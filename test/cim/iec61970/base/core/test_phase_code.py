@@ -9,7 +9,7 @@
 from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import PhaseCode, phase_code_by_id, SinglePhaseKind
+from zepben.ewb import PhaseCode, phase_code_by_id, SinglePhaseKind
 
 
 # pylint: enable=wrong-import-order,ungrouped-imports

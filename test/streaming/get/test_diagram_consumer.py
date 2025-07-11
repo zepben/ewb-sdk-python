@@ -15,7 +15,9 @@ from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
 
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import diagram_identified_objects, diagram, diagram_object
-from zepben.evolve import DiagramConsumerClient, BaseService, IdentifiedObject, DiagramObject, Diagram
+from zepben.ewb import DiagramConsumerClient, BaseService, IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed

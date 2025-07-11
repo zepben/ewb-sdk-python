@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import WindingConnection
+from zepben.ewb import WindingConnection
 
 
 def test_winding_connection_enum():

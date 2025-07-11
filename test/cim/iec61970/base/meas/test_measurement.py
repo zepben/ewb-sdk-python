@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import text, builds, sampled_from
-from zepben.evolve import Measurement, RemoteSource, PhaseCode, UnitSymbol
+from zepben.ewb import Measurement, RemoteSource, PhaseCode, UnitSymbol
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

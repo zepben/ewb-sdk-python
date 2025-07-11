@@ -8,9 +8,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 deps = [
-    "zepben.auth==0.12.1",
-    "zepben-protobuf==0.37.0",
+    "zepben-protobuf==1.0.0b1",
     "typing_extensions==4.12.2",
+    "requests>=2.26.0, <3.0.0",
+    "urllib3>=1.26.6, <1.27.0",
+    "PyJWT>=2.1.0, <2.2.0",
+    "dataclassy==0.6.2",
 ]
 
 test_deps = [
@@ -27,9 +30,9 @@ test_deps = [
 ]
 
 setup(
-    name="zepben.evolve",
-    version="0.49.0b1",
-    description="Python SDK for interacting with the Evolve platform",
+    name="zepben.ewb",
+    version="1.0.0b1",
+    description="Python SDK for interacting with the Energy Workbench platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/zepben/evolve-sdk-python",

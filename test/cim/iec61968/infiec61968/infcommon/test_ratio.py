@@ -7,7 +7,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from zepben.evolve import Ratio
+from zepben.ewb import Ratio
 
 ratio_kwargs = {
     "denominator": floats(min_value=0.1, max_value=1000),

@@ -26,7 +26,7 @@ An instance of `EwbDataFilePaths` represents a single EWB "data path". This data
 does not exist, `EwbDataFilePaths` can create it if `create_path` is set to `True` (Default: `False`).
 
 ```python
-from zepben.evolve import EwbDataFilePaths
+from zepben.ewb import EwbDataFilePaths
 from pathlib import Path
 
 data_path = Path("/path/to/ewb_data/")
@@ -42,7 +42,7 @@ EwbDataFilePaths provides methods to generate file paths for each type of databa
 Note: `EwbDataFilePaths` will return the expected path for the provided `database_type` and `date` regardless of whether it exists or not.
 
 ```python
-from zepben.evolve import EwbDataFilePaths
+from zepben.ewb import EwbDataFilePaths
 from pathlib import Path
 from datetime import date
 
@@ -65,7 +65,7 @@ second_network_database_path = ewb_data.network_model(second_date)
 `EwbDataFilePaths` contains search functionality to locate existing databases on disk.
 
 ```python
-from zepben.evolve import EwbDataFilePaths
+from zepben.ewb import EwbDataFilePaths
 from pathlib import Path
 from datetime import date
 

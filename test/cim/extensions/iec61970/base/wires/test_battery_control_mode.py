@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import BatteryControlMode
+from zepben.ewb import BatteryControlMode
 from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControlMode_pb2 import BatteryControlMode as PBBatteryControlMode
 
 

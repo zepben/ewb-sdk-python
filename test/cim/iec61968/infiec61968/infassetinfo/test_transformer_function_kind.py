@@ -6,7 +6,7 @@
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import TransformerFunctionKind
+from zepben.ewb import TransformerFunctionKind
 
 
 def test_transformer_function_kind_enum():

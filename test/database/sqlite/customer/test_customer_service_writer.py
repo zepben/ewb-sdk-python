@@ -5,7 +5,7 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import CustomerService, CustomerCimWriter, Customer, CustomerServiceWriter, CustomerDatabaseTables
+from zepben.ewb import CustomerService, CustomerCimWriter, Customer, CustomerServiceWriter, CustomerDatabaseTables
 
 
 class TestCustomerServiceWriter:

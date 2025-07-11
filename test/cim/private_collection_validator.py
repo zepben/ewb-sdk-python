@@ -8,7 +8,7 @@ from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple
 
 import pytest
 
-from zepben.evolve import IdentifiedObject, TIdentifiedObject
+from zepben.ewb import IdentifiedObject, TIdentifiedObject
 
 UIdentifiedObject = TypeVar("UIdentifiedObject", bound=IdentifiedObject)
 UOther = TypeVar("UOther")

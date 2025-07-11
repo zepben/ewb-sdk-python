@@ -13,7 +13,7 @@ from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesRespo
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, GrpcRequest, GrpcResponse, StreamGrpc, StreamUnaryGrpc
-from zepben.evolve import PhaseCode, datetime_to_timestamp, SwitchStateEvent, SwitchAction, CurrentStateEventBatch, QueryNetworkStateClient, BatchSuccessful
+from zepben.ewb import PhaseCode, datetime_to_timestamp, SwitchStateEvent, SwitchAction, CurrentStateEventBatch, QueryNetworkStateClient, BatchSuccessful
 
 
 def _current_state_batch_to_pb(batch: CurrentStateEventBatch) -> GetCurrentStatesResponse:

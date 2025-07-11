@@ -8,8 +8,8 @@ from unittest.mock import Mock, create_autospec, call
 import pytest
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import MissingTableConfigException, MetadataCollectionReader, BaseServiceReader, TableVersion
-from zepben.evolve.database.sqlite.common.base_database_reader import BaseDatabaseReader
+from zepben.ewb import MissingTableConfigException, MetadataCollectionReader, BaseServiceReader, TableVersion
+from zepben.ewb.database.sqlite.common.base_database_reader import BaseDatabaseReader
 
 
 class TestBaseDatabaseReader:

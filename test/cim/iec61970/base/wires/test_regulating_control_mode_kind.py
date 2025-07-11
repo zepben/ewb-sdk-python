@@ -6,7 +6,7 @@
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControlModeKind_pb2 import RegulatingControlModeKind as PBRegulatingControlModeKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import RegulatingControlModeKind
+from zepben.ewb import RegulatingControlModeKind
 
 
 def test_power_direction_kind_enum():

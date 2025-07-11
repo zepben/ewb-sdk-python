@@ -9,8 +9,8 @@ from unittest.mock import patch
 import pytest
 
 from services.network.tracing.phases.util import validate_phases_from_term_or_equip
-from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
-from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
+from zepben.ewb import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
+from zepben.ewb.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 
 A = SinglePhaseKind.A
 B = SinglePhaseKind.B

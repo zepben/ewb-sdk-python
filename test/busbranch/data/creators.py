@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import List
 
-from zepben.evolve import PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd
+from zepben.ewb import PowerTransformer
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
 def _create_per_length_sequence_impedance(i: float) -> PerLengthSequenceImpedance:

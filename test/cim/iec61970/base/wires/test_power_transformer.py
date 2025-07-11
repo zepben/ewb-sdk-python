@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
 from pytest import raises
-from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind, \
+from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind, \
     Terminal
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX

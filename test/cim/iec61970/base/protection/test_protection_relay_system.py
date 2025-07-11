@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists, sampled_from
-from zepben.evolve import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
+from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args

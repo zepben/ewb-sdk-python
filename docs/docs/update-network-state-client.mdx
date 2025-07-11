@@ -18,7 +18,7 @@ wrapper for the gRPC library, with the ability to update information about the s
 The channel gRPC channel can be directly from the gRPC library, or using our `GrpcChannelBuilder` helper. At its most basic, this can be achieved with:
 
 ```python
-from zepben.evolve import GrpcChannelBuilder
+from zepben.ewb import GrpcChannelBuilder
 
 channel = GrpcChannelBuilder().for_address(host, port).build()
 ```
@@ -30,7 +30,7 @@ For more in depth options for using a gRPC channel, see the [gRPC documentation]
 Using your gRPC channel with the `UpdateNetworkStateClient` is as simple as passing it to the constructor.
 
 ```python
-from zepben.evolve import UpdateNetworkStateClient
+from zepben.ewb import UpdateNetworkStateClient
 
 client = UpdateNetworkStateClient(channel)
 ```
@@ -51,7 +51,7 @@ The current state of switches can be updating by passing a `SwitchStateEvent` to
 ```python
 from datetime import datetime
 
-from zepben.evolve import SwitchStateEvent, SwitchAction
+from zepben.ewb import SwitchStateEvent, SwitchAction
 
 event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.OPEN)
 event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
@@ -65,7 +65,7 @@ You can cut an AcLineSegment in the current state of the network by passing an `
 ```python
 from datetime import datetime
 
-from zepben.evolve import AddCutEvent
+from zepben.ewb import AddCutEvent
 
 event1 = AddCutEvent("event1", datetime.now(), "cut_id", "acls_id")
 response = client.set_current_states(1, (event1))
@@ -78,7 +78,7 @@ You can remove a previously added cut from the current state of the network by p
 ```python
 from datetime import datetime
 
-from zepben.evolve import RemoveCutEvent
+from zepben.ewb import RemoveCutEvent
 
 event1 = RemoveCutEvent("event1", datetime.now(), "cut_id")
 response = client.set_current_states(1, (event1))
@@ -91,7 +91,7 @@ You can add a jumper between two other pieces of equipment in the current state 
 ```python
 from datetime import datetime
 
-from zepben.evolve import AddJumperEvent, JumperConnection
+from zepben.ewb import AddJumperEvent, JumperConnection
 
 event1 = AddJumperEvent("event1", datetime.now(), "jumper_id", JumperConnection("from_id", JumperConnection("to_id")))
 response = client.set_current_states(1, (event1))
@@ -104,7 +104,7 @@ You can remove a previously added jumper from the current state of the network b
 ```python
 from datetime import datetime
 
-from zepben.evolve import RemoveJumperEvent
+from zepben.ewb import RemoveJumperEvent
 
 event1 = RemoveJumperEvent("event1", datetime.now(), "jumper_id")
 response = client.set_current_states(1, (event1))
@@ -117,7 +117,7 @@ If you have multiple batches to send, you can use `set_current_states_in_batches
 ```python
 from datetime import datetime
 
-from zepben.evolve import SwitchStateEvent, SwitchAction
+from zepben.ewb import SwitchStateEvent, SwitchAction
 
 event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.OPEN)
 event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
@@ -148,7 +148,7 @@ Each batch will receive its own response, which will be one of the following:
 
 You can check the type of response or failure by checking against the types above.
 ```python
-from zepben.evolve import BatchFailure, StateEventUnknownMrid
+from zepben.ewb import BatchFailure, StateEventUnknownMrid
 
 if isinstance(response, BatchFailure):
     response.partial_failure # Will be true if all event failed, otherwise false.

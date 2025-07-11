@@ -8,12 +8,12 @@ import pytest
 from pytest_subtests.plugin import subtests
 
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut, \
+from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.ewb.services.network.network_service import NetworkService
+from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut, \
     ConductingEquipment
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
+from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
 class PathTerminal(Terminal):
     def __add__(self, other: Terminal) -> NetworkTraceStep.Path:

@@ -4,8 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import MagicMock
 
-from zepben.evolve import StepContext, Switch, NetworkTraceStep, Breaker, Junction
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
+from zepben.ewb import StepContext, Switch, NetworkTraceStep, Breaker
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
 
 
 def mock_ctx(value: int):
@@ -71,4 +72,3 @@ class TestEquipmentStepLimitCondition:
 
         result = condition.compute_next_value(step, current_step, 1)
         assert result == 1
-

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.evolve import Loop, Circuit, Substation
+from zepben.ewb import Loop, Circuit, Substation
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args

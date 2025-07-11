@@ -2,8 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import TraversalQueue, WeightedPriorityQueue
-from zepben.evolve.services.network.tracing.traversal.queue import LIFODeque, FIFODeque
+from zepben.ewb import TraversalQueue, WeightedPriorityQueue
+from zepben.ewb.services.network.tracing.traversal.queue import LIFODeque, FIFODeque
 
 
 class TestQueue:
@@ -76,4 +76,3 @@ class TestQueue:
         assert queue.pop() == 3
         assert queue.pop() == 2
         assert queue.pop() == 3
-

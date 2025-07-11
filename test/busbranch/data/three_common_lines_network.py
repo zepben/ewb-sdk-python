@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from busbranch.data.creators import _create_per_length_sequence_impedance
 from network_fixtures import create_terminal, create_terminals
-from zepben.evolve import NetworkService, AcLineSegment, OverheadWireInfo, Junction
+from zepben.ewb import NetworkService, AcLineSegment, Junction
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 
 
 def three_common_lines_network() -> NetworkService:

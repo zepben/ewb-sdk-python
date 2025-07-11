@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import SinglePhaseKind, single_phase_kind_by_id, PhaseCode
+from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, PhaseCode
 
 
 class TestSinglePhaseKind:

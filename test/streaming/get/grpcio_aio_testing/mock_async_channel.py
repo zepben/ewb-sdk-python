@@ -18,6 +18,9 @@
 # limitations under the License.
 
 #  Modifications Copyright Zeppelin Bend Pty Ltd as stated above
+
+__all__ = ["async_testing_channel"]
+
 import abc
 import asyncio
 
@@ -27,8 +30,6 @@ from grpc_testing._channel import _channel_rpc, _channel_state
 from grpc_testing._channel._channel_state import State
 
 from streaming.get.grpcio_aio_testing.mock_async_multi_callable import UnaryUnary, UnaryStream, StreamUnary, StreamStream
-
-__all__ = ["async_testing_channel"]
 
 
 class AsyncChannel(six.with_metaclass(abc.ABCMeta, grpc.aio.Channel)):

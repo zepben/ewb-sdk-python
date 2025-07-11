@@ -7,7 +7,7 @@ from hypothesis import given
 
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, \
     conducting_equipment_kwargs, conducting_equipment_args
-from zepben.evolve import Ground
+from zepben.ewb import Ground
 
 ground_kwargs = conducting_equipment_kwargs
 ground_args = conducting_equipment_args

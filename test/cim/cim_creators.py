@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test', 'create_overhead_wire_info', 'create_power_transformer_info',
            'create_short_circuit_test', 'create_series_compensator', 'create_shunt_compensator_info', 'create_switch_info', 'create_transformer_end_info',
            'create_transformer_tank_info', 'create_transformer_test', 'create_wire_info', 'sampled_wire_material_kind', 'create_asset', 'create_asset_info',
@@ -27,7 +28,7 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_power_electronics_connection', 'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end',
            'create_protected_switch', 'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator',
            'sampled_single_phase_kind', 'create_switch', 'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance',
-           'sampled_vector_group', 'sampled_winding_connection_kind', 'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit",
+           'sampled_vector_group', 'sampled_winding_connection', 'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit",
            'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder',
            'sampled_measurement', 'sampled_protected_switches', 'create_tap_changer_control', 'MIN_32_BIT_INTEGER', 'MAX_32_BIT_INTEGER',
            'MAX_32_BIT_UNSIGNED_INTEGER', 'MAX_64_BIT_INTEGER', 'MIN_64_BIT_INTEGER', 'TEXT_MAX_SIZE', 'FLOAT_MIN', 'FLOAT_MAX', 'MAX_END_NUMBER',
@@ -35,21 +36,24 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_reactive_capability_curve', 'create_synchronous_machine', 'create_earth_fault_compensator', 'create_curve', 'create_curve_data',
            'create_rotating_machine', 'sampled_curves', 'create_pan_demand_response_function', 'create_battery_control', 'create_asset_function',
            'create_end_device_function', 'create_static_var_compensator', 'create_per_length_phase_impedance', 'create_phase_impedance_data', 'create_clamp',
-           'create_cut'
+           'create_cut', 'sampled_transformer_construction_kind', 'sampled_transformer_function_kind', 'create_controlled_appliance',
+           'sampled_end_device_function_kind', 'sampled_potential_transformer_kind', 'sampled_diagram_style', 'sampled_orientation_kind',
+           'create_measurement_value', 'sampled_regulating_control_mode_kind', 'sampled_svc_control_mode', 'sampled_synchronous_machine_kind',
+           'sampled_power_direction_kind', 'sampled_protection_kind', 'create_relay_setting', 'sampled_battery_control_mode', 'sampled_transformer_cooling_type'
            ]
 
 from datetime import datetime
 from random import choice
 
-# This must be above hypothesis.strategies to avoid conflicting import with zepben.evolve.util.none
-from zepben.evolve import *
+# @formatter:off
+
+# This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
+from zepben.ewb import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
+# @formatter:on
+
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
 MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648
@@ -66,8 +70,22 @@ MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
+##################################
+# Extensions IEC61968 Asset Info #
+##################################
+
+def create_relay_info(include_runtime: bool = True):
+    return builds(
+        RelayInfo,
+        **create_asset_info(include_runtime),
+        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        reclose_fast=boolean_or_none()
+    )
+
+
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def create_pan_demand_response_function(include_runtime: bool = True):
@@ -79,8 +97,134 @@ def create_pan_demand_response_function(include_runtime: bool = True):
     )
 
 
+#################################
+# Extensions IEC61970 Base Core #
+#################################
+
+def create_site(include_runtime: bool = True):
+    return builds(Site, **create_equipment_container(include_runtime))
+
+
+###################################
+# Extensions IEC61970 Base Feeder #
+###################################
+
+def create_loop(include_runtime: bool = True):
+    return builds(
+        Loop,
+        **create_identified_object(include_runtime),
+        circuits=lists(builds(Circuit, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        energizing_substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+    )
+
+
+def create_lv_feeder(include_runtime: bool = True):
+    runtime = {
+        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2),
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+    } if include_runtime else {}
+
+    return builds(
+        LvFeeder,
+        # Only include equipment if we are processing runtime as we don't write equipment to the database for LvFeeder.
+        **create_equipment_container(include_runtime, add_equipment=include_runtime),
+        normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
+        **runtime
+    )
+
+
+##################################################
+# Extensions IEC61970 Base Generation Production #
+##################################################
+
+def create_ev_charging_unit(include_runtime: bool = True):
+    return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))
+
+
+#######################################
+# Extensions IEC61970 Base Protection #
+#######################################
+
+def create_distance_relay(include_runtime: bool = True):
+    return builds(
+        DistanceRelay,
+        **create_protection_relay_function(include_runtime),
+        backward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def sampled_power_direction_kind():
+    return sampled_from(PowerDirectionKind)
+
+
+def sampled_protection_kind():
+    return sampled_from(ProtectionKind)
+
+
+def create_protection_relay_function(include_runtime: bool = True):
+    return {
+        **create_power_system_resource(include_runtime),
+        "model": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        "reclosing": boolean_or_none(),
+        "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "protection_kind": sampled_protection_kind(),
+        "directable": boolean_or_none(),
+        "power_direction": sampled_power_direction_kind(),
+        "sensors": lists(builds(CurrentTransformer), max_size=2),
+        "protected_switches": lists(builds(Breaker), max_size=2),
+        "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
+        "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
+        "thresholds": lists(create_relay_setting(), min_size=4, max_size=4),
+        "relay_info": builds(RelayInfo)
+    }
+
+
+def create_protection_relay_scheme(include_runtime: bool = True):
+    return builds(
+        ProtectionRelayScheme,
+        **create_identified_object(include_runtime),
+        system=builds(ProtectionRelaySystem),
+        functions=lists(builds(CurrentRelay))
+    )
+
+
+def create_protection_relay_system(include_runtime: bool = True):
+    return builds(
+        ProtectionRelaySystem,
+        **create_equipment(include_runtime),
+        protection_kind=sampled_protection_kind(),
+        schemes=lists(builds(ProtectionRelayScheme))
+    )
+
+
+def create_relay_setting():
+    return builds(
+        RelaySetting,
+        unit_symbol=sampled_unit_symbol(),
+        value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
+def create_voltage_relay(include_runtime: bool = True):
+    return builds(
+        VoltageRelay,
+        **create_protection_relay_function(include_runtime),
+    )
+
+
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def create_battery_control(include_runtime: bool = True):
@@ -90,12 +234,33 @@ def create_battery_control(include_runtime: bool = True):
         charging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         discharging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reserve_percent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        control_mode=sampled_from(BatteryControlMode)
+        control_mode=sampled_battery_control_mode()
     )
 
 
+def sampled_battery_control_mode():
+    return sampled_from(BatteryControlMode)
+
+
+def sampled_transformer_cooling_type():
+    return sampled_from(TransformerCoolingType)
+
+
+def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS], **kwargs):
+    # This is needed as we purposely made it so you can't build a transformer end with multiple ratings through constructor
+    pte = PowerTransformerEnd(**kwargs)
+    if ratings:
+        for rating in ratings:
+            pte.add_transformer_end_rated_s(rating)
+    return pte
+
+
+def sampled_vector_group():
+    return sampled_from(VectorGroup)
+
+
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 
@@ -179,7 +344,7 @@ def create_transformer_end_info(include_runtime: bool = True):
     return builds(
         TransformerEndInfo,
         **create_asset_info(include_runtime),
-        connection_kind=sampled_winding_connection_kind(),
+        connection_kind=sampled_winding_connection(),
         emergency_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         end_number=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         insulation_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
@@ -228,7 +393,7 @@ def sampled_wire_material_kind():
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 
@@ -241,15 +406,15 @@ def create_asset(include_runtime: bool):
     }
 
 
-def create_asset_info(include_runtime: bool):
-    return {**create_identified_object(include_runtime)}
-
-
 def create_asset_container(include_runtime: bool):
     return {**create_asset(include_runtime)}
 
 
 def create_asset_function(include_runtime: bool):
+    return {**create_identified_object(include_runtime)}
+
+
+def create_asset_info(include_runtime: bool):
     return {**create_identified_object(include_runtime)}
 
 
@@ -259,15 +424,6 @@ def create_asset_organisation_role(include_runtime: bool):
 
 def create_asset_owner(include_runtime: bool = True):
     return builds(AssetOwner, **create_asset_organisation_role(include_runtime))
-
-
-def create_pole(include_runtime: bool = True):
-    return builds(
-        Pole,
-        **create_structure(include_runtime),
-        streetlights=lists(builds(Streetlight, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-    )
 
 
 def create_streetlight(include_runtime: bool = True):
@@ -280,16 +436,12 @@ def create_streetlight(include_runtime: bool = True):
     )
 
 
-def sampled_streetlight_lamp_kind():
-    return sampled_from(StreetlightLampKind)
-
-
 def create_structure(include_runtime: bool):
     return {**create_asset_container(include_runtime)}
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 
@@ -369,7 +521,7 @@ def create_town_detail():
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 
@@ -410,19 +562,8 @@ def create_tariffs(include_runtime: bool = True):
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
-
-
-def create_relay_info(include_runtime: bool = True):
-    return builds(
-        RelayInfo,
-        **create_asset_info(include_runtime),
-        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        reclose_fast=boolean_or_none()
-    )
-
 
 def create_current_transformer_info(include_runtime: bool = True):
     return builds(
@@ -456,8 +597,34 @@ def create_potential_transformer_info(include_runtime: bool = True):
     )
 
 
+def sampled_transformer_construction_kind():
+    return sampled_from(TransformerConstructionKind)
+
+
+def sampled_transformer_function_kind():
+    return sampled_from(TransformerFunctionKind)
+
+
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfAssets #
+##################################
+
+
+def create_pole(include_runtime: bool = True):
+    return builds(
+        Pole,
+        **create_structure(include_runtime),
+        streetlights=lists(builds(Streetlight, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
+def sampled_streetlight_lamp_kind():
+    return sampled_from(StreetlightLampKind)
+
+
+##################################
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 
@@ -470,8 +637,15 @@ def create_ratio():
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
+
+
+def create_controlled_appliance():
+    return builds(
+        ControlledAppliance,
+        appliances=sampled_from(Appliance)
+    )
 
 
 def create_end_device(include_runtime: bool):
@@ -489,6 +663,10 @@ def create_end_device_function(include_runtime: bool):
         **create_asset_function(include_runtime),
         "enabled": booleans()
     }
+
+
+def sampled_end_device_function_kind():
+    return sampled_from(EndDeviceFunctionKind)
 
 
 def create_meter(include_runtime: bool = True):
@@ -510,7 +688,7 @@ def create_usage_point(include_runtime: bool = True):
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 
@@ -523,9 +701,8 @@ def create_operational_restriction(include_runtime: bool = True):
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
-
 
 def create_auxiliary_equipment(include_runtime: bool):
     return {
@@ -556,6 +733,10 @@ def create_potential_transformer(include_runtime: bool = True):
     )
 
 
+def sampled_potential_transformer_kind():
+    return sampled_from(PotentialTransformerKind)
+
+
 def create_sensor(include_runtime: bool = True):
     return {
         **create_auxiliary_equipment(include_runtime),
@@ -564,7 +745,7 @@ def create_sensor(include_runtime: bool = True):
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 
@@ -712,10 +893,6 @@ def create_power_system_resource(include_runtime: bool):
     }
 
 
-def create_site(include_runtime: bool = True):
-    return builds(Site, **create_equipment_container(include_runtime))
-
-
 def create_sub_geographical_region(include_runtime: bool = True):
     return builds(
         SubGeographicalRegion,
@@ -752,8 +929,59 @@ def create_terminal(include_runtime: bool = True):
     )
 
 
+################################
+# IEC61970 Base Diagram Layout #
+################################
+
+
+def create_diagram(include_runtime: bool = True):
+    return builds(
+        Diagram,
+        **create_identified_object(include_runtime),
+        diagram_style=sampled_diagram_style(),
+        orientation_kind=sampled_orientation_kind(),
+        diagram_objects=lists(builds(DiagramObject, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+    )
+
+
+def create_diagram_object(include_runtime: bool = True):
+    return builds(
+        DiagramObject,
+        **create_identified_object(include_runtime),
+        diagram=builds(Diagram, **create_identified_object(include_runtime)),
+        identified_object_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        style=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        rotation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        diagram_object_points=lists(create_diagram_object_point(), min_size=1, max_size=2)
+    )
+
+
+def create_diagram_object_point():
+    return builds(
+        DiagramObjectPoint,
+        x_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def sampled_diagram_style():
+    return sampled_from(DiagramStyle)
+
+
+def sampled_orientation_kind():
+    return sampled_from(OrientationKind)
+
+
+########################
+# IEC61970 Base Domain #
+########################
+
+def sampled_unit_symbol():
+    return sampled_from(UnitSymbol)
+
+
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 
@@ -784,209 +1012,9 @@ def create_equivalent_equipment(include_runtime: bool):
     return {**create_conducting_equipment(include_runtime)}
 
 
-################################
-# IEC61970 BASE DIAGRAM LAYOUT #
-################################
-
-
-def create_diagram(include_runtime: bool = True):
-    return builds(
-        Diagram,
-        **create_identified_object(include_runtime),
-        diagram_style=sampled_from(DiagramStyle),
-        orientation_kind=sampled_from(OrientationKind),
-        diagram_objects=lists(builds(DiagramObject, **create_identified_object(include_runtime)), min_size=1, max_size=2)
-    )
-
-
-def create_diagram_object(include_runtime: bool = True):
-    return builds(
-        DiagramObject,
-        **create_identified_object(include_runtime),
-        diagram=builds(Diagram, **create_identified_object(include_runtime)),
-        identified_object_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        style=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        rotation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        diagram_object_points=lists(create_diagram_object_point(), min_size=1, max_size=2)
-    )
-
-
-def create_diagram_object_point():
-    return builds(
-        DiagramObjectPoint,
-        x_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-    )
-
-
-######################
-# IEC61970 BASE MEAS #
-######################
-
-
-def create_accumulator(include_runtime: bool = True):
-    return builds(Accumulator, **create_measurement(include_runtime))
-
-
-def create_accumulator_value(include_runtime: bool = True):
-    return builds(AccumulatorValue, **create_measurement(include_runtime))
-
-
-def create_analog(include_runtime: bool = True):
-    return builds(
-        Analog,
-        **create_measurement(include_runtime),
-        positive_flow_in=booleans()
-    )
-
-
-def create_analog_value(include_runtime: bool = True):
-    return builds(AnalogValue, **create_measurement(include_runtime))
-
-
-def create_control(include_runtime: bool = True):
-    return builds(
-        Control,
-        **create_io_point(include_runtime),
-        power_system_resource_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        remote_control=builds(RemoteControl, **create_identified_object(include_runtime))
-    )
-
-
-def create_discrete(include_runtime: bool = True):
-    return builds(Discrete, **create_measurement(include_runtime))
-
-
-def create_discrete_value(include_runtime: bool = True):
-    return builds(DiscreteValue, **create_measurement(include_runtime))
-
-
-def create_io_point(include_runtime: bool):
-    return {**create_identified_object(include_runtime)}
-
-
-def create_measurement(include_runtime: bool):
-    return {
-        **create_identified_object(include_runtime),
-        "remote_source": builds(RemoteSource, **create_identified_object(include_runtime)),
-        "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
-        "terminal_mrid": uuids(version=4).map(lambda x: str(x)),
-        "phases": sampled_phase_code(),
-        "unit_symbol": sampled_unit_symbol()
-    }
-
-
-def sampled_unit_symbol():
-    return sampled_from(UnitSymbol)
-
-
-############################
-# IEC61970 Base Protection #
-############################
-
-
-def create_current_relay(include_runtime: bool = True):
-    return builds(
-        CurrentRelay,
-        **create_protection_relay_function(include_runtime),
-        current_limit_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        inverse_time_flag=boolean_or_none(),
-        time_delay_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-    )
-
-
-def create_distance_relay(include_runtime: bool = True):
-    return builds(
-        DistanceRelay,
-        **create_protection_relay_function(include_runtime),
-        backward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-    )
-
-
-def create_voltage_relay(include_runtime: bool = True):
-    return builds(
-        VoltageRelay,
-        **create_protection_relay_function(include_runtime),
-    )
-
-
-def boolean_or_none():
-    return sampled_from([False, True, None])
-
-
-def create_protection_relay_function(include_runtime: bool = True):
-    return {
-        **create_power_system_resource(include_runtime),
-        "model": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        "reclosing": boolean_or_none(),
-        "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "protection_kind": sampled_from(ProtectionKind),
-        "directable": boolean_or_none(),
-        "power_direction": sampled_from(PowerDirectionKind),
-        "sensors": lists(builds(CurrentTransformer), max_size=2),
-        "protected_switches": lists(builds(Breaker), max_size=2),
-        "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
-        "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
-        "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_unit_symbol(), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                                   name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
-        "relay_info": builds(RelayInfo)
-    }
-
-
-def create_protection_relay_scheme(include_runtime: bool = True):
-    return builds(
-        ProtectionRelayScheme,
-        **create_identified_object(include_runtime),
-        system=builds(ProtectionRelaySystem),
-        functions=lists(builds(CurrentRelay))
-    )
-
-
-def create_protection_relay_system(include_runtime: bool = True):
-    return builds(
-        ProtectionRelaySystem,
-        **create_equipment(include_runtime),
-        protection_kind=sampled_from(ProtectionKind),
-        schemes=lists(builds(ProtectionRelayScheme))
-    )
-
-
-#######################
-# IEC61970 BASE SCADA #
-#######################
-
-def create_remote_control(include_runtime: bool = True):
-    return builds(
-        RemoteControl,
-        **create_remote_point(include_runtime),
-        control=builds(Control, **create_identified_object(include_runtime))
-    )
-
-
-def create_remote_point(include_runtime: bool):
-    return {**create_identified_object(include_runtime)}
-
-
-def create_remote_source(include_runtime: bool = True):
-    return builds(
-        RemoteSource,
-        **create_remote_point(include_runtime),
-        measurement=sampled_measurement(include_runtime)
-    )
-
-
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
-
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
 
 def sampled_battery_state_kind():
     return sampled_from(BatteryStateKind)
@@ -1020,8 +1048,123 @@ def create_power_electronics_wind_unit(include_runtime: bool = True):
     return builds(PowerElectronicsWindUnit, **create_power_electronics_unit(include_runtime))
 
 
+######################
+# IEC61970 Base Meas #
+######################
+
+
+def create_accumulator(include_runtime: bool = True):
+    return builds(Accumulator, **create_measurement(include_runtime))
+
+
+def create_accumulator_value():
+    return builds(
+        AccumulatorValue,
+        **create_measurement_value(),
+        value=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER)
+    )
+
+
+def create_analog(include_runtime: bool = True):
+    return builds(
+        Analog,
+        **create_measurement(include_runtime),
+        positive_flow_in=booleans()
+    )
+
+
+def create_analog_value():
+    return builds(
+        AnalogValue,
+        **create_measurement_value(),
+        value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_control(include_runtime: bool = True):
+    return builds(
+        Control,
+        **create_io_point(include_runtime),
+        power_system_resource_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        remote_control=builds(RemoteControl, **create_identified_object(include_runtime))
+    )
+
+
+def create_discrete(include_runtime: bool = True):
+    return builds(Discrete, **create_measurement(include_runtime))
+
+
+def create_discrete_value():
+    return builds(
+        DiscreteValue,
+        **create_measurement_value(),
+        value=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER)
+    )
+
+
+def create_io_point(include_runtime: bool):
+    return {**create_identified_object(include_runtime)}
+
+
+def create_measurement(include_runtime: bool):
+    return {
+        **create_identified_object(include_runtime),
+        "remote_source": builds(RemoteSource, **create_identified_object(include_runtime)),
+        "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
+        "terminal_mrid": uuids(version=4).map(lambda x: str(x)),
+        "phases": sampled_phase_code(),
+        "unit_symbol": sampled_unit_symbol()
+    }
+
+
+# noinspection PyUnusedLocal
+def create_measurement_value():
+    return {
+        # "time_stamp": ...
+    }
+
+
+############################
+# IEC61970 Base Protection #
+############################
+
+
+def create_current_relay(include_runtime: bool = True):
+    return builds(
+        CurrentRelay,
+        **create_protection_relay_function(include_runtime),
+        current_limit_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        inverse_time_flag=boolean_or_none(),
+        time_delay_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Scada #
+#######################
+
+def create_remote_control(include_runtime: bool = True):
+    return builds(
+        RemoteControl,
+        **create_remote_point(include_runtime),
+        control=builds(Control, **create_identified_object(include_runtime))
+    )
+
+
+def create_remote_point(include_runtime: bool):
+    return {**create_identified_object(include_runtime)}
+
+
+def create_remote_source(include_runtime: bool = True):
+    return builds(
+        RemoteSource,
+        **create_remote_point(include_runtime),
+        measurement=sampled_measurement(include_runtime)
+    )
+
+
+#######################
+# IEC61970 Base Wires #
 #######################
 
 
@@ -1061,17 +1204,6 @@ def create_clamp(include_runtime: bool = True):
     )
 
 
-def create_cut(include_runtime: bool = True):
-    args = create_switch(include_runtime)
-    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=2)
-    return builds(
-        Cut,
-        **args,
-        length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime)),
-    )
-
-
 def create_conductor(include_runtime: bool):
     return {
         **create_conducting_equipment(include_runtime),
@@ -1084,6 +1216,17 @@ def create_conductor(include_runtime: bool):
 
 def create_connector(include_runtime: bool):
     return {**create_conducting_equipment(include_runtime)}
+
+
+def create_cut(include_runtime: bool = True):
+    args = create_switch(include_runtime)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+    return builds(
+        Cut,
+        **args,
+        length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime)),
+    )
 
 
 def create_disconnector(include_runtime: bool = True):
@@ -1251,18 +1394,6 @@ def create_per_length_line_parameter(include_runtime: bool):
     return {**create_identified_object(include_runtime)}
 
 
-def create_phase_impedance_data():
-    return builds(
-        PhaseImpedanceData,
-        from_phase=sampled_from(SinglePhaseKind),
-        to_phase=sampled_from(SinglePhaseKind),
-        b=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        g=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-    )
-
-
 def create_per_length_phase_impedance(include_runtime: bool = True):
     return builds(
         PerLengthPhaseImpedance,
@@ -1291,6 +1422,18 @@ def create_petersen_coil(include_runtime: bool = True):
         PetersenCoil,
         **create_earth_fault_compensator(include_runtime),
         x_ground_nominal=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
+def create_phase_impedance_data():
+    return builds(
+        PhaseImpedanceData,
+        from_phase=sampled_from(SinglePhaseKind),
+        to_phase=sampled_from(SinglePhaseKind),
+        b=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        g=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -1371,7 +1514,7 @@ def create_power_transformer_end(include_runtime: bool = True):
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        connection_kind=sampled_winding_connection_kind(),
+        connection_kind=sampled_winding_connection(),
         b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -1379,19 +1522,10 @@ def create_power_transformer_end(include_runtime: bool = True):
         phase_angle_clock=integers(min_value=0, max_value=11),
         ratings=lists(builds(
             TransformerEndRatedS,
-            cooling_type=sampled_from(TransformerCoolingType),
+            cooling_type=sampled_transformer_cooling_type(),
             rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
         ), min_size=0, max_size=11, unique_by=lambda it: it.cooling_type)
     )
-
-
-def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS], **kwargs):
-    # This is needed as we purposely made it so you can't build a transformer end with multiple ratings through constructor
-    pte = PowerTransformerEnd(**kwargs)
-    if ratings:
-        for rating in ratings:
-            pte.add_transformer_end_rated_s(rating)
-    return pte
 
 
 def create_protected_switch(include_runtime: bool):
@@ -1449,6 +1583,10 @@ def create_regulating_control(include_runtime: bool):
     }
 
 
+def sampled_regulating_control_mode_kind():
+    return sampled_from(RegulatingControlModeKind)
+
+
 def create_rotating_machine(include_runtime: bool):
     return {
         **create_regulating_cond_eq(include_runtime),
@@ -1473,6 +1611,21 @@ def create_series_compensator(include_runtime: bool = True):
     )
 
 
+def create_shunt_compensator(include_runtime: bool):
+    return {
+        **create_regulating_cond_eq(include_runtime),
+        "asset_info": builds(ShuntCompensatorInfo, **create_identified_object(include_runtime)),
+        "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "grounded": booleans(),
+        "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "phase_connection": sampled_phase_shunt_connection_kind()
+    }
+
+
+def sampled_single_phase_kind():
+    return sampled_from(SinglePhaseKind)
+
+
 def create_static_var_compensator(include_runtime: bool = True):
     return builds(
         StaticVarCompensator,
@@ -1480,9 +1633,25 @@ def create_static_var_compensator(include_runtime: bool = True):
         capacitive_rating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inductive_rating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        svc_control_mode=sampled_from(SVCControlMode),
+        svc_control_mode=sampled_svc_control_mode(),
         voltage_set_point=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
+
+
+def sampled_svc_control_mode():
+    return sampled_from(SVCControlMode)
+
+
+def create_switch(include_runtime: bool):
+    return {
+        **create_conducting_equipment(include_runtime),
+        "rated_current": floats(min_value=1, max_value=FLOAT_MAX),
+        # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
+        "_normally_open": sampled_from([0, 15]),
+        "_open": sampled_from([0, 15])
+        # "_normally_open": integers(min_value=0, max_value=15),
+        # "_open": integers(min_value=0, max_value=15)
+    }
 
 
 def create_synchronous_machine(include_runtime: bool = True):
@@ -1509,9 +1678,27 @@ def create_synchronous_machine(include_runtime: bool = True):
         sat_direct_trans_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         x0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         x2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        type=sampled_from(SynchronousMachineKind),
-        operating_mode=sampled_from(SynchronousMachineKind)
+        type=sampled_synchronous_machine_kind(),
+        operating_mode=sampled_synchronous_machine_kind()
     )
+
+
+def sampled_synchronous_machine_kind():
+    return sampled_from(SynchronousMachineKind)
+
+
+def create_tap_changer(include_runtime: bool):
+    return {
+        **create_power_system_resource(include_runtime),
+        "high_step": integers(min_value=10, max_value=15),
+        "low_step": integers(min_value=0, max_value=2),
+        "step": floats(min_value=2.0, max_value=10.0),
+        "neutral_step": integers(min_value=2, max_value=10),
+        "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "normal_step": integers(min_value=2, max_value=10),
+        "control_enabled": booleans(),
+        "tap_changer_control": builds(TapChangerControl, **create_identified_object(include_runtime))
+    }
 
 
 def create_tap_changer_control(include_runtime: bool = True):
@@ -1528,47 +1715,6 @@ def create_tap_changer_control(include_runtime: bool = True):
         time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         co_generation_enabled=boolean_or_none()
     )
-
-
-def create_shunt_compensator(include_runtime: bool):
-    return {
-        **create_regulating_cond_eq(include_runtime),
-        "asset_info": builds(ShuntCompensatorInfo, **create_identified_object(include_runtime)),
-        "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "grounded": booleans(),
-        "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "phase_connection": sampled_phase_shunt_connection_kind()
-    }
-
-
-def sampled_single_phase_kind():
-    return sampled_from(SinglePhaseKind)
-
-
-def create_switch(include_runtime: bool):
-    return {
-        **create_conducting_equipment(include_runtime),
-        "rated_current": floats(min_value=1, max_value=FLOAT_MAX),
-        # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
-        "_normally_open": sampled_from([0, 15]),
-        "_open": sampled_from([0, 15])
-        # "_normally_open": integers(min_value=0, max_value=15),
-        # "_open": integers(min_value=0, max_value=15)
-    }
-
-
-def create_tap_changer(include_runtime: bool):
-    return {
-        **create_power_system_resource(include_runtime),
-        "high_step": integers(min_value=10, max_value=15),
-        "low_step": integers(min_value=0, max_value=2),
-        "step": floats(min_value=2.0, max_value=10.0),
-        "neutral_step": integers(min_value=2, max_value=10),
-        "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "normal_step": integers(min_value=2, max_value=10),
-        "control_enabled": booleans(),
-        "tap_changer_control": builds(TapChangerControl, **create_identified_object(include_runtime))
-    }
 
 
 def create_transformer_end(include_runtime: bool):
@@ -1597,17 +1743,13 @@ def create_transformer_star_impedance(include_runtime: bool = True):
     )
 
 
-def sampled_vector_group():
-    return sampled_from(VectorGroup)
-
-
-def sampled_winding_connection_kind():
+def sampled_winding_connection():
     return sampled_from(WindingConnection)
 
 
-#########################
-# IEC61970 INF IEC61970 #
-#########################
+###############################
+# IEC61970 InfIEC61970 Feeder #
+###############################
 
 
 def create_circuit(include_runtime: bool = True):
@@ -1618,40 +1760,6 @@ def create_circuit(include_runtime: bool = True):
         end_terminals=lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         end_substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )
-
-
-def create_loop(include_runtime: bool = True):
-    return builds(
-        Loop,
-        **create_identified_object(include_runtime),
-        circuits=lists(builds(Circuit, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        energizing_substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2)
-    )
-
-
-def create_lv_feeder(include_runtime: bool = True):
-    runtime = {
-        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2),
-        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2)
-    } if include_runtime else {}
-
-    return builds(
-        LvFeeder,
-        # Only include equipment if we are processing runtime as we don't write equipment to the database for LvFeeder.
-        **create_equipment_container(include_runtime, add_equipment=include_runtime),
-        normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
-        **runtime
-    )
-
-
-#####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-#####################################################
-
-def create_ev_charging_unit(include_runtime: bool = True):
-    return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))
 
 
 #########
@@ -1665,6 +1773,10 @@ def traced_phases():
         normal_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         current_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
+
+
+def boolean_or_none():
+    return sampled_from([False, True, None])
 
 
 ###############

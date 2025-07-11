@@ -5,7 +5,7 @@
 from datetime import datetime
 
 from hypothesis.strategies import text, datetimes
-from zepben.evolve import Document
+from zepben.ewb import Document
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

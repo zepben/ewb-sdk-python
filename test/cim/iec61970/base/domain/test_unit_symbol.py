@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.domain.UnitSymbol_pb2 import UnitSymbol as PBUnitSymbol
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import UnitSymbol
+from zepben.ewb import UnitSymbol
 
 
 def test_unit_symbol_enum():

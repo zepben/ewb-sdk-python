@@ -10,7 +10,7 @@ import pytest
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
+from zepben.ewb import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
     NetworkStateOperators, Cut
 
 UPSTREAM = FeederDirection.UPSTREAM

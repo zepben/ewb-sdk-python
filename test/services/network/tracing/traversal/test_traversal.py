@@ -8,7 +8,7 @@ from typing import Callable, TypeVar, Tuple, Any, Optional
 
 import pytest
 
-from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer, StepActionWithContextValue, StepAction
+from zepben.ewb import StepContext, Traversal, TraversalQueue, ContextValueComputer, StepActionWithContextValue, StepAction
 
 T = TypeVar('T')
 D = TypeVar('D')

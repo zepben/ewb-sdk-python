@@ -2,8 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import UnresolvedReference, Terminal, resolver, BoundReferenceResolver, AcLineSegment, ReferenceResolver, ConductingEquipment
-from zepben.evolve.services.common.reference_resolvers import term_to_ce_resolver, term_to_cn_resolver
+from zepben.ewb import UnresolvedReference, Terminal, resolver, BoundReferenceResolver, AcLineSegment, ReferenceResolver, ConductingEquipment
+from zepben.ewb.services.common.reference_resolvers import term_to_ce_resolver, term_to_cn_resolver
 
 
 def test_unresolved_reference_equality():

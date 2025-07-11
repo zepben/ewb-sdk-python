@@ -7,12 +7,12 @@ from hypothesis import given
 from hypothesis.strategies import lists, builds
 
 from cim.private_collection_validator import validate_unordered_other_1234567890
-from zepben.evolve import SinglePhaseKind, single_phase_kind_by_id
+from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id
 
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
     verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_kwargs, per_length_impedance_args
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 
 per_length_phase_impedance_kwargs = {
     **per_length_impedance_kwargs,

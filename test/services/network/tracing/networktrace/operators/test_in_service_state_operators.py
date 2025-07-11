@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import MagicMock
 
-from zepben.evolve import Equipment
-from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import InServiceStateOperators
+from zepben.ewb import Equipment
+from zepben.ewb.services.network.tracing.networktrace.operators.in_service_state_operators import InServiceStateOperators
 
 
 class TestInServiceStateOperators:

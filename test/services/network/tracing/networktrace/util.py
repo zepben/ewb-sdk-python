@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import MagicMock, Mock
 
-from zepben.evolve import NetworkTraceStep, ConductingEquipment, StepContext
+from zepben.ewb import NetworkTraceStep, ConductingEquipment, StepContext
 
 
 def mock_nts(path: NetworkTraceStep.Path=None,
@@ -38,4 +38,3 @@ def mock_ctx(value: int=None):
         ctx.get_value = lambda key: value
 
     return ctx
-

@@ -7,7 +7,7 @@ from collections import Counter
 
 import pytest
 
-from zepben.evolve import XyCandidatePhasePaths, SinglePhaseKind as Phase, PhaseCode
+from zepben.ewb import XyCandidatePhasePaths, SinglePhaseKind as Phase, PhaseCode
 
 
 class TestXyCandidatePhasePaths:

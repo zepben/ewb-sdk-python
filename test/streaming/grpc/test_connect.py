@@ -8,7 +8,7 @@ from unittest import mock
 
 import pytest
 
-from zepben.evolve import connect_insecure, connect_tls, connect_with_secret, connect_with_password, connect_with_token
+from zepben.ewb import connect_insecure, connect_tls, connect_with_secret, connect_with_password, connect_with_token
 
 base_gcb = Mock()
 addressed_gcb = Mock()
@@ -46,14 +46,14 @@ def before_each():
     token_fetcher.token_request_data.clear()
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 def test_connect_insecure(_):
     assert connect_insecure("hostname", 1234) is insecure_channel
 
     base_gcb.for_address.assert_called_once_with("hostname", 1234)
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 def test_connect_tls(_):
     assert connect_tls("hostname", 1234, "ca.cert") is secure_channel
 
@@ -61,7 +61,7 @@ def test_connect_tls(_):
     addressed_gcb.make_secure.assert_called_once_with(root_certificates="ca.cert")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 def test_connect_with_token(_):
     assert connect_with_token("access_token", "localhost", 1234, "ca.cert") is token_authenticated_channel
 
@@ -70,8 +70,8 @@ def test_connect_with_token(_):
     secure_gcb.with_client_token.assert_called_once_with("access_token")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_secret(mocked_create_token_fetcher, _):
     assert connect_with_secret("client_id", "client_secret", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is authenticated_channel
     assert token_fetcher.token_request_data == {
@@ -83,16 +83,16 @@ def test_connect_with_secret(mocked_create_token_fetcher, _):
     mocked_create_token_fetcher.assert_called_once_with(conf_address="conf_address", verify_conf=False, verify_auth="auth_ca.cert")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.connect_tls", return_value=secure_channel)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=None)
+@mock.patch("zepben.ewb.streaming.grpc.connect.connect_tls", return_value=secure_channel)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=None)
 def test_connect_with_secret_connects_with_tls_if_no_auth(mocked_create_token_fetcher, _):
     assert connect_with_secret("client_id", "client_secret", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is secure_channel
 
     mocked_create_token_fetcher.assert_called_once_with(conf_address="conf_address", verify_conf=False, verify_auth="auth_ca.cert")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_secret_defaults(mocked_create_token_fetcher, _):
     assert connect_with_secret("client_id", "client_secret", host="host", rpc_port=1234) is authenticated_channel
     assert token_fetcher.token_request_data == {
@@ -104,8 +104,8 @@ def test_connect_with_secret_defaults(mocked_create_token_fetcher, _):
     mocked_create_token_fetcher.assert_called_once_with(conf_address="https://host/ewb/auth", verify_conf=True, verify_auth=True)
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_password(mocked_create_token_fetcher, _):
     assert connect_with_password("client_id", "username", "password", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is authenticated_channel
     assert token_fetcher.token_request_data == {
@@ -119,16 +119,16 @@ def test_connect_with_password(mocked_create_token_fetcher, _):
     mocked_create_token_fetcher.assert_called_once_with(conf_address="conf_address", verify_conf=False, verify_auth="auth_ca.cert")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.connect_tls", return_value=secure_channel)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=None)
+@mock.patch("zepben.ewb.streaming.grpc.connect.connect_tls", return_value=secure_channel)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=None)
 def test_connect_with_password_connects_with_tls_if_no_auth(mocked_create_token_fetcher, _):
     assert connect_with_password("client_id", "username", "password", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is secure_channel
 
     mocked_create_token_fetcher.assert_called_once_with(conf_address="conf_address", verify_conf=False, verify_auth="auth_ca.cert")
 
 
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
+@mock.patch("zepben.ewb.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
+@mock.patch("zepben.ewb.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_password_defaults(mocked_create_token_fetcher, _):
     assert connect_with_password("client_id", "username", "password", "host", 1234) is authenticated_channel
     assert token_fetcher.token_request_data == {

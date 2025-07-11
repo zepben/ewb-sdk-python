@@ -25,7 +25,7 @@ The `on_set_current_states` callback is triggered for each request passing in a 
 ```python
 from typing import AsyncGenerator, Tuple
 
-from zepben.evolve import CurrentStateEvent, SetCurrentStatesStatus
+from zepben.ewb import CurrentStateEvent, SetCurrentStatesStatus
 
 
 async def on_set_current_states(batches: AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, ...]], None]) -> AsyncGenerator[
@@ -51,7 +51,7 @@ each request sent from a gRPC client.
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_UpdateNetworkStateServiceServicer_to_server
 
-from zepben.evolve import UpdateNetworkStateService
+from zepben.ewb import UpdateNetworkStateService
 
 server = grpc.aio.server()
 host = 'localhost:50051'
@@ -72,7 +72,7 @@ from typing import AsyncGenerator, Tuple
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_UpdateNetworkStateServiceServicer_to_server
 
-from zepben.evolve import CurrentStateEvent, SetCurrentStatesStatus, UpdateNetworkStateService, BatchSuccessful
+from zepben.ewb import CurrentStateEvent, SetCurrentStatesStatus, UpdateNetworkStateService, BatchSuccessful
 
 
 class UpdateNetworkStateServiceImpl:

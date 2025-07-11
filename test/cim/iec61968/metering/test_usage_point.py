@@ -5,7 +5,9 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists, booleans, text, integers, sampled_from
-from zepben.evolve import UsagePoint, Location, Equipment, EndDevice, PhaseCode
+from zepben.ewb import Location, Equipment, PhaseCode
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

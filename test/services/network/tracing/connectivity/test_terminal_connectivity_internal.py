@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 
-from zepben.evolve import TerminalConnectivityInternal, PhaseCode, PowerTransformer, Terminal
+from zepben.ewb import TerminalConnectivityInternal, PhaseCode, PowerTransformer, Terminal
 
 
 class TestTerminalConnectivityInternal:

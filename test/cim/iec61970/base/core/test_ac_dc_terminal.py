@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.evolve import AcDcTerminal
+from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 
 ac_dc_terminal_kwargs = identified_object_kwargs
 ac_dc_terminal_args = identified_object_args

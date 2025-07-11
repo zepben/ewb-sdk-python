@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from busbranch.data.creators import _create_per_length_sequence_impedance
 from network_fixtures import create_terminal, create_terminals
-from zepben.evolve import NetworkService, AcLineSegment
+from zepben.ewb import NetworkService, AcLineSegment
 
 
 def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkService:

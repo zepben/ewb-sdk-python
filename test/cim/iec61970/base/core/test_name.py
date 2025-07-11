@@ -5,9 +5,9 @@
 
 from hypothesis import given
 from hypothesis.strategies import text, builds
-from zepben.evolve import Junction
-from zepben.evolve.model.cim.iec61970.base.core.name import Name
-from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.model.cim.iec61970.base.core.name import Name
+from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from cim.iec61970.base.core.test_name_type import name_type_kwargs

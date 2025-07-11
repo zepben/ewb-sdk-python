@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
-from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
+from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
     UnitSymbol, unit_symbol_from_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
@@ -41,7 +41,7 @@ def verify_protection_relay_function_constructor_default(prf: ProtectionRelayFun
     assert prf.relay_delay_time is None
     assert prf.protection_kind is ProtectionKind.UNKNOWN
     assert prf.directable is None
-    assert prf.power_direction == PowerDirectionKind.UNKNOWN_DIRECTION
+    assert prf.power_direction == PowerDirectionKind.UNKNOWN
     assert len(list(prf.sensors)) == 0
     assert len(list(prf.protected_switches)) == 0
     assert len(list(prf.time_limits)) == 0

@@ -2,18 +2,19 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import dataclasses
+
+from dataclasses import dataclass
 from collections import Counter
 from typing import List
 
 import pytest
 
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
-from zepben.evolve import ConductingEquipment, PhaseCode, SinglePhaseKind, NetworkService, Tracing, NetworkStateOperators, stop_at_open, downstream, upstream, \
+from zepben.ewb import ConductingEquipment, PhaseCode, SinglePhaseKind, NetworkService, Tracing, NetworkStateOperators, stop_at_open, downstream, upstream, \
     NetworkTrace
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class TrackedPhases:
     equipment: ConductingEquipment
     phases: frozenset[SinglePhaseKind]

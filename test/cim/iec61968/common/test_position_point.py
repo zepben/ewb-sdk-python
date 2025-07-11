@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 from pytest import raises
-from zepben.evolve import PositionPoint
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 position_point_kwargs = {
     "x_position": floats(min_value=-180, max_value=180),

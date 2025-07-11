@@ -6,8 +6,8 @@ from collections import Counter
 
 from hypothesis import given
 from hypothesis.strategies import text
-from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction
+from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 

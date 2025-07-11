@@ -4,8 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from busbranch.data.creators import _create_transformer_ends
 from network_fixtures import create_terminal, create_terminals
-from zepben.evolve import NetworkService, AcLineSegment, PerLengthSequenceImpedance, PowerTransformer, BaseVoltage, OverheadWireInfo, PowerTransformerInfo, \
+from zepben.ewb import NetworkService, AcLineSegment, PowerTransformer, BaseVoltage, PowerTransformerInfo, \
     EnergyConsumer, EnergySource, PowerElectronicsConnection, EquivalentBranch
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 
 
 def simple_node_breaker_network() -> NetworkService:

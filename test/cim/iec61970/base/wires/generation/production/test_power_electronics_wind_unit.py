@@ -7,7 +7,7 @@ from hypothesis import given
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
-from zepben.evolve import PowerElectronicsWindUnit
+from zepben.ewb import PowerElectronicsWindUnit
 
 power_electronics_wind_unit_kwargs = power_electronics_unit_kwargs
 power_electronics_wind_unit_args = power_electronics_unit_args

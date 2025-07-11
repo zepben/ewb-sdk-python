@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61968.customers.CustomerKind_pb2 import CustomerKind as PBCustomerKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import CustomerKind
+from zepben.ewb import CustomerKind
 
 
 def test_customer_kind_enum():

@@ -8,16 +8,40 @@ from typing import List, Union
 import pytest
 from pytest import fixture
 
-from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkService, IdentifiedObject, \
-    BaseService, PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight, Pole, Meter, Location, Organisation, AssetOwner, \
-    Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, UsagePoint, Junction, BusbarSection, PowerElectronicsConnection, \
-    LinearShuntCompensator, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
+from zepben.ewb import Terminal, resolver, UnresolvedReference, NetworkService, IdentifiedObject, \
+    BaseService, PowerTransformerInfo, Streetlight, Pole, Location, Organisation, Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, \
+    PowerElectronicsConnection, \
+    EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
     LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
-    FaultIndicator, Feeder, Site, Circuit, Substation, PowerElectronicsConnectionPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, \
-    EnergyConsumerPhase, EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
-    Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
-    AssetContainer, OrganisationRole, Document, Agreement, LvFeeder, EvChargingUnit, TapChangerControl, BatteryControl, PanDemandResponseFunction, \
+    Circuit, Substation, ConnectivityNodeContainer, Equipment, EnergySourcePhase, ConnectivityNode, BaseVoltage, \
+    Control, RemoteControl, RemoteSource, Loop, AssetInfo, \
+    OrganisationRole, Document, LvFeeder, EvChargingUnit, TapChangerControl, BatteryControl, PanDemandResponseFunction, \
     StaticVarCompensator
+from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
+from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
+from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.ewb.model.cim.iec61968.metering.meter import Meter
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
+from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 
 @fixture

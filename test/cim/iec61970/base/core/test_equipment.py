@@ -5,7 +5,9 @@
 import datetime
 
 from hypothesis.strategies import booleans, lists, builds, datetimes
-from zepben.evolve import Equipment, UsagePoint, OperationalRestriction, Feeder, EquipmentContainer
+from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.cim_creators import sampled_equipment_container, sampled_hvlv_feeder
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \

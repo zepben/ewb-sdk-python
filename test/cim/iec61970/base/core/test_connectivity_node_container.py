@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from zepben.evolve import ConnectivityNodeContainer
+from zepben.ewb import ConnectivityNodeContainer
 
 connectivity_node_container_kwargs = power_system_resource_kwargs
 connectivity_node_container_args = power_system_resource_args

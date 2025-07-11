@@ -5,7 +5,7 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import NetworkService, NetworkCimWriter, NetworkServiceWriter, NetworkDatabaseTables, Circuit
+from zepben.ewb import NetworkService, NetworkCimWriter, NetworkServiceWriter, NetworkDatabaseTables, Circuit
 
 
 class TestNetworkServiceWriter:

@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import traceback
 from dataclasses import dataclass
 from typing import Awaitable, Callable, List, TypeVar, Union, Optional, Iterable, Generator
 
@@ -111,8 +112,13 @@ class MockServer:
         server = CatchingThread(target=self._run_server_logic, args=[interactions])
         server.start()
 
-        # Send the client requests.
-        await client_test()
+        # Send the client requests. We need to wrap this in an exception logging block to get any errors from asserts in the
+        # client test, as the pytest logging only give the outcome, not which line actually caused it.
+        # noinspection PyBroadException
+        try:
+            await client_test()
+        except Exception:
+            print(traceback.format_exc())
 
         # Wait for the server to finish. If this times out your test, it indicates that not all expected requests were received, or the request stream
         # wasn't closed/completed.

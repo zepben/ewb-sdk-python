@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 
-from zepben.evolve import RelaySetting, UnitSymbol
+from zepben.ewb import RelaySetting, UnitSymbol
 
 
 def test_relay_setting_value_must_be_real():

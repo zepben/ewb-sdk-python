@@ -9,251 +9,67 @@ import pytest
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
-from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
-    TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
-    AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
-    UsagePoint, Meter, Junction, OperationalRestriction, AuxiliaryEquipment, Terminal, FaultIndicator, AcDcTerminal, BaseVoltage, ConductingEquipment, \
-    ConnectivityNode, ConnectivityNodeContainer, Equipment, Site, EquipmentContainer, Feeder, Substation, GeographicalRegion, SubGeographicalRegion, \
-    PowerSystemResource, EquivalentBranch, EquivalentEquipment, Accumulator, Analog, Discrete, Measurement, RemoteSource, PhaseCode, UnitSymbol, \
+from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
+    TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, Location, AssetInfo, \
+    AssetOrganisationRole, Pole, Streetlight, WindingConnection, Structure, Junction, OperationalRestriction, AuxiliaryEquipment, Terminal, BaseVoltage, \
+    ConductingEquipment, \
+    ConnectivityNode, ConnectivityNodeContainer, Equipment, Site, EquipmentContainer, Feeder, Substation, PowerSystemResource, EquivalentBranch, \
+    EquivalentEquipment, \
+    Measurement, RemoteSource, PhaseCode, UnitSymbol, \
     RemoteControl, Control, RemotePoint, BatteryUnit, BatteryStateKind, PhotoVoltaicUnit, PowerElectronicsUnit, PowerElectronicsConnection, \
-    PowerElectronicsWindUnit, AcLineSegment, PerLengthSequenceImpedance, Breaker, BusbarSection, Conductor, Connector, Disconnector, EnergyConnection, \
-    EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
-    LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
-    ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
+    PowerElectronicsWindUnit, AcLineSegment, Breaker, BusbarSection, Connector, Disconnector, EnergyConnection, \
+    EnergyConsumer, PhaseShuntConnectionKind, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
+    PowerTransformer, PowerTransformerEnd, VectorGroup, \
+    ProtectedSwitch, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, Circuit, Loop, NetworkService, TracedPhases, \
+    FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, RelayInfo, \
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
-    TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
-    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
-    PhaseImpedanceData
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
+    TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
+    StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
+    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind
+from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
+from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
+from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
+from zepben.ewb.model.cim.iec61968.metering.meter import Meter
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
+from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
+from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
     validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
 
-    ################################
-    # EXTENSIONS IEC61968 METERING #
-    ################################
-
-    def test_pan_demand_response_function(self):
-        self._compare_end_device_function(PanDemandResponseFunction)
-
-        self.validator.validate_property(
-            PanDemandResponseFunction.kind,
-            PanDemandResponseFunction,
-            lambda _: EndDeviceFunctionKind.demandResponse,
-            lambda _: EndDeviceFunctionKind.onRequestRead
-        )
-        self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
-
     ##################################
-    # EXTENSIONS IEC61970 BASE WIRES #
+    # Extensions IEC61968 Asset Info #
     ##################################
-
-    def test_compare_battery_control(self):
-        self._compare_regulating_control(BatteryControl)
-
-        self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.peakShaveCharge,
-                                         lambda _: BatteryControlMode.peakShaveDischarge)
-
-    #######################
-    # IEC61968 ASSET INFO #
-    #######################
-
-    def test_compare_cable_info(self):
-        self._compare_wire_info(CableInfo)
-
-    def test_compare_no_load_test(self):
-        self._compare_transformer_test(NoLoadTest)
-
-        self.validator.validate_property(NoLoadTest.energised_end_voltage, NoLoadTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(NoLoadTest.exciting_current, NoLoadTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(NoLoadTest.exciting_current_zero, NoLoadTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(NoLoadTest.loss, NoLoadTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(NoLoadTest.loss_zero, NoLoadTest, lambda _: 1, lambda _: 2)
-
-    def test_compare_open_circuit_test(self):
-        self._compare_transformer_test(OpenCircuitTest)
-
-        self.validator.validate_property(OpenCircuitTest.energised_end_step, OpenCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(OpenCircuitTest.energised_end_voltage, OpenCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(OpenCircuitTest.open_end_step, OpenCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(OpenCircuitTest.open_end_voltage, OpenCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(OpenCircuitTest.phase_shift, OpenCircuitTest, lambda _: 1.0, lambda _: 2.0)
-
-    def test_compare_overhead_wire_info(self):
-        self._compare_wire_info(OverheadWireInfo)
-
-    def test_compare_power_transformer_info(self):
-        self._compare_asset_info(PowerTransformerInfo)
-
-        self.validator.validate_collection(
-            PowerTransformerInfo.transformer_tank_infos,
-            PowerTransformerInfo.add_transformer_tank_info,
-            PowerTransformerInfo,
-            lambda _: TransformerTankInfo(mrid="tti1"),
-            lambda _: TransformerTankInfo(mrid="tti2")
-        )
-
-    def test_compare_short_circuit_test(self):
-        self._compare_transformer_test(ShortCircuitTest)
-
-        self.validator.validate_property(ShortCircuitTest.current, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(ShortCircuitTest.energised_end_step, ShortCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShortCircuitTest.grounded_end_step, ShortCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShortCircuitTest.leakage_impedance, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(ShortCircuitTest.leakage_impedance_zero, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(ShortCircuitTest.loss, ShortCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShortCircuitTest.loss_zero, ShortCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShortCircuitTest.power, ShortCircuitTest, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShortCircuitTest.voltage, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(ShortCircuitTest.voltage_ohmic_part, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
-
-    def test_compare_shunt_compensator_info(self):
-        self._compare_asset_info(ShuntCompensatorInfo)
-        self.validator.validate_property(ShuntCompensatorInfo.max_power_loss, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShuntCompensatorInfo.rated_current, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShuntCompensatorInfo.rated_reactive_power, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(ShuntCompensatorInfo.rated_voltage, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
-
-    def test_compare_switch_info(self):
-        self._compare_asset_info(SwitchInfo)
-        self.validator.validate_property(SwitchInfo.rated_interrupting_time, SwitchInfo, lambda _: 1.1, lambda _: 2.2)
-
-    def test_compare_transformer_end_info(self):
-        self._compare_asset_info(TransformerEndInfo)
-
-        self.validator.validate_property(TransformerEndInfo.connection_kind, TransformerEndInfo, lambda _: WindingConnection.D, lambda _: WindingConnection.Y)
-        self.validator.validate_property(TransformerEndInfo.emergency_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.end_number, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.insulation_u, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.phase_angle_clock, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.r, TransformerEndInfo, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(TransformerEndInfo.rated_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.rated_u, TransformerEndInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerEndInfo.short_term_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
-
-        self.validator.validate_property(
-            TransformerEndInfo.transformer_star_impedance,
-            TransformerEndInfo,
-            lambda _: TransformerStarImpedance(mrid="tsi1"),
-            lambda _: TransformerStarImpedance(mrid="tsi2")
-        )
-
-    def test_compare_transformer_tank_info(self):
-        self._compare_asset_info(TransformerTankInfo)
-
-        self.validator.validate_collection(
-            TransformerTankInfo.transformer_end_infos,
-            TransformerTankInfo.add_transformer_end_info,
-            TransformerTankInfo,
-            lambda _: TransformerEndInfo(mrid="tei1"),
-            lambda _: TransformerEndInfo(mrid="tei2")
-        )
-
-    def _compare_transformer_test(self, creator: Type[TransformerTest]):
-        self._compare_identified_object(creator)
-
-        self.validator.validate_property(TransformerTest.base_power, creator, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(TransformerTest.temperature, creator, lambda _: 1.0, lambda _: 2.0)
-
-    def _compare_wire_info(self, creator: Type[WireInfo]):
-        self._compare_asset_info(creator)
-
-        self.validator.validate_property(WireInfo.rated_current, creator, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(WireInfo.material, creator, lambda _: WireMaterialKind.aluminum, lambda _: WireMaterialKind.copperCadmium)
-
-    ###################
-    # IEC61968 ASSETS #
-    ###################
-
-    def _compare_asset(self, creator: Type[Asset]):
-        self._compare_identified_object(creator)
-
-        self.validator.validate_collection(
-            Asset.organisation_roles,
-            Asset.add_organisation_role,
-            creator,
-            lambda _: AssetOwner(mrid="a1"),
-            lambda _: AssetOwner(mrid="a2")
-        )
-        self.validator.validate_collection(
-            Asset.power_system_resources,
-            Asset.add_power_system_resource,
-            creator,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
-        )
-        self.validator.validate_property(Asset.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
-
-    def _compare_asset_container(self, creator: Type[AssetContainer]):
-        self._compare_asset(creator)
-
-    def _compare_asset_function(self, creator: Type[AssetFunction]):
-        self._compare_identified_object(creator)
-
-    def _compare_asset_info(self, creator: Type[AssetInfo]):
-        self._compare_identified_object(creator)
-
-    def _compare_asset_organisation_role(self, creator: Type[AssetOrganisationRole]):
-        self._compare_organisation_role(creator)
-
-    def test_compare_asset_owner(self):
-        self._compare_asset_organisation_role(AssetOwner)
-
-    def test_compare_pole(self):
-        self._compare_structure(Pole)
-        self.validator.validate_property(Pole.classification, Pole, lambda _: "c1", lambda _: "c2")
-        self.validator.validate_collection(Pole.streetlights, Pole.add_streetlight, Pole, lambda _: Streetlight(mrid="sl1"), lambda _: Streetlight(mrid="sl2"))
-
-    def test_compare_streetlight(self):
-        self._compare_asset(Streetlight)
-
-        self.validator.validate_property(
-            Streetlight.lamp_kind,
-            Streetlight,
-            lambda _: StreetlightLampKind.HIGH_PRESSURE_SODIUM,
-            lambda _: StreetlightLampKind.MERCURY_VAPOR
-        )
-        self.validator.validate_property(Streetlight.light_rating, Streetlight, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(Streetlight.pole, Streetlight, lambda _: Pole(mrid="x"), lambda _: Pole(mrid="y"))
-
-    def _compare_structure(self, creator: Type[Structure]):
-        self._compare_asset_container(creator)
-
-    ###################
-    # IEC61968 COMMON #
-    ###################
-
-    def test_compare_location(self):
-        self._compare_identified_object(Location)
-
-        # noinspection PyArgumentList
-        self.validator.validate_property(
-            Location.main_address,
-            Location,
-            lambda _: StreetAddress("1234", TownDetail("town", "state")),
-            lambda _: StreetAddress("1234", TownDetail("other", "state"))
-        )
-        # noinspection PyArgumentList
-        self.validator.validate_indexed_collection(
-            Location.points,
-            Location.add_point,
-            Location,
-            lambda _: PositionPoint(1.0, 2.0),
-            lambda _: PositionPoint(3.0, 4.0)
-        )
-
-    #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
-    #####################################
 
     def test_compare_relay_info(self):
         self._compare_asset_info(RelayInfo)
@@ -268,450 +84,81 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: [0.1, 0.3]
         )
 
-    # noinspection PyArgumentList
-    def test_compare_current_transformer_info(self):
-        self._compare_asset_info(CurrentTransformerInfo)
+    ################################
+    # Extensions IEC61968 Metering #
+    ################################
 
-        self.validator.validate_property(CurrentTransformerInfo.accuracy_class, CurrentTransformerInfo, lambda _: "acc1", lambda _: "acc2")
-        self.validator.validate_property(CurrentTransformerInfo.accuracy_limit, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(CurrentTransformerInfo.core_count, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(CurrentTransformerInfo.ct_class, CurrentTransformerInfo, lambda _: "ctc1", lambda _: "ctc2")
-        self.validator.validate_property(CurrentTransformerInfo.knee_point_voltage, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(CurrentTransformerInfo.max_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
-        self.validator.validate_property(CurrentTransformerInfo.nominal_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
-        self.validator.validate_property(CurrentTransformerInfo.primary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(CurrentTransformerInfo.rated_current, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(CurrentTransformerInfo.secondary_fls_rating, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(CurrentTransformerInfo.secondary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(CurrentTransformerInfo.usage, CurrentTransformerInfo, lambda _: "usage1", lambda _: "usage2")
-
-    # noinspection PyArgumentList
-    def test_compare_potential_transformer_info(self):
-        self._compare_asset_info(PotentialTransformerInfo)
-
-        self.validator.validate_property(PotentialTransformerInfo.accuracy_class, PotentialTransformerInfo, lambda _: "acc1", lambda _: "acc2")
-        self.validator.validate_property(PotentialTransformerInfo.nominal_ratio, PotentialTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
-        self.validator.validate_property(PotentialTransformerInfo.primary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(PotentialTransformerInfo.pt_class, PotentialTransformerInfo, lambda _: "ptc1", lambda _: "ptc2")
-        self.validator.validate_property(PotentialTransformerInfo.rated_voltage, PotentialTransformerInfo, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(PotentialTransformerInfo.secondary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
-
-    #####################
-    # IEC61968 METERING #
-    #####################
-
-    def _compare_end_device(self, creator: Type[EndDevice]):
-        self._compare_asset_container(creator)
-
-        self.validator.validate_property(EndDevice.customer_mrid, creator, lambda _: "customer1", lambda _: "customer2")
-        self.validator.validate_property(EndDevice.service_location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
-        self.validator.validate_collection(
-            EndDevice.usage_points,
-            EndDevice.add_usage_point,
-            creator,
-            lambda _: UsagePoint(mrid="up1"),
-            lambda _: UsagePoint(mrid="up2"),
-            NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
-        )
-        self.validator.validate_collection(
-            EndDevice.functions,
-            EndDevice.add_function,
-            creator,
-            lambda _: EndDeviceFunction(mrid="edf1"),
-            lambda _: EndDeviceFunction(mrid="edf2"),
-            NetworkServiceComparatorOptions(compare_lv_simplification=False)
-        )
-
-    def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
-        self._compare_asset_function(creator)
-
-        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: True, lambda _: False)
-
-    def test_compare_meter(self):
-        self._compare_end_device(Meter)
-
-    def test_compare_usage_point(self):
-        self._compare_identified_object(UsagePoint)
-
-        self.validator.validate_property(UsagePoint.usage_point_location, UsagePoint, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
-        self.validator.validate_property(UsagePoint.is_virtual, UsagePoint, lambda _: False, lambda _: True)
-        self.validator.validate_property(UsagePoint.connection_category, UsagePoint, lambda _: "first", lambda _: "second")
-        self.validator.validate_property(UsagePoint.rated_power, UsagePoint, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(UsagePoint.approved_inverter_capacity, UsagePoint, lambda _: 1, lambda _: 2)
-        self.validator.validate_collection(
-            UsagePoint.end_devices,
-            UsagePoint.add_end_device,
-            UsagePoint,
-            lambda _: Meter(mrid="m1"),
-            lambda _: Meter(mrid="m2"),
-            NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
-        )
-        self.validator.validate_collection(
-            UsagePoint.equipment,
-            UsagePoint.add_equipment,
-            UsagePoint,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2"),
-            NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
-        )
-
-    #######################
-    # IEC61968 OPERATIONS #
-    #######################
-
-    def test_compare_operational_restriction(self):
-        self._compare_document(OperationalRestriction)
-
-        self.validator.validate_collection(
-            OperationalRestriction.equipment,
-            OperationalRestriction.add_equipment,
-            OperationalRestriction,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
-        )
-
-    #####################################
-    # IEC61970 BASE AUXILIARY EQUIPMENT #
-    #####################################
-
-    def _compare_auxiliary_equipment(self, creator: Type[AuxiliaryEquipment]):
-        self._compare_equipment(creator)
+    def test_compare_pan_demand_response_function(self):
+        self._compare_end_device_function(PanDemandResponseFunction)
 
         self.validator.validate_property(
-            AuxiliaryEquipment.terminal,
-            creator,
-            lambda _: Terminal(mrid="t1"),
-            lambda _: Terminal(mrid="t2"),
-            NetworkServiceComparatorOptions(compare_terminals=False),
-            options_stop_compare=True
+            PanDemandResponseFunction.kind,
+            PanDemandResponseFunction,
+            lambda _: EndDeviceFunctionKind.demandResponse,
+            lambda _: EndDeviceFunctionKind.onRequestRead
         )
+        self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
-    def test_compare_current_transformer(self):
-        self._compare_sensor(CurrentTransformer)
-
-        self.validator.validate_property(CurrentTransformer.core_burden, CurrentTransformer, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(
-            CurrentTransformer.asset_info,
-            CurrentTransformer,
-            lambda _: CurrentTransformerInfo(mrid="acti1"),
-            lambda _: CurrentTransformerInfo(mrid="acti2"),
-            expected_differences={"current_transformer_info"}
-        )
-        self.validator.validate_property(
-            CurrentTransformer.current_transformer_info,
-            CurrentTransformer,
-            lambda _: CurrentTransformerInfo(mrid="acti1"),
-            lambda _: CurrentTransformerInfo(mrid="acti2"),
-            expected_differences={"asset_info"}
-        )
-
-    def test_compare_fault_indicator(self):
-        self._compare_auxiliary_equipment(FaultIndicator)
-
-    def test_compare_potential_transformer(self):
-        self._compare_sensor(PotentialTransformer)
-
-        self.validator.validate_property(
-            PotentialTransformer.type,
-            PotentialTransformer,
-            lambda _: PotentialTransformerKind.capacitiveCoupling,
-            lambda _: PotentialTransformerKind.inductive
-        )
-        self.validator.validate_property(
-            PotentialTransformer.asset_info,
-            PotentialTransformer,
-            lambda _: PotentialTransformerInfo(mrid="avti1"),
-            lambda _: PotentialTransformerInfo(mrid="avti2"),
-            expected_differences={"potential_transformer_info"}
-        )
-        self.validator.validate_property(
-            PotentialTransformer.potential_transformer_info,
-            PotentialTransformer,
-            lambda _: PotentialTransformerInfo(mrid="vti1"),
-            lambda _: PotentialTransformerInfo(mrid="vti2"),
-            expected_differences={"asset_info"}
-        )
-
-    def _compare_sensor(self, creator: Type[Sensor]):
-        self.validator.validate_collection(
-            Sensor.relay_functions,
-            Sensor.add_relay_function,
-            creator,
-            lambda _: ProtectionRelayFunction(mrid="prf1"),
-            lambda _: ProtectionRelayFunction(mrid="prf2")
-        )
-        self._compare_auxiliary_equipment(creator)
-
-    ######################
-    # IEC61970 BASE CORE #
-    ######################
-
-    def _compare_ac_dc_terminal(self, creator: Type[AcDcTerminal]):
-        self._compare_identified_object(creator)
-
-    def test_compare_base_voltage(self):
-        self._compare_identified_object(BaseVoltage)
-
-        self.validator.validate_property(BaseVoltage.nominal_voltage, BaseVoltage, lambda _: 1, lambda _: 2)
-
-    def _compare_conducting_equipment(self, creator: Type[ConductingEquipment]):
-        self._compare_equipment(creator)
-
-        self.validator.validate_property(ConductingEquipment.base_voltage, creator, lambda _: BaseVoltage(mrid="b1"), lambda _: BaseVoltage(mrid="b2"))
-        self.validator.validate_indexed_collection(
-            ConductingEquipment.terminals,
-            ConductingEquipment.add_terminal,
-            creator,
-            lambda _: Terminal(mrid="1"),
-            lambda _: Terminal(mrid="2"),
-            NetworkServiceComparatorOptions(compare_terminals=False),
-            options_stop_compare=True
-        )
-
-    def _compare_curve(self, creator: Type[Curve]):
-        self._compare_identified_object(creator)
-
-        self.validator.validate_indexed_collection(
-            Curve.data,
-            Curve.add_curve_data,
-            creator,
-            lambda _: CurveData(1, 2),
-            lambda _: CurveData(3, 4),
-        )
-
-    def test_compare_connectivity_node(self):
-        self._compare_identified_object(ConnectivityNode)
-
-        self.validator.validate_collection(
-            ConnectivityNode.terminals,
-            ConnectivityNode.add_terminal,
-            ConnectivityNode,
-            lambda _: Terminal(mrid="1"),
-            lambda _: Terminal(mrid="2")
-        )
-
-    def _compare_connectivity_node_container(self, creator: Type[ConnectivityNodeContainer]):
-        self._compare_power_system_resource(creator)
-
-    def _compare_equipment(self, creator: Type[Equipment]):
-        self._compare_power_system_resource(creator)
-
-        self.validator.validate_property(Equipment.in_service, creator, lambda _: True, lambda _: False)
-        self.validator.validate_property(Equipment.normally_in_service, creator, lambda _: True, lambda _: False)
-        self.validator.validate_property(
-            Equipment.commissioned_date,
-            creator,
-            lambda _: datetime.datetime.fromtimestamp(0),
-            lambda _: datetime.datetime.fromtimestamp(1)
-        )
-        self.validator.validate_collection(Equipment.containers, Equipment.add_container, creator, lambda _: Site(mrid="s1"), lambda _: Site(mrid="s2"))
-        self.validator.validate_collection(
-            Equipment.usage_points,
-            Equipment.add_usage_point,
-            creator, lambda _: UsagePoint(mrid="u1"),
-            lambda _: UsagePoint(mrid="u2")
-        )
-        self.validator.validate_collection(
-            Equipment.operational_restrictions,
-            Equipment.add_operational_restriction,
-            creator,
-            lambda _: OperationalRestriction(mrid="o1"),
-            lambda _: OperationalRestriction(mrid="o2")
-        )
-        self.validator.validate_collection(
-            Equipment.current_containers,
-            Equipment.add_current_container,
-            creator,
-            lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
-        )
-
-    def _compare_equipment_container(self, creator: Type[EquipmentContainer]):
-        self._compare_connectivity_node_container(creator)
-
-        self.validator.validate_collection(
-            EquipmentContainer.equipment,
-            EquipmentContainer.add_equipment,
-            creator,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
-        )
-
-    def test_compare_feeder(self):
-        self._compare_equipment_container(Feeder)
-
-        self.validator.validate_property(Feeder.normal_head_terminal, Feeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
-        self.validator.validate_property(Feeder.normal_energizing_substation, Feeder, lambda _: Substation(mrid="s1"), lambda _: Substation(mrid="s2"))
-        self.validator.validate_collection(
-            Feeder.current_equipment,
-            Feeder.add_current_equipment,
-            Feeder,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
-        )
-        self.validator.validate_collection(
-            Feeder.normal_energized_lv_feeders,
-            Feeder.add_normal_energized_lv_feeder,
-            Feeder,
-            lambda _: LvFeeder(mrid="lvf1"),
-            lambda _: LvFeeder(mrid="lvf2")
-        )
-        self.validator.validate_collection(
-            Feeder.current_energized_lv_feeders,
-            Feeder.add_current_energized_lv_feeder,
-            Feeder,
-            lambda _: LvFeeder(mrid="lvf1"),
-            lambda _: LvFeeder(mrid="lvf2")
-        )
-
-    def test_compare_geographical_region(self):
-        self._compare_identified_object(GeographicalRegion)
-
-        self.validator.validate_collection(
-            GeographicalRegion.sub_geographical_regions,
-            GeographicalRegion.add_sub_geographical_region,
-            GeographicalRegion,
-            lambda _: SubGeographicalRegion(mrid="sg1"),
-            lambda _: SubGeographicalRegion(mrid="sg2")
-        )
-
-    def _compare_power_system_resource(self, creator: Type[PowerSystemResource]):
-        self._compare_identified_object(creator)
-
-        self.validator.validate_property(PowerSystemResource.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
-        self.validator.validate_collection(
-            PowerSystemResource.assets,
-            PowerSystemResource.add_asset,
-            creator,
-            lambda _: Pole(mrid="p1"),
-            lambda _: Pole(mrid="p2")
-        )
+    #################################
+    # Extensions IEC61970 Base Core #
+    #################################
 
     def test_compare_site(self):
         self._compare_equipment_container(Site)
 
-    def test_compare_sub_geographical_region(self):
-        self._compare_identified_object(SubGeographicalRegion)
+    ###################################
+    # Extensions IEC61970 Base Feeder #
+    ###################################
 
-        self.validator.validate_property(
-            SubGeographicalRegion.geographical_region,
-            SubGeographicalRegion,
-            lambda _: GeographicalRegion(mrid="g1"),
-            lambda _: GeographicalRegion(mrid="g2")
-        )
+    def test_compare_loop(self):
+        self._compare_identified_object(Loop)
+
+        self.validator.validate_collection(Loop.circuits, Loop.add_circuit, Loop, lambda _: Circuit(mrid="c1"), lambda _: Circuit(mrid="c2"))
+        self.validator.validate_collection(Loop.substations, Loop.add_substation, Loop, lambda _: Substation(mrid="s1"), lambda _: Substation(mrid="s2"))
         self.validator.validate_collection(
-            SubGeographicalRegion.substations,
-            SubGeographicalRegion.add_substation,
-            SubGeographicalRegion,
+            Loop.energizing_substations,
+            Loop.add_energizing_substation,
+            Loop,
             lambda _: Substation(mrid="s1"),
             lambda _: Substation(mrid="s2")
         )
 
-    def test_compare_substation(self):
-        self._compare_equipment_container(Substation)
+    def test_compare_lv_feeder(self):
+        self._compare_equipment_container(LvFeeder)
 
-        self.validator.validate_property(
-            Substation.sub_geographical_region,
-            Substation,
-            lambda _: SubGeographicalRegion(mrid="sg1"),
-            lambda _: SubGeographicalRegion(mrid="sg2")
+        self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_collection(
+            LvFeeder.normal_energizing_feeders,
+            LvFeeder.add_normal_energizing_feeder,
+            LvFeeder,
+            lambda _: Feeder(mrid="f1"),
+            lambda _: Feeder(mrid="f2")
         )
-        self.validator.validate_collection(Substation.feeders, Substation.add_feeder, Substation, lambda _: Feeder(mrid="f1"), lambda _: Feeder(mrid="f2"))
-
-    def test_compare_terminal(self):
-        self._compare_ac_dc_terminal(Terminal)
-
-        #
-        # NOTE: We need to have local variables for these otherwise they are garbage collected as they are only stored in weak references.
-        #
-        cn1 = ConnectivityNode(mrid="c1")
-        cn2 = ConnectivityNode(mrid="c2")
-
-        self.validator.validate_property(Terminal.phases, Terminal, lambda _: PhaseCode.ABC, lambda _: PhaseCode.ABCN)
-        self.validator.validate_property(Terminal.sequence_number, Terminal, lambda _: 1, lambda _: 2)
-        self.validator.validate_property(Terminal.normal_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
-        self.validator.validate_property(Terminal.current_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
-
-        for i in range(0, 32, 4):
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
-
-        self.validator.validate_val_property(
-            Terminal.connectivity_node,
-            Terminal,
-            lambda terminal, _: terminal.connect(cn1),
-            lambda terminal, _: terminal.connect(cn2)
+        self.validator.validate_collection(
+            LvFeeder.current_energizing_feeders,
+            LvFeeder.add_current_energizing_feeder,
+            LvFeeder,
+            lambda _: Feeder(mrid="f1"),
+            lambda _: Feeder(mrid="f2")
         )
-        self.validator.validate_property(Terminal.conducting_equipment, Terminal, lambda _: Junction(mrid="j1"), lambda _: Junction(mrid="j2"))
+        self.validator.validate_collection(
+            LvFeeder.current_equipment,
+            LvFeeder.add_current_equipment,
+            LvFeeder,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
 
-    #############################
-    # IEC61970 BASE EQUIVALENTS #
-    #############################
+    ##################################################
+    # Extensions IEC61970 Base Generation Production #
+    ##################################################
 
-    def test_compare_equivalent_branch(self):
-        self._compare_equivalent_equipment(EquivalentBranch)
+    def test_compare_ev_charging_unit(self):
+        self._compare_power_electronics_unit(EvChargingUnit)
 
-        self.validator.validate_property(EquivalentBranch.negative_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.negative_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.negative_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.negative_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.positive_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.positive_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.positive_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.positive_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.r, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.x, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.zero_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.zero_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.zero_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(EquivalentBranch.zero_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
-
-    def _compare_equivalent_equipment(self, creator: Type[EquivalentEquipment]):
-        self._compare_conducting_equipment(creator)
-
-    ######################
-    # IEC61970 BASE MEAS #
-    ######################
-
-    def test_compare_accumulator(self):
-        self._compare_measurement(Accumulator)
-
-    def test_compare_analog(self):
-        self._compare_measurement(Analog)
-        self.validator.validate_property(Analog.positive_flow_in, Analog, lambda _: True, lambda _: False)
-
-    def test_compare_discrete(self):
-        self._compare_measurement(Discrete)
-
-    def _compare_measurement(self, creator: Type[Measurement]):
-        self._compare_identified_object(creator)
-
-        self.validator.validate_property(Measurement.power_system_resource_mrid, creator, lambda _: "psr1", lambda _: "psr2")
-        self.validator.validate_property(Measurement.terminal_mrid, creator, lambda _: "terminal1", lambda _: "terminal2")
-        self.validator.validate_property(Measurement.remote_source, creator, lambda _: RemoteSource(mrid="rs1"), lambda _: RemoteSource(mrid="rs2"))
-        self.validator.validate_property(Measurement.phases, creator, lambda _: PhaseCode.ABCN, lambda _: PhaseCode.ABC)
-        self.validator.validate_property(Measurement.unit_symbol, creator, lambda _: UnitSymbol.HENRYS, lambda _: UnitSymbol.HOURS)
-
-    ############################
-    # IEC61970 Base Protection #
-    ############################
-    def test_compare_current_relay(self):
-        self._compare_protection_relay_function(CurrentRelay)
-
-        self.validator.validate_property(CurrentRelay.current_limit_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(CurrentRelay.inverse_time_flag, CurrentRelay, lambda _: False, lambda _: True)
-        self.validator.validate_property(CurrentRelay.time_delay_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
+    #######################################
+    # Extensions IEC61970 Base Protection #
+    #######################################
 
     def test_compare_distance_relay(self):
         self._compare_protection_relay_function(DistanceRelay)
@@ -725,9 +172,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(DistanceRelay.operation_phase_angle1, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(DistanceRelay.operation_phase_angle2, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(DistanceRelay.operation_phase_angle3, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
-
-    def test_compare_voltage_relay(self):
-        self._compare_protection_relay_function(VoltageRelay)
 
     def _compare_protection_relay_function(self, creator: Type[ProtectionRelayFunction]):
         self._compare_power_system_resource(creator)
@@ -839,31 +283,629 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: ProtectionRelayScheme(mrid="prs2")
         )
 
+    def test_compare_voltage_relay(self):
+        self._compare_protection_relay_function(VoltageRelay)
+
+    ##################################
+    # Extensions IEC61970 Base Wires #
+    ##################################
+
+    def test_compare_battery_control(self):
+        self._compare_regulating_control(BatteryControl)
+
+        self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.peakShaveCharge,
+                                         lambda _: BatteryControlMode.peakShaveDischarge)
+
     #######################
-    # IEC61970 BASE SCADA #
+    # IEC61968 Asset Info #
     #######################
 
-    def test_compare_remote_control(self):
-        self._compare_remote_point(RemoteControl)
+    def test_compare_cable_info(self):
+        self._compare_wire_info(CableInfo)
 
-        self.validator.validate_property(RemoteControl.control, RemoteControl, lambda _: Control(mrid="c1"), lambda _: Control(mrid="c2"))
+    def test_compare_no_load_test(self):
+        self._compare_transformer_test(NoLoadTest)
 
-    def _compare_remote_point(self, creator: Type[RemotePoint]):
-        self._compare_identified_object(creator)
+        self.validator.validate_property(NoLoadTest.energised_end_voltage, NoLoadTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(NoLoadTest.exciting_current, NoLoadTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(NoLoadTest.exciting_current_zero, NoLoadTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(NoLoadTest.loss, NoLoadTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(NoLoadTest.loss_zero, NoLoadTest, lambda _: 1, lambda _: 2)
 
-    def test_compare_remote_source(self):
-        self._compare_remote_point(RemoteSource)
+    def test_compare_open_circuit_test(self):
+        self._compare_transformer_test(OpenCircuitTest)
 
-        self.validator.validate_property(
-            RemoteSource.measurement,
-            RemoteSource,
-            lambda _: Measurement(mrid="m1"),
-            lambda _: Measurement(mrid="m2")
+        self.validator.validate_property(OpenCircuitTest.energised_end_step, OpenCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(OpenCircuitTest.energised_end_voltage, OpenCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(OpenCircuitTest.open_end_step, OpenCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(OpenCircuitTest.open_end_voltage, OpenCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(OpenCircuitTest.phase_shift, OpenCircuitTest, lambda _: 1.0, lambda _: 2.0)
+
+    def test_compare_overhead_wire_info(self):
+        self._compare_wire_info(OverheadWireInfo)
+
+    def test_compare_power_transformer_info(self):
+        self._compare_asset_info(PowerTransformerInfo)
+
+        self.validator.validate_collection(
+            PowerTransformerInfo.transformer_tank_infos,
+            PowerTransformerInfo.add_transformer_tank_info,
+            PowerTransformerInfo,
+            lambda _: TransformerTankInfo(mrid="tti1"),
+            lambda _: TransformerTankInfo(mrid="tti2")
         )
 
-    #############################################
-    # IEC61970 BASE WIRES GENERATION PRODUCTION #
-    #############################################
+    def test_compare_short_circuit_test(self):
+        self._compare_transformer_test(ShortCircuitTest)
+
+        self.validator.validate_property(ShortCircuitTest.current, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(ShortCircuitTest.energised_end_step, ShortCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShortCircuitTest.grounded_end_step, ShortCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShortCircuitTest.leakage_impedance, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(ShortCircuitTest.leakage_impedance_zero, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(ShortCircuitTest.loss, ShortCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShortCircuitTest.loss_zero, ShortCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShortCircuitTest.power, ShortCircuitTest, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShortCircuitTest.voltage, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(ShortCircuitTest.voltage_ohmic_part, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+
+    def test_compare_shunt_compensator_info(self):
+        self._compare_asset_info(ShuntCompensatorInfo)
+        self.validator.validate_property(ShuntCompensatorInfo.max_power_loss, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_current, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_reactive_power, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_voltage, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+
+    def test_compare_switch_info(self):
+        self._compare_asset_info(SwitchInfo)
+        self.validator.validate_property(SwitchInfo.rated_interrupting_time, SwitchInfo, lambda _: 1.1, lambda _: 2.2)
+
+    def test_compare_transformer_end_info(self):
+        self._compare_asset_info(TransformerEndInfo)
+
+        self.validator.validate_property(TransformerEndInfo.connection_kind, TransformerEndInfo, lambda _: WindingConnection.D, lambda _: WindingConnection.Y)
+        self.validator.validate_property(TransformerEndInfo.emergency_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.end_number, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.insulation_u, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.phase_angle_clock, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.r, TransformerEndInfo, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TransformerEndInfo.rated_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.rated_u, TransformerEndInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerEndInfo.short_term_s, TransformerEndInfo, lambda _: 1, lambda _: 2)
+
+        self.validator.validate_property(
+            TransformerEndInfo.transformer_star_impedance,
+            TransformerEndInfo,
+            lambda _: TransformerStarImpedance(mrid="tsi1"),
+            lambda _: TransformerStarImpedance(mrid="tsi2")
+        )
+
+    def test_compare_transformer_tank_info(self):
+        self._compare_asset_info(TransformerTankInfo)
+
+        self.validator.validate_collection(
+            TransformerTankInfo.transformer_end_infos,
+            TransformerTankInfo.add_transformer_end_info,
+            TransformerTankInfo,
+            lambda _: TransformerEndInfo(mrid="tei1"),
+            lambda _: TransformerEndInfo(mrid="tei2")
+        )
+
+    def _compare_transformer_test(self, creator: Type[TransformerTest]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_property(TransformerTest.base_power, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TransformerTest.temperature, creator, lambda _: 1.0, lambda _: 2.0)
+
+    def _compare_wire_info(self, creator: Type[WireInfo]):
+        self._compare_asset_info(creator)
+
+        self.validator.validate_property(WireInfo.rated_current, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(WireInfo.material, creator, lambda _: WireMaterialKind.aluminum, lambda _: WireMaterialKind.copperCadmium)
+
+    ###################
+    # IEC61968 Assets #
+    ###################
+
+    def _compare_asset(self, creator: Type[Asset]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_collection(
+            Asset.organisation_roles,
+            Asset.add_organisation_role,
+            creator,
+            lambda _: AssetOwner(mrid="a1"),
+            lambda _: AssetOwner(mrid="a2")
+        )
+        self.validator.validate_collection(
+            Asset.power_system_resources,
+            Asset.add_power_system_resource,
+            creator,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
+        self.validator.validate_property(Asset.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+
+    def _compare_asset_container(self, creator: Type[AssetContainer]):
+        self._compare_asset(creator)
+
+    def _compare_asset_function(self, creator: Type[AssetFunction]):
+        self._compare_identified_object(creator)
+
+    def _compare_asset_info(self, creator: Type[AssetInfo]):
+        self._compare_identified_object(creator)
+
+    def _compare_asset_organisation_role(self, creator: Type[AssetOrganisationRole]):
+        self._compare_organisation_role(creator)
+
+    def test_compare_asset_owner(self):
+        self._compare_asset_organisation_role(AssetOwner)
+
+    def test_compare_streetlight(self):
+        self._compare_asset(Streetlight)
+
+        self.validator.validate_property(
+            Streetlight.lamp_kind,
+            Streetlight,
+            lambda _: StreetlightLampKind.HIGH_PRESSURE_SODIUM,
+            lambda _: StreetlightLampKind.MERCURY_VAPOR
+        )
+        self.validator.validate_property(Streetlight.light_rating, Streetlight, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Streetlight.pole, Streetlight, lambda _: Pole(mrid="x"), lambda _: Pole(mrid="y"))
+
+    def _compare_structure(self, creator: Type[Structure]):
+        self._compare_asset_container(creator)
+
+    ###################
+    # IEC61968 Common #
+    ###################
+
+    def test_compare_location(self):
+        self._compare_identified_object(Location)
+
+        # noinspection PyArgumentList
+        self.validator.validate_property(
+            Location.main_address,
+            Location,
+            lambda _: StreetAddress("1234", TownDetail("town", "state")),
+            lambda _: StreetAddress("1234", TownDetail("other", "state"))
+        )
+        # noinspection PyArgumentList
+        self.validator.validate_indexed_collection(
+            Location.points,
+            Location.add_point,
+            Location,
+            lambda _: PositionPoint(1.0, 2.0),
+            lambda _: PositionPoint(3.0, 4.0)
+        )
+
+    #####################################
+    # IEC61968 InfIEC61968 InfAssetInfo #
+    #####################################
+
+    def test_compare_current_transformer_info(self):
+        self._compare_asset_info(CurrentTransformerInfo)
+
+        self.validator.validate_property(CurrentTransformerInfo.accuracy_class, CurrentTransformerInfo, lambda _: "acc1", lambda _: "acc2")
+        self.validator.validate_property(CurrentTransformerInfo.accuracy_limit, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.core_count, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.ct_class, CurrentTransformerInfo, lambda _: "ctc1", lambda _: "ctc2")
+        self.validator.validate_property(CurrentTransformerInfo.knee_point_voltage, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.max_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(CurrentTransformerInfo.nominal_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(CurrentTransformerInfo.primary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.rated_current, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.secondary_fls_rating, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.secondary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.usage, CurrentTransformerInfo, lambda _: "usage1", lambda _: "usage2")
+
+    # noinspection PyArgumentList
+    def test_compare_potential_transformer_info(self):
+        self._compare_asset_info(PotentialTransformerInfo)
+
+        self.validator.validate_property(PotentialTransformerInfo.accuracy_class, PotentialTransformerInfo, lambda _: "acc1", lambda _: "acc2")
+        self.validator.validate_property(PotentialTransformerInfo.nominal_ratio, PotentialTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(PotentialTransformerInfo.primary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(PotentialTransformerInfo.pt_class, PotentialTransformerInfo, lambda _: "ptc1", lambda _: "ptc2")
+        self.validator.validate_property(PotentialTransformerInfo.rated_voltage, PotentialTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PotentialTransformerInfo.secondary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    def test_compare_pole(self):
+        self._compare_structure(Pole)
+        self.validator.validate_property(Pole.classification, Pole, lambda _: "c1", lambda _: "c2")
+        self.validator.validate_collection(Pole.streetlights, Pole.add_streetlight, Pole, lambda _: Streetlight(mrid="sl1"), lambda _: Streetlight(mrid="sl2"))
+
+    #####################
+    # IEC61968 Metering #
+    #####################
+
+    def _compare_end_device(self, creator: Type[EndDevice]):
+        self._compare_asset_container(creator)
+
+        self.validator.validate_property(EndDevice.customer_mrid, creator, lambda _: "customer1", lambda _: "customer2")
+        self.validator.validate_property(EndDevice.service_location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+        self.validator.validate_collection(
+            EndDevice.usage_points,
+            EndDevice.add_usage_point,
+            creator,
+            lambda _: UsagePoint(mrid="up1"),
+            lambda _: UsagePoint(mrid="up2"),
+            NetworkServiceComparatorOptions(compare_lv_simplification=False),
+            options_stop_compare=True
+        )
+        self.validator.validate_collection(
+            EndDevice.functions,
+            EndDevice.add_function,
+            creator,
+            lambda _: EndDeviceFunction(mrid="edf1"),
+            lambda _: EndDeviceFunction(mrid="edf2"),
+            NetworkServiceComparatorOptions(compare_lv_simplification=False)
+        )
+
+    def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
+        self._compare_asset_function(creator)
+
+        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: True, lambda _: False)
+
+    def test_compare_meter(self):
+        self._compare_end_device(Meter)
+
+    def test_compare_usage_point(self):
+        self._compare_identified_object(UsagePoint)
+
+        self.validator.validate_property(UsagePoint.usage_point_location, UsagePoint, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+        self.validator.validate_property(UsagePoint.is_virtual, UsagePoint, lambda _: False, lambda _: True)
+        self.validator.validate_property(UsagePoint.connection_category, UsagePoint, lambda _: "first", lambda _: "second")
+        self.validator.validate_property(UsagePoint.rated_power, UsagePoint, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(UsagePoint.approved_inverter_capacity, UsagePoint, lambda _: 1, lambda _: 2)
+        self.validator.validate_collection(
+            UsagePoint.end_devices,
+            UsagePoint.add_end_device,
+            UsagePoint,
+            lambda _: Meter(mrid="m1"),
+            lambda _: Meter(mrid="m2"),
+            NetworkServiceComparatorOptions(compare_lv_simplification=False),
+            options_stop_compare=True
+        )
+        self.validator.validate_collection(
+            UsagePoint.equipment,
+            UsagePoint.add_equipment,
+            UsagePoint,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2"),
+            NetworkServiceComparatorOptions(compare_lv_simplification=False),
+            options_stop_compare=True
+        )
+
+    #######################
+    # IEC61968 Operations #
+    #######################
+
+    def test_compare_operational_restriction(self):
+        self._compare_document(OperationalRestriction)
+
+        self.validator.validate_collection(
+            OperationalRestriction.equipment,
+            OperationalRestriction.add_equipment,
+            OperationalRestriction,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
+
+    #####################################
+    # IEC61970 Base Auxiliary Equipment #
+    #####################################
+
+    def _compare_auxiliary_equipment(self, creator: Type[AuxiliaryEquipment]):
+        self._compare_equipment(creator)
+
+        self.validator.validate_property(
+            AuxiliaryEquipment.terminal,
+            creator,
+            lambda _: Terminal(mrid="t1"),
+            lambda _: Terminal(mrid="t2"),
+            NetworkServiceComparatorOptions(compare_terminals=False),
+            options_stop_compare=True
+        )
+
+    def test_compare_current_transformer(self):
+        self._compare_sensor(CurrentTransformer)
+
+        self.validator.validate_property(CurrentTransformer.core_burden, CurrentTransformer, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(
+            CurrentTransformer.asset_info,
+            CurrentTransformer,
+            lambda _: CurrentTransformerInfo(mrid="acti1"),
+            lambda _: CurrentTransformerInfo(mrid="acti2"),
+            expected_differences={"current_transformer_info"}
+        )
+        self.validator.validate_property(
+            CurrentTransformer.current_transformer_info,
+            CurrentTransformer,
+            lambda _: CurrentTransformerInfo(mrid="acti1"),
+            lambda _: CurrentTransformerInfo(mrid="acti2"),
+            expected_differences={"asset_info"}
+        )
+
+    def test_compare_fault_indicator(self):
+        self._compare_auxiliary_equipment(FaultIndicator)
+
+    def test_compare_potential_transformer(self):
+        self._compare_sensor(PotentialTransformer)
+
+        self.validator.validate_property(
+            PotentialTransformer.type,
+            PotentialTransformer,
+            lambda _: PotentialTransformerKind.capacitiveCoupling,
+            lambda _: PotentialTransformerKind.inductive
+        )
+        self.validator.validate_property(
+            PotentialTransformer.asset_info,
+            PotentialTransformer,
+            lambda _: PotentialTransformerInfo(mrid="avti1"),
+            lambda _: PotentialTransformerInfo(mrid="avti2"),
+            expected_differences={"potential_transformer_info"}
+        )
+        self.validator.validate_property(
+            PotentialTransformer.potential_transformer_info,
+            PotentialTransformer,
+            lambda _: PotentialTransformerInfo(mrid="vti1"),
+            lambda _: PotentialTransformerInfo(mrid="vti2"),
+            expected_differences={"asset_info"}
+        )
+
+    def _compare_sensor(self, creator: Type[Sensor]):
+        self.validator.validate_collection(
+            Sensor.relay_functions,
+            Sensor.add_relay_function,
+            creator,
+            lambda _: ProtectionRelayFunction(mrid="prf1"),
+            lambda _: ProtectionRelayFunction(mrid="prf2")
+        )
+        self._compare_auxiliary_equipment(creator)
+
+    ######################
+    # IEC61970 Base Core #
+    ######################
+
+    def _compare_ac_dc_terminal(self, creator: Type[AcDcTerminal]):
+        self._compare_identified_object(creator)
+
+    def test_compare_base_voltage(self):
+        self._compare_identified_object(BaseVoltage)
+
+        self.validator.validate_property(BaseVoltage.nominal_voltage, BaseVoltage, lambda _: 1, lambda _: 2)
+
+    def _compare_conducting_equipment(self, creator: Type[ConductingEquipment]):
+        self._compare_equipment(creator)
+
+        self.validator.validate_property(ConductingEquipment.base_voltage, creator, lambda _: BaseVoltage(mrid="b1"), lambda _: BaseVoltage(mrid="b2"))
+        self.validator.validate_indexed_collection(
+            ConductingEquipment.terminals,
+            ConductingEquipment.add_terminal,
+            creator,
+            lambda _: Terminal(mrid="1"),
+            lambda _: Terminal(mrid="2"),
+            NetworkServiceComparatorOptions(compare_terminals=False),
+            options_stop_compare=True
+        )
+
+    def test_compare_connectivity_node(self):
+        self._compare_identified_object(ConnectivityNode)
+
+        self.validator.validate_collection(
+            ConnectivityNode.terminals,
+            ConnectivityNode.add_terminal,
+            ConnectivityNode,
+            lambda _: Terminal(mrid="1"),
+            lambda _: Terminal(mrid="2")
+        )
+
+    def _compare_connectivity_node_container(self, creator: Type[ConnectivityNodeContainer]):
+        self._compare_power_system_resource(creator)
+
+    def _compare_curve(self, creator: Type[Curve]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_indexed_collection(
+            Curve.data,
+            Curve.add_curve_data,
+            creator,
+            lambda _: CurveData(1, 2),
+            lambda _: CurveData(3, 4),
+        )
+
+    def _compare_equipment(self, creator: Type[Equipment]):
+        self._compare_power_system_resource(creator)
+
+        self.validator.validate_property(Equipment.in_service, creator, lambda _: True, lambda _: False)
+        self.validator.validate_property(Equipment.normally_in_service, creator, lambda _: True, lambda _: False)
+        self.validator.validate_property(
+            Equipment.commissioned_date,
+            creator,
+            lambda _: datetime.datetime.fromtimestamp(0),
+            lambda _: datetime.datetime.fromtimestamp(1)
+        )
+        self.validator.validate_collection(Equipment.containers, Equipment.add_container, creator, lambda _: Site(mrid="s1"), lambda _: Site(mrid="s2"))
+        self.validator.validate_collection(
+            Equipment.usage_points,
+            Equipment.add_usage_point,
+            creator, lambda _: UsagePoint(mrid="u1"),
+            lambda _: UsagePoint(mrid="u2")
+        )
+        self.validator.validate_collection(
+            Equipment.operational_restrictions,
+            Equipment.add_operational_restriction,
+            creator,
+            lambda _: OperationalRestriction(mrid="o1"),
+            lambda _: OperationalRestriction(mrid="o2")
+        )
+        self.validator.validate_collection(
+            Equipment.current_containers,
+            Equipment.add_current_container,
+            creator,
+            lambda _: Feeder(mrid="f1"),
+            lambda _: Feeder(mrid="f2")
+        )
+
+    def _compare_equipment_container(self, creator: Type[EquipmentContainer]):
+        self._compare_connectivity_node_container(creator)
+
+        self.validator.validate_collection(
+            EquipmentContainer.equipment,
+            EquipmentContainer.add_equipment,
+            creator,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
+
+    def test_compare_feeder(self):
+        self._compare_equipment_container(Feeder)
+
+        self.validator.validate_property(Feeder.normal_head_terminal, Feeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_property(Feeder.normal_energizing_substation, Feeder, lambda _: Substation(mrid="s1"), lambda _: Substation(mrid="s2"))
+        self.validator.validate_collection(
+            Feeder.current_equipment,
+            Feeder.add_current_equipment,
+            Feeder,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
+        self.validator.validate_collection(
+            Feeder.normal_energized_lv_feeders,
+            Feeder.add_normal_energized_lv_feeder,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvf1"),
+            lambda _: LvFeeder(mrid="lvf2")
+        )
+        self.validator.validate_collection(
+            Feeder.current_energized_lv_feeders,
+            Feeder.add_current_energized_lv_feeder,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvf1"),
+            lambda _: LvFeeder(mrid="lvf2")
+        )
+
+    def test_compare_geographical_region(self):
+        self._compare_identified_object(GeographicalRegion)
+
+        self.validator.validate_collection(
+            GeographicalRegion.sub_geographical_regions,
+            GeographicalRegion.add_sub_geographical_region,
+            GeographicalRegion,
+            lambda _: SubGeographicalRegion(mrid="sg1"),
+            lambda _: SubGeographicalRegion(mrid="sg2")
+        )
+
+    def _compare_power_system_resource(self, creator: Type[PowerSystemResource]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_property(PowerSystemResource.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+        self.validator.validate_collection(
+            PowerSystemResource.assets,
+            PowerSystemResource.add_asset,
+            creator,
+            lambda _: Pole(mrid="p1"),
+            lambda _: Pole(mrid="p2")
+        )
+
+    def test_compare_sub_geographical_region(self):
+        self._compare_identified_object(SubGeographicalRegion)
+
+        self.validator.validate_property(
+            SubGeographicalRegion.geographical_region,
+            SubGeographicalRegion,
+            lambda _: GeographicalRegion(mrid="g1"),
+            lambda _: GeographicalRegion(mrid="g2")
+        )
+        self.validator.validate_collection(
+            SubGeographicalRegion.substations,
+            SubGeographicalRegion.add_substation,
+            SubGeographicalRegion,
+            lambda _: Substation(mrid="s1"),
+            lambda _: Substation(mrid="s2")
+        )
+
+    def test_compare_substation(self):
+        self._compare_equipment_container(Substation)
+
+        self.validator.validate_property(
+            Substation.sub_geographical_region,
+            Substation,
+            lambda _: SubGeographicalRegion(mrid="sg1"),
+            lambda _: SubGeographicalRegion(mrid="sg2")
+        )
+        self.validator.validate_collection(Substation.feeders, Substation.add_feeder, Substation, lambda _: Feeder(mrid="f1"), lambda _: Feeder(mrid="f2"))
+
+    def test_compare_terminal(self):
+        self._compare_ac_dc_terminal(Terminal)
+
+        #
+        # NOTE: We need to have local variables for these otherwise they are garbage collected as they are only stored in weak references.
+        #
+        cn1 = ConnectivityNode(mrid="c1")
+        cn2 = ConnectivityNode(mrid="c2")
+
+        self.validator.validate_property(Terminal.phases, Terminal, lambda _: PhaseCode.ABC, lambda _: PhaseCode.ABCN)
+        self.validator.validate_property(Terminal.sequence_number, Terminal, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Terminal.normal_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
+        self.validator.validate_property(Terminal.current_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
+
+        for i in range(0, 32, 4):
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
+
+        self.validator.validate_val_property(
+            Terminal.connectivity_node,
+            Terminal,
+            lambda terminal, _: terminal.connect(cn1),
+            lambda terminal, _: terminal.connect(cn2)
+        )
+        self.validator.validate_property(Terminal.conducting_equipment, Terminal, lambda _: Junction(mrid="j1"), lambda _: Junction(mrid="j2"))
+
+    #############################
+    # IEC61970 Base Equivalents #
+    #############################
+
+    def test_compare_equivalent_branch(self):
+        self._compare_equivalent_equipment(EquivalentBranch)
+
+        self.validator.validate_property(EquivalentBranch.negative_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.negative_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.negative_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.negative_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.positive_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.positive_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.positive_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.positive_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.r, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.x, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.zero_r12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.zero_r21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.zero_x12, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EquivalentBranch.zero_x21, EquivalentBranch, lambda _: 1.0, lambda _: 2.0)
+
+    def _compare_equivalent_equipment(self, creator: Type[EquivalentEquipment]):
+        self._compare_conducting_equipment(creator)
+
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     def test_compare_battery_unit(self):
         self._compare_power_electronics_unit(BatteryUnit)
@@ -890,8 +932,64 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def test_compare_power_electronics_wind_unit(self):
         self._compare_power_electronics_unit(PowerElectronicsWindUnit)
 
+    ######################
+    # IEC61970 Base Meas #
+    ######################
+
+    def test_compare_accumulator(self):
+        self._compare_measurement(Accumulator)
+
+    def test_compare_analog(self):
+        self._compare_measurement(Analog)
+        self.validator.validate_property(Analog.positive_flow_in, Analog, lambda _: True, lambda _: False)
+
+    def test_compare_discrete(self):
+        self._compare_measurement(Discrete)
+
+    def _compare_measurement(self, creator: Type[Measurement]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_property(Measurement.power_system_resource_mrid, creator, lambda _: "psr1", lambda _: "psr2")
+        self.validator.validate_property(Measurement.terminal_mrid, creator, lambda _: "terminal1", lambda _: "terminal2")
+        self.validator.validate_property(Measurement.remote_source, creator, lambda _: RemoteSource(mrid="rs1"), lambda _: RemoteSource(mrid="rs2"))
+        self.validator.validate_property(Measurement.phases, creator, lambda _: PhaseCode.ABCN, lambda _: PhaseCode.ABC)
+        self.validator.validate_property(Measurement.unit_symbol, creator, lambda _: UnitSymbol.HENRYS, lambda _: UnitSymbol.HOURS)
+
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
+    def test_compare_current_relay(self):
+        self._compare_protection_relay_function(CurrentRelay)
+
+        self.validator.validate_property(CurrentRelay.current_limit_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentRelay.inverse_time_flag, CurrentRelay, lambda _: False, lambda _: True)
+        self.validator.validate_property(CurrentRelay.time_delay_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
+
     #######################
-    # IEC61970 BASE WIRES #
+    # IEC61970 Base Scada #
+    #######################
+
+    def test_compare_remote_control(self):
+        self._compare_remote_point(RemoteControl)
+
+        self.validator.validate_property(RemoteControl.control, RemoteControl, lambda _: Control(mrid="c1"), lambda _: Control(mrid="c2"))
+
+    def _compare_remote_point(self, creator: Type[RemotePoint]):
+        self._compare_identified_object(creator)
+
+    def test_compare_remote_source(self):
+        self._compare_remote_point(RemoteSource)
+
+        self.validator.validate_property(
+            RemoteSource.measurement,
+            RemoteSource,
+            lambda _: Measurement(mrid="m1"),
+            lambda _: Measurement(mrid="m2")
+        )
+
+    #######################
+    # IEC61970 Base Wires #
     #######################
 
     def test_compare_ac_line_segment(self):
@@ -932,12 +1030,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Clamp.length_from_terminal_1, Clamp, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(Clamp.ac_line_segment, Clamp, lambda _: AcLineSegment(mrid="c1"), lambda _: AcLineSegment(mrid="c2"))
 
-    def test_compare_cut(self):
-        self._compare_switch(Cut)
-
-        self.validator.validate_property(Cut.length_from_terminal_1, Cut, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(Cut.ac_line_segment, Cut, lambda _: AcLineSegment(mrid="c1"), lambda _: AcLineSegment(mrid="c2"))
-
     def _compare_conductor(self, creator: Type[Conductor]):
         self._compare_conducting_equipment(creator)
 
@@ -952,8 +1044,19 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_connector(self, creator: Type[Connector]):
         self._compare_conducting_equipment(creator)
 
+    def test_compare_cut(self):
+        self._compare_switch(Cut)
+
+        self.validator.validate_property(Cut.length_from_terminal_1, Cut, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(Cut.ac_line_segment, Cut, lambda _: AcLineSegment(mrid="c1"), lambda _: AcLineSegment(mrid="c2"))
+
     def test_compare_disconnector(self):
         self._compare_switch(Disconnector)
+
+    def _compare_earth_fault_compensator(self, creator: Type[EarthFaultCompensator]):
+        self._compare_conducting_equipment(creator)
+
+        self.validator.validate_property(EarthFaultCompensator.r, creator, lambda _: 1.0, lambda _: 2.0)
 
     def _compare_energy_connection(self, creator: Type[EnergyConnection]):
         self._compare_conducting_equipment(creator)
@@ -1058,6 +1161,11 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def test_compare_ground_disconnector(self):
         self._compare_switch(GroundDisconnector)
 
+    def test_compare_grounding_impedance(self):
+        self._compare_earth_fault_compensator(GroundingImpedance)
+
+        self.validator.validate_property(GroundingImpedance.x, GroundingImpedance, lambda _: 1.0, lambda _: 2.0)
+
     def test_compare_jumper(self):
         self._compare_switch(Jumper)
 
@@ -1105,6 +1213,11 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PerLengthSequenceImpedance.x0, PerLengthSequenceImpedance, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PerLengthSequenceImpedance.b0ch, PerLengthSequenceImpedance, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PerLengthSequenceImpedance.g0ch, PerLengthSequenceImpedance, lambda _: 1.0, lambda _: 2.0)
+
+    def test_compare_petersen_coil(self):
+        self._compare_earth_fault_compensator(PetersenCoil)
+
+        self.validator.validate_property(PetersenCoil.x_ground_nominal, PetersenCoil, lambda _: 1.0, lambda _: 2.0)
 
     def test_compare_power_electronics_connection(self):
         self._compare_regulating_cond_eq(PowerElectronicsConnection)
@@ -1234,8 +1347,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerEnd.s_ratings,
             PowerTransformerEnd.add_transformer_end_rated_s,
             PowerTransformerEnd,
-            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1),
-            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 2),
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1),
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 2),
             expected_differences={"rated_s"}
         )
 
@@ -1305,6 +1418,15 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: RegulatingCondEq(mrid="rce1"),
             lambda _: RegulatingCondEq(mrid="rce2")
         )
+
+    def _compare_rotating_machine(self, creator: Type[RotatingMachine]):
+        self._compare_regulating_cond_eq(creator)
+
+        self.validator.validate_property(RotatingMachine.rated_power_factor, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RotatingMachine.rated_s, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RotatingMachine.rated_u, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(RotatingMachine.p, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RotatingMachine.q, creator, lambda _: 1.0, lambda _: 2.0)
 
     def test_compare_series_compensator(self):
         self._compare_conducting_equipment(SeriesCompensator)
@@ -1377,6 +1499,41 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_compare(closed_switch, open_switch, expect_modification=difference)
 
+    def test_compare_synchronous_machine(self):
+        self._compare_rotating_machine(SynchronousMachine)
+
+        self.validator.validate_property(SynchronousMachine.base_q, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.condenser_p, SynchronousMachine, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(SynchronousMachine.earthing, SynchronousMachine, lambda _: False, lambda _: True)
+        self.validator.validate_property(SynchronousMachine.earthing_star_point_r, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.earthing_star_point_x, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.ikk, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.max_q, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.max_u, SynchronousMachine, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(SynchronousMachine.min_q, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.min_u, SynchronousMachine, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(SynchronousMachine.mu, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.r, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.r0, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.r2, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.sat_direct_subtrans_x, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.sat_direct_sync_x, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.sat_direct_trans_x, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.x0, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.x2, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(SynchronousMachine.type, SynchronousMachine, lambda _: SynchronousMachineKind.generator,
+                                         lambda _: SynchronousMachineKind.motor)
+        self.validator.validate_property(SynchronousMachine.operating_mode, SynchronousMachine, lambda _: SynchronousMachineKind.generator,
+                                         lambda _: SynchronousMachineKind.motor)
+
+        self.validator.validate_collection(
+            SynchronousMachine.curves,
+            SynchronousMachine.add_curve,
+            SynchronousMachine,
+            lambda _: ReactiveCapabilityCurve(mrid="c1"),
+            lambda _: ReactiveCapabilityCurve(mrid="c2")
+        )
+
     def _compare_tap_changer(self, creator: Type[TapChanger]):
         self._compare_power_system_resource(creator)
 
@@ -1425,15 +1582,18 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: TransformerStarImpedance(mrid="tsi2")
         )
 
-    ####################################################
-    # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-    ####################################################
+    def test_compare_transformer_star_impedance(self):
+        self._compare_identified_object(TransformerStarImpedance)
 
-    def test_compare_ev_charging_unit(self):
-        self._compare_power_electronics_unit(EvChargingUnit)
+        self.validator.validate_property(TransformerStarImpedance.r, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TransformerStarImpedance.r0, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TransformerStarImpedance.x, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TransformerStarImpedance.x0, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TransformerStarImpedance.transformer_end_info, TransformerStarImpedance, lambda _: TransformerEndInfo(mrid="tei1"),
+                                         lambda _: TransformerEndInfo(mrid="tei2"))
 
     ###############################
-    # IEC61970 INFIEC61970 FEEDER #
+    # IEC61970 InfIEC61970 Feeder #
     ###############################
 
     def test_compare_circuit(self):
@@ -1453,43 +1613,4 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Circuit,
             lambda _: Substation(mrid="s1"),
             lambda _: Substation(mrid="s2")
-        )
-
-    def test_compare_loop(self):
-        self._compare_identified_object(Loop)
-
-        self.validator.validate_collection(Loop.circuits, Loop.add_circuit, Loop, lambda _: Circuit(mrid="c1"), lambda _: Circuit(mrid="c2"))
-        self.validator.validate_collection(Loop.substations, Loop.add_substation, Loop, lambda _: Substation(mrid="s1"), lambda _: Substation(mrid="s2"))
-        self.validator.validate_collection(
-            Loop.energizing_substations,
-            Loop.add_energizing_substation,
-            Loop,
-            lambda _: Substation(mrid="s1"),
-            lambda _: Substation(mrid="s2")
-        )
-
-    def test_compare_lv_feeder(self):
-        self._compare_equipment_container(LvFeeder)
-
-        self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
-        self.validator.validate_collection(
-            LvFeeder.normal_energizing_feeders,
-            LvFeeder.add_normal_energizing_feeder,
-            LvFeeder,
-            lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
-        )
-        self.validator.validate_collection(
-            LvFeeder.current_energizing_feeders,
-            LvFeeder.add_current_energizing_feeder,
-            LvFeeder,
-            lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
-        )
-        self.validator.validate_collection(
-            LvFeeder.current_equipment,
-            LvFeeder.add_current_equipment,
-            LvFeeder,
-            lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
         )

@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
-from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
-from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.ewb import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
+from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \

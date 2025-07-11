@@ -18,16 +18,15 @@
 # limitations under the License.
 
 #  Modifications Copyright Zeppelin Bend Pty Ltd as stated above
+
+__all__ = ["UnaryResponse", "ResponseIteratorCall"]
+
 from abc import ABC
 from typing import TypeVar, Union, AsyncIterable, Optional
 
 import grpc
 from grpc.aio import UnaryUnaryCall, StreamUnaryCall, UnaryStreamCall, StreamStreamCall, Metadata
-
-__all__ = ["UnaryResponse", "ResponseIteratorCall"]
-
 from grpc.aio._typing import RequestType, DoneCallbackType
-
 from grpc_testing._channel._invocation import _RpcErrorCall, _initial_metadata, _trailing_metadata, _code, _details, _add_callback, _time_remaining, \
     _is_active, _cancel
 

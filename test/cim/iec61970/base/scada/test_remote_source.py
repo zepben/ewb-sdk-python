@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds
-from zepben.evolve import RemoteSource, Measurement
+from zepben.ewb import RemoteSource, Measurement
 
 from cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
     verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args

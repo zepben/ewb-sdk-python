@@ -10,13 +10,13 @@ import pytest
 from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 
 from test.util import all_subclasses
-from zepben.evolve.dataclassy import dataclass
+from zepben.ewb.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType
-from zepben.auth import ZepbenTokenFetcher
+from zepben.ewb.auth import ZepbenTokenFetcher
 
-from zepben.evolve import GrpcChannelBuilder, GrpcConnectionException, GrpcClient
+from zepben.ewb import GrpcChannelBuilder, GrpcConnectionException, GrpcClient
 
 _TWENTY_MEGABYTES = 1024 * 1024 * 20
 DEFAULT_GRPC_CHANNEL_MAX_RECEIVE_MESSAGE_LENGTH = ("grpc.max_receive_message_length", _TWENTY_MEGABYTES)
@@ -50,7 +50,7 @@ class MockedChannel:
         pass
 
 
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_skip_connection_test(mock_insecure_channel, mock_test_connection):
     assert GrpcChannelBuilder().build(skip_connection_test=True) == "insecure channel"
@@ -60,7 +60,7 @@ def test_skip_connection_test(mock_insecure_channel, mock_test_connection):
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
     assert GrpcChannelBuilder().build(debug=True) == "insecure channel"
@@ -71,7 +71,7 @@ def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_timeout_connection_test(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
     assert GrpcChannelBuilder().build(timeout_seconds=2789) == "insecure channel"
@@ -82,7 +82,7 @@ def test_timeout_connection_test(mock_insecure_channel, mock_test_connection, mo
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
     assert GrpcChannelBuilder().for_address("hostname", 1234).build() == "insecure channel"
@@ -93,7 +93,7 @@ def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_options_passed_to_insecure_channel(mock_insecure_channel, *_):
     options = [("grpc.max_receive_message_length", 1), ("other_option", 1)]
@@ -102,7 +102,7 @@ def test_options_passed_to_insecure_channel(mock_insecure_channel, *_):
 
 
 @mock.patch("grpc.secure_channel", return_value=MockedChannel("secure sync test channel"))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.ssl_channel_credentials", return_value="channel creds")
 @mock.patch("grpc.aio.secure_channel", return_value="secure channel")
 def test_options_passed_to_secure_channel(mocked_secure_channel, *_):
@@ -112,7 +112,7 @@ def test_options_passed_to_secure_channel(mocked_secure_channel, *_):
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_passed_options_override_defaults(mock_insecure_channel, *_):
     options = [("grpc.max_receive_message_length", 1), ("other_option", 0)]
@@ -128,7 +128,7 @@ def test_passed_options_override_defaults(mock_insecure_channel, *_):
 
 
 @mock.patch("grpc.secure_channel", return_value=MockedChannel("secure sync test channel"))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.ssl_channel_credentials", return_value="channel creds")
 @mock.patch("grpc.aio.secure_channel", return_value="secure channel")
 def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_connection, mock_secure_sync_channel):
@@ -144,7 +144,7 @@ def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_
 
 
 @mock.patch("builtins.open", side_effect=lambda filename, *args, **kwargs: MockReadable(str.encode(filename)))
-@mock.patch("zepben.evolve.GrpcChannelBuilder.make_secure_with_bytes")
+@mock.patch("zepben.ewb.GrpcChannelBuilder.make_secure_with_bytes")
 def test_make_secure_filename_version(mocked_mswb, mocked_open):
     GrpcChannelBuilder().make_secure("ca", "cc", "pk")
     GrpcChannelBuilder().make_secure()
@@ -154,7 +154,7 @@ def test_make_secure_filename_version(mocked_mswb, mocked_open):
 
 
 @mock.patch("grpc.secure_channel", return_value=MockedChannel("secure sync test channel"))
-@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("zepben.ewb.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.secure_channel")
 @mock.patch("grpc.composite_channel_credentials", return_value="composite creds")
 @mock.patch("grpc.metadata_call_credentials", return_value="call creds")
@@ -358,7 +358,7 @@ def test_test_connection_raises_connection_exception_with_debug(mock_checkConnec
 
 
 def test_count_grpc_stubs():
-    all_clients = all_subclasses(GrpcClient, 'zepben.evolve.streaming')
+    all_clients = all_subclasses(GrpcClient, 'zepben.ewb.streaming')
     expected_stubs = set()
 
     for name in map(lambda klass: klass.__name__, all_clients):

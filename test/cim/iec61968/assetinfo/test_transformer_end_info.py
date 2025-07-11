@@ -6,17 +6,17 @@ from unittest.mock import patch
 
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
+from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection, create_transformer_tank_info, \
     create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
 
 transformer_end_info_kwargs = {
     **asset_info_kwargs,
-    "connection_kind": sampled_winding_connection_kind(),
+    "connection_kind": sampled_winding_connection(),
     "emergency_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "insulation_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
@@ -34,7 +34,7 @@ transformer_end_info_kwargs = {
     "energised_end_open_circuit_tests": create_open_circuit_test(),
 }
 
-transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN_WINDING, 1, 2, 3, 4, 5.0, 6, 7, 8, TransformerTankInfo(), TransformerStarImpedance(),
+transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN, 1, 2, 3, 4, 5.0, 6, 7, 8, TransformerTankInfo(), TransformerStarImpedance(),
                              NoLoadTest(), ShortCircuitTest(), ShortCircuitTest(), OpenCircuitTest(), OpenCircuitTest()]
 
 
@@ -42,7 +42,7 @@ def test_transformer_end_info_constructor_default():
     tei = TransformerEndInfo()
 
     verify_asset_info_constructor_default(tei)
-    assert tei.connection_kind == WindingConnection.UNKNOWN_WINDING
+    assert tei.connection_kind == WindingConnection.UNKNOWN
     assert tei.emergency_s is None
     assert tei.end_number == 0
     assert tei.insulation_u is None

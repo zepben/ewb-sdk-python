@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, one_of, none, integers
-from zepben.evolve import RotatingMachine
+from zepben.ewb import RotatingMachine
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, regulating_cond_eq_args, \

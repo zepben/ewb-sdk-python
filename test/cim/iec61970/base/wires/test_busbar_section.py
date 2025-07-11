@@ -7,7 +7,8 @@ from hypothesis.strategies import builds, lists
 
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
-from zepben.evolve import BusbarSection, Terminal
+from zepben.ewb import Terminal
+from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 
 busbar_section_kwargs = {
     **connector_kwargs,

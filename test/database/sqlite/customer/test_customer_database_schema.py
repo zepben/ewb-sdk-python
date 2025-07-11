@@ -10,9 +10,9 @@ from hypothesis import given, settings, HealthCheck
 from cim.cim_creators import create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariffs
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
+from zepben.ewb import IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
     CustomerDatabaseWriter, CustomerService
-from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
+from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -35,8 +35,17 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     def create_identified_object(self) -> IdentifiedObject:
         return Customer()
 
+    ###################
+    # IEC61968 Common #
+    ###################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(organisation=create_organisation(False))
+    async def test_schema_organisation_customer(self, organisation):
+        await self._validate_schema(SchemaNetworks().customer_services_of(Organisation, organisation))
+
     ######################
-    # IEC61968 CUSTOMERS #
+    # IEC61968 Customers #
     ######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -58,12 +67,3 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     @given(tariffs=create_tariffs(False))
     async def test_schema_tariffs(self, tariffs):
         await self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs))
-
-    ###################
-    # IEC61968 COMMON #
-    ###################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(organisation=create_organisation(False))
-    async def test_schema_organisation_customer(self, organisation):
-        await self._validate_schema(SchemaNetworks().customer_services_of(Organisation, organisation))

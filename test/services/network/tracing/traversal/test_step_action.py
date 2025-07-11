@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 
-from zepben.evolve import StepAction, StepContext
-from zepben.evolve.services.network.tracing.traversal.step_action import T
+from zepben.ewb import StepAction, StepContext
+from zepben.ewb.services.network.tracing.traversal.step_action import T
 
 
 class TestStepAction:

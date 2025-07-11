@@ -10,7 +10,7 @@ from cim.iec61970.base.wires.generation.production.test_power_electronics_unit i
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode
+from zepben.ewb import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode
 
 battery_unit_kwargs = {
     **power_electronics_unit_kwargs,

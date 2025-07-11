@@ -2,17 +2,41 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+__all__ = [
+    # We only export the top level container classes, and a minimal set of classes for testing the consumers.
+    'network_identified_objects', 'ac_line_segment',
+    'customer_identified_objects', 'customer',
+    'diagram_identified_objects', 'diagram', 'diagram_object'
+]
+
 from typing import Optional, Dict
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.struct_pb2 import NullValue
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids, one_of, none
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
+from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site as PBSite
+from zepben.protobuf.cim.extensions.iec61970.base.feeder.Loop_pb2 import Loop as PBLoop
+from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.extensions.iec61970.base.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
+from zepben.protobuf.cim.extensions.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay as PBDistanceRelay
+from zepben.protobuf.cim.extensions.iec61970.base.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
+from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
+from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelayFunction_pb2 import ProtectionRelayFunction as PBProtectionRelayFunction
+from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelayScheme_pb2 import ProtectionRelayScheme as PBProtectionRelayScheme
+from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelaySystem_pb2 import ProtectionRelaySystem as PBProtectionRelaySystem
+from zepben.protobuf.cim.extensions.iec61970.base.protection.RelaySetting_pb2 import RelaySetting as PBRelaySetting
+from zepben.protobuf.cim.extensions.iec61970.base.protection.VoltageRelay_pb2 import VoltageRelay as PBVoltageRelay
 from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControlMode_pb2 import BatteryControlMode as PBBatteryControlMode
 from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControl_pb2 import BatteryControl as PBBatteryControl
+from zepben.protobuf.cim.extensions.iec61970.base.wires.TransformerCoolingType_pb2 import TransformerCoolingType as PBTransformerCoolingType
+from zepben.protobuf.cim.extensions.iec61970.base.wires.TransformerEndRatedS_pb2 import TransformerEndRatedS as PBTransformerEndRatedS
+from zepben.protobuf.cim.extensions.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as PBNoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
@@ -32,8 +56,6 @@ from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAss
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole as PBAssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBAssetOwner
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
-from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as PBPole
-from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
 from zepben.protobuf.cim.iec61968.common.Agreement_pb2 import Agreement as PBAgreement
@@ -52,7 +74,8 @@ from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingS
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infassets.Pole_pb2 import Pole as PBPole
+from zepben.protobuf.cim.iec61968.infiec61968.infassets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 from zepben.protobuf.cim.iec61968.infiec61968.infcommon.Ratio_pb2 import Ratio as PBRatio
 from zepben.protobuf.cim.iec61968.metering.EndDeviceFunctionKind_pb2 import EndDeviceFunctionKind as PBEndDeviceFunctionKind
 from zepben.protobuf.cim.iec61968.metering.EndDeviceFunction_pb2 import EndDeviceFunction as PBEndDeviceFunction
@@ -71,8 +94,8 @@ from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage a
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer as PBConnectivityNodeContainer
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode as PBConnectivityNode
-from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve as PBCurve
 from zepben.protobuf.cim.iec61970.base.core.CurveData_pb2 import CurveData as PBCurveData
+from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve as PBCurve
 from zepben.protobuf.cim.iec61970.base.core.EquipmentContainer_pb2 import EquipmentContainer as PBEquipmentContainer
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment as PBEquipment
 from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder as PBFeeder
@@ -80,7 +103,6 @@ from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import Geogra
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import PowerSystemResource as PBPowerSystemResource
-from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
@@ -92,6 +114,11 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import 
 from zepben.protobuf.cim.iec61970.base.domain.UnitSymbol_pb2 import UnitSymbol as PBUnitSymbol
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
+from zepben.protobuf.cim.iec61970.base.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
+from zepben.protobuf.cim.iec61970.base.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
+from zepben.protobuf.cim.iec61970.base.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator as PBAccumulator
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog as PBAnalog
 from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
@@ -99,21 +126,18 @@ from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDi
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
-from zepben.protobuf.cim.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay as PBDistanceRelay
-from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelayFunction_pb2 import ProtectionRelayFunction as PBProtectionRelayFunction
-from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelayScheme_pb2 import ProtectionRelayScheme as PBProtectionRelayScheme
-from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelaySystem_pb2 import ProtectionRelaySystem as PBProtectionRelaySystem
-from zepben.protobuf.cim.iec61970.base.protection.RelaySetting_pb2 import RelaySetting as PBRelaySetting
-from zepben.protobuf.cim.iec61970.base.protection.VoltageRelay_pb2 import VoltageRelay as PBVoltageRelay
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
+from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp as PBClamp
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector as PBConnector
+from zepben.protobuf.cim.iec61970.base.wires.Cut_pb2 import Cut as PBCut
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector as PBDisconnector
+from zepben.protobuf.cim.iec61970.base.wires.EarthFaultCompensator_pb2 import EarthFaultCompensator as PBEarthFaultCompensator
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConnection_pb2 import EnergyConnection as PBEnergyConnection
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumerPhase_pb2 import EnergyConsumerPhase as PBEnergyConsumerPhase
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumer_pb2 import EnergyConsumer as PBEnergyConsumer
@@ -122,6 +146,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse as PBFuse
 from zepben.protobuf.cim.iec61970.base.wires.GroundDisconnector_pb2 import GroundDisconnector as PBGroundDisconnector
 from zepben.protobuf.cim.iec61970.base.wires.Ground_pb2 import Ground as PBGround
+from zepben.protobuf.cim.iec61970.base.wires.GroundingImpedance_pb2 import GroundingImpedance as PBGroundingImpedance
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper as PBJumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJunction
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
@@ -144,31 +169,21 @@ from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBR
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControlModeKind_pb2 import RegulatingControlModeKind as PBRegulatingControlModeKind
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
+from zepben.protobuf.cim.iec61970.base.wires.RotatingMachine_pb2 import RotatingMachine as PBRotatingMachine
 from zepben.protobuf.cim.iec61970.base.wires.SVCControlMode_pb2 import SVCControlMode as PBSVCControlMode
 from zepben.protobuf.cim.iec61970.base.wires.SeriesCompensator_pb2 import SeriesCompensator as PBSeriesCompensator
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
 from zepben.protobuf.cim.iec61970.base.wires.StaticVarCompensator_pb2 import StaticVarCompensator as PBStaticVarCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
+from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachineKind_pb2 import SynchronousMachineKind as PBSynchronousMachineKind
+from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachine_pb2 import SynchronousMachine as PBSynchronousMachine
 from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
-from zepben.protobuf.cim.iec61970.base.wires.TransformerCoolingType_pb2 import TransformerCoolingType as PBTransformerCoolingType
-from zepben.protobuf.cim.iec61970.base.wires.TransformerEndRatedS_pb2 import TransformerEndRatedS as PBTransformerEndRatedS
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
-from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
-from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
-from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
-from zepben.protobuf.cim.iec61970.infiec61970.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
-from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
-from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
@@ -185,29 +200,23 @@ MAX_SEQUENCE_NUMBER = 40
 MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
-__all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_info', 'power_transformer_info', 'short_circuit_test', 'shunt_compensator_info',
-           'transformer_end_info', 'transformer_tank_info', 'transformer_test', 'wire_info', 'asset', 'asset_container', 'asset_info',
-           'asset_organisation_role', 'asset_owner', 'structure', 'pole', 'streetlight', 'document', 'location', 'organisation', 'organisation_role',
-           'position_point', 'street_address', 'street_detail', 'town_detail', 'customer', 'customer_agreement', 'pricing_structure', 'tariff',
-           'current_transformer_info', 'potential_transformer_info', 'ratio',
-           'end_device', 'meter', 'usage_point', 'operational_restriction', 'auxiliary_equipment', 'current_transformer', 'fault_indicator',
-           'potential_transformer', 'sensor', 'ac_dc_terminal', 'base_voltage', 'conducting_equipment', 'connectivity_node', 'connectivity_node_container',
-           'equipment', 'equipment_container', 'feeder', 'geographical_region', 'identified_object', 'power_system_resource', 'site', 'sub_geographical_region',
-           'substation', 'terminal', 'diagram', 'diagram_object', 'equivalent_branch', 'equivalent_equipment', 'accumulator', 'analog', 'control', 'discrete',
-           'io_point', 'measurement',
-           'remote_control', 'remote_point', 'remote_source', 'battery_unit', 'photo_voltaic_unit', 'power_electronics_unit', 'power_electronics_wind_unit',
-           'ac_line_segment', 'breaker', 'busbar_section', 'conductor', 'connector', 'disconnector', 'energy_connection', 'energy_consumer',
-           'energy_consumer_phase', 'energy_source', 'energy_source_phase', 'fuse', 'jumper', 'junction', 'line', 'linear_shunt_compensator',
-           'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
-           'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
-           'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
-           'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects', 'tap_changer_control',
-           'regulating_control', 'pan_demand_response_function', 'battery_control', 'asset_function', 'end_device_function', 'static_var_compensator',
-           'per_length_phase_impedance', 'phase_impedance_data', 'reactive_capability_curve', 'curve', 'curve_data']
+
+##################################
+# Extensions IEC61968 Asset Info #
+##################################
+
+def relay_info():
+    return builds(
+        PBRelayInfo,
+        ai=asset_info(),
+        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        **nullable_bool_settings("recloseFast"),
+        recloseDelays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), max_size=3)
+    )
 
 
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def pan_demand_response_function():
@@ -219,8 +228,119 @@ def pan_demand_response_function():
     )
 
 
+#################################
+# Extensions IEC61970 Base Core #
+#################################
+
+def site():
+    return builds(PBSite, ec=equipment_container())
+
+
+###################################
+# Extensions IEC61970 Base Feeder #
+###################################
+
+def loop():
+    return builds(
+        PBLoop,
+        io=identified_object(),
+        circuitMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        substationMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        normalEnergizingSubstationMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def lv_feeder():
+    return builds(
+        PBLvFeeder,
+        ec=equipment_container(),
+        normalHeadTerminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        normalEnergizingFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+##################################################
+# Extensions IEC61970 Base Generation Production #
+##################################################
+
+def ev_charging_unit():
+    return builds(PBEvChargingUnit, peu=power_electronics_unit())
+
+
+#######################################
+# Extensions IEC61970 Base Protection #
+#######################################
+
+def distance_relay():
+    return builds(
+        PBDistanceRelay,
+        prf=protection_relay_function(),
+        backwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    )
+
+
+def protection_relay_function():
+    return builds(
+        PBProtectionRelayFunction,
+        psr=power_system_resource(),
+        model=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        **nullable_bool_settings("reclosing"),
+        relayDelayTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        protectionKind=sampled_from(PBProtectionKind.values()),
+        **nullable_bool_settings("directable"),
+        powerDirection=sampled_from(PBPowerDirectionKind.values()),
+        sensorMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        protectedSwitchMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        schemeMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        timeLimits=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        thresholds=lists(relay_setting(), max_size=4)
+    )
+
+
+def protection_relay_scheme():
+    return builds(
+        PBProtectionRelayScheme,
+        io=identified_object(),
+        systemMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        functionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def protection_relay_system():
+    return builds(
+        PBProtectionRelaySystem,
+        eq=equipment(),
+        protectionKind=sampled_from(PBProtectionKind.values()),
+        schemeMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def relay_setting():
+    return builds(
+        PBRelaySetting,
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        unitSymbol=sampled_from(PBUnitSymbol.values()),
+        value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def voltage_relay():
+    return builds(
+        PBVoltageRelay,
+        prf=protection_relay_function()
+    )
+
+
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def battery_control():
@@ -234,8 +354,16 @@ def battery_control():
     )
 
 
+def transformer_end_rated_s():
+    return builds(
+        PBTransformerEndRatedS,
+        coolingType=sampled_from(PBTransformerCoolingType.values()),
+        ratedS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    )
+
+
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 def cable_info():
@@ -358,7 +486,7 @@ def wire_info():
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 def asset():
@@ -392,19 +520,6 @@ def asset_owner():
     return builds(PBAssetOwner, aor=asset_organisation_role())
 
 
-def structure():
-    return builds(PBStructure, ac=asset_container())
-
-
-def pole():
-    return builds(
-        PBPole,
-        st=structure(),
-        streetlightMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-    )
-
-
 def streetlight():
     return builds(
         PBStreetlight,
@@ -415,9 +530,17 @@ def streetlight():
     )
 
 
+def structure():
+    return builds(PBStructure, ac=asset_container())
+
+
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
+
+def agreement():
+    return builds(PBAgreement, doc=document())
+
 
 def document():
     return builds(
@@ -430,10 +553,6 @@ def document():
         status=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         comment=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
-
-
-def agreement():
-    return builds(PBAgreement, doc=document())
 
 
 def location():
@@ -480,7 +599,7 @@ def town_detail():
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 
@@ -519,19 +638,8 @@ def tariff():
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
-
-
-def relay_info():
-    return builds(
-        PBRelayInfo,
-        ai=asset_info(),
-        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        **nullable_bool_settings("recloseFast"),
-        recloseDelays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), max_size=3)
-    )
-
 
 def current_transformer_info():
     return builds(
@@ -566,7 +674,21 @@ def potential_transformer_info():
 
 
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfAssets #
+##################################
+
+
+def pole():
+    return builds(
+        PBPole,
+        st=structure(),
+        streetlightMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
+##################################
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 def ratio():
@@ -574,7 +696,7 @@ def ratio():
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
 
 def end_device():
@@ -615,7 +737,7 @@ def usage_point():
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 def operational_restriction():
@@ -623,7 +745,7 @@ def operational_restriction():
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
 
 def auxiliary_equipment():
@@ -647,7 +769,7 @@ def sensor():
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def ac_dc_terminal():
@@ -673,6 +795,24 @@ def connectivity_node():
 
 def connectivity_node_container():
     return builds(PBConnectivityNodeContainer, psr=power_system_resource())
+
+
+def curve():
+    return builds(
+        PBCurve,
+        io=identified_object(),
+        curveData=lists(curve_data(), max_size=2)
+    )
+
+
+def curve_data():
+    return builds(
+        PBCurveData,
+        xValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y1Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y2Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y3Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    )
 
 
 def equipment():
@@ -726,10 +866,6 @@ def power_system_resource():
     )
 
 
-def site():
-    return builds(PBSite, ec=equipment_container())
-
-
 def sub_geographical_region():
     return builds(
         PBSubGeographicalRegion,
@@ -763,9 +899,9 @@ def terminal():
     )
 
 
-###############################
-# IEC61970 BASE DIAGRAMLAYOUT #
-###############################
+################################
+# IEC61970 Base Diagram Layout #
+################################
 
 
 def diagram():
@@ -799,7 +935,7 @@ def diagram_object_point():
 
 
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 def equivalent_branch():
@@ -829,8 +965,41 @@ def equivalent_equipment():
     return builds(PBEquivalentEquipment, ce=conducting_equipment())
 
 
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
+
+def battery_unit():
+    return builds(
+        PBBatteryUnit,
+        peu=power_electronics_unit(),
+        batteryState=sampled_from(PBBatteryStateKind.values()),
+        ratedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
+        storedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
+        batteryControlMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def photo_voltaic_unit():
+    return builds(PBPhotoVoltaicUnit, peu=power_electronics_unit())
+
+
+def power_electronics_unit():
+    return builds(
+        PBPowerElectronicsUnit,
+        eq=equipment(),
+        powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        maxP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        minP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    )
+
+
+def power_electronics_wind_unit():
+    return builds(PBPowerElectronicsWindUnit, peu=power_electronics_unit())
+
+
 ######################
-# IEC61970 BASE MEAS #
+# IEC61970 Base Meas #
 ######################
 
 def accumulator():
@@ -884,76 +1053,8 @@ def current_relay():
     )
 
 
-def distance_relay():
-    return builds(
-        PBDistanceRelay,
-        prf=protection_relay_function(),
-        backwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    )
-
-
-def voltage_relay():
-    return builds(
-        PBVoltageRelay,
-        prf=protection_relay_function()
-    )
-
-
-def relay_setting():
-    return builds(
-        PBRelaySetting,
-        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        unitSymbol=sampled_from(PBUnitSymbol.values()),
-        value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-    )
-
-
-def protection_relay_function():
-    return builds(
-        PBProtectionRelayFunction,
-        psr=power_system_resource(),
-        model=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        **nullable_bool_settings("reclosing"),
-        relayDelayTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        protectionKind=sampled_from(PBProtectionKind.values()),
-        **nullable_bool_settings("directable"),
-        powerDirection=sampled_from(PBPowerDirectionKind.values()),
-        sensorMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        protectedSwitchMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        schemeMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        timeLimits=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        thresholds=lists(relay_setting(), max_size=4)
-    )
-
-
-def protection_relay_scheme():
-    return builds(
-        PBProtectionRelayScheme,
-        io=identified_object(),
-        systemMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        functionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
-def protection_relay_system():
-    return builds(
-        PBProtectionRelaySystem,
-        eq=equipment(),
-        protectionKind=sampled_from(PBProtectionKind.values()),
-        schemeMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
 #######################
-# IEC61970 BASE SCADA #
+# IEC61970 Base Scada #
 #######################
 
 def remote_control():
@@ -968,41 +1069,8 @@ def remote_source():
     return builds(PBRemoteSource, rp=remote_point(), measurementMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
-
-def battery_unit():
-    return builds(
-        PBBatteryUnit,
-        peu=power_electronics_unit(),
-        batteryState=sampled_from(PBBatteryStateKind.values()),
-        ratedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
-        storedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
-        batteryControlMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
-def photo_voltaic_unit():
-    return builds(PBPhotoVoltaicUnit, peu=power_electronics_unit())
-
-
-def power_electronics_unit():
-    return builds(
-        PBPowerElectronicsUnit,
-        eq=equipment(),
-        powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        maxP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        minP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-    )
-
-
-def power_electronics_wind_unit():
-    return builds(PBPowerElectronicsWindUnit, peu=power_electronics_unit())
-
-
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Wires #
 #######################
 
 def ac_line_segment():
@@ -1021,6 +1089,15 @@ def busbar_section():
     return builds(PBBusbarSection, cn=connector())
 
 
+def clamp():
+    return builds(
+        PBClamp,
+        ce=conducting_equipment(),
+        lengthFromTerminal1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        acLineSegmentMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+    )
+
+
 def conductor():
     return builds(PBConductor, ce=conducting_equipment(), length=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
@@ -1029,8 +1106,21 @@ def connector():
     return builds(PBConnector, ce=conducting_equipment())
 
 
+def cut():
+    return builds(
+        PBCut,
+        sw=switch(),
+        lengthFromTerminal1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        acLineSegmentMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+    )
+
+
 def disconnector():
     return builds(PBDisconnector, sw=switch())
+
+
+def earth_fault_compensator():
+    return builds(PBEarthFaultCompensator, ce=conducting_equipment(), r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def energy_connection():
@@ -1045,7 +1135,7 @@ def energy_consumer():
         customerCount=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         grounded=booleans(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         pFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.Enum.values()),
+        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values()),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         qFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
@@ -1105,6 +1195,10 @@ def ground_disconnector():
     return builds(PBGroundDisconnector, sw=switch())
 
 
+def grounding_impedance():
+    return builds(PBGroundingImpedance, efc=earth_fault_compensator(), x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+
+
 def jumper():
     return builds(PBJumper, sw=switch())
 
@@ -1115,19 +1209,6 @@ def junction():
 
 def line():
     return builds(PBLine, ec=equipment_container())
-
-
-def series_compensator():
-    return builds(
-        PBSeriesCompensator,
-        ce=conducting_equipment(),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        varistorRatedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        varistorVoltageThreshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    )
 
 
 def linear_shunt_compensator():
@@ -1153,18 +1234,6 @@ def per_length_line_parameter():
     return builds(PBPerLengthLineParameter, io=identified_object())
 
 
-def phase_impedance_data():
-    return builds(
-        PBPhaseImpedanceData,
-        fromPhase=sampled_from(PBSinglePhaseKind.values()),
-        toPhase=sampled_from(PBSinglePhaseKind.values()),
-        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    )
-
-
 def per_length_phase_impedance():
     return builds(
         PBPerLengthPhaseImpedance,
@@ -1185,6 +1254,18 @@ def per_length_sequence_impedance():
         gch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         b0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def phase_impedance_data():
+    return builds(
+        PBPhaseImpedanceData,
+        fromPhase=sampled_from(PBSinglePhaseKind.values()),
+        toPhase=sampled_from(PBSinglePhaseKind.values()),
+        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     )
 
 
@@ -1268,14 +1349,6 @@ def power_transformer_end():
     )
 
 
-def transformer_end_rated_s():
-    return builds(
-        PBTransformerEndRatedS,
-        coolingType=sampled_from(PBTransformerCoolingType.values()),
-        ratedS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    )
-
-
 def protected_switch():
     return builds(
         PBProtectedSwitch,
@@ -1291,24 +1364,6 @@ def ratio_tap_changer():
         tc=tap_changer(),
         transformerEndMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         stepVoltageIncrement=floats(min_value=0.0, max_value=1.0)
-    )
-
-
-def curve_data():
-    return builds(
-        PBCurveData,
-        xValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y1Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y2Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y3Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    )
-
-
-def curve():
-    return builds(
-        PBCurve,
-        io=identified_object(),
-        curveData=lists(curve_data(), max_size=2)
     )
 
 
@@ -1350,6 +1405,31 @@ def regulating_control():
     )
 
 
+def rotating_machine():
+    return builds(
+        PBRotatingMachine,
+        rce=regulating_cond_eq(),
+        ratedPowerFactor=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ratedS=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ratedU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        p=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
+def series_compensator():
+    return builds(
+        PBSeriesCompensator,
+        ce=conducting_equipment(),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        varistorRatedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        varistorVoltageThreshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    )
+
+
 def shunt_compensator():
     return builds(
         PBShuntCompensator,
@@ -1357,7 +1437,7 @@ def shunt_compensator():
         sections=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         grounded=booleans(),
         nomU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.Enum.values())
+        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values())
     )
 
 
@@ -1368,7 +1448,7 @@ def static_var_compensator():
         capacitiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inductiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        svcControlMode=sampled_from(PBSVCControlMode.Enum.values()),
+        svcControlMode=sampled_from(PBSVCControlMode.values()),
         voltageSetPoint=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
@@ -1380,6 +1460,35 @@ def switch():
         ratedCurrent=integers(min_value=1, max_value=MAX_32_BIT_INTEGER),
         normalOpen=booleans(),
         open=booleans()
+    )
+
+
+def synchronous_machine():
+    return builds(
+        PBSynchronousMachine,
+        rm=rotating_machine(),
+        baseQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        condenserP=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        earthing=booleans(),
+        earthingStarPointR=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        earthingStarPointX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ikk=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        maxQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        maxU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        minQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        minU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        mu=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectSubtransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectSyncX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectTransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        type=sampled_from(PBSynchronousMachineKind.values()),
+        operatingMode=sampled_from(PBSynchronousMachineKind.values()),
+        reactiveCapabilityCurveMRIDs=one_of(none(), text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))),
     )
 
 
@@ -1442,7 +1551,7 @@ def transformer_star_impedance():
 
 
 ###############################
-# IEC61970 INFIEC61970 FEEDER #
+# IEC61970 InfIEC61970 Feeder #
 ###############################
 
 def circuit():
@@ -1455,32 +1564,9 @@ def circuit():
     )
 
 
-def loop():
-    return builds(
-        PBLoop,
-        io=identified_object(),
-        circuitMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        substationMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        normalEnergizingSubstationMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
-def lv_feeder():
-    return builds(
-        PBLvFeeder,
-        ec=equipment_container(),
-        normalHeadTerminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        normalEnergizingFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
-####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-####################################################
-
-def ev_charging_unit():
-    return builds(PBEvChargingUnit, peu=power_electronics_unit())
-
+#########
+# MODEL #
+#########
 
 def nullable_bool_settings(flag_name: str, value: Optional[bool] = sampled_from([False, True, None])) -> Dict:
     settings = {}
@@ -1491,10 +1577,6 @@ def nullable_bool_settings(flag_name: str, value: Optional[bool] = sampled_from(
 
     return settings
 
-
-#########
-# MODEL #
-#########
 
 def timestamp():
     return builds(Timestamp, seconds=integers(min_value=0, max_value=MAX_32_BIT_INTEGER), nanos=integers(min_value=0, max_value=MAX_32_BIT_INTEGER))
@@ -1507,13 +1589,56 @@ def timestamp():
 @composite
 def network_identified_objects(draw):
     nios = [
-        # EXTENSIONS IEC61968 METERING #
+        ##################################
+        # Extensions IEC61968 Asset Info #
+        ##################################
+
+        draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
+
+        ################################
+        # Extensions IEC61968 Metering #
+        ################################
+
         draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
 
-        # EXTENSIONS IEC61970 BASE WIRES #
+        #################################
+        # Extensions IEC61970 Base Core #
+        #################################
+
+        draw(builds(NetworkIdentifiedObject, site=site())),
+
+        ###################################
+        # Extensions IEC61970 Base Feeder #
+        ###################################
+
+        draw(builds(NetworkIdentifiedObject, loop=loop())),
+        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
+
+        ##################################################
+        # Extensions IEC61970 Base Generation Production #
+        ##################################################
+
+        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit())),
+
+        #######################################
+        # Extensions IEC61970 Base Protection #
+        #######################################
+
+        draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
+        draw(builds(NetworkIdentifiedObject, protectionRelayScheme=protection_relay_scheme())),
+        draw(builds(NetworkIdentifiedObject, protectionRelaySystem=protection_relay_system())),
+        draw(builds(NetworkIdentifiedObject, voltageRelay=voltage_relay())),
+
+        ##################################
+        # Extensions IEC61970 Base Wires #
+        ##################################
+
         draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
 
-        # IEC61968 ASSET INFO #
+        #######################
+        # IEC61968 Asset Info #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, cableInfo=cable_info())),
         draw(builds(NetworkIdentifiedObject, noLoadTest=no_load_test())),
         draw(builds(NetworkIdentifiedObject, openCircuitTest=open_circuit_test())),
@@ -1521,75 +1646,115 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, powerTransformerInfo=power_transformer_info())),
         draw(builds(NetworkIdentifiedObject, shortCircuitTest=short_circuit_test())),
         draw(builds(NetworkIdentifiedObject, shuntCompensatorInfo=shunt_compensator_info())),
+        draw(builds(NetworkIdentifiedObject, switchInfo=switch_info())),
         draw(builds(NetworkIdentifiedObject, transformerEndInfo=transformer_end_info())),
         draw(builds(NetworkIdentifiedObject, transformerTankInfo=transformer_tank_info())),
 
-        # IEC61968 ASSETS #
+        ###################
+        # IEC61968 Assets #
+        ###################
+
         draw(builds(NetworkIdentifiedObject, assetOwner=asset_owner())),
-        draw(builds(NetworkIdentifiedObject, pole=pole())),
         draw(builds(NetworkIdentifiedObject, streetlight=streetlight())),
 
-        # IEC61968 COMMON #
+        ###################
+        # IEC61968 Common #
+        ###################
+
         draw(builds(NetworkIdentifiedObject, location=location())),
         draw(builds(NetworkIdentifiedObject, organisation=organisation())),
 
-        # IEC61968 METERING #
+        #####################################
+        # IEC61968 InfIEC61968 InfAssetInfo #
+        #####################################
+
+        draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
+        draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
+
+        ##################################
+        # IEC61968 InfIEC61968 InfAssets #
+        ##################################
+
+        draw(builds(NetworkIdentifiedObject, pole=pole())),
+
+        #####################
+        # IEC61968 Metering #
+        #####################
+
         draw(builds(NetworkIdentifiedObject, meter=meter())),
         draw(builds(NetworkIdentifiedObject, usagePoint=usage_point())),
 
-        # IEC61968 OPERATIONS #
+        #######################
+        # IEC61968 Operations #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, operationalRestriction=operational_restriction())),
 
-        # IEC61968 InfIEC61968 ASSET INFO #
-        draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
-        draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
-        draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
+        #####################################
+        # IEC61970 Base Auxiliary Equipment #
+        #####################################
 
-        # IEC61970 BASE AUXILIARY EQUIPMENT #
         draw(builds(NetworkIdentifiedObject, currentTransformer=current_transformer())),
         draw(builds(NetworkIdentifiedObject, faultIndicator=fault_indicator())),
         draw(builds(NetworkIdentifiedObject, potentialTransformer=potential_transformer())),
 
-        # IEC61970 BASE CORE #
+        ######################
+        # IEC61970 Base Core #
+        ######################
+
         draw(builds(NetworkIdentifiedObject, baseVoltage=base_voltage())),
         draw(builds(NetworkIdentifiedObject, connectivityNode=connectivity_node())),
         draw(builds(NetworkIdentifiedObject, feeder=feeder())),
         draw(builds(NetworkIdentifiedObject, geographicalRegion=geographical_region())),
-        draw(builds(NetworkIdentifiedObject, site=site())),
         draw(builds(NetworkIdentifiedObject, subGeographicalRegion=sub_geographical_region())),
         draw(builds(NetworkIdentifiedObject, substation=substation())),
         draw(builds(NetworkIdentifiedObject, terminal=terminal())),
-        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
-        # IEC61970 BASE EQUIVALENTS #
+        #############################
+        # IEC61970 Base Equivalents #
+        #############################
+
         draw(builds(NetworkIdentifiedObject, equivalentBranch=equivalent_branch())),
 
-        # IEC61970 BASE MEAS #
+        #######################################
+        # IEC61970 Base Generation Production #
+        #######################################
+
+        draw(builds(NetworkIdentifiedObject, batteryUnit=battery_unit())),
+        draw(builds(NetworkIdentifiedObject, photoVoltaicUnit=photo_voltaic_unit())),
+        draw(builds(NetworkIdentifiedObject, powerElectronicsWindUnit=power_electronics_wind_unit())),
+
+        ######################
+        # IEC61970 Base Meas #
+        ######################
+
         draw(builds(NetworkIdentifiedObject, accumulator=accumulator())),
         draw(builds(NetworkIdentifiedObject, analog=analog())),
         draw(builds(NetworkIdentifiedObject, control=control())),
         draw(builds(NetworkIdentifiedObject, discrete=discrete())),
 
-        # IEC61970 BASE PROTECTION #
-        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
-        draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
-        draw(builds(NetworkIdentifiedObject, protectionRelayScheme=protection_relay_scheme())),
-        draw(builds(NetworkIdentifiedObject, protectionRelaySystem=protection_relay_system())),
-        draw(builds(NetworkIdentifiedObject, voltageRelay=voltage_relay())),
+        ############################
+        # IEC61970 Base Protection #
+        ############################
 
-        # IEC61970 BASE SCADA #
+        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
+
+        #######################
+        # IEC61970 Base Scada #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, remoteControl=remote_control())),
         draw(builds(NetworkIdentifiedObject, remoteSource=remote_source())),
 
-        # IEC61970 BASE WIRES GENERATION PRODUCTION #
-        draw(builds(NetworkIdentifiedObject, batteryUnit=battery_unit())),
-        draw(builds(NetworkIdentifiedObject, photoVoltaicUnit=photo_voltaic_unit())),
-        draw(builds(NetworkIdentifiedObject, powerElectronicsWindUnit=power_electronics_wind_unit())),
+        #######################
+        # IEC61970 Base Wires #
+        #######################
 
-        # IEC61970 BASE WIRES #
         draw(builds(NetworkIdentifiedObject, acLineSegment=ac_line_segment())),
         draw(builds(NetworkIdentifiedObject, breaker=breaker())),
         draw(builds(NetworkIdentifiedObject, busbarSection=busbar_section())),
+        draw(builds(NetworkIdentifiedObject, clamp=clamp())),
+        draw(builds(NetworkIdentifiedObject, cut=cut())),
         draw(builds(NetworkIdentifiedObject, disconnector=disconnector())),
         draw(builds(NetworkIdentifiedObject, energyConsumer=energy_consumer())),
         draw(builds(NetworkIdentifiedObject, energyConsumerPhase=energy_consumer_phase())),
@@ -1598,6 +1763,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, fuse=fuse())),
         draw(builds(NetworkIdentifiedObject, ground=ground())),
         draw(builds(NetworkIdentifiedObject, groundDisconnector=ground_disconnector())),
+        draw(builds(NetworkIdentifiedObject, groundingImpedance=grounding_impedance())),
         draw(builds(NetworkIdentifiedObject, jumper=jumper())),
         draw(builds(NetworkIdentifiedObject, junction=junction())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linear_shunt_compensator())),
@@ -1609,20 +1775,19 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, powerTransformer=power_transformer())),
         draw(builds(NetworkIdentifiedObject, powerTransformerEnd=power_transformer_end())),
         draw(builds(NetworkIdentifiedObject, ratioTapChanger=ratio_tap_changer())),
+        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
         draw(builds(NetworkIdentifiedObject, recloser=recloser())),
         draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
+        draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
+        draw(builds(NetworkIdentifiedObject, synchronousMachine=synchronous_machine())),
         draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
         draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
-        draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
-        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
-        # IEC61970 INFIEC61970 FEEDER #
+        ###############################
+        # IEC61970 InfIEC61970 Feeder #
+        ###############################
+
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),
-        draw(builds(NetworkIdentifiedObject, loop=loop())),
-        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
-
-        # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit()))
     ]
     return nios
 
@@ -1635,6 +1800,10 @@ def network_identified_objects(draw):
 @composite
 def diagram_identified_objects(draw):
     dios = [
+        ################################
+        # IEC61970 Base Diagram Layout #
+        ################################
+
         draw(builds(DiagramIdentifiedObject, diagram=diagram())),
         draw(builds(DiagramIdentifiedObject, diagramObject=diagram_object()))
     ]
@@ -1649,8 +1818,17 @@ def diagram_identified_objects(draw):
 @composite
 def customer_identified_objects(draw):
     dios = [
-        draw(builds(CustomerIdentifiedObject, customer=customer())),
+        ###################
+        # IEC61968 Common #
+        ###################
+
         draw(builds(CustomerIdentifiedObject, organisation=organisation())),
+
+        ######################
+        # IEC61968 Customers #
+        ######################
+
+        draw(builds(CustomerIdentifiedObject, customer=customer())),
         draw(builds(CustomerIdentifiedObject, customerAgreement=customer_agreement())),
         draw(builds(CustomerIdentifiedObject, pricingStructure=pricing_structure())),
         draw(builds(CustomerIdentifiedObject, tariff=tariff())),

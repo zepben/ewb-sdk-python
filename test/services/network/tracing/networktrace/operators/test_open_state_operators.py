@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import MagicMock
 
-from zepben.evolve import Switch, SinglePhaseKind
-from zepben.evolve.services.network.tracing.networktrace.operators.open_state_operators import OpenStateOperators
+from zepben.ewb import Switch, SinglePhaseKind
+from zepben.ewb.services.network.tracing.networktrace.operators.open_state_operators import OpenStateOperators
 
 
 class FlipFlopper:

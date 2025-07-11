@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import text, lists, builds
-from zepben.evolve import Pole, Streetlight
+from zepben.ewb import Pole, Streetlight
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \

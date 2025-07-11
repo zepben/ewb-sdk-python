@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 from pytest import raises
-from zepben.evolve import DiagramObjectPoint
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 

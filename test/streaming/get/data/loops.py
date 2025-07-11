@@ -2,7 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import NetworkService, Substation, Loop, Circuit, EquipmentContainer, Junction, Terminal, Feeder
+from zepben.ewb import NetworkService, Substation, Loop, Circuit, EquipmentContainer, Terminal
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 
 #

@@ -5,8 +5,8 @@
 import logging
 from typing import Iterable, Optional, Union
 
-from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.ewb import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal
+from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 logger = logging.getLogger("phase_logger.py")
 

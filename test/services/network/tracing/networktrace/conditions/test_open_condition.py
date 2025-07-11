@@ -5,8 +5,8 @@
 from typing import Callable
 from unittest.mock import MagicMock
 
-from zepben.evolve import Switch, SinglePhaseKind, NetworkTraceStep, ConductingEquipment, StepContext
-from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
+from zepben.ewb import Switch, SinglePhaseKind, NetworkTraceStep, ConductingEquipment, StepContext
+from zepben.ewb.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
 
 
 
@@ -80,4 +80,3 @@ class TestOpenCondition:
         )
 
         assert not OpenCondition(is_open, spk).should_queue(*should_queue_params(next_step))
-

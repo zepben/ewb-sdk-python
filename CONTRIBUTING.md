@@ -32,7 +32,7 @@ python -m pytest
 You can generate the [coverage report](htmlcov/index.html) using the following options:
 
 ```
- pytest --cov=zepben.evolve --cov-report=html --cov-branch
+ pytest --cov=zepben.ewb --cov-report=html --cov-branch
  ```
 
 If you need to debug a test, you will need to annotate the test with the following
@@ -47,63 +47,63 @@ to prevent the test from timing out while you step through the code:
 
 1. Update [`setup.py`](setup.py) to import the correct version of `zepben.protobuf`.
 1. Model updating:
-1. Add new classes to the [cim model package](src/zepben/evolve/model/cim).
+1. Add new classes to the [cim model package](src/zepben/ewb/model/cim).
 1. Descriptions copied from [Evolve CIM Profile documentation](https://zepben.github.io/evolve/docs/cim/evolve) and added as doc comments to new changes (on
    class, property etc)
-1. Add comparators to [service packages](src/zepben/evolve/services).
-  1. [network](src/zepben/evolve/services/network/network_service_comparator.py)
-  1. [customer](src/zepben/evolve/services/customer/customer_service_comparator.py)
-  1. [diagram](src/zepben/evolve/services/diagram/diagram_service_comparator.py)
-1. Update [translator package](src/zepben/evolve/services/network/translator):
-1. Update [```__init__.py```](src/zepben/evolve/services/network/translator/__init__.py):
+1. Add comparators to [service packages](src/zepben/ewb/services).
+  1. [network](src/zepben/ewb/services/network/network_service_comparator.py)
+  1. [customer](src/zepben/ewb/services/customer/customer_service_comparator.py)
+  1. [diagram](src/zepben/ewb/services/diagram/diagram_service_comparator.py)
+1. Update [translator package](src/zepben/ewb/services/network/translator):
+1. Update [```__init__.py```](src/zepben/ewb/services/network/translator/__init__.py):
    * ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
    * ```<new_class_name>.mrid = lambda self: self...mrid()```
-1. Update [network_cim2proto.py](src/zepben/evolve/services/network/translator/network_cim2proto.py):
+1. Update [network_cim2proto.py](src/zepben/ewb/services/network/translator/network_cim2proto.py):
    * ```import <new_class_name> as PB<new_class_name>```
    * Add ```def <new_class_name>_to_pb```
    * Add ```"<new_class_name>_to_pb"``` to ```__all__```
    * Add ```<new_class_name>.to_pb = <new_class_name>_to_pb```
-1. Update  [network_proto2cim.py](src/zepben/evolve/services/network/translator/network_proto2cim.py)
+1. Update  [network_proto2cim.py](src/zepben/ewb/services/network/translator/network_proto2cim.py)
    * ```import <new_class_name> as PB<new_class_name>```
    * Add ```def <new_class_name>_to_pb```
    * Add ```"<new_class_name>_to_cim"``` to ```__all__```
    * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```
-1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
+1. Add reference resolver(s) to resolvers in [common package](src/zepben/ewb/services/common)  (if new associations).
 1. Update database schema:
-1. Increment `TablesVersion.SUPPORTED_VERSION` by 1 in [table_version.py](src/zepben/evolve/database/sqlite/tables/table_version.py)
-1. In the [tables package](src/zepben/evolve/database/sqlite/tables), add a table class for each new CIM class and many-to-many association.
+1. Increment `TablesVersion.SUPPORTED_VERSION` by 1 in [table_version.py](src/zepben/ewb/database/sqlite/tables/table_version.py)
+1. In the [tables package](src/zepben/ewb/database/sqlite/tables), add a table class for each new CIM class and many-to-many association.
    Update any previously-existing table classes whose CIM classes have field changes.
 1. Register new tables into `_included_tables()`
-  1. [network](src/zepben/evolve/database/sqlite/network/network_database_tables.py)
-  1. [customer](src/zepben/evolve/database/sqlite/customer/customer_database_tables.py)
-  1. [diagram](src/zepben/evolve/database/sqlite/diagram/diagram_database_tables.py)
+  1. [network](src/zepben/ewb/database/sqlite/network/network_database_tables.py)
+  1. [customer](src/zepben/ewb/database/sqlite/customer/customer_database_tables.py)
+  1. [diagram](src/zepben/ewb/database/sqlite/diagram/diagram_database_tables.py)
 1. Update `*CIMReader` for new CIM classes/associations and field updates.
-  1. [network](src/zepben/evolve/database/sqlite/network/network_cim_reader.py)
-  1. [customer](src/zepben/evolve/database/sqlite/customer/customer_cim_reader.py)
-  1. [diagram](src/zepben/evolve/database/sqlite/diagram/diagram_cim_reader.py)
+  1. [network](src/zepben/ewb/database/sqlite/network/network_cim_reader.py)
+  1. [customer](src/zepben/ewb/database/sqlite/customer/customer_cim_reader.py)
+  1. [diagram](src/zepben/ewb/database/sqlite/diagram/diagram_cim_reader.py)
      Then, update `*ServiceReader` to load from each new tables.
-  1. [network](src/zepben/evolve/database/sqlite/network/network_service_reader.py)
-  1. [customer](src/zepben/evolve/database/sqlite/customer/customer_service_reader.py)
-  1. [diagram](src/zepben/evolve/database/sqlite/diagram/diagram_service_reader.py)
+  1. [network](src/zepben/ewb/database/sqlite/network/network_service_reader.py)
+  1. [customer](src/zepben/ewb/database/sqlite/customer/customer_service_reader.py)
+  1. [diagram](src/zepben/ewb/database/sqlite/diagram/diagram_service_reader.py)
 1. Update `*CIMWriter` for new CIM classes/associations and field updates.
-  1. [network](src/zepben/evolve/database/sqlite/network/network_cim_writer.py)
-  1. [customer](src/zepben/evolve/database/sqlite/customer/customer_cim_writer.py)
-  1. [diagram](src/zepben/evolve/database/sqlite/diagram/diagram_cim_writer.py)
+  1. [network](src/zepben/ewb/database/sqlite/network/network_cim_writer.py)
+  1. [customer](src/zepben/ewb/database/sqlite/customer/customer_cim_writer.py)
+  1. [diagram](src/zepben/ewb/database/sqlite/diagram/diagram_cim_writer.py)
      Then, update `*ServiceWriter` to write to each new table.
-  1. [network](src/zepben/evolve/database/sqlite/network/network_service_writer.py)
-  1. [customer](src/zepben/evolve/database/sqlite/customer/customer_service_writer.py)
-  1. [diagram](src/zepben/evolve/database/sqlite/diagram/diagram_service_writer.py)
-1. Update [```__init__.py```](src/zepben/evolve/__init__.py) to import every new public name (classes, functions, constants, extension methods):
+  1. [network](src/zepben/ewb/database/sqlite/network/network_service_writer.py)
+  1. [customer](src/zepben/ewb/database/sqlite/customer/customer_service_writer.py)
+  1. [diagram](src/zepben/ewb/database/sqlite/diagram/diagram_service_writer.py)
+1. Update [```__init__.py```](src/zepben/ewb/__init__.py) to import every new public name (classes, functions, constants, extension methods):
 
 
-* ```from zepben.evolve...<new_module_name> import *```
+* ```from zepben.ewb...<new_module_name> import *```
 
 
 1. Testing:
 
 
-* Import public names via ```from zepben.evolve import <name>``` when writing/updating tests. This ensures that
-  [```__init__.py```](src/zepben/evolve/__init__.py) was updated correctly.
+* Import public names via ```from zepben.ewb import <name>``` when writing/updating tests. This ensures that
+  [```__init__.py```](src/zepben/ewb/__init__.py) was updated correctly.
 * Test for model classes.
 * Add new classes to corresponding service translator test. [```test/services/.../translator```](test/services)
 * Add the required creators to:
@@ -122,7 +122,7 @@ to prevent the test from timing out while you step through the code:
 
 
 1. Update release notes in [```changelog.md```](changelog.md).
-1. Update _nio_type_to_cim in [```network_consumer.py```](src/zepben/evolve/streaming/get/network_consumer.py) to include newly added classes.
+1. Update _nio_type_to_cim in [```network_consumer.py```](src/zepben/ewb/streaming/get/network_consumer.py) to include newly added classes.
 
 ## Adding support for new services ##
 

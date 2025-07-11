@@ -8,8 +8,9 @@ from typing import Callable, List
 import pytest
 from pytest import raises
 
-from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
-    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode, TransformerEndRatedS, TransformerCoolingType
+from zepben.ewb import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
+    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode, TransformerCoolingType
+from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 
 
 class TestTestNetworkBuilder:
@@ -289,7 +290,7 @@ class TestTestNetworkBuilder:
 
         n = await (TestNetworkBuilder()
                    .from_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
-                   .to_power_transformer([PhaseCode.ABC], [init_s_rating(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 3)])  # tx1
+                   .to_power_transformer([PhaseCode.ABC], [init_s_rating(TransformerCoolingType.UNKNOWN, 3)])  # tx1
                    .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
                    .build())
         print(hex(id(n)))

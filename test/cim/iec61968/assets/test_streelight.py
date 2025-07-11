@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
-from zepben.evolve import Streetlight, Pole, StreetlightLampKind
+from zepben.ewb import Streetlight, Pole
+from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \

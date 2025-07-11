@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, one_of, none
-from zepben.evolve import EarthFaultCompensator
+from zepben.ewb import EarthFaultCompensator
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, conducting_equipment_args, \

@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, floats, integers, text
-from zepben.evolve import CurrentTransformerInfo, Ratio
+from zepben.ewb import CurrentTransformerInfo, Ratio
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \

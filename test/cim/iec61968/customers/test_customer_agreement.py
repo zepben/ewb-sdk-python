@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.evolve import CustomerAgreement, Customer, PricingStructure
+from zepben.ewb import CustomerAgreement, Customer, PricingStructure
 
 from cim.iec61968.common.test_agreement import agreement_kwargs, verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args

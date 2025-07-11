@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.evolve import Feeder, Terminal, Equipment, LvFeeder
+from zepben.ewb import Terminal, Equipment, LvFeeder
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args

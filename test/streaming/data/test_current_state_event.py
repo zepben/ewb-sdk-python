@@ -11,7 +11,7 @@ from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCur
     AddCutEvent as PBAddCutEvent, RemoveCutEvent as PBRemoveCutEvent, AddJumperEvent as PBAddJumperEvent, RemoveJumperEvent as PBRemoveJumperEvent, \
     SwitchAction as PBSwitchAction, JumperConnection as PBJumperConnection
 
-from zepben.evolve import PhaseCode, datetime_to_timestamp, CurrentStateEvent, SwitchStateEvent, SwitchAction, AddCutEvent, RemoveCutEvent, AddJumperEvent, \
+from zepben.ewb import PhaseCode, datetime_to_timestamp, CurrentStateEvent, SwitchStateEvent, SwitchAction, AddCutEvent, RemoveCutEvent, AddJumperEvent, \
     RemoveJumperEvent
 
 
@@ -41,7 +41,7 @@ class TestCurrentStateEvent:
         pb_event = PBCurrentStateEvent(
             eventId="event1",
             timestamp=datetime_to_timestamp(datetime.now()),
-            switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.OPEN, phases=PBPhaseCode.ABCN)
+            switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.SWITCH_ACTION_OPEN, phases=PBPhaseCode.PHASE_CODE_ABCN)
         )
 
         event = SwitchStateEvent.from_pb(pb_event)

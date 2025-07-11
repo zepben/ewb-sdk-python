@@ -8,7 +8,7 @@ from cim.cim_creators import sampled_phase_code, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
+from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
 
 regulating_control_kwargs = {
     **power_system_resource_kwargs,
@@ -35,7 +35,7 @@ regulating_control_args = [*power_system_resource_args, False, RegulatingControl
 def verify_regulating_control_constructor_default(rc: RegulatingControl):
     verify_power_system_resource_constructor_default(rc)
     assert rc.discrete is None
-    assert rc.mode == RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
+    assert rc.mode == RegulatingControlModeKind.UNKNOWN
     assert rc.monitored_phase == PhaseCode.NONE
     assert rc.target_deadband is None
     assert rc.target_value is None

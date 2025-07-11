@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import text
-from zepben.evolve import StreetDetail
+from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 
