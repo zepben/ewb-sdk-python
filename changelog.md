@@ -40,14 +40,6 @@
 * `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
 * `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
 * Renamed `length_from_t1_or_0` to `length_from_t1_or_0`.
-* Renamed the package to `com.zepben.ewb`. You will need to update all your imports `com.zepben.evolve.*` -> `com.zepben.ewb.*`. This also updates the maven
-  artifact:
-  ```xml
-  <dependency>
-      <groupId>com.zepben</groupId>
-      <artifactId>ewb-sdk</artifactId>
-  </dependency>
-  ```
 * Relocated the following classes into the Zepben extensions area, marking them as [ZBEX]:
   * `DistanceRelay`: `cim.iec61970.base.protection` -> `cim.extensions.iec61970.base.protection`.
   * `EvChargingUnit`: `cim.iec61970.infiec61970.wires.generation.production` -> `cim.extensions.iec61970.base.generation.production`.
