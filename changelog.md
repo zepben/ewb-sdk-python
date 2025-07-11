@@ -7,7 +7,8 @@
 * None.
 
 ### Enhancements
-* None.
+* `EquipmentTreeBuilder` now has a `leaves` attribute which is a dict of all mrid -> IdentifiedObject contained in the tree
+* `TreeNode` uses a set to store `_children` instead of a set, massive performance gains.
 
 ### Fixes
 * None.
