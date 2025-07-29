@@ -6,7 +6,7 @@
 __all__ = ["TableRotatingMachines"]
 
 from zepben.ewb import TableRegulatingCondEq
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 
 
 class TableRotatingMachines(TableRegulatingCondEq):

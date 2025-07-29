@@ -5,7 +5,7 @@
 
 __all__ = ["TableBatteryControls"]
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_regulating_controls import TableRegulatingControls
 
 

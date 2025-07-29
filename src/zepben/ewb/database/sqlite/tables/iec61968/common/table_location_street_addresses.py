@@ -5,7 +5,7 @@
 
 from typing import List, Generator
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_street_addresses import TableStreetAddresses
 
 __all__ = ["TableLocationStreetAddresses"]

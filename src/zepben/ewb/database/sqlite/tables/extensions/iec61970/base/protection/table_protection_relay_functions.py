@@ -7,7 +7,7 @@ __all__ = ["TableProtectionRelayFunctions"]
 
 from abc import ABC
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_power_system_resources import TablePowerSystemResources
 
 

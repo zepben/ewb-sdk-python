@@ -8,7 +8,7 @@ __all__ = ["TablePhaseImpedanceData"]
 from typing import List, Generator
 
 from zepben.ewb import SqliteTable
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 
 
 class TablePhaseImpedanceData(SqliteTable):

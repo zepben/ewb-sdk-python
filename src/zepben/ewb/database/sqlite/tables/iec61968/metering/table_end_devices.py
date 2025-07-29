@@ -7,7 +7,7 @@ __all__ = ["TableEndDevices"]
 
 from abc import ABC
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_asset_containers import TableAssetContainers
 
 

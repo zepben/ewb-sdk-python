@@ -9,7 +9,7 @@ import sqlite3
 from sqlite3 import Cursor
 from typing import Optional
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
@@ -17,6 +17,7 @@ class TableVersion(SqliteTable):
     SUPPORTED_VERSION = 59
 
     def __init__(self):
+        super().__init__()
         self.version: Column = self._create_column("version", "TEXT", Nullable.NOT_NULL)
 
     @property

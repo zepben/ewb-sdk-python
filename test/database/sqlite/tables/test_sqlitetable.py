@@ -8,7 +8,7 @@ from typing import List
 
 from pytest import raises
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
