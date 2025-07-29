@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from _pytest.python_api import raises
+from pytest import raises
 from hypothesis.strategies import floats, booleans, builds, integers
 from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd

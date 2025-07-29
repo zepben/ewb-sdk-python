@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from _pytest.python_api import raises
+from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 
