@@ -7,7 +7,7 @@ __all__ = ["TableEquipmentUsagePoints"]
 
 from typing import List, Generator
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 

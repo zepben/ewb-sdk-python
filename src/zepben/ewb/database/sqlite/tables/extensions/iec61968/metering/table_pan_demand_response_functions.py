@@ -5,7 +5,7 @@
 
 __all__ = ["TablePanDemandResponseFunctions"]
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 
 

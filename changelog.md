@@ -87,9 +87,10 @@
     * `CURRENT_NETWORK_STATE` -> `CURRENT`.
 * The `zepben.auth` dependency has been incorporated into the SDK with the following package change:
   * `zepben.auth` -> `zepben.ewb.auth`. You can also import these directly from `zepben.ewb`.
+* `SqliteTable` now subclasses `SqlTable`.
 
 ### New Features
-* None.
+* Created a new `SqlTable` that doesn't support creating schema creation statements by default.
 
 ### Enhancements
 * `EquipmentTreeBuilder` will now calculate `leaves` when specified to do so.
