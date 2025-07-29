@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
-from _pytest.python_api import raises
+from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
 from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection

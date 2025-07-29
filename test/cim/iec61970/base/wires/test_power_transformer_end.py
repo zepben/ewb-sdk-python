@@ -5,7 +5,7 @@
 import re
 
 import pytest
-from _pytest.python_api import raises
+from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
 from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType

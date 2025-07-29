@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterator
 from unittest.mock import Mock
 
-from _pytest.python_api import raises
+from pytest import raises
 
 from zepben.ewb import EwbDataFilePaths, DatabaseType
 
