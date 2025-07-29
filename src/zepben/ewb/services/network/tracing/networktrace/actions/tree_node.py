@@ -5,33 +5,31 @@
 
 __all__ = ['TreeNode']
 
-from typing import List, TypeVar, Generic
-
-from zepben.ewb import IdentifiedObject
+from typing import TypeVar, Generic, Set
 
 T = TypeVar('T')
 
 
 class TreeNode(Generic[T]):
     """
-    represents a node in the NetworkTrace tree
+    Represents a node in the NetworkTrace tree
     """
 
-    def __init__(self, identified_object: IdentifiedObject, parent=None):
+    def __init__(self, identified_object: T, parent=None):
         self.identified_object = identified_object
         self._parent: TreeNode = parent
-        self._children: List[TreeNode] = []
+        self._children: Set[TreeNode] = set()
 
     @property
     def parent(self) -> 'TreeNode[T]':
         return self._parent
 
     @property
-    def children(self):
-        return list(self._children)
+    def children(self) -> Set['TreeNode[T]']:
+        return set(self._children)
 
-    def add_child(self, child: 'TreeNode'):
-        self._children.append(child)
+    def add_child(self, child: 'TreeNode[T]'):
+        self._children.add(child)
 
     def __str__(self):
         return f"{{object: {self.identified_object}, parent: {self.parent or ''}, num children: {len(self.children)}}}"
