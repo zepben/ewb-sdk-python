@@ -8,11 +8,10 @@ from __future__ import annotations
 __all__ = ["ControlledAppliance", "Appliance"]
 
 from dataclasses import dataclass
-from enum import Enum, unique
+from enum import Enum
 from typing import List, Union
 
 
-@unique
 class Appliance(Enum):
     """
     The type of appliance.

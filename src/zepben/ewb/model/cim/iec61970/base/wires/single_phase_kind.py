@@ -5,7 +5,7 @@
 
 __all__ = ["SinglePhaseKind", "single_phase_kind_by_id", "SINGLE_PHASE_KIND_VALUES"]
 
-from enum import Enum, unique
+from enum import Enum
 from typing import Union
 
 
@@ -25,7 +25,6 @@ def single_phase_kind_by_id(value):
     return SINGLE_PHASE_KIND_VALUES[value]
 
 
-@unique
 class SinglePhaseKind(Enum):
     """
     Enumeration of single phase identifiers. Allows designation of single phases for both transmission and distribution equipment, circuits and loads.

@@ -5,10 +5,9 @@
 
 __all__ = ["SynchronousMachineKind"]
 
-from enum import unique, Enum
+from enum import Enum
 
 
-@unique
 class SynchronousMachineKind(Enum):
     """
     Synchronous machine type.

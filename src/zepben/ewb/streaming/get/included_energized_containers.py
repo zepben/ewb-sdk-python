@@ -5,10 +5,9 @@
 
 __all__ = ["IncludedEnergizedContainers"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class IncludedEnergizedContainers(Enum):
     """
     Indicates which energized contains should be included when fetching a container.

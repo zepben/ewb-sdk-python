@@ -5,10 +5,9 @@
 
 __all__ = ["PhaseShuntConnectionKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class PhaseShuntConnectionKind(Enum):
     """
     The configuration of phase connections for a single terminal device such as a load or capacitor.

@@ -5,10 +5,9 @@
 
 __all__ = ["OrientationKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class OrientationKind(Enum):
     """
     The orientation of the coordinate system with respect to top, left, and the coordinate number system.

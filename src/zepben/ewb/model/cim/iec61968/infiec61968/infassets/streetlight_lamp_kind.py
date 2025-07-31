@@ -5,10 +5,9 @@
 
 __all__ = ["StreetlightLampKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class StreetlightLampKind(Enum):
     """
     Kind of lamp for a `Streetlight`

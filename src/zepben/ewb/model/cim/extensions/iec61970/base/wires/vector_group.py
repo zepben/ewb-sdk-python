@@ -5,13 +5,12 @@
 
 __all__ = ["VectorGroup"]
 
-from enum import Enum, unique
+from enum import Enum
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
 
 
 @zbex
-@unique
 class VectorGroup(Enum):
     """
     [ZBEX]

@@ -5,10 +5,9 @@
 
 __all__ = ["EndDeviceFunctionKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class EndDeviceFunctionKind(Enum):
     """
     Kind of end device function.
