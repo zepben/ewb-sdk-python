@@ -235,6 +235,10 @@ def test_network_service_translations(**kwargs):
     # If this test still appears to lock up, it is likely you have missed validating a class or forgot to exclude the table. Either figure out which
     # case you have, or wait for the test to finish, and it will tell you.
     #
+    # NOTE: updating hypothesis can break this test on python 3.9 to 1.200.0 and beyond, if you do that, and it breaks, this command
+    # will run only this test:
+    #    tox -e py39 -- test/services/network/translator/test_network_translator.py::test_network_service_translations --no-cov
+    #
     validate_service_translations(
         NetworkService,
         NetworkServiceComparator(),
