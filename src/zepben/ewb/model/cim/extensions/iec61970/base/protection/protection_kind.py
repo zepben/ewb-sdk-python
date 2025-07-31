@@ -5,13 +5,12 @@
 
 __all__ = ["ProtectionKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
 
 
 @zbex
-@unique
 class ProtectionKind(Enum):
     """
     [ZBEX]

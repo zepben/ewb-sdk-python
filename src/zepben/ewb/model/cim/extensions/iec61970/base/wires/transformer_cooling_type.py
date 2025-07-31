@@ -5,13 +5,12 @@
 
 __all__ = ["TransformerCoolingType"]
 
-from enum import Enum, unique
+from enum import Enum
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
 
 
 @zbex
-@unique
 class TransformerCoolingType(Enum):
     """
     [ZBEX]

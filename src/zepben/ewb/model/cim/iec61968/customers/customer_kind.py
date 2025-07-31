@@ -5,10 +5,9 @@
 
 __all__ = ["CustomerKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class CustomerKind(Enum):
     """
     Kind of customer.

@@ -5,10 +5,9 @@
 
 __all__ = ["TransformerConstructionKind"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class TransformerConstructionKind(Enum):
     """
     Kind of transformer construction.

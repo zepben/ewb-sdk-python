@@ -5,10 +5,9 @@
 
 __all__ = ["DiagramStyle"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class DiagramStyle(Enum):
     """
     The diagram style refer to a style used by the originating system for a diagram.  A diagram style describes

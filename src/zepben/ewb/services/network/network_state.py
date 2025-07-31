@@ -5,10 +5,9 @@
 
 __all__ = ["NetworkState"]
 
-from enum import Enum, unique
+from enum import Enum
 
 
-@unique
 class NetworkState(Enum):
     """
     Indicates which state of the network an operation should be performed on.
