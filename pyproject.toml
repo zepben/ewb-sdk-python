@@ -12,8 +12,8 @@
     build-backend = "setuptools.build_meta"
 
 [project]
-    name = "zepben.evolve"
-    version = "0.48.0b6"
+    name = "zepben.ewb"
+    version = "1.0.0b2"
     description = "Python SDK for interacting with the Evolve platform"
     readme = {file = "README.md", content-type = "test/markdown"}
     license = "MPL-2.0"
