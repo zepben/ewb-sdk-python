@@ -33,12 +33,15 @@ async def test_downstream_tree():
     start = n.get("j1", ConductingEquipment)
     assert start is not None
     tree_builder = EquipmentTreeBuilder()
-    trace = Tracing.network_trace_branching(
-        network_state_operators=normal,
-        action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT) \
-        .add_condition(downstream()) \
-        .add_step_action(tree_builder) \
+    trace = (
+        Tracing.network_trace_branching(
+            network_state_operators=normal,
+            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT
+        )
+        .add_condition(downstream())
+        .add_step_action(tree_builder)
         .add_step_action(lambda item, context: visited_ce.append(item.path.to_equipment.mrid))
+    )
 
     await trace.run(start)
 
@@ -51,34 +54,39 @@ async def test_downstream_tree():
 
     pprint.pprint(visit_counts)
 
-    root = list(tree_builder.roots)[0]
+    root = tree_builder._roots[start]
 
     assert root is not None
     _verify_tree_asset(root, n["j1"], None, [n["ac1"], n["ac3"]])
 
-    test_node = root.children[0]
-    _verify_tree_asset(test_node, n["ac1"], n["j1"], [n["j2"]])
+    assert len(root.children) == 2
+    for test_node in root.children:
+        if test_node.identified_object == n['ac1']:
+            _verify_tree_asset(test_node, n["ac1"], n["j1"], [n["j2"]])
 
-    test_node = test_node.children[0]
-    _verify_tree_asset(test_node, n["j2"], n["ac1"], [n["ac2"]])
+            test_node = test_node.children.pop()
+            _verify_tree_asset(test_node, n["j2"], n["ac1"], [n["ac2"]])
 
-    test_node = test_node.children[0]
-    _verify_tree_asset(test_node, n["ac2"], n["j2"], [n["j3"]])
+            test_node = test_node.children.pop()
+            _verify_tree_asset(test_node, n["ac2"], n["j2"], [n["j3"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j3"], n["ac2"], [n["ac4"]])
+            test_node = next(iter(test_node.children))
+            _verify_tree_asset(test_node, n["j3"], n["ac2"], [n["ac4"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["ac4"], n["j3"], [n["j6"]])
+            test_node = next(iter(test_node.children))
+            _verify_tree_asset(test_node, n["ac4"], n["j3"], [n["j6"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j6"], n["ac4"], [])
+            test_node = next(iter(test_node.children))
+            _verify_tree_asset(test_node, n["j6"], n["ac4"], [])
+            break
 
-    test_node = list(root.children)[1]
-    _verify_tree_asset(test_node, n["ac3"], n["j1"], [n["j4"]])
+        elif test_node.identified_object == n['ac3']:
+            _verify_tree_asset(test_node, n["ac3"], n["j1"], [n["j4"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j4"], n["ac3"], [n["ac5"], n["ac6"]])
+            test_node = next(iter(test_node.children))
+            _verify_tree_asset(test_node, n["j4"], n["ac3"], [n["ac5"], n["ac6"]])
+        else:
+            assert False
 
     assert len(_find_nodes(root, "j0")) == 0
     assert len(_find_nodes(root, "ac0")) == 0
@@ -147,6 +155,10 @@ async def test_downstream_tree():
     assert _find_node_depths(root, "ac16") == [8, 9, 11, 14]
 
 
+    for ce in (n['j5'], n['j13']):
+        assert ce in {l.identified_object for l in tree_builder.leaves}
+
+
 def _verify_tree_asset(
     tree_node: TreeNode,
     expected_asset: Optional[ConductingEquipment],
@@ -162,8 +174,15 @@ def _verify_tree_asset(
     else:
         assert tree_node.parent is None
 
-    children_nodes = list(c.identified_object for c in tree_node.children)
-    assert children_nodes == expected_children
+    children_nodes = [c.identified_object for c in tree_node.children]
+    try:
+        for child in expected_children:
+            assert child in children_nodes
+        for child in children_nodes:
+            assert child in expected_children
+    except AssertionError as e:
+        e.args = (expected_children, children_nodes)
+        raise e
 
 
 def _find_nodes(root: TreeNode[ConductingEquipment], asset_id: str) -> List[TreeNode[ConductingEquipment]]:
