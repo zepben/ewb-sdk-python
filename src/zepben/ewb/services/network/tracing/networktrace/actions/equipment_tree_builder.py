@@ -35,6 +35,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     """
 
     _roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
+    _leaves: set[EquipmentTreeNode] = set()
 
     def __init__(self):
         super().__init__(key=str(uuid.uuid4()))
@@ -42,6 +43,26 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     @property
     def roots(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
         return (r for r in self._roots.values())
+
+    def recurse_nodes(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
+        """
+        Returns a generator that will yield every node in the tree structure.
+        """
+        def recurse(node: TreeNode[ConductingEquipment]):
+            yield node
+            for child in node.children:
+                yield from recurse(child)
+
+        for root in self._roots.values():
+            yield from recurse(root)
+
+    @property
+    def leaves(self) -> set[EquipmentTreeNode]:
+        """
+        Return the leaves of the tree structure. Depending on how the backing trace is configured,
+        there may be extra unexpected leaves in loops.
+        """
+        return set(self._leaves)
 
     def compute_initial_value(self, item: NetworkTraceStep[Any]) -> EquipmentTreeNode:
         node = self._roots.get(item.path.to_equipment)
@@ -64,7 +85,9 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
 
     def _apply(self, item: NetworkTraceStep[Any], context: StepContext):
         current_node: TreeNode = self.get_context_value(context)
+        self._leaves.add(current_node) # add this node to _leaves as it has no children
         if current_node.parent:
+            self._leaves.discard(current_node.parent) # this nodes parent now has a child, it's not a leaf anymore
             current_node.parent.add_child(current_node)
 
     def clear(self):
