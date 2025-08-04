@@ -7,10 +7,11 @@
 * None.
 
 ### Enhancements
-* None.
+* `EquipmentTreeBuilder` will now calculate `leaves` when specified to do so.
 
 ### Fixes
-* None.
+* using `EquipmentTreeBuilder` more then once per interpreter will no longer cause the `roots` to contain more objects then it should due to `_roots` being a 
+  class var
 
 ### Notes
 * None.
