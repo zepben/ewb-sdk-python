@@ -16,6 +16,41 @@ from zepben.ewb.services.network.tracing.networktrace.actions.equipment_tree_bui
 from zepben.ewb.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
 
+def test_accessing_leaves_when_not_calculated_raises_exception():
+    builder = EquipmentTreeBuilder()
+    with pytest.raises(AttributeError):
+        builder.leaves
+
+@pytest.mark.asyncio
+async def test_equipment_tree_builder_leaves():
+    n = create_looping_network()
+    normal = NetworkStateOperators.NORMAL
+    current = NetworkStateOperators.CURRENT
+
+    await Tracing.set_phases().run(n)
+    feeder_head = n.get("j0", ConductingEquipment)
+    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=normal)
+    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=current)
+    await log_directions(n.get('j0', ConductingEquipment))
+
+    start = n.get("j1", ConductingEquipment)
+    assert start is not None
+    tree_builder = EquipmentTreeBuilder(calculate_leaves=True)
+    trace = (
+        Tracing.network_trace_branching(
+            network_state_operators=normal,
+            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT
+        )
+        .add_condition(downstream())
+        .add_step_action(tree_builder)
+    )
+
+    await trace.run(start)
+
+    for ce in (n['j5'], n['j13']):
+        assert ce in {l.identified_object for l in tree_builder.leaves}
+
+
 @pytest.mark.asyncio
 async def test_downstream_tree():
     n = create_looping_network()
@@ -153,10 +188,6 @@ async def test_downstream_tree():
     assert _find_node_depths(root, "ac14") == [9, 11, 11]
     assert _find_node_depths(root, "ac15") == [7, 10, 12, 13]
     assert _find_node_depths(root, "ac16") == [8, 9, 11, 14]
-
-
-    for ce in (n['j5'], n['j13']):
-        assert ce in {l.identified_object for l in tree_builder.leaves}
 
 
 def _verify_tree_asset(

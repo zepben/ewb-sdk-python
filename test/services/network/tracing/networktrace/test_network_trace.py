@@ -13,8 +13,8 @@ import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
 from zepben.ewb import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, \
-    Tracing
-from zepben.ewb.testing.test_network_builder import TestNetworkBuilder
+    Tracing, StepContext, StepActionWithContextValue, EnergyConsumer
+from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 Terminal.__add__ = PathTerminal.__add__
 Terminal.__sub__ = PathTerminal.__sub__
@@ -286,3 +286,49 @@ class TestNetworkTrace:
         # Can even use bizarre paths, they are just the same as any other external path.
         await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.ALL_STEPS, ["c2-t1", "c2-t2"])
         await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c2-t1"])
+
+    async def test_context_is_not_shared_between_branches(self):
+        #
+        # 1--c0--21--c1-*-21--c2--21--ec3
+        #         1
+        #         1--c4--21--ec5
+        #
+
+        ns = (
+            TestNetworkBuilder()
+            .from_acls()  # c0
+            .to_acls()  # c1
+            .with_clamp()  # c1-clamp1
+            .to_acls()  # c2
+            .to_energy_consumer()  # ec3
+            .branch_from('c1-clamp1')
+            .to_acls()  # c4
+            .to_energy_consumer()  # ec5
+        ).network
+
+        data_capture: list[tuple[str, list]] = []
+
+        class StepActionWithContext(StepActionWithContextValue):
+            def _apply(self, item: NetworkTraceStep, context: List):
+                print(item)
+                if isinstance((ec := item.path.to_equipment), EnergyConsumer):
+                    data_capture.append((ec.mrid, self.get_context_value(context)))
+
+            def compute_next_value(self, next_item: NetworkTraceStep, current_item: NetworkTraceStep, current_value: List):
+                nv =  list(current_value)
+                nv.append(next_item.path.from_equipment.mrid)
+                return nv
+
+            def compute_initial_value(self, item: NetworkTraceStep):
+                return [item.path.from_equipment.mrid]
+
+        await (
+            Tracing.network_trace()
+            .add_step_action(StepActionWithContext('key'))
+        ).run(ns.get('c0'))
+
+        assert len(data_capture) == 2
+        assert data_capture == [('ec3', ['c0', 'c0', 'c1', 'c1', 'c2', 'c2']),
+                                ('ec5', ['c0', 'c0', 'c1', 'c1-clamp1', 'c4', 'c4'])]
+
+
