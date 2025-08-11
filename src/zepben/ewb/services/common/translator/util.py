@@ -49,7 +49,7 @@ def long_or_none(value: int) -> Optional[int]:
 
 
 def str_or_none(value: str) -> Optional[str]:
-    return value if value else None
+    return value or None
 
 
 def from_nullable_int(value: Optional[int]) -> int:
@@ -69,10 +69,7 @@ def from_nullable_long(value: Optional[int]) -> int:
 
 
 def nullable_bool_settings(flag_name: str, value: Optional[bool]) -> Dict:
-    settings = {}
     if value is None:
-        settings[f"{flag_name}Null"] = NullValue.NULL_VALUE
+        return {f'{flag_name}Null': NullValue.NULL_VALUE}
     else:
-        settings[f"{flag_name}Set"] = value
-
-    return settings
+        return {f'{flag_name}Set': value}
