@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Union
 
+from zepben.ewb import unique
 
+
+@unique
 class Appliance(Enum):
     """
     The type of appliance.

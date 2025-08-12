@@ -7,7 +7,10 @@ __all__ = ["TransformerConstructionKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class TransformerConstructionKind(Enum):
     """
     Kind of transformer construction.
