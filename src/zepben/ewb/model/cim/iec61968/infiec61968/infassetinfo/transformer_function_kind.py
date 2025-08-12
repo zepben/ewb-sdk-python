@@ -7,7 +7,10 @@ __all__ = ["TransformerFunctionKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class TransformerFunctionKind(Enum):
     """
     Function of a transformer.

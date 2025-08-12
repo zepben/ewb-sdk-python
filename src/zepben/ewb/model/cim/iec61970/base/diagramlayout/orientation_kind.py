@@ -7,7 +7,10 @@ __all__ = ["OrientationKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class OrientationKind(Enum):
     """
     The orientation of the coordinate system with respect to top, left, and the coordinate number system.

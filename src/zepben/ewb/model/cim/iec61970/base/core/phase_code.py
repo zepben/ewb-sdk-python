@@ -8,6 +8,7 @@ __all__ = ["PhaseCode", "phase_code_by_id", "phase_code_from_single_phases"]
 from enum import Enum
 from typing import List, Set, Union
 
+from zepben.ewb import unique
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 
@@ -21,6 +22,7 @@ def phase_code_by_id(value: int):
     return _PHASE_CODE_VALUES[value]
 
 
+@unique
 class PhaseCode(Enum):
     """
     An unordered enumeration of phase identifiers.  Allows designation of phases for both transmission and distribution equipment,

@@ -8,9 +8,11 @@ __all__ = ["PowerDirectionKind"]
 from enum import Enum
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
+from zepben.ewb.util import unique
 
 
 @zbex
+@unique
 class PowerDirectionKind(Enum):
     """
     [ZBEX]

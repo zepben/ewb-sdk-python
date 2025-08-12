@@ -7,7 +7,10 @@ __all__ = ["CustomerKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class CustomerKind(Enum):
     """
     Kind of customer.

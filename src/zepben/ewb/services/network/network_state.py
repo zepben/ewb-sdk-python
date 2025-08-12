@@ -7,7 +7,10 @@ __all__ = ["NetworkState"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class NetworkState(Enum):
     """
     Indicates which state of the network an operation should be performed on.

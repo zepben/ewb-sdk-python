@@ -7,7 +7,10 @@ __all__ = ["StreetlightLampKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class StreetlightLampKind(Enum):
     """
     Kind of lamp for a `Streetlight`

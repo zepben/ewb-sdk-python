@@ -7,7 +7,10 @@ __all__ = ["SynchronousMachineKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class SynchronousMachineKind(Enum):
     """
     Synchronous machine type.

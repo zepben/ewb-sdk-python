@@ -7,7 +7,10 @@ __all__ = ["BatteryStateKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class BatteryStateKind(Enum):
     """
     Battery state.

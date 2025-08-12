@@ -7,7 +7,10 @@ __all__ = ["EndDeviceFunctionKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class EndDeviceFunctionKind(Enum):
     """
     Kind of end device function.

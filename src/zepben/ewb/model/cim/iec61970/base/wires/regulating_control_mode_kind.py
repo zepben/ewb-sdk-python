@@ -7,7 +7,10 @@ __all__ = ["RegulatingControlModeKind"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class RegulatingControlModeKind(Enum):
     """
     The kind of regulation model. For example regulating voltage, reactive power, active power, etc.

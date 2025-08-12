@@ -7,6 +7,8 @@ __all__ = ["UnitSymbol", "unit_symbol_from_id", "unit_symbol_from_cim_name"]
 
 from enum import Enum
 
+from zepben.ewb import unique
+
 
 def unit_symbol_from_cim_name(value: str):
     return _unitsymbol_by_cim_name[value]
@@ -16,6 +18,7 @@ def unit_symbol_from_id(value: int):
     return _unitsymbol_members_by_id[value]
 
 
+# NOTE: We can't use `@unique` here, as there are duplicate unit strings.
 class UnitSymbol(Enum):
     """
     The derived units defined for usage in the CIM. In some cases, the derived unit is equal to an SI unit. Whenever possible, the standard derived symbol is

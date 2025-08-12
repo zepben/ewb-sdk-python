@@ -7,7 +7,10 @@ __all__ = ["DiagramStyle"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class DiagramStyle(Enum):
     """
     The diagram style refer to a style used by the originating system for a diagram.  A diagram style describes
