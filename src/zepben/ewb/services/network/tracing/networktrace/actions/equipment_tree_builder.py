@@ -34,14 +34,39 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     >>>     .add_step_action(tree_builder)).run()
     """
 
-    _roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
-
-    def __init__(self):
+    def __init__(self, calculate_leaves: bool = False):
         super().__init__(key=str(uuid.uuid4()))
+
+        self._roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
+        self._leaves: set[EquipmentTreeNode] = set()
+
+        self._calculate_leaves = calculate_leaves
 
     @property
     def roots(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
         return (r for r in self._roots.values())
+
+    def recurse_nodes(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
+        """
+        Returns a generator that will yield every node in the tree structure.
+        """
+        def recurse(node: TreeNode[ConductingEquipment]):
+            yield node
+            for child in node.children:
+                yield from recurse(child)
+
+        for root in self._roots.values():
+            yield from recurse(root)
+
+    @property
+    def leaves(self) -> set[EquipmentTreeNode]:
+        """
+        Return the leaves of the tree structure.
+        Depending on how the backing trace is configured, there may be extra unexpected leaves in loops.
+        """
+        if not self._calculate_leaves:
+            raise AttributeError('leaves were not calculated, you must pass calculate_leaves=True to the EquipmentTreeBuilder when creating.')
+        return set(self._leaves)
 
     def compute_initial_value(self, item: NetworkTraceStep[Any]) -> EquipmentTreeNode:
         node = self._roots.get(item.path.to_equipment)
@@ -62,10 +87,18 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
         else:
             return TreeNode(next_item.path.to_equipment, current_value)
 
-    def _apply(self, item: NetworkTraceStep[Any], context: StepContext):
+    def _apply(self, _: NetworkTraceStep[Any], context: StepContext):
         current_node: TreeNode = self.get_context_value(context)
         if current_node.parent:
             current_node.parent.add_child(current_node)
+
+        if self._calculate_leaves:
+            self._process_leaf(current_node)
+
+    def _process_leaf(self, current_node: TreeNode[ConductingEquipment]):
+        self._leaves.add(current_node) # add this node to _leaves as it has no children
+        if current_node.parent:
+            self._leaves.discard(current_node.parent) # this nodes parent now has a child, it's not a leaf anymore
 
     def clear(self):
         self._roots.clear()

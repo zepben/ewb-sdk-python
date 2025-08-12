@@ -92,7 +92,7 @@
 * None.
 
 ### Enhancements
-* None.
+* `EquipmentTreeBuilder` will now calculate `leaves` when specified to do so.
 
 ### Fixes
 * Marked some extensions properties and classes with [ZBEX] that were missing them (might still be more). In addition to the ones moved into the extensions
@@ -127,6 +127,8 @@
   * `RegulatingControl.ratedCurrent`
   * `Sensor.relayFunctions`
   * `UsagePoint.approvedInverterCapacity`
+* using `EquipmentTreeBuilder` more then once per interpreter will no longer cause the `roots` to contain more objects then it should due to `_roots` being a 
+  class var
 
 ### Notes
 * None.
