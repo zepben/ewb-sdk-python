@@ -22,9 +22,18 @@ class Example:
 
     def __post_init__(self):
         _strings = Wrappa(self.strings)
+        print("BOOOOP")
         self.strings: Wrappa = _strings
 
+class Child(Example):
+    ints: List[int] = field(default_factory=list)
+
+    def __post_init__(self):
+        super().__post_init__()
+        _ints = Wrappa(self.ints)
+        self.ints: Wrappa = _ints
+
 if __name__ == '__main__':
-    ex = Example(strings=['a', 'b'])
-    ex.strings.add('ccc')
-    print(ex.strings)
+    ex2 = Child(strings=['a', 'b'])
+    ex2.strings.add('ccc')
+    print(ex2.strings)

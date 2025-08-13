@@ -9,6 +9,7 @@ __all__ = ["Sensor"]
 
 from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
 
+from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 
@@ -22,23 +23,15 @@ class Sensor(AuxiliaryEquipment):
     used in control or be recorded.
     """
 
-    _relay_functions: Optional[List[ProtectionRelayFunction]] = None
+    relay_functions: Optional[Iterable[ProtectionRelayFunction]] = None
     """The relay functions influenced by this [Sensor]."""
 
-    def __init__(self, relay_functions: Iterable[ProtectionRelayFunction] = None, **kwargs):
-        super(Sensor, self).__init__(**kwargs)
-        if relay_functions is not None:
-            for relay_function in relay_functions:
-                self.add_relay_function(relay_function)
 
-    @property
-    def relay_functions(self) -> Generator[ProtectionRelayFunction, None, None]:
-        """
-        Yields all the :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
+    def __post_init__(self):
+        _zlist = ZepbenList(self.relay_functions)
+        self.relay_functions
 
-        :return: A generator that iterates over all ProtectionRelayFunction influenced by this Sensor.
-        """
-        return ngen(self._relay_functions)
+
 
     def num_relay_functions(self) -> int:
         """
