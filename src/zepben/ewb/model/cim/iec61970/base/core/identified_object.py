@@ -19,7 +19,7 @@ from zepben.ewb.util import require, CopyableUUID, nlen, ngen, safe_remove
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+# @dataclass(slots=True)
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.
@@ -40,9 +40,20 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     description: str = ""
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
+    # names: Optional[List[Name]] = None
     _names: Optional[List[Name]] = None
 
-    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
+    # def __post_init__(self):
+    #     _names = self.names
+    #     del self.names
+    #     if _names:
+    #         for name in _names:
+    #             self.add_name(name.type, name.name)
+
+    def __init__(self,
+                 names: Optional[List[Name]] = None, **kwargs):
+
+
         super(IdentifiedObject, self).__init__(**kwargs)
         if names:
             for name in names:
