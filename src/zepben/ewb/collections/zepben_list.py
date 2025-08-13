@@ -6,6 +6,7 @@
 import typing
 from abc import ABC
 from collections.abc import Iterator
+from dataclasses import dataclass
 from typing import List, Optional, Iterable
 
 T = typing.TypeVar('T')
@@ -17,8 +18,12 @@ class ZepbenList(typing.Iterator[T]):
     _data: Optional[List[T]] = None
     _iter: Optional[Iterator[T]] = None
 
-    def __init__(self, data: List[T] = None):
-        self._data = data
+    def __init__(self, data: Optional[Iterable[T]] = None):
+        if data is None:
+            self._data = None
+        else:
+            self._data = []
+            self.add_all(data)
 
     def __iter__(self):
         yield from self._data or []
@@ -80,6 +85,11 @@ class ZepbenList(typing.Iterator[T]):
         """
         print(self._data)
 
+    def __repr__(self):
+        return f'{self.__class__.__name__} [{self._data}]'
+
+
+
 
 if __name__ == '__main__':
     # z  = ZbList()
@@ -105,3 +115,4 @@ if __name__ == '__main__':
     print(z.has(3))
 
     print(len(z))
+

@@ -7,11 +7,10 @@ from __future__ import annotations
 
 __all__ = ["Sensor"]
 
-from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
+from typing import Optional, TYPE_CHECKING, Iterable
 
-from zepben.ewb.collections.zepben_list import ZepbenList
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
-from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
@@ -28,8 +27,8 @@ class Sensor(AuxiliaryEquipment):
 
 
     def __post_init__(self):
-        _zlist = ZepbenList(self.relay_functions)
-        self.relay_functions
+        _relay_functions = MRIDList(self.relay_functions)
+        self.relay_functions: MRIDList = _relay_functions
 
 
 
@@ -39,7 +38,7 @@ class Sensor(AuxiliaryEquipment):
 
         :return: The number of ProtectionRelayFunction influenced by this Sensor.
         """
-        return nlen(self._relay_functions)
+        return len(self.relay_functions)
 
     def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
         """
@@ -49,7 +48,7 @@ class Sensor(AuxiliaryEquipment):
         :return: The ProtectionRelayFunction with the specified mRID if it exists, otherwise None.
         :raises KeyError: If `mrid` wasn't present.
         """
-        return get_by_mrid(self._relay_functions, mrid)
+        return self.relay_functions.get_by_mrid(mrid)
 
     def add_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
         """
@@ -58,11 +57,10 @@ class Sensor(AuxiliaryEquipment):
         :param protection_relay_function: The ProtectionRelayFunction to associate with this Sensor.
         :return: A reference to this Sensor for fluent use.
         """
-        if self._validate_reference(protection_relay_function, self.get_relay_function, "A ProtectionRelayFunction"):
-            return self
+        # if self._validate_reference(protection_relay_function, self.get_relay_function, "A ProtectionRelayFunction"):
+        #     return self
 
-        self._relay_functions = list() if self._relay_functions is None else self._relay_functions
-        self._relay_functions.append(protection_relay_function)
+        self.relay_functions.add(protection_relay_function)
         return self
 
     def remove_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
@@ -72,7 +70,8 @@ class Sensor(AuxiliaryEquipment):
         :param protection_relay_function: The ProtectionRelayFunction to disassociate from this Sensor.
         :return: A reference to this Sensor for fluent use.
         """
-        self._relay_functions = safe_remove(self._relay_functions, protection_relay_function)
+        # self._relay_functions = safe_remove(self._relay_functions, protection_relay_function)
+        self.relay_functions.remove(protection_relay_function)
         return self
 
     def clear_relay_function(self) -> Sensor:
@@ -81,5 +80,6 @@ class Sensor(AuxiliaryEquipment):
 
         :return: A reference to this Sensor for fluent use.
         """
-        self._relay_functions = None
+        # self._relay_functions = None
+        self.relay_functions.clear()
         return self
