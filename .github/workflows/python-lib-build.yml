@@ -6,7 +6,7 @@ on:
 
 jobs:
   run:
-    uses: zepben/.github/.github/workflows/python-build.yml@main
+    uses: zepben/.github/.github/workflows/python-build.yml@python3.10
     with:
       private: false
     secrets: inherit
