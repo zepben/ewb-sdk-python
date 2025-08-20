@@ -5,7 +5,7 @@
 
 __all__ = ["TableCurrentRelays"]
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
 
 

@@ -5,7 +5,7 @@
 
 __all__ = ["TableRemoteSources"]
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_points import TableRemotePoints
 
 

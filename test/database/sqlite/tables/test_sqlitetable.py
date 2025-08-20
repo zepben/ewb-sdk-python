@@ -8,7 +8,7 @@ from typing import List
 
 from pytest import raises
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
@@ -33,7 +33,7 @@ def test_ddl():
 
 def test_create_column_set_raises_on_invalid_column_name():
     x = TableWithDuplicateColumnName()
-    with raises(ValueError, match="You have a duplicate column names, go fix that."):
+    with raises(ValueError, match="You have duplicate column names, go fix that."):
         _ = x.column_set
 
 

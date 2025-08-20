@@ -5,7 +5,7 @@
 
 __all__ = ["TableNoLoadTests"]
 
-from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61968.assetinfo.table_transformer_test import TableTransformerTest
 
 
