@@ -4,7 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import typing
-from collections.abc import Iterator
 from typing import List, Optional, Iterable
 
 T = typing.TypeVar('T')
@@ -75,6 +74,12 @@ class ZepbenList(typing.Iterator[T]):
         Equivalent to `some_item in zblist_object`
         """
         return item in self
+
+    def of_type(self, _type: typing.Type):
+        yield from (item for item in self if isinstance(item, type))
+
+    def num_of_type(self, _type: typing.Type):
+        return sum(1 for item in self if isinstance(item, type))
 
     def print_contents(self):
         """
