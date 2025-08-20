@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim", "organisation_role_to_cim",
-           "BaseProtoToCim", "with_network_service", "bind_to_cim"]
+           "BaseProtoToCim", "add_to_network_or_none", "bind_to_cim"]
 
 import functools
 import inspect
@@ -35,7 +35,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def with_network_service(func: TProtoToCimFunc) -> TProtoToCimFunc:
+def add_to_network_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
     @functools.wraps(func)
     def wrapper(pb: Message, service: BaseService) -> Optional[IdentifiedObject]:
         return cim if service.add(cim := func(pb, service)) else None
@@ -68,7 +68,7 @@ def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
 
 
 @bind_to_cim
-@with_network_service
+@add_to_network_or_none
 def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Optional[Organisation]:
     cim = Organisation()
 
