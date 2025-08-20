@@ -44,9 +44,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     names: Optional[List[Name]] = None
 
     def __post_init__(self):
-        _names = ZepbenList()
-        _names.add_all(self.names)
-        self.names : ZepbenList[Name] = _names
+        _names = ZepbenList(self.names)
+        self.names : ZepbenList[Name] = ZepbenList(self.names)
 
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"

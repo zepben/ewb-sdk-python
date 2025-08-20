@@ -8,10 +8,11 @@ from __future__ import annotations
 __all__ = ['ConductingEquipment']
 
 import sys
-from typing import List, Optional, Generator, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 
+from zepben.ewb.collections.terminal_list import TerminalList
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.ewb.util import get_by_mrid, require, ngen
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
@@ -35,16 +36,13 @@ class ConductingEquipment(Equipment):
     used for transformers.
     """
 
-    _terminals: List[Terminal] = []
+    # _terminals: List[Terminal] = []
+    terminals: Optional[List[Terminal]] = None
     max_terminals = int(sys.maxsize)
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConductingEquipment, self).__init__(**kwargs)
-        if terminals:
-            for term in terminals:
-                if term.conducting_equipment is None:
-                    term.conducting_equipment = self
-                self.add_terminal(term)
+    def _post_init__(self):
+        self.terminals : TerminalList = TerminalList(self.terminals, self, self.max_terminals)
+        del self.max_terminals
 
     # pylint: disable=unused-argument
     def get_base_voltage(self, terminal: Terminal = None):
@@ -57,7 +55,6 @@ class ConductingEquipment(Equipment):
         """
         return self.base_voltage
 
-    # pylint: enable=unused-argument
 
     @property
     def base_voltage_value(self) -> int:
@@ -66,19 +63,11 @@ class ConductingEquipment(Equipment):
         """
         return self.base_voltage.nominal_voltage if self.base_voltage and self.base_voltage.nominal_voltage else 0
 
-    @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        """
-        `ConductingEquipment` have `Terminal`s that may be connected to other `ConductingEquipment`
-        `Terminal`s via `ConnectivityNode`s.
-        """
-        return ngen(self._terminals)
-
     def num_terminals(self):
         """
         Get the number of `Terminal`s for this `ConductingEquipment`.
         """
-        return len(self._terminals)
+        return len(self.terminals)
 
     def get_terminal(self, identifier: Union[int, str]):
         """
@@ -91,11 +80,7 @@ class ConductingEquipment(Equipment):
         Raises `KeyError` if `mrid` wasn't present.
         Raises `TypeError` if the identifier wasn't a recognised type
         """
-        if isinstance(identifier, int):
-            return self.get_terminal_by_sn(identifier)
-        elif isinstance(identifier, str):
-            return self.get_terminal_by_mrid(identifier)
-        raise TypeError(f'`identifier` parameter not a recognised type: {type(identifier)}')
+        return self.terminals.get(identifier)
 
     def get_terminal_by_mrid(self, mrid: str) -> Terminal:
         """
@@ -107,7 +92,7 @@ class ConductingEquipment(Equipment):
 
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._terminals, mrid)
+        return self.terminals.get_by_mrid(mrid)
 
     def get_terminal_by_sn(self, sequence_number: int):
         """
@@ -119,10 +104,7 @@ class ConductingEquipment(Equipment):
 
         Raises IndexError if no `Terminal` was found with sequence_number `sequence_number`.
         """
-        for term in self._terminals:
-            if term.sequence_number == sequence_number:
-                return term
-        raise IndexError(f"No Terminal with sequence_number {sequence_number} was found in ConductingEquipment {str(self)}")
+        return self.terminals.get_by_sn(sequence_number)
 
     def __getitem__(self, item: int):
         return self.get_terminal_by_sn(item)
@@ -137,18 +119,10 @@ class ConductingEquipment(Equipment):
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConductingEquipment`.
         Raises `ValueError` if `max_terminals` has already been reached.
         """
+        # TODO: Remove this filth
         if self._validate_terminal(terminal):
             return self
-
-        require(self.num_terminals() < self.max_terminals,
-                lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).")
-
-        if terminal.sequence_number == 0:
-            terminal.sequence_number = self.num_terminals() + 1
-
-        self._terminals.append(terminal)
-        self._terminals.sort(key=lambda t: t.sequence_number)
-
+        self.terminals.add(terminal)
         return self
 
     def remove_terminal(self, terminal: Terminal) -> ConductingEquipment:
@@ -159,7 +133,7 @@ class ConductingEquipment(Equipment):
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConductingEquipment`.
         """
-        self._terminals.remove(terminal)
+        self.terminals.remove(terminal)
         return self
 
     def clear_terminals(self) -> ConductingEquipment:
@@ -167,7 +141,7 @@ class ConductingEquipment(Equipment):
         Clear all terminals.
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         """
-        self._terminals.clear()
+        self.terminals.clear()
         return self
 
     def __repr__(self):
@@ -189,9 +163,6 @@ class ConductingEquipment(Equipment):
 
         if self._validate_reference_by_field(terminal, terminal.sequence_number, self.get_terminal_by_sn, "sequence_number"):
             return True
-
-        if not terminal.conducting_equipment:
-            terminal.conducting_equipment = self
 
         require(terminal.conducting_equipment is self,
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")

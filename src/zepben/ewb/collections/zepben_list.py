@@ -4,9 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import typing
-from abc import ABC
 from collections.abc import Iterator
-from dataclasses import dataclass
 from typing import List, Optional, Iterable
 
 T = typing.TypeVar('T')
@@ -99,7 +97,7 @@ if __name__ == '__main__':
         print(v)
 
     z.add(42)
-    z.add('24')
+    # z.add('24')
     for v in z: print(v)
 
     z.clear()
