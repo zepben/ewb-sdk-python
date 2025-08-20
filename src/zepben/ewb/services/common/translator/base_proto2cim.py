@@ -36,6 +36,10 @@ R = TypeVar("R")
 
 
 def add_to_network_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
+    """
+    This should wrap any leaf class of the hierarchy, for example, If you're porting over ewb-sdk-jvm
+    changes, any of the classes that get used in a `network.add(Class)`
+    """
     @functools.wraps(func)
     def wrapper(pb: Message, service: BaseService) -> Optional[IdentifiedObject]:
         return cim if service.add(cim := func(pb, service)) else None
