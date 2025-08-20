@@ -1,0 +1,61 @@
+#  Copyright 2025 Zeppelin Bend Pty Ltd
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+[build-system]
+    requires = [
+        "setuptools",
+        "wheel",
+        "build>=1.2.0"
+    ]
+    build-backend = "setuptools.build_meta"
+
+[project]
+    name = "zepben.ewb"
+    version = "1.0.0b6"
+    description = "Python SDK for interacting with the Energy Workbench platform"
+    readme = {file = "README.md", content-type = "test/markdown"}
+    license = "MPL-2.0"
+    requires-python = '>=3.9,<3.13'
+    authors = [
+        {name = "Kurt Greaves", email = "kurt.greaves@zepben.com"},
+        {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
+    ]
+    dependencies = [
+        "zepben.protobuf==1.0.0b1",
+        "typing_extensions==4.12.2",
+        "requests>=2.26.0, <3.0.0",
+        "urllib3>=1.26.6, <1.27.0",
+        "PyJWT>=2.1.0, <2.2.0",
+        "dataclassy==0.6.2",
+    ]
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Operating System :: OS Independent"
+    ]
+
+[project.urls]
+    Repository = "https://github.com/zepben/evolve-sdk-python"
+    Homepage = "https://zepben.com"
+
+[project.optional-dependencies]
+    test = [
+        "pytest>=7.4.4, <9",
+        "pytest-cov==6.1.1",
+        "pytest-asyncio==0.26.0",
+        "pytest-timeout==2.4.0",
+        "pytest-subtests",
+        "hypothesis==6.119.4",  # 6.120.0 has issues with one of our large tests
+        "grpcio-testing==1.61.3",
+        "pylint==2.14.5",
+        "six==1.16.0",
+        "tox"
+    ]
+
+[tool.setuptools.packages.find]
+    where = ["src/"]
