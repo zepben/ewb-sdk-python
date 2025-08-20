@@ -62,7 +62,7 @@ to prevent the test from timing out while you step through the code:
    * ```import <new_class_name> as PB<new_class_name>```
    * Add ```def <new_class_name>_to_pb```
    * Add ```"<new_class_name>_to_pb"``` to ```__all__```
-   * Add ```<new_class_name>.to_pb = <new_class_name>_to_pb```
+   * Annotate ```<new_class_name>_to_pb``` with the ```@bind_to_pb``` decorator
 1. Update  [network_proto2cim.py](src/zepben/ewb/services/network/translator/network_proto2cim.py)
    * ```import <new_class_name> as PB<new_class_name>```
    * Add ```def <new_class_name>_to_pb```

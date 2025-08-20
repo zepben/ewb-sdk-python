@@ -5,6 +5,9 @@
 
 __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb", "organisation_to_pb"]
 
+import inspect
+from typing import ParamSpec, TypeVar, Callable
+
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
@@ -23,10 +26,23 @@ from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common.translator.util import mrid_or_empty
 
 
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def bind_to_pb(func: Callable[P, R]) -> Callable[P, R]:
+    """
+    Get the object described in the type hint of the first argument of the function we are wrapping
+    set that object's `to_pb` function to be the function we are wrapping
+    """
+    inspect.get_annotations(func, eval_str=True)[func.__code__.co_varnames[0]].to_pb = func
+    return func
+
 ###################
 # IEC61968 Common #
 ###################
 
+@bind_to_pb
 def document_to_pb(cim: Document) -> PBDocument:
     timestamp = None
     if cim.created_date_time:
@@ -44,10 +60,12 @@ def document_to_pb(cim: Document) -> PBDocument:
     )
 
 
+@bind_to_pb
 def organisation_to_pb(cim: Organisation) -> PBOrganisation:
     return PBOrganisation(io=identified_object_to_pb(cim))
 
 
+@bind_to_pb
 def organisation_role_to_pb(cim: OrganisationRole) -> PBOrganisationRole:
     return PBOrganisationRole(
         io=identified_object_to_pb(cim),
@@ -55,15 +73,11 @@ def organisation_role_to_pb(cim: OrganisationRole) -> PBOrganisationRole:
     )
 
 
-Document.to_pb = document_to_pb
-Organisation.to_pb = organisation_to_pb
-OrganisationRole.to_pb = organisation_role_to_pb
-
-
 ######################
 # IEC61970 Base Core #
 ######################
 
+@bind_to_pb
 def identified_object_to_pb(cim: IdentifiedObject) -> PBIdentifiedObject:
     return PBIdentifiedObject(
         mRID=str(cim.mrid),
@@ -73,6 +87,7 @@ def identified_object_to_pb(cim: IdentifiedObject) -> PBIdentifiedObject:
     )
 
 
+@bind_to_pb
 def name_to_pb(cim: Name) -> PBName:
     return PBName(
         name=cim.name,
@@ -80,13 +95,9 @@ def name_to_pb(cim: Name) -> PBName:
     )
 
 
+@bind_to_pb
 def name_type_to_pb(cim: NameType) -> PBNameType:
     return PBNameType(
         name=cim.name,
         description=cim.description
     )
-
-
-IdentifiedObject.to_pb = identified_object_to_pb
-Name.to_pb = name_to_pb
-NameType.to_pb = name_type_to_pb

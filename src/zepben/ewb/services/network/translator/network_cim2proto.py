@@ -301,7 +301,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import *
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
-from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
+from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb, bind_to_pb
 from zepben.ewb.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
     nullable_bool_settings
 # noinspection PyProtectedMember
@@ -324,6 +324,7 @@ class CimTranslationException(Exception):
 # Extensions IEC61968 Asset Info #
 ##################################
 
+@bind_to_pb
 def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
     return PBRelayInfo(
         ai=asset_info_to_pb(cim),
@@ -333,13 +334,11 @@ def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
     )
 
 
-RelayInfo.to_pb = relay_info_to_pb
-
-
 ################################
 # Extensions IEC61968 Metering #
 ################################
 
+@bind_to_pb
 def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanDemandResponseFunction:
     """
     Convert the :class:`PanDemandResponseFunction` into its protobuf counterpart.
@@ -354,24 +353,20 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
     )
 
 
-PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
-
-
 #################################
 # Extensions IEC61970 Base Core #
 #################################
 
+@bind_to_pb
 def site_to_pb(cim: Site) -> PBSite:
     return PBSite(ec=equipment_container_to_pb(cim))
-
-
-Site.to_pb = site_to_pb
 
 
 ###################################
 # Extensions IEC61970 Base Feeder #
 ###################################
 
+@bind_to_pb
 def loop_to_pb(cim: Loop) -> PBLoop:
     return PBLoop(
         io=identified_object_to_pb(cim),
@@ -381,6 +376,7 @@ def loop_to_pb(cim: Loop) -> PBLoop:
     )
 
 
+@bind_to_pb
 def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
     return PBLvFeeder(
         ec=equipment_container_to_pb(cim),
@@ -390,25 +386,20 @@ def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
     )
 
 
-Loop.to_pb = loop_to_pb
-LvFeeder.to_pb = lv_feeder_to_pb
-
-
 ##################################################
 # Extensions IEC61970 Base Generation Production #
 ##################################################
 
+@bind_to_pb
 def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
     return PBEvChargingUnit(peu=power_electronics_unit_to_pb(cim))
-
-
-EvChargingUnit.to_pb = ev_charging_unit
 
 
 #######################################
 # Extensions IEC61970 Base Protection #
 #######################################
 
+@bind_to_pb
 def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
     return PBDistanceRelay(
         prf=protection_relay_function_to_pb(cim, True),
@@ -441,6 +432,7 @@ def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_
     )
 
 
+@bind_to_pb
 def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRelayScheme:
     return PBProtectionRelayScheme(
         io=identified_object_to_pb(cim),
@@ -449,6 +441,7 @@ def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRel
     )
 
 
+@bind_to_pb
 def protection_relay_system_to_pb(cim: ProtectionRelaySystem) -> PBProtectionRelaySystem:
     return PBProtectionRelaySystem(
         eq=equipment_to_pb(cim),
@@ -465,22 +458,18 @@ def relay_setting_to_pb(cim: RelaySetting) -> PBRelaySetting:
     )
 
 
+@bind_to_pb
 def voltage_relay_to_pb(cim: VoltageRelay) -> PBVoltageRelay:
     return PBVoltageRelay(
         prf=protection_relay_function_to_pb(cim, True),
     )
 
 
-DistanceRelay.to_pb = distance_relay_to_pb
-ProtectionRelayScheme.to_pb = protection_relay_scheme_to_pb
-ProtectionRelaySystem.to_pb = protection_relay_system_to_pb
-VoltageRelay.to_pb = voltage_relay_to_pb
-
-
 ##################################
 # Extensions IEC61970 Base Wires #
 ##################################
 
+@bind_to_pb
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
     """
     Convert the :class:`BatteryControl` into its protobuf counterpart.
@@ -497,17 +486,16 @@ def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
     )
 
 
-BatteryControl.to_pb = battery_control_to_pb
-
-
 #######################
 # IEC61968 Asset Info #
 #######################
 
+@bind_to_pb
 def cable_info_to_pb(cim: CableInfo) -> PBCableInfo:
     return PBCableInfo(wi=wire_info_to_pb(cim))
 
 
+@bind_to_pb
 def no_load_test_to_pb(cim: NoLoadTest) -> PBNoLoadTest:
     return PBNoLoadTest(
         tt=transformer_test_to_pb(cim),
@@ -519,6 +507,7 @@ def no_load_test_to_pb(cim: NoLoadTest) -> PBNoLoadTest:
     )
 
 
+@bind_to_pb
 def open_circuit_test_to_pb(cim: OpenCircuitTest) -> PBOpenCircuitTest:
     return PBOpenCircuitTest(
         tt=transformer_test_to_pb(cim),
@@ -530,10 +519,12 @@ def open_circuit_test_to_pb(cim: OpenCircuitTest) -> PBOpenCircuitTest:
     )
 
 
+@bind_to_pb
 def overhead_wire_info_to_pb(cim: OverheadWireInfo) -> PBOverheadWireInfo:
     return PBOverheadWireInfo(wi=wire_info_to_pb(cim))
 
 
+@bind_to_pb
 def power_transformer_info_to_pb(cim: PowerTransformerInfo) -> PBPowerTransformerInfo:
     return PBPowerTransformerInfo(
         ai=asset_info_to_pb(cim),
@@ -541,6 +532,7 @@ def power_transformer_info_to_pb(cim: PowerTransformerInfo) -> PBPowerTransforme
     )
 
 
+@bind_to_pb
 def short_circuit_test_to_pb(cim: ShortCircuitTest) -> PBShortCircuitTest:
     return PBShortCircuitTest(
         tt=transformer_test_to_pb(cim),
@@ -557,6 +549,7 @@ def short_circuit_test_to_pb(cim: ShortCircuitTest) -> PBShortCircuitTest:
     )
 
 
+@bind_to_pb
 def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensatorInfo:
     return PBShuntCompensatorInfo(
         ai=asset_info_to_pb(cim),
@@ -567,6 +560,7 @@ def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensato
     )
 
 
+@bind_to_pb
 def switch_info_to_pb(cim: SwitchInfo) -> PBSwitchInfo:
     return PBSwitchInfo(
         ai=asset_info_to_pb(cim),
@@ -574,6 +568,7 @@ def switch_info_to_pb(cim: SwitchInfo) -> PBSwitchInfo:
     )
 
 
+@bind_to_pb
 def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=asset_info_to_pb(cim),
@@ -596,6 +591,7 @@ def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     )
 
 
+@bind_to_pb
 def transformer_tank_info_to_pb(cim: TransformerTankInfo) -> PBTransformerTankInfo:
     return PBTransformerTankInfo(
         ai=asset_info_to_pb(cim),
@@ -603,6 +599,7 @@ def transformer_tank_info_to_pb(cim: TransformerTankInfo) -> PBTransformerTankIn
     )
 
 
+@bind_to_pb
 def transformer_test_to_pb(cim: TransformerTest) -> PBTransformerTest:
     return PBTransformerTest(
         io=identified_object_to_pb(cim),
@@ -611,24 +608,13 @@ def transformer_test_to_pb(cim: TransformerTest) -> PBTransformerTest:
     )
 
 
+@bind_to_pb
 def wire_info_to_pb(cim: WireInfo) -> PBWireInfo:
     return PBWireInfo(
         ai=asset_info_to_pb(cim),
         ratedCurrent=from_nullable_int(cim.rated_current),
         material=_map_wire_material_kind.to_pb(cim.material)
     )
-
-
-CableInfo.to_pb = cable_info_to_pb
-NoLoadTest.to_pb = no_load_test_to_pb
-OpenCircuitTest.to_pb = open_circuit_test_to_pb
-OverheadWireInfo.to_pb = overhead_wire_info_to_pb
-PowerTransformerInfo.to_pb = power_transformer_info_to_pb
-ShortCircuitTest.to_pb = short_circuit_test_to_pb
-ShuntCompensatorInfo.to_pb = shunt_compensator_info_to_pb
-SwitchInfo.to_pb = switch_info_to_pb
-TransformerEndInfo.to_pb = transformer_end_info_to_pb
-TransformerTankInfo.to_pb = transformer_tank_info_to_pb
 
 
 ###################
@@ -667,10 +653,12 @@ def asset_organisation_role_to_pb(cim: AssetOrganisationRole) -> PBAssetOrganisa
     return pb
 
 
+@bind_to_pb
 def asset_owner_to_pb(cim: AssetOwner) -> PBAssetOwner:
     return PBAssetOwner(aor=asset_organisation_role_to_pb(cim))
 
 
+@bind_to_pb
 def streetlight_to_pb(cim: Streetlight) -> PBStreetlight:
     return PBStreetlight(
         at=asset_to_pb(cim),
@@ -684,14 +672,11 @@ def structure_to_pb(cim: Structure) -> PBStructure:
     return PBStructure(ac=asset_container_to_pb(cim))
 
 
-AssetOwner.to_pb = asset_owner_to_pb
-Streetlight.to_pb = streetlight_to_pb
-
-
 ###################
 # IEC61968 Common #
 ###################
 
+@bind_to_pb
 def location_to_pb(cim: Location) -> PBLocation:
     return PBLocation(
         io=identified_object_to_pb(cim),
@@ -729,13 +714,11 @@ def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
     return PBTownDetail(name=cim.name, stateOrProvince=cim.state_or_province)
 
 
-Location.to_pb = location_to_pb
-
-
 #####################################
 # IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
+@bind_to_pb
 def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTransformerInfo:
     return PBCurrentTransformerInfo(
         ai=asset_info_to_pb(cim),
@@ -754,6 +737,7 @@ def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTran
     )
 
 
+@bind_to_pb
 def potential_transformer_info_to_pb(cim: PotentialTransformerInfo) -> PBPotentialTransformerInfo:
     return PBPotentialTransformerInfo(
         ai=asset_info_to_pb(cim),
@@ -766,23 +750,17 @@ def potential_transformer_info_to_pb(cim: PotentialTransformerInfo) -> PBPotenti
     )
 
 
-CurrentTransformerInfo.to_pb = current_transformer_info_to_pb
-PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
-
-
 ##################################
 # IEC61968 InfIEC61968 InfAssets #
 ##################################
 
+@bind_to_pb
 def pole_to_pb(cim: Pole) -> PBPole:
     return PBPole(
         st=structure_to_pb(cim),
         streetlightMRIDs=[str(io.mrid) for io in cim.streetlights],
         classification=cim.classification
     )
-
-
-Pole.to_pb = pole_to_pb
 
 
 ##################################
@@ -824,10 +802,12 @@ def end_device_function_to_pb(cim: EndDeviceFunction) -> PBEndDeviceFunction:
     )
 
 
+@bind_to_pb
 def meter_to_pb(cim: Meter) -> PBMeter:
     return PBMeter(ed=end_device_to_pb(cim))
 
 
+@bind_to_pb
 def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
     return PBUsagePoint(
         io=identified_object_to_pb(cim),
@@ -842,19 +822,13 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
     )
 
 
-Meter.to_pb = meter_to_pb
-UsagePoint.to_pb = usage_point_to_pb
-
-
 #######################
 # IEC61968 Operations #
 #######################
 
+@bind_to_pb
 def operational_restriction_to_pb(cim: OperationalRestriction) -> PBOperationalRestriction:
     return PBOperationalRestriction(doc=document_to_pb(cim))
-
-
-OperationalRestriction.to_pb = operational_restriction_to_pb
 
 
 #####################################
@@ -868,6 +842,7 @@ def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment, include_asset_info: bool 
     )
 
 
+@bind_to_pb
 def current_transformer_to_pb(cim: CurrentTransformer) -> PBCurrentTransformer:
     return PBCurrentTransformer(
         sn=sensor_to_pb(cim, True),
@@ -875,10 +850,12 @@ def current_transformer_to_pb(cim: CurrentTransformer) -> PBCurrentTransformer:
     )
 
 
+@bind_to_pb
 def fault_indicator_to_pb(cim: FaultIndicator) -> PBFaultIndicator:
     return PBFaultIndicator(ae=auxiliary_equipment_to_pb(cim))
 
 
+@bind_to_pb
 def potential_transformer_to_pb(cim: PotentialTransformer) -> PBPotentialTransformer:
     return PBPotentialTransformer(
         sn=sensor_to_pb(cim, True),
@@ -893,11 +870,6 @@ def sensor_to_pb(cim: Sensor, include_asset_info: bool = False) -> PBSensor:
     )
 
 
-CurrentTransformer.to_pb = current_transformer_to_pb
-FaultIndicator.to_pb = fault_indicator_to_pb
-PotentialTransformer.to_pb = potential_transformer_to_pb
-
-
 ######################
 # IEC61970 Base Core #
 ######################
@@ -906,6 +878,7 @@ def ac_dc_terminal_to_pb(cim: AcDcTerminal) -> PBAcDcTerminal:
     return PBAcDcTerminal(io=identified_object_to_pb(cim))
 
 
+@bind_to_pb
 def base_voltage_to_pb(cim: BaseVoltage) -> PBBaseVoltage:
     return PBBaseVoltage(
         io=identified_object_to_pb(cim),
@@ -921,6 +894,7 @@ def conducting_equipment_to_pb(cim: ConductingEquipment, include_asset_info: boo
     )
 
 
+@bind_to_pb
 def connectivity_node_to_pb(cim: ConnectivityNode) -> PBConnectivityNode:
     return PBConnectivityNode(io=identified_object_to_pb(cim))
 
@@ -966,6 +940,7 @@ def equipment_container_to_pb(cim: EquipmentContainer) -> PBEquipmentContainer:
     return PBEquipmentContainer(cnc=connectivity_node_container_to_pb(cim))
 
 
+@bind_to_pb
 def feeder_to_pb(cim: Feeder) -> PBFeeder:
     return PBFeeder(
         ec=equipment_container_to_pb(cim),
@@ -976,6 +951,7 @@ def feeder_to_pb(cim: Feeder) -> PBFeeder:
     )
 
 
+@bind_to_pb
 def geographical_region_to_pb(cim: GeographicalRegion) -> PBGeographicalRegion:
     return PBGeographicalRegion(
         io=identified_object_to_pb(cim),
@@ -992,6 +968,7 @@ def power_system_resource_to_pb(cim: PowerSystemResource, include_asset_info: bo
     )
 
 
+@bind_to_pb
 def sub_geographical_region_to_pb(cim: SubGeographicalRegion) -> PBSubGeographicalRegion:
     return PBSubGeographicalRegion(
         io=identified_object_to_pb(cim),
@@ -1000,6 +977,7 @@ def sub_geographical_region_to_pb(cim: SubGeographicalRegion) -> PBSubGeographic
     )
 
 
+@bind_to_pb
 def substation_to_pb(cim: Substation) -> PBSubstation:
     return PBSubstation(
         ec=equipment_container_to_pb(cim),
@@ -1011,6 +989,7 @@ def substation_to_pb(cim: Substation) -> PBSubstation:
     )
 
 
+@bind_to_pb
 def terminal_to_pb(cim: Terminal) -> PBTerminal:
     # noinspection PyProtectedMember
     return PBTerminal(
@@ -1025,19 +1004,11 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
     )
 
 
-BaseVoltage.to_pb = base_voltage_to_pb
-ConnectivityNode.to_pb = connectivity_node_to_pb
-Feeder.to_pb = feeder_to_pb
-GeographicalRegion.to_pb = geographical_region_to_pb
-SubGeographicalRegion.to_pb = sub_geographical_region_to_pb
-Substation.to_pb = substation_to_pb
-Terminal.to_pb = terminal_to_pb
-
-
 #############################
 # IEC61970 Base Equivalents #
 #############################
 
+@bind_to_pb
 def equivalent_branch_to_pb(cim: EquivalentBranch) -> PBEquivalentBranch:
     return PBEquivalentBranch(
         ee=equivalent_equipment_to_pb(cim),
@@ -1064,13 +1035,11 @@ def equivalent_equipment_to_pb(cim: EquivalentEquipment) -> PBEquivalentEquipmen
     return PBEquivalentEquipment(ce=conducting_equipment_to_pb(cim))
 
 
-EquivalentBranch.to_pb = equivalent_branch_to_pb
-
-
 #######################################
 # IEC61970 Base Generation Production #
 #######################################
 
+@bind_to_pb
 def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     """
     Convert the :class:`BatteryUnit` into its protobuf counterpart.
@@ -1086,6 +1055,7 @@ def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     )
 
 
+@bind_to_pb
 def photo_voltaic_unit_to_pb(cim: PhotoVoltaicUnit) -> PBPhotoVoltaicUnit:
     return PBPhotoVoltaicUnit(peu=power_electronics_unit_to_pb(cim))
 
@@ -1099,23 +1069,21 @@ def power_electronics_unit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronic
     )
 
 
+@bind_to_pb
 def power_electronics_wind_unit_to_pb(cim: PowerElectronicsWindUnit) -> PBPowerElectronicsWindUnit:
     return PBPowerElectronicsWindUnit(peu=power_electronics_unit_to_pb(cim))
-
-
-BatteryUnit.to_pb = battery_unit_to_pb
-PhotoVoltaicUnit.to_pb = photo_voltaic_unit_to_pb
-PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 
 
 ######################
 # IEC61970 Base Meas #
 ######################
 
+@bind_to_pb
 def accumulator_to_pb(cim: Accumulator) -> PBAccumulator:
     return PBAccumulator(measurement=measurement_to_pb(cim))
 
 
+@bind_to_pb
 def analog_to_pb(cim: Analog) -> PBAnalog:
     return PBAnalog(
         measurement=measurement_to_pb(cim),
@@ -1123,6 +1091,7 @@ def analog_to_pb(cim: Analog) -> PBAnalog:
     )
 
 
+@bind_to_pb
 def control_to_pb(cim: Control) -> PBControl:
     return PBControl(
         ip=io_point_to_pb(cim),
@@ -1131,6 +1100,7 @@ def control_to_pb(cim: Control) -> PBControl:
     )
 
 
+@bind_to_pb
 def discrete_to_pb(cim: Discrete) -> PBDiscrete:
     return PBDiscrete(measurement=measurement_to_pb(cim))
 
@@ -1150,16 +1120,11 @@ def measurement_to_pb(cim: Measurement) -> PBMeasurement:
     )
 
 
-Accumulator.to_pb = accumulator_to_pb
-Analog.to_pb = analog_to_pb
-Control.to_pb = control_to_pb
-Discrete.to_pb = discrete_to_pb
-
-
 ############################
 # IEC61970 Base Protection #
 ############################
 
+@bind_to_pb
 def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     return PBCurrentRelay(
         prf=protection_relay_function_to_pb(cim, True),
@@ -1169,13 +1134,11 @@ def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     )
 
 
-CurrentRelay.to_pb = current_relay_to_pb
-
-
 #######################
 # IEC61970 Base Scada #
 #######################
 
+@bind_to_pb
 def remote_control_to_pb(cim: RemoteControl) -> PBRemoteControl:
     return PBRemoteControl(
         rp=remote_point_to_pb(cim),
@@ -1187,6 +1150,7 @@ def remote_point_to_pb(cim: RemotePoint) -> PBRemotePoint:
     return PBRemotePoint(io=identified_object_to_pb(cim))
 
 
+@bind_to_pb
 def remote_source_to_pb(cim: RemoteSource) -> PBRemoteSource:
     return PBRemoteSource(
         rp=remote_point_to_pb(cim),
@@ -1194,14 +1158,11 @@ def remote_source_to_pb(cim: RemoteSource) -> PBRemoteSource:
     )
 
 
-RemoteControl.to_pb = remote_control_to_pb
-RemoteSource.to_pb = remote_source_to_pb
-
-
 #######################
 # IEC61970 Base Wires #
 #######################
 
+@bind_to_pb
 def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
     """
     Convert the :class:`AcLineSegment` into its protobuf counterpart.
@@ -1216,6 +1177,7 @@ def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
     )
 
 
+@bind_to_pb
 def breaker_to_pb(cim: Breaker) -> PBBreaker:
     return PBBreaker(
         sw=protected_switch_to_pb(cim),
@@ -1223,10 +1185,12 @@ def breaker_to_pb(cim: Breaker) -> PBBreaker:
     )
 
 
+@bind_to_pb
 def busbar_section_to_pb(cim: BusbarSection) -> PBBusbarSection:
     return PBBusbarSection(cn=connector_to_pb(cim))
 
 
+@bind_to_pb
 def clamp_to_pb(cim: Clamp) -> PBClamp:
     return PBClamp(
         ce=conducting_equipment_to_pb(cim),
@@ -1248,6 +1212,7 @@ def connector_to_pb(cim: Connector) -> PBConnector:
     return PBConnector(ce=conducting_equipment_to_pb(cim))
 
 
+@bind_to_pb
 def cut_to_pb(cim: Cut) -> PBCut:
     return PBCut(
         sw=switch_to_pb(cim),
@@ -1256,6 +1221,7 @@ def cut_to_pb(cim: Cut) -> PBCut:
     )
 
 
+@bind_to_pb
 def disconnector_to_pb(cim: Disconnector) -> PBDisconnector:
     return PBDisconnector(sw=switch_to_pb(cim))
 
@@ -1271,6 +1237,7 @@ def energy_connection_to_pb(cim: EnergyConnection, include_asset_info=False) -> 
     return PBEnergyConnection(ce=conducting_equipment_to_pb(cim, include_asset_info))
 
 
+@bind_to_pb
 def energy_consumer_to_pb(cim: EnergyConsumer) -> PBEnergyConsumer:
     return PBEnergyConsumer(
         ec=energy_connection_to_pb(cim),
@@ -1285,6 +1252,7 @@ def energy_consumer_to_pb(cim: EnergyConsumer) -> PBEnergyConsumer:
     )
 
 
+@bind_to_pb
 def energy_consumer_phase_to_pb(cim: EnergyConsumerPhase) -> PBEnergyConsumerPhase:
     return PBEnergyConsumerPhase(
         psr=power_system_resource_to_pb(cim),
@@ -1297,6 +1265,7 @@ def energy_consumer_phase_to_pb(cim: EnergyConsumerPhase) -> PBEnergyConsumerPha
     )
 
 
+@bind_to_pb
 def energy_source_to_pb(cim: EnergySource) -> PBEnergySource:
     return PBEnergySource(
         ec=energy_connection_to_pb(cim),
@@ -1329,6 +1298,7 @@ def energy_source_to_pb(cim: EnergySource) -> PBEnergySource:
     )
 
 
+@bind_to_pb
 def energy_source_phase_to_pb(cim: EnergySourcePhase) -> PBEnergySourcePhase:
     return PBEnergySourcePhase(
         psr=power_system_resource_to_pb(cim),
@@ -1337,6 +1307,7 @@ def energy_source_phase_to_pb(cim: EnergySourcePhase) -> PBEnergySourcePhase:
     )
 
 
+@bind_to_pb
 def fuse_to_pb(cim: Fuse) -> PBFuse:
     return PBFuse(
         sw=switch_to_pb(cim),
@@ -1344,18 +1315,21 @@ def fuse_to_pb(cim: Fuse) -> PBFuse:
     )
 
 
+@bind_to_pb
 def ground_to_pb(cim: Ground) -> PBGround:
     return PBGround(
         ce=conducting_equipment_to_pb(cim, True)
     )
 
 
+@bind_to_pb
 def ground_disconnector_to_pb(cim: GroundDisconnector) -> PBGroundDisconnector:
     return PBGroundDisconnector(
         sw=switch_to_pb(cim)
     )
 
 
+@bind_to_pb
 def grounding_impedance_to_pb(cim: GroundingImpedance) -> PBGroundingImpedance:
     return PBGroundingImpedance(
         efc=earth_fault_compensator_to_pb(cim),
@@ -1363,10 +1337,12 @@ def grounding_impedance_to_pb(cim: GroundingImpedance) -> PBGroundingImpedance:
     )
 
 
+@bind_to_pb
 def jumper_to_pb(cim: Jumper) -> PBJumper:
     return PBJumper(sw=switch_to_pb(cim))
 
 
+@bind_to_pb
 def junction_to_pb(cim: Junction) -> PBJunction:
     return PBJunction(cn=connector_to_pb(cim))
 
@@ -1375,6 +1351,7 @@ def line_to_pb(cim: Line) -> PBLine:
     return PBLine(ec=equipment_container_to_pb(cim))
 
 
+@bind_to_pb
 def linear_shunt_compensator_to_pb(cim: LinearShuntCompensator) -> PBLinearShuntCompensator:
     return PBLinearShuntCompensator(
         sc=shunt_compensator_to_pb(cim),
@@ -1385,6 +1362,7 @@ def linear_shunt_compensator_to_pb(cim: LinearShuntCompensator) -> PBLinearShunt
     )
 
 
+@bind_to_pb
 def load_break_switch_to_pb(cim: LoadBreakSwitch) -> PBLoadBreakSwitch:
     return PBLoadBreakSwitch(ps=protected_switch_to_pb(cim))
 
@@ -1397,6 +1375,7 @@ def per_length_line_parameter_to_pb(cim: PerLengthLineParameter) -> PBPerLengthL
     return PBPerLengthLineParameter(io=identified_object_to_pb(cim))
 
 
+@bind_to_pb
 def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengthPhaseImpedance:
     """
     Convert the :class:`PerLengthPhaseImpedance` into its protobuf counterpart.
@@ -1409,6 +1388,7 @@ def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengt
     )
 
 
+@bind_to_pb
 def per_length_sequence_impedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPerLengthSequenceImpedance:
     return PBPerLengthSequenceImpedance(
         pli=per_length_impedance_to_pb(cim),
@@ -1423,6 +1403,7 @@ def per_length_sequence_impedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPe
     )
 
 
+@bind_to_pb
 def petersen_coil_to_pb(cim: PetersenCoil) -> PBPetersenCoil:
     return PBPetersenCoil(
         efc=earth_fault_compensator_to_pb(cim),
@@ -1446,6 +1427,7 @@ def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
     )
 
 
+@bind_to_pb
 def power_electronics_connection_to_pb(cim: PowerElectronicsConnection) -> PBPowerElectronicsConnection:
     return PBPowerElectronicsConnection(
         rce=regulating_cond_eq_to_pb(cim),
@@ -1485,6 +1467,7 @@ def power_electronics_connection_to_pb(cim: PowerElectronicsConnection) -> PBPow
     )
 
 
+@bind_to_pb
 def power_electronics_connection_phase_to_pb(cim: PowerElectronicsConnectionPhase) -> PBPowerElectronicsConnectionPhase:
     return PBPowerElectronicsConnectionPhase(
         psr=power_system_resource_to_pb(cim),
@@ -1495,6 +1478,7 @@ def power_electronics_connection_phase_to_pb(cim: PowerElectronicsConnectionPhas
     )
 
 
+@bind_to_pb
 def power_transformer_to_pb(cim: PowerTransformer) -> PBPowerTransformer:
     return PBPowerTransformer(
         ce=conducting_equipment_to_pb(cim, True),
@@ -1506,6 +1490,7 @@ def power_transformer_to_pb(cim: PowerTransformer) -> PBPowerTransformer:
     )
 
 
+@bind_to_pb
 def power_transformer_end_to_pb(cim: PowerTransformerEnd) -> PBPowerTransformerEnd:
     return PBPowerTransformerEnd(
         te=transformer_end_to_pb(cim),
@@ -1534,6 +1519,7 @@ def protected_switch_to_pb(cim: ProtectedSwitch) -> PBProtectedSwitch:
     )
 
 
+@bind_to_pb
 def ratio_tap_changer_to_pb(cim: RatioTapChanger) -> PBRatioTapChanger:
     return PBRatioTapChanger(
         tc=tap_changer_to_pb(cim),
@@ -1542,10 +1528,12 @@ def ratio_tap_changer_to_pb(cim: RatioTapChanger) -> PBRatioTapChanger:
     )
 
 
+@bind_to_pb
 def reactive_capability_curve_to_pb(cim: ReactiveCapabilityCurve) -> PBReactiveCapabilityCurve:
     return PBReactiveCapabilityCurve(c=curve_to_pb(cim))
 
 
+@bind_to_pb
 def recloser_to_pb(cim: Recloser) -> PBRecloser:
     return PBRecloser(sw=protected_switch_to_pb(cim))
 
@@ -1593,6 +1581,7 @@ def rotating_machine_to_pb(cim: RotatingMachine) -> PBRotatingMachine:
     )
 
 
+@bind_to_pb
 def series_compensator_to_pb(cim: SeriesCompensator) -> PBSeriesCompensator:
     return PBSeriesCompensator(
         ce=conducting_equipment_to_pb(cim, True),
@@ -1615,6 +1604,7 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
     )
 
 
+@bind_to_pb
 def static_var_compensator_to_pb(cim: StaticVarCompensator) -> PBStaticVarCompensator:
     """
     Convert the :class:`StaticVarCompensator` into its protobuf counterpart.
@@ -1640,6 +1630,7 @@ def switch_to_pb(cim: Switch) -> PBSwitch:
     )
 
 
+@bind_to_pb
 def synchronous_machine_to_pb(cim: SynchronousMachine) -> PBSynchronousMachine:
     return PBSynchronousMachine(
         rm=rotating_machine_to_pb(cim),
@@ -1683,6 +1674,7 @@ def tap_changer_to_pb(cim: TapChanger) -> PBTapChanger:
     )
 
 
+@bind_to_pb
 def tap_changer_control_to_pb(cim: TapChangerControl) -> PBTapChangerControl:
     return PBTapChangerControl(
         rc=regulating_control_to_pb(cim),
@@ -1719,6 +1711,7 @@ def transformer_end_rated_s_to_pb(cim: TransformerEndRatedS) -> PBTransformerEnd
     )
 
 
+@bind_to_pb
 def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransformerStarImpedance:
     return PBTransformerStarImpedance(
         io=identified_object_to_pb(cim),
@@ -1730,46 +1723,12 @@ def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransfo
     )
 
 
-AcLineSegment.to_pb = ac_line_segment_to_pb
-Breaker.to_pb = breaker_to_pb
-BusbarSection.to_pb = busbar_section_to_pb
-Clamp.to_pb = clamp_to_pb
-Cut.to_pb = cut_to_pb
-Disconnector.to_pb = disconnector_to_pb
-EnergyConsumer.to_pb = energy_consumer_to_pb
-EnergyConsumerPhase.to_pb = energy_consumer_phase_to_pb
-EnergySource.to_pb = energy_source_to_pb
-EnergySourcePhase.to_pb = energy_source_phase_to_pb
-Fuse.to_pb = fuse_to_pb
-Ground.to_pb = ground_to_pb
-GroundDisconnector.to_pb = ground_disconnector_to_pb
-GroundingImpedance.to_pb = grounding_impedance_to_pb
-Jumper.to_pb = jumper_to_pb
-Junction.to_pb = junction_to_pb
-LinearShuntCompensator.to_pb = linear_shunt_compensator_to_pb
-LoadBreakSwitch.to_pb = load_break_switch_to_pb
-PerLengthPhaseImpedance.to_pb = per_length_phase_impedance_to_pb
-PerLengthSequenceImpedance.to_pb = per_length_sequence_impedance_to_pb
-PetersenCoil.to_pb = petersen_coil_to_pb
-PowerElectronicsConnection.to_pb = power_electronics_connection_to_pb
-PowerElectronicsConnectionPhase.to_pb = power_electronics_connection_phase_to_pb
-PowerTransformer.to_pb = power_transformer_to_pb
-PowerTransformerEnd.to_pb = power_transformer_end_to_pb
-RatioTapChanger.to_pb = ratio_tap_changer_to_pb
-ReactiveCapabilityCurve.to_pb = reactive_capability_curve_to_pb
-Recloser.to_pb = recloser_to_pb
-SeriesCompensator.to_pb = series_compensator_to_pb
-StaticVarCompensator.to_pb = static_var_compensator_to_pb
-SynchronousMachine.to_pb = synchronous_machine_to_pb
-TapChangerControl.to_pb = tap_changer_control_to_pb
-TransformerStarImpedance.to_pb = transformer_star_impedance_to_pb
-
-
 ###############################
 # IEC61970 InfIEC61970 Feeder #
 ###############################
 
 
+@bind_to_pb
 def circuit_to_pb(cim: Circuit) -> PBCircuit:
     return PBCircuit(
         l=line_to_pb(cim),
@@ -1777,6 +1736,3 @@ def circuit_to_pb(cim: Circuit) -> PBCircuit:
         endTerminalMRIDs=[str(io.mrid) for io in cim.end_terminals],
         endSubstationMRIDs=[str(io.mrid) for io in cim.end_substations]
     )
-
-
-Circuit.to_pb = circuit_to_pb
