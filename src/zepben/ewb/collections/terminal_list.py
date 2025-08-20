@@ -12,7 +12,7 @@ from zepben.ewb.collections.mrid_list import MRIDList
 class TerminalList(MRIDList[Terminal]):
     def __init__(self,
                  terminals: Iterable[Terminal],
-                 conducting_equipment: ConductingEquipment,
+                 conducting_equipment: ConductingEquipment = None,
                  max_terminals = int(sys.maxsize)):
         self.conducting_equipment: ConductingEquipment = conducting_equipment
         self.max_terminals = max_terminals
@@ -40,8 +40,9 @@ class TerminalList(MRIDList[Terminal]):
         super().add(terminal)
 
         # TODO: Check if this thing is only supposed to run at init
-        if terminal.conducting_equipment is None:
-            terminal.conducting_equipment = self.conducting_equipment
+        if self.conducting_equipment is not None:
+            if terminal.conducting_equipment is None:
+                terminal.conducting_equipment = self.conducting_equipment
 
         if terminal.sequence_number == 0:
             terminal.sequence_number = len(self) + 1

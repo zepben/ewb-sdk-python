@@ -7,11 +7,11 @@ from __future__ import annotations
 
 __all__ = ["ConnectivityNode"]
 
-from typing import Generator, List, TYPE_CHECKING
+from dataclasses import dataclass
+from typing import List, TYPE_CHECKING, Optional
 
-from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.collections.terminal_list import TerminalList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import get_by_mrid, ngen
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
@@ -23,30 +23,20 @@ class ConnectivityNode(IdentifiedObject):
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
     # noinspection PyDunderSlots
-    __slots__ = ["_terminals", "__weakref__"]
-    _terminals: List[Terminal] = []
+    __slots__ = ["terminals", "__weakref__"]
+    terminals: Optional[List[Terminal]] = None
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConnectivityNode, self).__init__(**kwargs)
-        if terminals:
-            for term in terminals:
-                self.add_terminal(term)
+    def __post_init__(self):
+        self.terminals : TerminalList = TerminalList(self.terminals)
 
     def __iter__(self):
-        return iter(self._terminals)
+        return iter(self.terminals)
 
     def num_terminals(self):
         """
         Get the number of `Terminal`s for this `ConnectivityNode`.
         """
-        return len(self._terminals)
-
-    @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        """
-        The `Terminal`s attached to this `ConnectivityNode`
-        """
-        return ngen(self._terminals)
+        return len(self.terminals)
 
     def get_terminal(self, mrid: str) -> Terminal:
         """
@@ -56,7 +46,7 @@ class ConnectivityNode(IdentifiedObject):
         Returns The `Terminal` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._terminals, mrid)
+        return self.terminals.get_by_mrid(mrid)
 
     def add_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
@@ -69,7 +59,7 @@ class ConnectivityNode(IdentifiedObject):
         if self._validate_reference(terminal, self.get_terminal, "A Terminal"):
             return self
 
-        self._terminals.append(terminal)
+        self.terminals.add(terminal)
         return self
 
     def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
@@ -80,7 +70,7 @@ class ConnectivityNode(IdentifiedObject):
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
         """
-        self._terminals.remove(terminal)
+        self.terminals.remove(terminal)
         return self
 
     def clear_terminals(self) -> ConnectivityNode:
@@ -88,14 +78,14 @@ class ConnectivityNode(IdentifiedObject):
         Clear all terminals.
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         """
-        self._terminals.clear()
+        self.terminals.clear()
         return self
 
     def is_switched(self):
         return self.get_switch() is not None
 
     def get_switch(self):
-        for term in self._terminals:
+        for term in self.terminals:
             try:
                 # All switches should implement is_open
                 _ = term.conducting_equipment.is_open()
