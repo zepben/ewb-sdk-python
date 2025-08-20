@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class CurveData:
     """
     Multipurpose data points for defining a curve. The use of this generic class is discouraged if a more specific class can be used to specify the X and

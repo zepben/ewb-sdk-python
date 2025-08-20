@@ -14,7 +14,6 @@ class ZepbenList(typing.Iterator[T]):
     Generic list class
     """
     _data: Optional[List[T]] = None
-    _iter: Optional[Iterator[T]] = None
 
     def __init__(self, data: Optional[Iterable[T]] = None):
         if data is None:

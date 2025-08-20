@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import sys
-from typing import Iterable
+from typing import Iterable, Optional
 
 from zepben.ewb import Terminal, ConductingEquipment, require
 from zepben.ewb.collections.mrid_list import MRIDList
@@ -14,7 +14,7 @@ class TerminalList(MRIDList[Terminal]):
                  terminals: Iterable[Terminal],
                  conducting_equipment: ConductingEquipment = None,
                  max_terminals = int(sys.maxsize)):
-        self.conducting_equipment: ConductingEquipment = conducting_equipment
+        self.conducting_equipment: Optional[ConductingEquipment] = conducting_equipment
         self.max_terminals = max_terminals
         super().__init__(terminals)
 
