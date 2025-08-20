@@ -19,12 +19,14 @@ __all__ = [
     "datetime_to_timestamp",
     "none",
     "classproperty",
+    "unique",
 ]
 
 import os
 import re
 from collections.abc import Sized
 from datetime import datetime
+from enum import unique as enum_unique
 from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict, Collection
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -187,3 +189,12 @@ def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
     timestamp = PBTimestamp()
     timestamp.FromDatetime(date_time)
     return timestamp
+
+
+def unique(enumeration: T) -> T:
+    """
+    A wrapper for the enum.unique() wrapper to preserve typing so that undefined members are correctly
+    flagged by the linter.
+    """
+    enum_unique(enumeration)
+    return enumeration

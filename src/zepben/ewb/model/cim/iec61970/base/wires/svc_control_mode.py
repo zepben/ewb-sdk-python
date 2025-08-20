@@ -7,7 +7,10 @@ __all__ = ["SVCControlMode"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class SVCControlMode(Enum):
     """
     Static VAr Compensator control mode.

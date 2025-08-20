@@ -7,7 +7,10 @@ __all__ = ["IncludedEnergizingContainers"]
 
 from enum import Enum
 
+from zepben.ewb.util import unique
 
+
+@unique
 class IncludedEnergizingContainers(Enum):
     """
     Indicates which energizing contains should be included when fetching a container.

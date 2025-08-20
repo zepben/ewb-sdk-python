@@ -7,7 +7,10 @@ __all__ = ["WindingConnection"]
 
 from enum import Enum
 
+from zepben.ewb import unique
 
+
+@unique
 class WindingConnection(Enum):
     """
     Winding connection type.
