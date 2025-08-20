@@ -413,9 +413,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self._tracker.visit(terminal, phases)
 
 
-def default_condition_step_type(step_type: CanActionItem):
-    if step_type is None:
-        return False
+def default_condition_step_type(step_type: CanActionItem) -> NetworkTraceStep.Type:
     if step_type == NetworkTraceActionType.ALL_STEPS:
         return NetworkTraceStep.Type.ALL
     elif step_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
@@ -432,19 +430,4 @@ def compute_data_with_action_type(compute_data: ComputeData[T], action_type: Can
                 current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
             )
         )
-    raise Exception(f'{action_type.__class__}: step doesnt match expected types')
-
-
-def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeDataWithPaths[T]:
-    if action_type == NetworkTraceActionType.ALL_STEPS:
-        return self
-    elif action_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
-        return ComputeDataWithPaths(
-            lambda current_step, current_context, next_path, next_paths: (
-                current_step.data if next_path.traced_internally else self.compute_next(current_step, current_context, next_path, next_paths)
-            )
-        )
-    raise Exception('step doesnt match expected types')
-
-
-ComputeDataWithPaths[T].with_action_type = with_paths_with_action_type
+    raise Exception(f'{action_type.__name__}: step doesnt match expected types')
