@@ -86,6 +86,7 @@ class GrpcChannelBuilder(ABC):
 
     def _test_connection(self, channel: grpc.Channel, debug: bool, timeout_seconds: int):
         debug_errors = []
+        permission_errors = []
         for name, client in zip(self._stubs.keys(), map(lambda stub: stub(channel), list(self._stubs.values()))):
             try:
                 result = client.checkConnection(CheckConnectionRequest(), timeout=timeout_seconds, wait_for_ready=False)
@@ -93,7 +94,11 @@ class GrpcChannelBuilder(ABC):
                     return
             except _InactiveRpcError as rpc_error:
                 debug_errors.append(f"Received the following exception with {name}:\n{rpc_error}\n")
-        raise GrpcConnectionException(f"Couldn't establish gRPC connection to any service on {self._socket_address}.\n{''.join(debug_errors) if debug else ''}")
+                if rpc_error.code() in (grpc.StatusCode.UNAUTHENTICATED, grpc.StatusCode.PERMISSION_DENIED):
+                    permission_errors.append(f"Received the following exception with {name}:\n\t{rpc_error.code().name}: {rpc_error.details()}\n")
+        # Preference propagating permissions errors to users if any exist, otherwise just take the first error from the first service we tried.
+        propagate = ''.join(permission_errors) if permission_errors else debug_errors[0]
+        raise GrpcConnectionException(f"Couldn't establish gRPC connection to any service on {self._socket_address}.\n{''.join(debug_errors) if debug else propagate}")
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         """

@@ -130,6 +130,7 @@
   * `UsagePoint.approvedInverterCapacity`
 * using `EquipmentTreeBuilder` more then once per interpreter will no longer cause the `roots` to contain more objects then it should due to `_roots` being a 
   class var
+* Errors when initiating gRPC connections will now properly be propagated to users.
 
 ### Notes
 * None.
