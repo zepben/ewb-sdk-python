@@ -7,12 +7,13 @@ from __future__ import annotations
 
 __all__ = ["Diagram"]
 
-from typing import Optional, Dict, List, Generator, TYPE_CHECKING
+from typing import Optional, Dict, List, TYPE_CHECKING
 
+from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
-from zepben.ewb.util import nlen, ngen, require, safe_remove_by_id
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
@@ -30,7 +31,10 @@ class Diagram(IdentifiedObject):
     orientation_kind: OrientationKind = OrientationKind.POSITIVE
     """Coordinate system orientation of the diagram."""
 
-    _diagram_objects: Optional[Dict[str, DiagramObject]] = None
+    diagram_objects: Optional[Dict[str, DiagramObject]] = None
+
+    def __post_init__(self):
+        self.diagram_objects: MRIDDict[DiagramObject] = MRIDDict(self.diagram_objects)
 
     def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
         super(Diagram, self).__init__(**kwargs)
@@ -42,14 +46,7 @@ class Diagram(IdentifiedObject):
         """
         Returns The number of `DiagramObject`s associated with this `Diagram`
         """
-        return nlen(self._diagram_objects)
-
-    @property
-    def diagram_objects(self) -> Generator[DiagramObject, None, None]:
-        """
-        The diagram objects belonging to this diagram.
-        """
-        return ngen(self._diagram_objects.values() if self._diagram_objects is not None else None)
+        return len(self.diagram_objects)
 
     def get_diagram_object(self, mrid: str) -> DiagramObject:
         """
@@ -59,12 +56,7 @@ class Diagram(IdentifiedObject):
         Returns The `DiagramObject` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self._diagram_objects:
-            raise KeyError(mrid)
-        try:
-            return self._diagram_objects[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.diagram_objects.get_by_mrid(mrid)
 
     def add_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
         """
@@ -76,16 +68,13 @@ class Diagram(IdentifiedObject):
         Raises `ValueError` if another `DiagramObject` with the same `mrid` already exists for this `Diagram`, or if `diagram_object.diagram` is not this
         `Diagram`.
         """
+
         if not diagram_object.diagram:
             diagram_object.diagram = self
         require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} references another Diagram "
                                                         f"{str(diagram_object.diagram)}, expected {str(self)}.")
 
-        if self._validate_reference(diagram_object, self.get_diagram_object, "A DiagramObject"):
-            return self
-
-        self._diagram_objects = dict() if self._diagram_objects is None else self._diagram_objects
-        self._diagram_objects[diagram_object.mrid] = diagram_object
+        self.diagram_objects.add(diagram_object)
 
         return self
 
@@ -97,7 +86,7 @@ class Diagram(IdentifiedObject):
         Returns A reference to this `Diagram` to allow fluent use.
         Raises `KeyError` if `diagram_object` was not associated with this `Diagram`.
         """
-        self._diagram_objects = safe_remove_by_id(self._diagram_objects, diagram_object)
+        self.diagram_objects.remove(diagram_object)
         return self
 
     def clear_diagram_objects(self) -> Diagram:
@@ -105,5 +94,5 @@ class Diagram(IdentifiedObject):
         Clear all `DiagramObject`s.
         Returns A reference to this `Diagram` to allow fluent use.
         """
-        self._diagram_objects = None
+        self.diagram_objects.clear()
         return self

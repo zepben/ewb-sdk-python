@@ -37,7 +37,7 @@ class PowerSystemResource(IdentifiedObject):
 
     assets: Optional[List[Asset]] = None
 
-    def __post_init__(self, assets: Iterable[Asset] = None, **kwargs):
+    def __post_init__(self):
         self.assets: MRIDList[Asset] = MRIDList(self.assets)
 
     @property

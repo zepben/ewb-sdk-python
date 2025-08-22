@@ -2,13 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import typing
+from __future__ import annotations
 
-from zepben.ewb import IdentifiedObject
+from typing import TypeVar, TYPE_CHECKING
+
 from zepben.ewb.collections.zepben_list import ZepbenList
 
+if TYPE_CHECKING:
+    from zepben.ewb import IdentifiedObject
 
-T_MRID = typing.TypeVar('T_MRID', bound=IdentifiedObject)
+T_MRID = TypeVar('T_MRID', bound='IdentifiedObject')
 
 class MRIDList(ZepbenList[T_MRID]):
     def get_by_mrid(self, mrid: str, safe: bool=False):
@@ -36,7 +39,7 @@ class MRIDList(ZepbenList[T_MRID]):
 
         super().add(item)
 
-    def error_duplicate(self, item: IdentifiedObject):
+    def error_duplicate(self, item: T_MRID):
         raise ValueError(f"{item.__class__.__name__} with mRID {item.mrid} already exists.")
 
 

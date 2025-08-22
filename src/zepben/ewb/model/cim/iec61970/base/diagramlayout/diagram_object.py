@@ -7,11 +7,13 @@ from __future__ import annotations
 
 __all__ = ["DiagramObject"]
 
-from typing import Optional, List, Generator, Callable, TYPE_CHECKING
+from dataclasses import field, InitVar
+from typing import Optional, List, Callable, TYPE_CHECKING
 
+from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-from zepben.ewb.util import nlen, ngen, require, safe_remove
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
@@ -23,7 +25,8 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    _diagram: Optional[Diagram] = None
+    _diagram: Optional[Diagram] = field(init=False, repr=False)
+    diagram: InitVar[Diagram]
     """A diagram object is part of a diagram."""
 
     identified_object_mrid: Optional[str] = None
@@ -35,7 +38,11 @@ class DiagramObject(IdentifiedObject):
     rotation: float = 0.0
     """Sets the angle of rotation of the diagram object.  Zero degrees is pointing to the top of the diagram. Rotation is clockwise."""
 
-    _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
+    diagram_object_points: Optional[List[DiagramObjectPoint]] = None
+
+    def __post_init__(self, diagram: Diagram = None):
+        self.diagram = diagram
+        self.points: ZepbenList[DiagramObjectPoint] = ZepbenList(self.diagram_object_points)
 
     def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
         super(DiagramObject, self).__init__(**kwargs)
@@ -60,14 +67,7 @@ class DiagramObject(IdentifiedObject):
         """
         Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
         """
-        return nlen(self._diagram_object_points)
-
-    @property
-    def points(self) -> Generator[DiagramObjectPoint, None, None]:
-        """
-        The `DiagramObjectPoint`s for this `DiagramObject`.
-        """
-        return ngen(self._diagram_object_points)
+        return len(self.diagram_object_points)
 
     def get_point(self, sequence_number: int) -> DiagramObjectPoint:
         """
@@ -79,10 +79,7 @@ class DiagramObject(IdentifiedObject):
         Returns The `DiagramObjectPoint` identified by `sequence_number`
         Raises IndexError if this `DiagramObject` didn't contain `sequence_number` points.
         """
-        if self._diagram_object_points is not None:
-            return self._diagram_object_points[sequence_number]
-        else:
-            raise IndexError(sequence_number)
+        return self.points[sequence_number]
 
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
@@ -119,8 +116,7 @@ class DiagramObject(IdentifiedObject):
                 lambda: f"Unable to add DiagramObjectPoint to {str(self)}. Sequence number {sequence_number}"
                         f" is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
                         f"adding the items in order and there are no gaps in the numbering.")
-        self._diagram_object_points = list() if self._diagram_object_points is None else self._diagram_object_points
-        self._diagram_object_points.insert(sequence_number, point)
+        self.points.add(point)
         return self
 
     def __setitem__(self, key, value):
@@ -134,7 +130,7 @@ class DiagramObject(IdentifiedObject):
         Returns A reference to this `DiagramObject` to allow fluent use.
         Raises `ValueError` if `point` was not associated with this `DiagramObject`.
         """
-        self._diagram_object_points = safe_remove(self._diagram_object_points, point)
+        self.points.remove(point)
         return self
 
     def remove_point_by_sequence_number(self, sequence_number: int) -> DiagramObjectPoint:
@@ -148,7 +144,7 @@ class DiagramObject(IdentifiedObject):
         :raises IndexError: If no :class:`DiagramObjectPoint` with the specified `sequence_number` was not associated with this :class:`DiagramObject`.
         """
         point = self.get_point(sequence_number)
-        self._diagram_object_points = safe_remove(self._diagram_object_points, point)
+        self.points.remove(point)
         return point
 
     def clear_points(self) -> DiagramObject:
@@ -156,5 +152,5 @@ class DiagramObject(IdentifiedObject):
         Clear all points.
         Returns A reference to this `DiagramObject` to allow fluent use.
         """
-        self._diagram_object_points = None
+        self.points.clear()
         return self

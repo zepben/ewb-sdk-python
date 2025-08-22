@@ -45,8 +45,7 @@ class Equipment(PowerSystemResource):
     operational_restrictions: Optional[List[OperationalRestriction]] = None
     current_containers: Optional[List[EquipmentContainer]] = None
 
-    def __post_init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
+    def __post_init__(self):
         self.usage_points : MRIDList[UsagePoint] = MRIDList(self.usage_points)
         self.equipment_containers : MRIDList[EquipmentContainer] = MRIDList(self.equipment_containers)
         self.operational_restrictions : MRIDList[OperationalRestriction] = MRIDList(self.operational_restrictions)

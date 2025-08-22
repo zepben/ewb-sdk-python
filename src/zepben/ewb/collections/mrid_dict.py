@@ -2,11 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import time
 from typing import Optional, Dict, Iterable
 
-from zepben.ewb import IdentifiedObject
-from zepben.ewb.collections.mrid_list import MRIDList
+from zepben.ewb.collections.mrid_list import MRIDList, T_MRID
 
 
 class MRIDDict(MRIDList):
@@ -14,9 +12,9 @@ class MRIDDict(MRIDList):
     Generic list class
     """
 
-    def __init__(self, data: Optional[Iterable[IdentifiedObject]] = None):
+    def __init__(self, data: Optional[Iterable[T_MRID]] = None):
         super().__init__()
-        self._data: Optional[Dict[str, IdentifiedObject]] = None
+        self._data: Optional[Dict[str, T_MRID]] = None
         if data is not None:
             self.update(data)
 
@@ -27,7 +25,7 @@ class MRIDDict(MRIDList):
     def __next__(self):
         ...
 
-    def add(self, item: IdentifiedObject, safe: bool=False):
+    def add(self, item: T_MRID, safe: bool=False):
         """
         Add an item to this Zepben List
         """
@@ -41,7 +39,7 @@ class MRIDDict(MRIDList):
 
         self._data[item.mrid] = item
 
-    def remove(self, item: IdentifiedObject):
+    def remove(self, item: T_MRID):
         """
         Remove an item from this Zepben List by item value
         """
@@ -62,67 +60,9 @@ class MRIDDict(MRIDList):
             return False
         return mrid in self._data
 
-    def __contains__(self, identifier: str | T):
+    def __contains__(self, identifier: str | T_MRID):
         if self._data is None:
             return False
         if isinstance(identifier, str):
             return self.has_mrid(identifier)
         return identifier in self._data.values()
-
-
-def ralign(msg, n):
-    return ' ' * max(0, n-len(msg)) + msg
-
-def run_timer_test(cls: type, inp: Iterable[IdentifiedObject]):
-    start = time.time()
-    cls(inp)
-    return time.time() - start
-
-def run_n_tests(cls: type, n: int, ntests: int=100):
-    inp = [IdentifiedObject(str(i)) for i in range(n)]
-
-    results = []
-    for i in range(ntests):
-        results += [run_timer_test(cls, inp)]
-
-    # print(len(results), len(inp), len(cls(inp)))
-
-    return sum(results) / n * 1e9
-
-def time_stuff():
-    volumes = [1, 3, 10, 100]
-    ntests = 10000
-
-    for n in volumes:
-        print()
-        print(f'\tRunning {ntests} tests with {n} objects:')
-        print('Dict (ns):', ralign(str(int(run_n_tests(MRIDDict, n, ntests))), 9))
-        print('List (ns):', ralign(str(int(run_n_tests(MRIDList, n, ntests))), 9))
-
-if __name__ == '__main__':
-    # z  = ZbList()
-    # z : MRIDDict = MRIDDict()
-    #
-    # for v in z:
-    #     print(v)
-    #
-    # z.add(IdentifiedObject('1'))
-    # z.add(IdentifiedObject('2'))
-    # # z.add('24')
-    # for v in z: print(v)
-    #
-    # z.clear()
-    #
-    # print(z)
-    # for v in z: print('>', v)
-    #
-    # z.print_contents()
-    #
-    # z.add(IdentifiedObject('3'))
-    # for v in z: print(v)
-    # print('4' in z)
-    # print('3' in z)
-    #
-    # print(len(z))
-
-    time_stuff()

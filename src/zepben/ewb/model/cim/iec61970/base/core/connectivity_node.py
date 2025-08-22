@@ -23,7 +23,8 @@ class ConnectivityNode(IdentifiedObject):
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
     # noinspection PyDunderSlots
-    __slots__ = ["terminals", "__weakref__"]
+    # __slots__ = ["terminals", "__weakref__"]
+    # __weakref__
     terminals: Optional[List[Terminal]] = None
 
     def __post_init__(self):
