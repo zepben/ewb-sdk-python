@@ -9,6 +9,7 @@ __all__ = ['EquipmentContainer']
 
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar
 
+from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
 
@@ -26,27 +27,17 @@ class EquipmentContainer(ConnectivityNodeContainer):
     Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
     """
 
-    _equipment: Optional[Dict[str, Equipment]] = None
+    equipment: Optional[Dict[str, Equipment]] = None
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __init__(self, equipment: List[Equipment] = None, **kwargs):
-        super(EquipmentContainer, self).__init__(**kwargs)
-        if equipment:
-            for eq in equipment:
-                self.add_equipment(eq)
+    def __post_init__(self):
+        self.equipment: MRIDDict[Equipment] = MRIDDict(self.equipment)
 
     def num_equipment(self):
         """
         Returns The number of `Equipment` associated with this `EquipmentContainer`
         """
-        return nlen(self._equipment)
-
-    @property
-    def equipment(self) -> Generator[Equipment, None, None]:
-        """
-        The `Equipment` contained in this `EquipmentContainer`
-        """
-        return ngen(self._equipment.values() if self._equipment is not None else None)
+        return len(self.equipment)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
@@ -56,12 +47,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self._equipment:
-            raise KeyError(mrid)
-        try:
-            return self._equipment[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.equipment.get_by_mrid(mrid)
 
     def add_equipment(self, equipment: Equipment) -> EquipmentContainer:
         """
@@ -71,11 +57,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
         """
-        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
-            return self
-        if self._equipment is None:
-            self._equipment = dict()
-        self._equipment[equipment.mrid] = equipment
+        self.equipment.add(equipment)
         return self
 
     def remove_equipment(self, equipment: Equipment) -> EquipmentContainer:
@@ -86,7 +68,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
         """
-        self._equipment = safe_remove_by_id(self._equipment, equipment)
+        self.equipment.remove(equipment)
         return self
 
     def clear_equipment(self) -> EquipmentContainer:
@@ -94,11 +76,11 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Clear all equipment.
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         """
-        self._equipment = None
+        self.equipment.clear()
         return self
 
     @property
-    def current_equipment(self) -> Generator[Equipment, None, None]:
+    def current_equipment(self):
         """
         Contained `Equipment` using the current state of the network.
         """
@@ -155,8 +137,9 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Convenience function to find all of the current feeders of the equipment associated with this equipment container.
         Returns the current feeders for all associated feeders
         """
+        # TODO: Remove dup code
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self.equipment:
             for f in equip.current_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -168,7 +151,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns the normal feeders for all associated feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self.equipment:
             for f in equip.normal_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -180,7 +163,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns the normal LV feeders for all associated LV feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self.equipment:
             for f in equip.current_lv_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -192,7 +175,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns the normal LV feeders for all associated LV feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self.equipment:
             for f in equip.normal_lv_feeders:
                 if f not in seen:
                     seen.add(f.mrid)

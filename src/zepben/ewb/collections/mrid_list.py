@@ -7,13 +7,16 @@ import typing
 from zepben.ewb import IdentifiedObject
 from zepben.ewb.collections.zepben_list import ZepbenList
 
+
 T_MRID = typing.TypeVar('T_MRID', bound=IdentifiedObject)
 
 class MRIDList(ZepbenList[T_MRID]):
-    def get_by_mrid(self, mrid: str):
+    def get_by_mrid(self, mrid: str, safe: bool=False):
         try:
             return next(item for item in self if item.mrid == mrid)
         except StopIteration:
+            if safe:
+                return None
             raise KeyError(mrid)
 
     def has_mrid(self, mrid: str):
@@ -24,10 +27,18 @@ class MRIDList(ZepbenList[T_MRID]):
             return self.has_mrid(identifier)
         return super().__contains__(identifier)
 
-    def add(self, item: T_MRID):
-        if self.has_mrid(item.mrid):
-            return #TODO: Figure out errors
+    def add(self, item: T_MRID, safe: bool=False):
+        if (other := self.get_by_mrid(item.mrid)) is not None:
+            if not safe:
+                if item is not other:
+                    self.error_duplicate(item)
+            return
+
         super().add(item)
+
+    def error_duplicate(self, item: IdentifiedObject):
+        raise ValueError(f"{item.__class__.__name__} with mRID {item.mrid} already exists.")
+
 
 
 

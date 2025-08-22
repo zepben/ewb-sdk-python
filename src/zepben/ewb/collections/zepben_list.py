@@ -12,13 +12,9 @@ class ZepbenList(typing.Iterator[T]):
     """
     Generic list class
     """
-    _data: Optional[List[T]] = None
-
     def __init__(self, data: Optional[Iterable[T]] = None):
-        if data is None:
-            self._data = None
-        else:
-            self._data = []
+        self._data: Optional[List[T]] = None
+        if data is not None:
             self.add_all(data)
 
     def __iter__(self):
