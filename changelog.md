@@ -141,6 +141,7 @@
 ### Enhancements
 * `EquipmentTreeBuilder` will now calculate `leaves` when specified to do so.
 * Bumped `hypothesis` version for tests to latest (6.138.2), fixed examples generating large numbers of results causing tests to run extremely slow.
+* Bumped every other dependency to the latest version aside from dataclassy.
 
 ### Fixes
 * Marked some extensions properties and classes with [ZBEX] that were missing them (might still be more). In addition to the ones moved into the extensions
