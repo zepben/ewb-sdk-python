@@ -5,6 +5,7 @@
 
 __all__ = ["EnergyConsumerPhase"]
 
+from dataclasses import field, InitVar
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -17,7 +18,8 @@ if TYPE_CHECKING:
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
-    _energy_consumer: Optional['EnergyConsumer'] = None
+    _energy_consumer: Optional['EnergyConsumer'] = field(init=False, repr=False)
+    energy_consumer: InitVar[EnergyConsumer | None]
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
@@ -38,10 +40,8 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer: 'EnergyConsumer' = None, **kwargs):
-        super(EnergyConsumerPhase, self).__init__(**kwargs)
-        if energy_consumer:
-            self.energy_consumer = energy_consumer
+    def __post_init__(self, energy_consumer: EnergyConsumer=None):
+        self.energy_consumer = energy_consumer
 
     @property
     def energy_consumer(self):

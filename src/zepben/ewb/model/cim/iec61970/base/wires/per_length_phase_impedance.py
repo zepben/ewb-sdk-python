@@ -7,6 +7,7 @@ __all__ = ["PerLengthPhaseImpedance"]
 
 from typing import Optional, List, Generator
 
+from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -18,34 +19,21 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
     Impedance and admittance parameters per unit length for n-wire unbalanced lines, in matrix form.
     """
 
-    _data: Optional[List[PhaseImpedanceData]] = None
+    data: Optional[List[PhaseImpedanceData]] = None
 
-    def __init__(self, data: List[PhaseImpedanceData] = None, **kwargs):
-        """
-        `data` A list of `PhaseImpedanceData`s to associate with this `PerLengthPhaseImpedance`.
-        """
-        super(PerLengthPhaseImpedance, self).__init__(**kwargs)
-        if data:
-            for phase_data in data:
-                self.add_data(phase_data)
-
-    @property
-    def data(self) -> Generator[PhaseImpedanceData, None, None]:
-        """
-        The point data values that define this phase_impedance, sorted by `x_value` in ascending order.
-        """
-        return ngen(self._data)
+    def __post_init__(self):
+        self.data: ZepbenList[PhaseImpedanceData] = ZepbenList(self.data)
 
     @property
     def diagonal(self) -> Generator[PhaseImpedanceData, None, None]:
         """
         Get only the diagonal elements of the matrix, i.e toPhase == fromPhase.
         """
-        return ngen(pid for pid in self._data if pid.from_phase == pid.to_phase)
+        return ngen(pid for pid in self.data if pid.from_phase == pid.to_phase)
 
     def num_data(self):
         """Return the number of :class:`PhaseImpedanceData` associated with this :class:`PerLengthPhaseImpedance`."""
-        return nlen(self._data)
+        return len(self.data)
 
     def get_data(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
         """
@@ -56,10 +44,9 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         :returns: The :class:`PhaseImpedanceData` with the specified `from_phase` and `to_phase` if it exists.
         :raises KeyError: When no `PhaseImpedanceData` was found with a matching `from_phase` and `to_phase`.
         """
-        if self._data:
-            phase_impedance_data = next((it for it in self._data if it.from_phase == from_phase and it.to_phase == to_phase), None)
-            if phase_impedance_data:
-                return phase_impedance_data
+        phase_impedance_data = next((it for it in self.data if it.from_phase == from_phase and it.to_phase == to_phase), None)
+        if phase_impedance_data:
+            return phase_impedance_data
         raise KeyError((from_phase, to_phase))
 
     def add_data(self, phase_impedance_data: PhaseImpedanceData) -> 'PerLengthPhaseImpedance':
@@ -70,12 +57,11 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         :returns: A reference to this :class:`PerLengthPhaseImpedance` to allow fluent use.
         :raises ValueError: If another :class:`PhaseImpedanceData` with the same `from_phase` and `to_phase` already exists for this :class:`PerLengthPhaseImpedance`.
         """
-
+        # TODO: Attempt to internalise this requirement
         require(none([it.from_phase == phase_impedance_data.from_phase and it.to_phase == phase_impedance_data.to_phase for it in self.data]),
                 lambda: f"""Unable to add PhaseImpedanceData to {self}. A PhaseImpedanceData with from_phase {phase_impedance_data.from_phase} and to_phase {phase_impedance_data.to_phase} already exists in this PerLengthPhaseImpedance.""")
 
-        self._data = self._data or []
-        self._data.append(phase_impedance_data)
+        self.data.add(phase_impedance_data)
 
         return self
 
@@ -87,7 +73,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         :returns: A reference to this :class:`PerLengthPhaseImpedance` to allow fluent use.
         :raises ValueError: If `phase_impedance_data` was not associated with this :class:`PerLengthPhaseImpedance`.
         """
-        self._data = safe_remove(self._data, phase_impedance_data)
+        self.data.remove(phase_impedance_data)
         return self
 
     def clear_data(self) -> 'PerLengthPhaseImpedance':
@@ -95,5 +81,5 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         Clear all :class:`PhaseImpedanceData` associated with this :class:`PerLengthPhaseImpedance`.
         :returns: A reference to this :class:`PerLengthPhaseImpedance` to allow fluent use.
         """
-        self._data = None
+        self.data.clear()
         return self

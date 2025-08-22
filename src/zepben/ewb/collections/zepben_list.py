@@ -74,6 +74,9 @@ class ZepbenList(typing.Iterator[T]):
         """
         return item in self
 
+    def sort(self, key=None, reverse: bool=False):
+        self._data.sort(key=key, reverse=reverse)
+
     def of_type(self, _type: typing.Type):
         yield from (item for item in self if isinstance(item, type))
 

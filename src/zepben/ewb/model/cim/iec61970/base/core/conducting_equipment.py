@@ -40,7 +40,7 @@ class ConductingEquipment(Equipment):
     terminals: Optional[List[Terminal]] = None
     max_terminals = int(sys.maxsize)
 
-    def _post_init__(self):
+    def __post_init__(self):
         self.terminals : TerminalList = TerminalList(self.terminals, self, self.max_terminals)
         del self.max_terminals
 

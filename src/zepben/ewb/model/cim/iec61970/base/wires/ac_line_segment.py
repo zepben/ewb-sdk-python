@@ -5,8 +5,10 @@
 
 __all__ = ["AcLineSegment"]
 
+from dataclasses import field
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 
@@ -36,8 +38,10 @@ class AcLineSegment(Conductor):
     per_length_impedance: Optional['PerLengthImpedance'] = None
     """A `zepben.ewb.model.cim.iec61970.base.wires.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: Optional[List['Cut']] = None
-    _clamps: Optional[List['Clamp']] = None
+    # _cuts: Optional[List['Cut']] = None
+    cuts: MRIDList['Cut'] = field(default_factory=MRIDList)
+    # _clamps: Optional[List['Clamp']] = None
+    clamps: MRIDList['Clamp'] = field(default_factory=MRIDList)
 
     @property
     def per_length_sequence_impedance(self) -> Optional['PerLengthSequenceImpedance']:
@@ -71,16 +75,11 @@ class AcLineSegment(Conductor):
     def per_length_phase_impedance(self, value: Optional['PerLengthPhaseImpedance']):
         self.per_length_impedance = value
 
-    @property
-    def cuts(self) -> Generator['Cut', None, None]:
-        """The `Cut`s for this `AcLineSegment`."""
-        return ngen(self._cuts)
-
     def num_cuts(self):
         """
         Get the number of `Cut`s for this `AcLineSegment`.
         """
-        return nlen(self._cuts)
+        return len(self.cuts)
 
     def get_cut(self, mrid: str) -> 'Cut':
         """
@@ -90,7 +89,7 @@ class AcLineSegment(Conductor):
         :return: The `Cut` with the specified `mrid` if it exists
         :raise KeyError: If the `mrid` wasn't present.
         """
-        return get_by_mrid(self._cuts, mrid)
+        return self.cuts.get_by_mrid(mrid)
 
     def add_cut(self, cut: 'Cut') -> 'AcLineSegment':
         """
@@ -100,11 +99,11 @@ class AcLineSegment(Conductor):
         :return: A reference to this `AcLineSegment` to allow fluent use.
         :raise ValueError: If another `Cut` with the same `mrid` already exists for this `AcLineSegment`.
         """
+        # TODO: Internalise validation if possible
         if self._validate_cut(cut):
             return self
 
-        self._cuts = list() if self._cuts is None else self._cuts
-        self._cuts.append(cut)
+        self.cuts.add(cut)
         return self
 
     def remove_cut(self, cut: 'Cut') -> 'AcLineSegment':
@@ -113,7 +112,7 @@ class AcLineSegment(Conductor):
         :raise ValueError: If `cut` was not associated with this `AcLineSegment`.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._cuts = safe_remove(self._cuts, cut)
+        self.cuts.remove(cut)
         return self
 
     def clear_cuts(self) -> 'AcLineSegment':
@@ -121,19 +120,14 @@ class AcLineSegment(Conductor):
         Clear all `Cut`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._cuts.clear()
+        self.cuts.clear()
         return self
-
-    @property
-    def clamps(self) -> Generator['Clamp', None, None]:
-        """The `Clamp`s for this `AcLineSegment`."""
-        return ngen(self._clamps)
 
     def num_clamps(self):
         """
         Get the number of `Clamp`s for this `AcLineSegment`.
         """
-        return nlen(self._clamps)
+        return len(self.clamps)
 
     def get_clamp(self, mrid: str) -> 'Clamp':
         """
@@ -143,7 +137,7 @@ class AcLineSegment(Conductor):
         :return: The `Clamp` with the specified `mrid` if it exists
         :raise KeyError: If the `mrid` wasn't present.
         """
-        return get_by_mrid(self._clamps, mrid)
+        return self.clamps.get_by_mrid(mrid)
 
     def add_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
         """
@@ -153,11 +147,11 @@ class AcLineSegment(Conductor):
         :return: A reference to this `AcLineSegment` to allow fluent use.
         :raise ValueError: If another `Clamp` with the same `mrid` already exists for this `AcLineSegment`.
         """
+        # TODO: Internalise validation if possible
         if self._validate_clamp(clamp):
             return self
 
-        self._clamps = list() if self._clamps is None else self._clamps
-        self._clamps.append(clamp)
+        self.clamps.add(clamp)
         return self
 
     def remove_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
@@ -166,7 +160,7 @@ class AcLineSegment(Conductor):
         :raise ValueError: If `clamp` was not associated with this `AcLineSegment`.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._clamps = safe_remove(self._clamps, clamp)
+        self.clamps.remove(clamp)
         return self
 
     def clear_clamps(self) -> 'AcLineSegment':
@@ -174,7 +168,7 @@ class AcLineSegment(Conductor):
         Clear all `Clamp`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._clamps.clear()
+        self.clamps.clear()
         return self
 
     def _validate_cut(self, cut: 'Cut') -> bool:
