@@ -48,7 +48,7 @@
         "pytest-asyncio==0.26.0",
         "pytest-timeout==2.4.0",
         "pytest-subtests",
-        "hypothesis==6.119.4",  # 6.120.0 has issues with one of our large tests
+        "hypothesis==6.138.2",
         "grpcio-testing==1.61.3",
         "pylint==2.14.5",
         "six==1.16.0",
