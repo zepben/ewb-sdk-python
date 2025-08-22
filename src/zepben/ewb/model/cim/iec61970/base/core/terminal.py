@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from dataclasses import InitVar, field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
@@ -29,7 +30,8 @@ class Terminal(AcDcTerminal):
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    _conducting_equipment: Optional[ConductingEquipment] = None
+    conducting_equipment: InitVar[ConductingEquipment | None]
+    _conducting_equipment: Optional[ConductingEquipment] = field(init=False, repr=False)
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
@@ -52,12 +54,12 @@ class Terminal(AcDcTerminal):
     """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
     """
 
-    _cn: Optional[ReferenceType] = None
+    connectivity_node: InitVar[ReferenceType | None]
+    _cn: Optional[ReferenceType] = field(init=False, repr=False)
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
 
-    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
-        super(Terminal, self).__init__(**kwargs)
+    def __post_init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None):
         if conducting_equipment:
             self.conducting_equipment = conducting_equipment
 

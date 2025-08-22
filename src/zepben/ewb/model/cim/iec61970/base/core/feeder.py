@@ -7,6 +7,7 @@ from __future__ import annotations
 
 __all__ = ["Feeder"]
 
+from dataclasses import InitVar, field
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
 from zepben.ewb.collections.mrid_dict import MRIDDict
@@ -25,8 +26,8 @@ class Feeder(EquipmentContainer):
     A collection of equipment for organizational purposes, used for grouping distribution resources.
     The organization of a feeder does not necessarily reflect connectivity or current operation state.
     """
-
-    normal_head_terminal: Optional[Terminal] = None
+    _normal_head_terminal: Optional[Terminal] = field(init=False, repr=False)
+    normal_head_terminal: InitVar[Terminal | None]
     """The normal head terminal or terminals of the feeder."""
 
     normal_energizing_substation: Optional[Substation] = None
@@ -41,17 +42,24 @@ class Feeder(EquipmentContainer):
     current_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
     """The LV feeders that are energized by this feeder in the current state of the network."""
 
-    def __post_init__(self):
+    def __post_init__(self, normal_head_terminal: Terminal = None):
+        if normal_head_terminal:
+            self.normal_head_terminal = normal_head_terminal
         self.current_equipment: MRIDDict[Equipment] = MRIDDict(self.current_equipment)
         self.normal_energized_lv_feeders: MRIDDict[LvFeeder] = MRIDDict(self.normal_energized_lv_feeders)
         self.current_energized_lv_feeders: MRIDDict[LvFeeder] = MRIDDict(self.current_energized_lv_feeders)
 
-    # This is awful, but it's the only way to adhere to the naming schema (while keeping dataclasses)
-    def __setattr__(self, name: str, value):
-        if name == 'normal_head_terminal':
-            if not (self.normal_head_terminal is None or self.normal_head_terminal is value or (self.num_equipment() == 0 and self.num_current_equipment() == 0)):
-                raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
-        return object.__setattr__(self, name, value)
+    @property
+    def normal_head_terminal(self) -> Optional[Terminal]:
+        """The normal head terminal or terminals of the feeder."""
+        return self._normal_head_terminal
+
+    @normal_head_terminal.setter
+    def normal_head_terminal(self, term: Optional[Terminal]):
+        if self._normal_head_terminal is None or self._normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
+            self._normal_head_terminal = term
+        else:
+            raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
 
     def num_current_equipment(self):
         """

@@ -9,6 +9,7 @@ __all__ = ["Substation"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 
@@ -28,63 +29,32 @@ class Substation(EquipmentContainer):
     sub_geographical_region: Optional[SubGeographicalRegion] = None
     """The SubGeographicalRegion containing the substation."""
 
-    _normal_energized_feeders: Optional[List[Feeder]] = None
+    normal_energized_feeders: Optional[List[Feeder]] = None
 
-    _loops: Optional[List[Loop]] = None
+    loops: Optional[List[Loop]] = None
 
-    _energized_loops: Optional[List[Loop]] = None
+    energized_loops: Optional[List[Loop]] = None
 
-    _circuits: Optional[List[Circuit]] = None
+    circuits: Optional[List[Circuit]] = None
 
-    def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
-                 circuits: List[Circuit] = None, **kwargs):
-        super(Substation, self).__init__(**kwargs)
-        if normal_energized_feeders:
-            for feeder in normal_energized_feeders:
-                self.add_feeder(feeder)
-        if loops:
-            for loop in loops:
-                self.add_loop(loop)
-        if energized_loops:
-            for loop in energized_loops:
-                self.add_energized_loop(loop)
-        if circuits:
-            for circuit in circuits:
-                self.add_circuit(circuit)
+    def __post_init__(self):
+        self.normal_energized_feeders: MRIDList[Feeder] = MRIDList(self.normal_energized_feeders)
+        self.loops: MRIDList[Feeder] = MRIDList(self.loops)
+        self.energized_loops: MRIDList[Feeder] = MRIDList(self.energized_loops)
+        self.circuits: MRIDList[Feeder] = MRIDList(self.circuits)
 
     @property
-    def circuits(self) -> Generator[Circuit, None, None]:
-        """
-        The `Circuit`s originating from this substation.
-        """
-        return ngen(self._circuits)
-
-    @property
-    def loops(self) -> Generator[Loop, None, None]:
-        """
-        The `Loop` originating from this substation.
-        """
-        return ngen(self._loops)
-
-    @property
-    def energized_loops(self) -> Generator[Loop, None, None]:
-        """
-        The `Loop`s originating from this substation that are energised.
-        """
-        return ngen(self._energized_loops)
-
-    @property
-    def feeders(self) -> Generator[Feeder, None, None]:
+    def feeders(self):
         """
         The normal energized feeders of the substation. Also used for naming purposes.
         """
-        return ngen(self._normal_energized_feeders)
+        return self.normal_energized_feeders
 
     def num_feeders(self):
         """
         Returns The number of `Feeder`s associated with this `Substation`
         """
-        return nlen(self._normal_energized_feeders)
+        return len(self.normal_energized_feeders)
 
     def get_feeder(self, mrid: str) -> Feeder:
         """
@@ -94,7 +64,7 @@ class Substation(EquipmentContainer):
         Returns The `Feeder` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._normal_energized_feeders, mrid)
+        return self.normal_energized_feeders.get_by_mrid(mrid)
 
     def add_feeder(self, feeder: Feeder) -> Substation:
         """
@@ -104,10 +74,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`.
         """
-        if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
-            return self
-        self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
-        self._normal_energized_feeders.append(feeder)
+        self.normal_energized_feeders.add(feeder)
         return self
 
     def remove_feeder(self, feeder: Feeder) -> Substation:
@@ -118,7 +85,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `feeder` was not associated with this `Substation`.
         """
-        self._normal_energized_feeders = safe_remove(self._normal_energized_feeders, feeder)
+        self.normal_energized_feeders.remove(feeder)
         return self
 
     def clear_feeders(self) -> Substation:
@@ -126,14 +93,14 @@ class Substation(EquipmentContainer):
         Clear all current `Feeder`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._normal_energized_feeders = None
+        self.normal_energized_feeders.clear()
         return self
 
     def num_loops(self):
         """
         Returns The number of `Loop`s associated with this `Substation`
         """
-        return nlen(self._loops)
+        return len(self.loops)
 
     def get_loop(self, mrid: str) -> Loop:
         """
@@ -143,7 +110,7 @@ class Substation(EquipmentContainer):
         Returns The `Loop` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._loops, mrid)
+        return self.loops.get_by_mrid(mrid)
 
     def add_loop(self, loop: Loop) -> Substation:
         """
@@ -153,10 +120,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
         """
-        if self._validate_reference(loop, self.get_loop, "A Loop"):
-            return self
-        self._loops = list() if self._loops is None else self._loops
-        self._loops.append(loop)
+        self.loops.add(loop)
         return self
 
     def remove_loop(self, loop: Loop) -> Substation:
@@ -167,7 +131,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `loop` was not associated with this `Substation`.
         """
-        self._loops = safe_remove(self._loops, loop)
+        self.loops.remove(loop)
         return self
 
     def clear_loops(self) -> Substation:
@@ -175,14 +139,14 @@ class Substation(EquipmentContainer):
         Clear all current `Loop`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._loops = None
+        self.loops.clear()
         return self
 
     def num_energized_loops(self):
         """
         Returns The number of `Loop`s associated with this `Substation`
         """
-        return nlen(self._energized_loops)
+        return len(self.energized_loops)
 
     def get_energized_loop(self, mrid: str) -> Loop:
         """
@@ -192,7 +156,7 @@ class Substation(EquipmentContainer):
         Returns The `Loop` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._energized_loops, mrid)
+        return self.energized_loops.get_by_mrid(mrid)
 
     def add_energized_loop(self, loop: Loop) -> Substation:
         """
@@ -202,10 +166,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
         """
-        if self._validate_reference(loop, self.get_energized_loop, "A Loop"):
-            return self
-        self._energized_loops = list() if self._energized_loops is None else self._energized_loops
-        self._energized_loops.append(loop)
+        self.energized_loops.add(loop)
         return self
 
     def remove_energized_loop(self, loop: Loop) -> Substation:
@@ -216,7 +177,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `loop` was not associated with this `Substation`.
         """
-        self._energized_loops = safe_remove(self._energized_loops, loop)
+        self.energized_loops.remove(loop)
         return self
 
     def clear_energized_loops(self) -> Substation:
@@ -224,14 +185,14 @@ class Substation(EquipmentContainer):
         Clear all current `Loop`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._energized_loops = None
+        self.energized_loops.clear()
         return self
 
     def num_circuits(self):
         """
         Returns The number of `Circuit`s associated with this `Substation`
         """
-        return nlen(self._circuits)
+        return len(self.circuits)
 
     def get_circuit(self, mrid: str) -> Circuit:
         """
@@ -241,7 +202,7 @@ class Substation(EquipmentContainer):
         Returns The `Circuit` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._circuits, mrid)
+        return self.circuits.get_by_mrid(mrid)
 
     def add_circuit(self, circuit: Circuit) -> Substation:
         """
@@ -251,10 +212,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
         """
-        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
-            return self
-        self._circuits = list() if self._circuits is None else self._circuits
-        self._circuits.append(circuit)
+        self.circuits.add(circuit)
         return self
 
     def remove_circuit(self, circuit: Circuit) -> Substation:
@@ -265,7 +223,7 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `circuit` was not associated with this `Substation`.
         """
-        self._circuits = safe_remove(self._circuits, circuit)
+        self.circuits.remove(circuit)
         return self
 
     def clear_circuits(self) -> Substation:
@@ -273,5 +231,5 @@ class Substation(EquipmentContainer):
         Clear all current `Circuit`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._circuits = None
+        self.circuits.clear()
         return self

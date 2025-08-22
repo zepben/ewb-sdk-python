@@ -7,10 +7,10 @@ from __future__ import annotations
 
 __all__ = ['PowerSystemResource']
 
-from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
+from typing import Optional, TYPE_CHECKING, List, Iterable
 
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.asset import Asset
@@ -35,13 +35,10 @@ class PowerSystemResource(IdentifiedObject):
     num_controls: int = 0
     """Number of Control's known to associate with this [PowerSystemResource]"""
 
-    _assets: Optional[List[Asset]] = None
+    assets: Optional[List[Asset]] = None
 
-    def __init__(self, assets: Iterable[Asset] = None, **kwargs):
-        super(PowerSystemResource, self).__init__(**kwargs)
-        if assets:
-            for asset in assets:
-                self.add_asset(asset)
+    def __post_init__(self, assets: Iterable[Asset] = None, **kwargs):
+        self.assets: MRIDList[Asset] = MRIDList(self.assets)
 
     @property
     def has_controls(self) -> bool:
@@ -54,14 +51,7 @@ class PowerSystemResource(IdentifiedObject):
         """
         Get the number of `Asset`s associated with this `PowerSystemResource`.
         """
-        return nlen(self._assets)
-
-    @property
-    def assets(self) -> Generator[Asset, None, None]:
-        """
-        The `Asset`s of this `PowerSystemResource`.
-        """
-        return ngen(self._assets)
+        return len(self.assets)
 
     def get_asset(self, mrid: str) -> Asset:
         """
@@ -71,7 +61,7 @@ class PowerSystemResource(IdentifiedObject):
         Returns The `Asset` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._assets, mrid)
+        return self.assets.get_by_mrid(mrid)
 
     def add_asset(self, asset: Asset) -> PowerSystemResource:
         """
@@ -79,11 +69,7 @@ class PowerSystemResource(IdentifiedObject):
         Returns A reference to this `PowerSystemResource` to allow fluent use.
         Raises `ValueError` if another `Asset` with the same `mrid` already exists in this `PowerSystemResource`
         """
-        if self._validate_reference(asset, self.get_asset, "An Asset"):
-            return self
-
-        self._assets = list() if self._assets is None else self._assets
-        self._assets.append(asset)
+        self.assets.add(asset)
         return self
 
     def remove_asset(self, asset: Asset) -> PowerSystemResource:
@@ -94,7 +80,7 @@ class PowerSystemResource(IdentifiedObject):
         Raises `ValueError` if `asset` was not associated with this `PowerSystemResource`.
         Returns A reference to this `PowerSystemResource` to allow fluent use.
         """
-        self._assets = safe_remove(self._assets, asset)
+        self.assets.remove(asset)
         return self
 
     def clear_assets(self) -> PowerSystemResource:
@@ -102,5 +88,5 @@ class PowerSystemResource(IdentifiedObject):
         Clear all assets.
         Returns self
         """
-        self._assets = None
+        self.assets.clear()
         return self

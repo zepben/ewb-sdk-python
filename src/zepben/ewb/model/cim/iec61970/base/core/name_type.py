@@ -7,9 +7,9 @@ from __future__ import annotations
 
 __all__ = ["NameType"]
 
+from dataclasses import dataclass, field
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 
 if TYPE_CHECKING:
@@ -33,8 +33,8 @@ class NameType:
     description: str = ""
     """Description of the name type."""
 
-    _names_index: Dict[str, Name] = dict()
-    _names_multi_index: Dict[str, List[Name]] = dict()
+    _names_index: Dict[str, Name] = field(default_factory=dict)
+    _names_multi_index: Dict[str, List[Name]] = field(default_factory=dict)
 
     def __str__(self):
         return f"NameType(name='{self.name}', description='{self.description}')"
@@ -62,6 +62,7 @@ class NameType:
             return name in self._names_index or name in self._names_multi_index
         if isinstance(name, Name):
             return name in self._names_index.values() or name in self._names_multi_index.values()
+        raise KeyError()
 
     @overload
     def get_names(self, name: str) -> Generator[Name, None, None]:

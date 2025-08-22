@@ -15,7 +15,7 @@ class ZepbenList(typing.Iterator[T]):
     def __init__(self, data: Optional[Iterable[T]] = None):
         self._data: Optional[List[T]] = None
         if data is not None:
-            self.add_all(data)
+            self.update(data)
 
     def __iter__(self):
         yield from self._data or []
@@ -41,7 +41,7 @@ class ZepbenList(typing.Iterator[T]):
             self._data = []
         self._data.append(item)
 
-    def add_all(self, items: Iterable[T]):
+    def update(self, items: Iterable[T]):
         for item in items:
             self.add(item)
 

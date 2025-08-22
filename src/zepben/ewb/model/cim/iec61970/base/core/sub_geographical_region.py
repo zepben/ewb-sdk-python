@@ -7,10 +7,10 @@ from __future__ import annotations
 
 __all__ = ["SubGeographicalRegion"]
 
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
@@ -25,26 +25,17 @@ class SubGeographicalRegion(IdentifiedObject):
     geographical_region: Optional[GeographicalRegion] = None
     """The geographical region to which this sub-geographical region is within."""
 
-    _substations: Optional[List[Substation]] = None
+    substations: Optional[List[Substation]] = None
 
-    def __init__(self, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(**kwargs)
-        if substations:
-            for sub in substations:
-                self.add_substation(sub)
+    def __post_init__(self, substations: List[Substation] = None, **kwargs):
+        self.substations: MRIDList[Substation] = MRIDList(self.substations)
 
     def num_substations(self) -> int:
         """
         Returns The number of `Substation`s associated with this `SubGeographicalRegion`
         """
-        return nlen(self._substations)
+        return len(self.substations)
 
-    @property
-    def substations(self) -> Generator[Substation, None, None]:
-        """
-        All substations belonging to this sub geographical region.
-        """
-        return ngen(self._substations)
 
     def get_substation(self, mrid: str) -> Substation:
         """
@@ -54,7 +45,7 @@ class SubGeographicalRegion(IdentifiedObject):
         Returns The `Substation` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._substations, mrid)
+        return self.substations.get_by_mrid(mrid)
 
     def add_substation(self, substation: Substation) -> SubGeographicalRegion:
         """
@@ -67,10 +58,7 @@ class SubGeographicalRegion(IdentifiedObject):
         Raises `ValueError` if another `Substation` with the same `mrid` already exists for this
         `GeographicalRegion`.
         """
-        if self._validate_reference(substation, self.get_substation, "A Substation"):
-            return self
-        self._substations = list() if self._substations is None else self._substations
-        self._substations.append(substation)
+        self.substations.add(substation)
         return self
 
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:
@@ -81,7 +69,7 @@ class SubGeographicalRegion(IdentifiedObject):
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
         Raises `ValueError` if `substation` was not associated with this `SubGeographicalRegion`.
         """
-        self._substations = safe_remove(self._substations, substation)
+        self.substations.remove(substation)
         return self
 
     def clear_substations(self) -> SubGeographicalRegion:
@@ -89,5 +77,5 @@ class SubGeographicalRegion(IdentifiedObject):
         Clear all `Substations`.
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
         """
-        self._substations = None
+        self.substations.clear()
         return self

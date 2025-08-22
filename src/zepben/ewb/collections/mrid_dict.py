@@ -18,7 +18,7 @@ class MRIDDict(MRIDList):
         super().__init__()
         self._data: Optional[Dict[str, IdentifiedObject]] = None
         if data is not None:
-            self.add_all(data)
+            self.update(data)
 
     def __iter__(self):
         values = [] if self._data is None else self._data.values()
