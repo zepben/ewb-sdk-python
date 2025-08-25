@@ -12,7 +12,7 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram 
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb
+from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, set_or_null, bind_to_pb
 from zepben.ewb.services.common.translator.util import mrid_or_empty
 # noinspection PyProtectedMember
 from zepben.ewb.services.diagram.translator.diagram_enum_mappers import _map_diagram_style, _map_orientation_kind
@@ -22,6 +22,7 @@ from zepben.ewb.services.diagram.translator.diagram_enum_mappers import _map_dia
 # IEC61970 Base Diagram Layout #
 ################################
 
+@bind_to_pb
 def diagram_to_pb(cim: Diagram) -> PBDiagram:
     return PBDiagram(
         io=identified_object_to_pb(cim),
@@ -31,21 +32,20 @@ def diagram_to_pb(cim: Diagram) -> PBDiagram:
     )
 
 
+@bind_to_pb
 def diagram_object_to_pb(cim: DiagramObject) -> PBDiagramObject:
     return PBDiagramObject(
         io=identified_object_to_pb(cim),
         diagramMRID=mrid_or_empty(cim.diagram),
         identifiedObjectMRID=cim.identified_object_mrid,
-        diagramObjectStyle=cim.style,
+        diagramObjectPoints=[diagram_object_point_to_pb(io) for io in cim.points],
         rotation=cim.rotation,
-        diagramObjectPoints=[diagram_object_point_to_pb(io) for io in cim.points]
+        **set_or_null(
+            diagramObjectStyle=cim.style,
+        )
     )
 
 
+@bind_to_pb
 def diagram_object_point_to_pb(cim: DiagramObjectPoint) -> PBDiagramObjectPoint:
     return PBDiagramObjectPoint(xPosition=cim.x_position, yPosition=cim.y_position)
-
-
-Diagram.to_pb = diagram_to_pb
-DiagramObject.to_pb = diagram_object_to_pb
-DiagramObjectPoint.to_pb = diagram_object_point_to_pb

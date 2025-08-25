@@ -16,7 +16,7 @@ from zepben.ewb.model.cim.iec61968.customers.customer import Customer
 from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
-from zepben.ewb.services.common.translator.base_cim2proto import document_to_pb, organisation_role_to_pb
+from zepben.ewb.services.common.translator.base_cim2proto import document_to_pb, organisation_role_to_pb, set_or_null, bind_to_pb
 from zepben.ewb.services.common.translator.util import mrid_or_empty
 # noinspection PyProtectedMember
 from zepben.ewb.services.customer.translator.customer_enum_mappers import _map_customer_kind
@@ -26,6 +26,7 @@ from zepben.ewb.services.customer.translator.customer_enum_mappers import _map_c
 # IEC61968 Common #
 ###################
 
+@bind_to_pb
 def agreement_to_pb(cim: Agreement) -> PBAgreement:
     return PBAgreement(doc=document_to_pb(cim))
 
@@ -34,17 +35,21 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
 # IEC61968 Customers #
 ######################
 
+@bind_to_pb
 def customer_to_pb(cim: Customer) -> PBCustomer:
     customer = PBCustomer(
         kind=_map_customer_kind.to_pb(cim.kind),
-        specialNeed=cim.special_need,
-        customerAgreementMRIDs=[str(io.mrid) for io in cim.agreements]
+        customerAgreementMRIDs=[str(io.mrid) for io in cim.agreements],
+        **set_or_null(
+            specialNeed=cim.special_need,
+        )
     )
 
     getattr(customer, 'or').CopyFrom(organisation_role_to_pb(cim))
     return customer
 
 
+@bind_to_pb
 def customer_agreement_to_pb(cim: CustomerAgreement) -> PBCustomerAgreement:
     return PBCustomerAgreement(
         agr=agreement_to_pb(cim),
@@ -53,6 +58,7 @@ def customer_agreement_to_pb(cim: CustomerAgreement) -> PBCustomerAgreement:
     )
 
 
+@bind_to_pb
 def pricing_structure_to_pb(cim: PricingStructure) -> PBPricingStructure:
     return PBPricingStructure(
         doc=document_to_pb(cim),
@@ -60,12 +66,6 @@ def pricing_structure_to_pb(cim: PricingStructure) -> PBPricingStructure:
     )
 
 
+@bind_to_pb
 def tariff_to_pb(cim: Tariff) -> PBTariff:
     return PBTariff(doc=document_to_pb(cim))
-
-
-Agreement.to_pb = agreement_to_pb
-Customer.to_pb = customer_to_pb
-CustomerAgreement.to_pb = customer_agreement_to_pb
-PricingStructure.to_pb = pricing_structure_to_pb
-Tariff.to_pb = tariff_to_pb

@@ -54,6 +54,11 @@ def bind_to_cim(func: Callable[P, R]) -> Callable[P, R]:
     inspect.get_annotations(func, eval_str=True)[func.__code__.co_varnames[0]].to_cim = func
     return func
 
+T = TypeVar("T")
+
+def get_nullable(pb: Message, field: str) -> Optional[T]:
+    return None if pb.HasField(f'{field}Null') else getattr(pb, f'{field}Set')
+
 
 ###################
 # IEC61968 Common #
@@ -61,12 +66,12 @@ def bind_to_cim(func: Callable[P, R]) -> Callable[P, R]:
 
 @bind_to_cim
 def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
-    cim.title = pb.title
+    cim.title = get_nullable(pb, 'title')
     cim.created_date_time = pb.createdDateTime.ToDatetime() if pb.HasField("createdDateTime") else None
-    cim.author_name = pb.authorName
-    cim.type = pb.type
-    cim.status = pb.status
-    cim.comment = pb.comment
+    cim.author_name = get_nullable(pb, 'authorName')
+    cim.type = get_nullable(pb, 'type')
+    cim.status = get_nullable(pb, 'status')
+    cim.comment = get_nullable(pb, 'comment')
 
     identified_object_to_cim(pb.io, cim, service)
 
@@ -94,8 +99,8 @@ def organisation_role_to_cim(pb: PBOrganisationRole, cim: OrganisationRole, serv
 @bind_to_cim
 def identified_object_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, service: BaseService):
     cim.mrid = pb.mRID
-    cim.name = pb.name
-    cim.description = pb.description
+    cim.name = get_nullable(pb, 'name')
+    cim.description = get_nullable(pb, 'description')
     [cim.add_name(name_to_cim(name, cim, service).type, name.name) for name in pb.names]
 
 
@@ -120,7 +125,7 @@ def name_type_to_cim(pb: PBNameType, service: BaseService):
         nt = NameType(pb.name)
         service.add_name_type(nt)
 
-    nt.description = pb.description
+    nt.description = get_nullable(pb, 'description')
     return nt
 
 

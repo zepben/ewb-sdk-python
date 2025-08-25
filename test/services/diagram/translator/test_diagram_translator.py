@@ -6,6 +6,7 @@ from typing import TypeVar
 
 from hypothesis import given
 from zepben.ewb import IdentifiedObject, DiagramService, NameType, DiagramDatabaseTables, TableDiagramObjectPoints
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 from cim.cim_creators import *
@@ -50,7 +51,7 @@ def test_creates_new_name_type():
     cim = DiagramService().add_from_pb(pb)
 
     assert cim.name == pb.name
-    assert cim.description == pb.description
+    assert cim.description == get_nullable(pb, 'description')
 
 
 def test_updates_existing_name_type():
@@ -65,4 +66,4 @@ def test_updates_existing_name_type():
     cim = ds.add_from_pb(pb)
 
     assert cim is nt
-    assert cim.description == pb.description
+    assert cim.description == get_nullable(pb, 'description')

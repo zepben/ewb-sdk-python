@@ -17,6 +17,7 @@ from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, 
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
     TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, TableBatteryUnitsBatteryControls, \
     TableEndDevicesEndDeviceFunctions, TableAssetsPowerSystemResources, TableSynchronousMachinesReactiveCapabilityCurves, TableCurveData
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -304,7 +305,7 @@ def test_creates_new_name_type():
     cim = NetworkService().add_from_pb(pb)
 
     assert cim.name == pb.name
-    assert cim.description == pb.description
+    assert cim.description == get_nullable(pb, 'description')
 
 
 def test_updates_existing_name_type():
@@ -319,7 +320,7 @@ def test_updates_existing_name_type():
     cim = ns.add_from_pb(pb)
 
     assert cim is nt
-    assert cim.description == pb.description
+    assert cim.description == get_nullable(pb, 'description')
 
 
 def test_power_transformer_end_order():
