@@ -57,7 +57,7 @@ def bind_to_cim(func: Callable[P, R]) -> Callable[P, R]:
 T = TypeVar("T")
 
 def get_nullable(pb: Message, field: str) -> Optional[T]:
-    return None if pb.HasField(f'{field}Null') else getattr(pb, f'{field}Set')
+    return getattr(pb, f'{field}Set') if pb.HasField(f'{field}Set') else None
 
 
 ###################

@@ -496,12 +496,12 @@ class TestPhaseInferrer:
 
     @staticmethod
     def _correct_message(mrid: str) -> str:
-        return f"*** Action Required *** Inferred missing phase for '' [{mrid}] which should be correct. The phase was inferred due to a disconnected " \
+        return f"*** Action Required *** Inferred missing phase for 'AcLineSegment{{{mrid}}}' which should be correct. The phase was inferred due to a disconnected " \
                f"nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the " \
                f"source system."
 
     @staticmethod
     def _suspect_message(mrid: str) -> str:
-        return f"*** Action Required *** Inferred missing phases for '' [{mrid}] which may not be correct. The phases were inferred due to a disconnected " \
+        return f"*** Action Required *** Inferred missing phases for 'AcLineSegment{{{mrid}}}' which may not be correct. The phases were inferred due to a disconnected " \
                f"nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the " \
                f"source system."

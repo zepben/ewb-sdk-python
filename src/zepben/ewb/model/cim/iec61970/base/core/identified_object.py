@@ -34,13 +34,15 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
-    name: str = ""
+    name: Optional[str] = None
     """The name is any free human readable and possibly non unique text naming the object."""
 
-    description: str = ""
+    description: Optional[str] = None
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
     _names: Optional[List[Name]] = None
+
+    # TODO: Missing num_diagram_objects: int = None  def has_diagram_objects(self): return (self.num_diagram_objects or 0) > 0
 
     def __init__(self, names: Optional[List[Name]] = None, **kwargs):
         super(IdentifiedObject, self).__init__(**kwargs)
@@ -49,7 +51,11 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 self.add_name(name.type, name.name)
 
     def __str__(self):
-        return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
+        str = f'{self.__class__.__name__}'
+        if self.name:
+            return f'{str}{{{self.mrid}|{self.name}}}'
+        return f'{str}{{{self.mrid}}}'
+        return f'{self.__class__.__name__}{{{self.mrid}{f"|{self.name}" if self.name else ""}}}'
 
     @property
     def names(self) -> Generator[Name, None, None]:

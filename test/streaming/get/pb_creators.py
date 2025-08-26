@@ -852,7 +852,7 @@ def identified_object():
         PBIdentifiedObject,
         mRID=uuids(version=4).map(lambda x: str(x)),
         nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        descriptionSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        descriptionSet=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -1409,11 +1409,11 @@ def rotating_machine():
     return builds(
         PBRotatingMachine,
         rce=regulating_cond_eq(),
-        ratedPowerFactorSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ratedSSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ratedUSet=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        pSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        qSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+        ratedPowerFactorSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedSSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1467,25 +1467,25 @@ def synchronous_machine():
     return builds(
         PBSynchronousMachine,
         rm=rotating_machine(),
-        baseQSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        condenserPSet=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        baseQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        condenserPSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         earthingSet=booleans(),
-        earthingStarPointRSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        earthingStarPointXSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ikkSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        maxQSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        maxUSet=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        minQSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        minUSet=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        muSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        rSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r0Set=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r2Set=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectSubtransXSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectSyncXSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectTransXSet=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        x0Set=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        x2Set=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        earthingStarPointRSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        earthingStarPointXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ikkSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        maxQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        maxUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        minQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        muSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r2Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectSubtransXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectSyncXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectTransXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x2Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         type=sampled_from(PBSynchronousMachineKind.values()),
         operatingMode=sampled_from(PBSynchronousMachineKind.values()),
         reactiveCapabilityCurveMRIDs=one_of(none(), text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))),

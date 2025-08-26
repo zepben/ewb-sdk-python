@@ -24,7 +24,7 @@ street_address_args = ["a", TownDetail(), "b", StreetDetail()]
 def test_street_address_constructor_default():
     sa = StreetAddress()
 
-    assert sa.postal_code == ""
+    assert sa.postal_code is None
     assert not sa.town_detail
 
 

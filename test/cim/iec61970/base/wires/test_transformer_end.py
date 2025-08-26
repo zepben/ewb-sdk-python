@@ -29,7 +29,7 @@ transformer_end_args = [*identified_object_args, True, 1.1, 2.2, RatioTapChanger
 
 def verify_transformer_end_constructor_default(te: TransformerEnd):
     verify_identified_object_constructor_default(te)
-    assert not te.grounded
+    assert te.grounded is None
     assert te.r_ground is None
     assert te.x_ground is None
     assert not te.ratio_tap_changer

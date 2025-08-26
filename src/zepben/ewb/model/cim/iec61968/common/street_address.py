@@ -18,11 +18,11 @@ class StreetAddress(object):
     General purpose street and postal address information.
     """
 
-    postal_code: str = ""
+    postal_code: Optional[str] = None
     """Postal code for the address."""
     town_detail: Optional[TownDetail] = None
     """Optional `TownDetail` for this address."""
-    po_box: str = ""
+    po_box: Optional[str] = None
     """Post office box for the address."""
     street_detail: Optional[StreetDetail] = None
     """Optional `StreetDetail` for this address."""

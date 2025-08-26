@@ -29,7 +29,7 @@ class SynchronousMachine(RotatingMachine):
     condenser_p: Optional[int] = None
     """Active power consumed (watts) when in condenser mode operation."""
 
-    earthing: bool = False
+    earthing: Optional[bool] = None
     """Indicates whether the generator is earthed. Used for short circuit data exchange according to IEC 60909."""
 
     earthing_star_point_r: Optional[float] = None

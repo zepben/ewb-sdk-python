@@ -13,7 +13,7 @@ class TablePoles(TableStructures):
 
     def __init__(self):
         super().__init__()
-        self.classification: Column = self._create_column("classification", "TEXT", Nullable.NOT_NULL)
+        self.classification: Column = self._create_column("classification", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:

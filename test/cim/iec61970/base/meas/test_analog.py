@@ -13,7 +13,10 @@ analog_args = measurement_args
 
 
 def test_analog_constructor_default():
-    verify_measurement_constructor_default(Analog())
+    analog = Analog()
+    verify_measurement_constructor_default(analog)
+
+    assert analog.positive_flow_in is None
 
 
 @given(**analog_kwargs)

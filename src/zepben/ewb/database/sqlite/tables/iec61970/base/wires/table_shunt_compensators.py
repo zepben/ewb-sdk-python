@@ -16,7 +16,7 @@ class TableShuntCompensators(TableRegulatingCondEq, ABC):
     def __init__(self):
         super().__init__()
         self.shunt_compensator_info_mrid: Column = self._create_column("shunt_compensator_info_mrid", "TEXT", Nullable.NULL)
-        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NOT_NULL)
+        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NULL)
         self.nom_u: Column = self._create_column("nom_u", "INTEGER", Nullable.NULL)
         self.phase_connection: Column = self._create_column("phase_connection", "TEXT", Nullable.NOT_NULL)
         self.sections: Column = self._create_column("sections", "NUMBER", Nullable.NULL)

@@ -26,7 +26,7 @@ def verify_power_system_resource_constructor_default(psr: PowerSystemResource):
     verify_identified_object_constructor_default(psr)
     assert psr.location is None
     assert psr.asset_info is None
-    assert psr.num_controls == 0
+    assert psr.num_controls is None
     assert not list(psr.assets)
 
 

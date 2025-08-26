@@ -31,7 +31,7 @@ tap_changer_args = [*power_system_resource_args, False, 1, TapChangerControl(), 
 
 def verify_tap_changer_constructor_default(tc: TapChanger):
     verify_power_system_resource_constructor_default(tc)
-    assert tc.control_enabled
+    assert tc.control_enabled is None
     assert tc.neutral_u is None
     assert tc.high_step is None
     assert tc.low_step is None

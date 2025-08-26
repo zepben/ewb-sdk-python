@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["NameType"]
 
-from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
+from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional
 
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
@@ -30,7 +30,7 @@ class NameType:
     name: str
     """Name of the name type."""
 
-    description: str = ""
+    description: Optional[str] = None
     """Description of the name type."""
 
     _names_index: Dict[str, Name] = dict()

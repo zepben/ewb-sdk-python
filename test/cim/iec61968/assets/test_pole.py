@@ -24,7 +24,7 @@ def test_pole_constructor_default():
     p = Pole()
 
     verify_structure_constructor_default(p)
-    assert p.classification == ""
+    assert p.classification is None
     assert not list(p.streetlights)
 
 

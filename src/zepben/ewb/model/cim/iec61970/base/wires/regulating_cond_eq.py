@@ -21,7 +21,7 @@ class RegulatingCondEq(EnergyConnection):
     de-energized. Note that zero-impedance branches can potentially be modeled by other equipment types.
     """
 
-    control_enabled: bool = True
+    control_enabled: Optional[bool] = None
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
     _regulating_control: Optional[RegulatingControl] = None

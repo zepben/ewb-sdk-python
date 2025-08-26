@@ -62,7 +62,7 @@ class TestNetworkConsumer:
 
     @pytest.mark.asyncio
     @given(network_identified_objects())
-    @settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate))
+    @settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate), derandomize=True)
     async def test_get_identified_objects_supported_types(self, nios):
         requested = []
         for nio in nios:

@@ -6,6 +6,7 @@
 __all__ = ["StreetDetail"]
 
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -14,22 +15,22 @@ class StreetDetail(object):
     Street details, in the context of address.
     """
 
-    building_name: str = ""
+    building_name: str = None
     """
     (if applicable) In certain cases the physical location of the place of interest does not have a direct point of entry from the street, 
     but may be located inside a larger structure such as a building, complex, office block, apartment, etc.
     """
-    floor_identification: str = ""
+    floor_identification: Optional[str] = None
     """The identification by name or number, expressed as text, of the floor in the building as part of this address."""
-    name: str = ""
+    name: Optional[str] = None
     """Name of the street."""
-    number: str = ""
+    number: Optional[str] = None
     """Designator of the specific location on the street."""
-    suite_number: str = ""
+    suite_number: Optional[str] = None
     """Number of the apartment or suite."""
-    type: str = ""
+    type: Optional[str] = None
     """Type of street. Examples include: street, circle, boulevard, avenue, road, drive, etc."""
-    display_address: str = ""
+    display_address: Optional[str] = None
     """The address as it should be displayed to a user."""
 
     def all_fields_empty(self):

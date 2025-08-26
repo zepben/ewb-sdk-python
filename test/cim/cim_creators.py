@@ -855,8 +855,8 @@ def create_geographical_region(include_runtime: bool = True):
 def create_identified_object(include_runtime: bool):
     return {
         "mrid": uuids(version=4).map(lambda x: str(x)),
-        "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "name": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        "description": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()), max_size=2, unique_by=lambda it: it.name)
     }
 
@@ -1559,7 +1559,7 @@ def create_recloser(include_runtime: bool = True):
 def create_regulating_cond_eq(include_runtime: bool):
     return {
         **create_energy_connection(include_runtime),
-        "control_enabled": booleans(),
+        "control_enabled": one_of(none(), booleans()),
         "regulating_control": builds(TapChangerControl, **create_identified_object(include_runtime)),
     }
 
@@ -1661,7 +1661,7 @@ def create_synchronous_machine(include_runtime: bool = True):
         curves=one_of(none(), lists(builds(ReactiveCapabilityCurve, **create_identified_object(include_runtime)), min_size=1, max_size=2)),
         base_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         condenser_p=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        earthing=booleans(),
+        earthing=one_of(none(), booleans()),
         earthing_star_point_r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         earthing_star_point_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         ikk=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),

@@ -28,7 +28,7 @@ class UsagePoint(IdentifiedObject):
     usage_point_location: Optional[Location] = None
     """Service `zepben.ewb.model.cim.iec61968.common.location.Location` where the service delivered by this `UsagePoint` is consumed."""
 
-    is_virtual: bool = False
+    is_virtual: Optional[bool] = None
     """
     If true, this usage point is virtual, i.e., no physical location exists in the network where a meter could be located to
     collect the meter readings. For example, one may define a virtual usage point to serve as an aggregation of usage for all

@@ -154,9 +154,11 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         feeder_start_points = set(map(head_conducting_equipment_mrid, self.service.objects(Feeder)))
 
         def has_been_assigned_to_feeder(energy_source: EnergySource) -> bool:
-            return energy_source.is_external_grid \
-                and self._is_on_feeder(energy_source) \
+            return (
+                energy_source.is_external_grid
+                and self._is_on_feeder(energy_source)
                 and feeder_start_points.isdisjoint({it.to_equip.mrid for it in connected_equipment(energy_source) if it.to_equip})
+            )
 
         for es in self.service.objects(EnergySource):
             if has_been_assigned_to_feeder(es):

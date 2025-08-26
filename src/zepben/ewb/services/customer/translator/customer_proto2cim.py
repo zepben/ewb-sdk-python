@@ -44,6 +44,7 @@ def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Custom
     cim = Customer(
         mrid=pb.mrid(),
         kind=CustomerKind(pb.kind),
+        # TODO: missing num_end_devices from jvm sdk
         special_need=get_nullable(pb, 'specialNeed')
     )
 

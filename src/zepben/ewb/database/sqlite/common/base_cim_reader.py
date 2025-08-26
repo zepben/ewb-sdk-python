@@ -53,12 +53,12 @@ class BaseCimReader(ABC):
         :return: True if the `Document` was successfully read from the database and added to the service.
         :raises SQLException: For any errors encountered reading from the database.
         """
-        document.title = result_set.get_string(table.title.query_index, on_none="")
+        document.title = result_set.get_string(table.title.query_index, on_none=None)
         document.created_date_time = result_set.get_instant(table.created_date_time.query_index, on_none=None)
-        document.author_name = result_set.get_string(table.author_name.query_index, on_none="")
-        document.type = result_set.get_string(table.type.query_index, on_none="")
-        document.status = result_set.get_string(table.status.query_index, on_none="")
-        document.comment = result_set.get_string(table.comment.query_index, on_none="")
+        document.author_name = result_set.get_string(table.author_name.query_index, on_none=None)
+        document.type = result_set.get_string(table.type.query_index, on_none=None)
+        document.status = result_set.get_string(table.status.query_index, on_none=None)
+        document.comment = result_set.get_string(table.comment.query_index, on_none=None)
 
         return self._load_identified_object(document, table, result_set)
 
@@ -111,8 +111,8 @@ class BaseCimReader(ABC):
         :return: True if the `IdentifiedObject` was successfully read from the database and added to the service.
         :raises SQLException: For any errors encountered reading from the database.
         """
-        identified_object.name = result_set.get_string(table.name_.query_index, on_none="")
-        identified_object.description = result_set.get_string(table.description.query_index, on_none="")
+        identified_object.name = result_set.get_string(table.name_.query_index, on_none=None)
+        identified_object.description = result_set.get_string(table.description.query_index, on_none=None)
         # Currently unused
         # identified_object.num_diagram_objects = result_set.get_int(table.num_diagram_objects.query_index)
 

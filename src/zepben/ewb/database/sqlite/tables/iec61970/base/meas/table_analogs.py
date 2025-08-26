@@ -13,7 +13,7 @@ class TableAnalogs(TableMeasurements):
 
     def __init__(self):
         super().__init__()
-        self.positive_flow_in: Column = self._create_column("positive_flow_in", "BOOLEAN", Nullable.NOT_NULL)
+        self.positive_flow_in: Column = self._create_column("positive_flow_in", "BOOLEAN", Nullable.NULL)
 
     @property
     def name(self) -> str:

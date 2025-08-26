@@ -25,13 +25,13 @@ street_detail_args = ["a", "b", "c", "d", "e", "f", "g"]
 def test_street_detail_constructor_default():
     sd = StreetDetail()
 
-    assert sd.building_name == ""
-    assert sd.floor_identification == ""
-    assert sd.name == ""
-    assert sd.number == ""
-    assert sd.suite_number == ""
-    assert sd.type == ""
-    assert sd.display_address == ""
+    assert sd.building_name is None
+    assert sd.floor_identification is None
+    assert sd.name is None
+    assert sd.number is None
+    assert sd.suite_number is None
+    assert sd.type is None
+    assert sd.display_address is None
 
 
 @given(**street_detail_kwargs)

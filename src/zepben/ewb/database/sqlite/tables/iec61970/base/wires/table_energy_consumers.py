@@ -14,7 +14,7 @@ class TableEnergyConsumers(TableEnergyConnections):
     def __init__(self):
         super().__init__()
         self.customer_count: Column = self._create_column("customer_count", "INTEGER", Nullable.NULL)
-        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NOT_NULL)
+        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NULL)
         self.p: Column = self._create_column("p", "NUMBER", Nullable.NULL)
         self.q: Column = self._create_column("q", "NUMBER", Nullable.NULL)
         self.p_fixed: Column = self._create_column("p_fixed", "NUMBER", Nullable.NULL)

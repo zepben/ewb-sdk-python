@@ -16,4 +16,4 @@ class TablePowerSystemResources(TableIdentifiedObjects, ABC):
     def __init__(self):
         super().__init__()
         self.location_mrid: Column = self._create_column("location_mrid", "TEXT", Nullable.NULL)
-        self.num_controls: Column = self._create_column("num_controls", "INTEGER", Nullable.NOT_NULL)
+        self.num_controls: Column = self._create_column("num_controls", "INTEGER", Nullable.NULL)

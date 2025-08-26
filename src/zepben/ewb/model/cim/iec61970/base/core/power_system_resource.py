@@ -32,7 +32,7 @@ class PowerSystemResource(IdentifiedObject):
     asset_info: Optional[AssetInfo] = None
     """A subclass of `zepben.ewb.model.cim.iec61968.assets.asset_info.AssetInfo` providing information about the asset associated with this PowerSystemResource."""
 
-    num_controls: int = 0
+    num_controls: Optional[int] = None
     """Number of Control's known to associate with this [PowerSystemResource]"""
 
     _assets: Optional[List[Asset]] = None
@@ -48,7 +48,7 @@ class PowerSystemResource(IdentifiedObject):
         """
         * :return: True if this [PowerSystemResource] has at least 1 Control associated with it, false otherwise.
         """
-        return self.num_controls > 0
+        return nlen(self.num_controls) > 0
 
     def num_assets(self) -> int:
         """

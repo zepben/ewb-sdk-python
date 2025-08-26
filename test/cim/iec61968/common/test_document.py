@@ -26,12 +26,12 @@ document_args = [*identified_object_args, "a", datetime(2021, 1, 1), "b", "c", "
 
 def verify_document_constructor_default(d: Document):
     verify_identified_object_constructor_default(d)
-    assert d.title == ""
+    assert d.title is None
     assert not d.created_date_time
-    assert d.author_name == ""
-    assert d.type == ""
-    assert d.status == ""
-    assert d.comment == ""
+    assert d.author_name is None
+    assert d.type is None
+    assert d.status is None
+    assert d.comment is None
 
 
 # noinspection PyShadowingBuiltins

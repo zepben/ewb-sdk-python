@@ -15,7 +15,7 @@ class TableStreetAddresses(TableTownDetails, ABC):
 
     def __init__(self):
         super().__init__()
-        self.postal_code: Column = self._create_column("postal_code", "TEXT", Nullable.NOT_NULL)
+        self.postal_code: Column = self._create_column("postal_code", "TEXT", Nullable.NULL)
         self.po_box: Column = self._create_column("po_box", "TEXT", Nullable.NULL)
         self.building_name: Column = self._create_column("building_name", "TEXT", Nullable.NULL)
         self.floor_identification: Column = self._create_column("floor_identification", "TEXT", Nullable.NULL)

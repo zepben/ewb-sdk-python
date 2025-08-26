@@ -24,7 +24,7 @@ class TransformerEnd(IdentifiedObject):
     In earlier CIM versions, the TransformerWinding class served a similar purpose, but this class is more flexible
     because it associates to terminal but is not a specialization of ConductingEquipment.
     """
-    grounded: bool = False
+    grounded: Optional[bool] = None
     """(for Yn and Zn connections) True if the neutral is solidly grounded."""
 
     r_ground: Optional[float] = None

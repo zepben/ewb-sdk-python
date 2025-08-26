@@ -15,7 +15,7 @@ class TableTapChangers(TablePowerSystemResources, ABC):
 
     def __init__(self):
         super().__init__()
-        self.control_enabled: Column = self._create_column("control_enabled", "BOOLEAN", Nullable.NOT_NULL)
+        self.control_enabled: Column = self._create_column("control_enabled", "BOOLEAN", Nullable.NULL)
         self.high_step: Column = self._create_column("high_step", "INTEGER", Nullable.NULL)
         self.low_step: Column = self._create_column("low_step", "INTEGER", Nullable.NULL)
         self.neutral_step: Column = self._create_column("neutral_step", "INTEGER", Nullable.NULL)

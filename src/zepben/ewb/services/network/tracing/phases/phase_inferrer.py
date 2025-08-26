@@ -36,9 +36,9 @@ class PhaseInferrer:
         @property
         def description(self) -> str:
             if self.suspect:
-                _inner_desc = f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
+                _inner_desc = f"phases for '{str(self.conducting_equipment)}' which may not be correct. The phases were inferred"
             else:
-                _inner_desc = f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
+                _inner_desc = f"phase for '{str(self.conducting_equipment)}' which should be correct. The phase was inferred"
             return (f'Inferred missing {_inner_desc} due to a disconnected nominal phase because of an '
                     f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
 

@@ -19,7 +19,7 @@ class TableTransformerEnds(TableIdentifiedObjects, ABC):
         self.end_number: Column = self._create_column("end_number", "INTEGER", Nullable.NOT_NULL)
         self.terminal_mrid: Column = self._create_column("terminal_mrid", "TEXT", Nullable.NULL)
         self.base_voltage_mrid: Column = self._create_column("base_voltage_mrid", "TEXT", Nullable.NULL)
-        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NOT_NULL)
+        self.grounded: Column = self._create_column("grounded", "BOOLEAN", Nullable.NULL)
         self.r_ground: Column = self._create_column("r_ground", "NUMBER", Nullable.NULL)
         self.x_ground: Column = self._create_column("x_ground", "NUMBER", Nullable.NULL)
         self.star_impedance_mrid: Column = self._create_column("star_impedance_mrid", "TEXT", Nullable.NULL)

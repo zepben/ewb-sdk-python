@@ -25,7 +25,7 @@ class TableEnergySources(TableEnergyConnections):
         self.x: Column = self._create_column("x", "NUMBER", Nullable.NULL)
         self.x0: Column = self._create_column("x0", "NUMBER", Nullable.NULL)
         self.xn: Column = self._create_column("xn", "NUMBER", Nullable.NULL)
-        self.is_external_grid: Column = self._create_column("is_external_grid", "BOOLEAN", Nullable.NOT_NULL)
+        self.is_external_grid: Column = self._create_column("is_external_grid", "BOOLEAN", Nullable.NULL)
         self.r_min: Column = self._create_column("r_min", "NUMBER", Nullable.NULL)
         self.rn_min: Column = self._create_column("rn_min", "NUMBER", Nullable.NULL)
         self.r0_min: Column = self._create_column("r0_min", "NUMBER", Nullable.NULL)
