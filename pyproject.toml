@@ -23,7 +23,7 @@
         {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
     ]
     dependencies = [
-        "zepben.protobuf==1.0.0b1",
+        "zepben.protobuf==1.0.0",
         "typing_extensions==4.12.2",
         "requests>=2.26.0, <3.0.0",
         "urllib3>=1.26.6, <1.27.0",

@@ -88,6 +88,27 @@
 * The `zepben.auth` dependency has been incorporated into the SDK with the following package change:
   * `zepben.auth` -> `zepben.ewb.auth`. You can also import these directly from `zepben.ewb`.
 * `SqliteTable` now subclasses `SqlTable`.
+* The following CIM fields have been made nullable. Note if previously accessing these fields you will now have to handle them potentially being null.
+  * `Analog.positiveFlowIn`
+  * `Document.*`
+  * `EnergyConsumer.grounded`
+  * `EnergySource.isExternalGrid`
+  * `IdentifiedObject.name`
+  * `IdentifiedObject.description`
+  * `IdentifiedObject.numDiagramObjects`
+  * `Meter.companyMeterId`
+  * `NameType.description`
+  * `Pole.classification`
+  * `PowerSystemResource.numControls`
+  * `RegulatingCondEq.controlEnabled`
+  * `ShuntCompensator.grounded`
+  * `StreetAddress.postalCode`
+  * `StreetAddress.poBox`
+  * `StreetDetail.*`
+  * `SynchronousMachine.earthing`
+  * `TapChanger.controlEnabled`
+  * `TransformerEnd.grounded`
+  * `UsagePoint.isVirtual`
 
 ### New Features
 * Created a new `SqlTable` that doesn't support creating schema creation statements by default.
