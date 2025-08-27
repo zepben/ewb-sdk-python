@@ -2,14 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable, Set, Any
+from typing import Callable, FrozenSet, Any
 from enum import Enum
 
 from zepben.ewb import Terminal, SinglePhaseKind
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.ewb.services.network.tracing.traversal.step_context import StepContext
 
-HasTracked = Callable[[Terminal, Set[SinglePhaseKind]], bool]
+HasTracked = Callable[[Terminal, FrozenSet[SinglePhaseKind]], bool]
 CanActionItem = Callable[[NetworkTraceStep[Any], StepContext, HasTracked], bool]
 
 
