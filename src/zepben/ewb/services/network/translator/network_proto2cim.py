@@ -1119,8 +1119,8 @@ def curve_to_cim(pb: PBCurve, cim: Curve, network_service: NetworkService):
 
 def curve_data_to_cim(pb: PBCurveData) -> Optional[CurveData]:
     return CurveData(
-        get_nullable(pb, 'xValue'),
-        get_nullable(pb, 'y1Value'),
+        pb.xValue,
+        pb.y1Value,
         get_nullable(pb, 'y2Value'),
         get_nullable(pb, 'y3Value'),
     )
@@ -2160,7 +2160,7 @@ def transformer_end_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_se
 
 
 def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> Optional[TransformerEndRatedS]:
-    return TransformerEndRatedS(cooling_type=TransformerCoolingType(pb.coolingType), rated_s=get_nullable(pb, 'ratedS'))
+    return TransformerEndRatedS(cooling_type=TransformerCoolingType(pb.coolingType), rated_s=pb.ratedS)
 
 
 @bind_to_cim

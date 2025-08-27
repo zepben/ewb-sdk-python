@@ -41,8 +41,6 @@ def bind_to_pb(func: Callable[P, R]) -> Callable[P, R]:
 
 
 def set_or_null(**kwargs):
-    if 'invWattRespPAtV1' in kwargs.keys():
-        print('yo')
     return {f'{k}{"Null" if v is None else "Set"}': v if v is not None else NullValue.NULL_VALUE for k, v in kwargs.items()}
 
 

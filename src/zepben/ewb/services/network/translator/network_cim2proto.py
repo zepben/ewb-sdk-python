@@ -595,7 +595,7 @@ def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=asset_info_to_pb(cim),
         connectionKind=_map_winding_connection.to_pb(cim.connection_kind),
-        endNumber=from_nullable_int(cim.end_number),
+        endNumber=cim.end_number,
         transformerTankInfoMRID=mrid_or_empty(cim.transformer_tank_info),
         transformerStarImpedanceMRID=mrid_or_empty(cim.transformer_star_impedance),
         energisedEndNoLoadTestsMRID=mrid_or_empty(cim.energised_end_no_load_tests),
@@ -966,12 +966,13 @@ def curve_to_pb(cim: Curve) -> PBCurve:
 
 
 def curve_data_to_pb(cim: CurveData) -> PBCurveData:
-    return PBCurveData(**set_or_null(
+    return PBCurveData(
         xValue=cim.x_value,
         y1Value=cim.y1_value,
-        y2Value=from_nullable_float(cim.y2_value),
-        y3Value=from_nullable_float(cim.y3_value)
-    )
+        **set_or_null(
+            y2Value=from_nullable_float(cim.y2_value),
+            y3Value=from_nullable_float(cim.y3_value)
+        )
     )
 
 
@@ -1832,10 +1833,8 @@ def transformer_end_to_pb(cim: TransformerEnd) -> PBTransformerEnd:
 
 def transformer_end_rated_s_to_pb(cim: TransformerEndRatedS) -> PBTransformerEndRatedS:
     return PBTransformerEndRatedS(
-        coolingType=_map_transformer_cooling_type.to_pb(cim.cooling_type)
-        **set_or_null(
-            ratedS=cim.rated_s,
-        )
+        coolingType=_map_transformer_cooling_type.to_pb(cim.cooling_type),
+        ratedS=cim.rated_s,
     )
 
 
@@ -1845,10 +1844,10 @@ def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransfo
         io=identified_object_to_pb(cim),
         transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info),
         **set_or_null(
-            r=cim.r if cim.r else 0.0,
-            r0=cim.r0 if cim.r0 else 0.0,
-            x=cim.x if cim.x else 0.0,
-            x0=cim.x0 if cim.x0 else 0.0,
+            r=cim.r,
+            r0=cim.r0,
+            x=cim.x,
+            x0=cim.x0
         )
     )
 

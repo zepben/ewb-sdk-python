@@ -21,7 +21,7 @@ class Meter(EndDevice):
         return self.name
 
     @company_meter_id.setter
-    def company_meter_id(self, meter_id: str):
+    def company_meter_id(self, meter_id: Optional[str]):
         """
         `meter_id` The ID to set for this Meter. Will use `IdentifiedObject.name` as a backing field.
         """

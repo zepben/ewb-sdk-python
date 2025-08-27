@@ -51,11 +51,10 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 self.add_name(name.type, name.name)
 
     def __str__(self):
-        str = f'{self.__class__.__name__}'
+        class_name = f'{self.__class__.__name__}'
         if self.name:
-            return f'{str}{{{self.mrid}|{self.name}}}'
-        return f'{str}{{{self.mrid}}}'
-        return f'{self.__class__.__name__}{{{self.mrid}{f"|{self.name}" if self.name else ""}}}'
+            return f'{class_name}{{{self.mrid}|{self.name}}}'
+        return f'{class_name}{{{self.mrid}}}'
 
     @property
     def names(self) -> Generator[Name, None, None]:
