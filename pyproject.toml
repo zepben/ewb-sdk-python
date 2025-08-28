@@ -13,7 +13,7 @@
 
 [project]
     name = "zepben.ewb"
-    version = "1.0.0b11"
+    version = "1.0.0"
     description = "Python SDK for interacting with the Energy Workbench platform"
     readme = {file = "README.md", content-type = "text/markdown"}
     license = "MPL-2.0"
@@ -28,7 +28,6 @@
         "requests>=2.26.0, <3.0.0",
         "urllib3>=1.26.6, <1.27.0",
         "PyJWT>=2.1.0, <2.2.0",
-        "dataclassy==0.6.2",
     ]
     classifiers = [
         "Programming Language :: Python :: 3",
