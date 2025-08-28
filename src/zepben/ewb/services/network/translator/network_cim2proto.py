@@ -301,7 +301,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import *
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
-from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb, bind_to_pb
+from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb, bind_to_pb, set_or_null
 from zepben.ewb.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
     nullable_bool_settings
 # noinspection PyProtectedMember
@@ -328,9 +328,11 @@ class CimTranslationException(Exception):
 def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
     return PBRelayInfo(
         ai=asset_info_to_pb(cim),
-        curveSetting=cim.curve_setting,
-        **nullable_bool_settings("recloseFast", cim.reclose_fast),
-        recloseDelays=cim.reclose_delays
+        recloseDelays=cim.reclose_delays,
+        **set_or_null(
+            curveSetting=cim.curve_setting,
+            recloseFast=cim.reclose_fast,
+        )
     )
 
 
@@ -349,7 +351,9 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
     return PBPanDemandResponseFunction(
         edf=end_device_function_to_pb(cim),
         kind=_map_end_device_function_kind.to_pb(cim.kind),
-        appliance=from_nullable_int(cim._appliance_bitmask)
+        **set_or_null(
+            appliance=cim._appliance_bitmask
+        )
     )
 
 
@@ -403,32 +407,36 @@ def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
 def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
     return PBDistanceRelay(
         prf=protection_relay_function_to_pb(cim, True),
-        backwardBlind=from_nullable_float(cim.backward_blind),
-        backwardReach=from_nullable_float(cim.backward_reach),
-        backwardReactance=from_nullable_float(cim.backward_reactance),
-        forwardBlind=from_nullable_float(cim.forward_blind),
-        forwardReach=from_nullable_float(cim.forward_reach),
-        forwardReactance=from_nullable_float(cim.forward_reactance),
-        operationPhaseAngle1=from_nullable_float(cim.operation_phase_angle1),
-        operationPhaseAngle2=from_nullable_float(cim.operation_phase_angle2),
-        operationPhaseAngle3=from_nullable_float(cim.operation_phase_angle3)
+        **set_or_null(
+            backwardBlind=cim.backward_blind,
+            backwardReach=cim.backward_reach,
+            backwardReactance=cim.backward_reactance,
+            forwardBlind=cim.forward_blind,
+            forwardReach=cim.forward_reach,
+            forwardReactance=cim.forward_reactance,
+            operationPhaseAngle1=cim.operation_phase_angle1,
+            operationPhaseAngle2=cim.operation_phase_angle2,
+            operationPhaseAngle3=cim.operation_phase_angle3,
+        )
     )
 
 
 def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_info: bool = False) -> PBProtectionRelayFunction:
     return PBProtectionRelayFunction(
         psr=power_system_resource_to_pb(cim, include_asset_info),
-        model=cim.model,
-        **nullable_bool_settings("reclosing", cim.reclosing),
         timeLimits=cim.time_limits,
         thresholds=[relay_setting_to_pb(rs) for rs in cim.thresholds],
-        relayDelayTime=from_nullable_float(cim.relay_delay_time),
         protectionKind=_map_protection_kind.to_pb(cim.protection_kind),
         protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches],
-        **nullable_bool_settings("directable", cim.directable),
         powerDirection=_map_power_direction_kind.to_pb(cim.power_direction),
         sensorMRIDs=[str(io.mrid) for io in cim.sensors],
         schemeMRIDs=[str(io.mrid) for io in cim.schemes],
+        **set_or_null(
+            model=cim.model,
+            reclosing=cim.reclosing,
+            relayDelayTime=cim.relay_delay_time,
+            directable=cim.directable,
+        )
     )
 
 
@@ -436,8 +444,8 @@ def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_
 def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRelayScheme:
     return PBProtectionRelayScheme(
         io=identified_object_to_pb(cim),
+        functionMRIDs=[str(io.mrid) for io in cim.functions],
         systemMRID=mrid_or_empty(cim.system),
-        functionMRIDs=[str(io.mrid) for io in cim.functions]
     )
 
 
@@ -452,9 +460,11 @@ def protection_relay_system_to_pb(cim: ProtectionRelaySystem) -> PBProtectionRel
 
 def relay_setting_to_pb(cim: RelaySetting) -> PBRelaySetting:
     return PBRelaySetting(
-        name=cim.name,
         unitSymbol=_map_unit_symbol.to_pb(cim.unit_symbol),
-        value=from_nullable_float(cim.value)
+        value=from_nullable_float(cim.value),
+        **set_or_null(
+            name=cim.name,
+        )
     )
 
 
@@ -479,10 +489,12 @@ def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
 
     return PBBatteryControl(
         rc=regulating_control_to_pb(cim),
-        chargingRate=from_nullable_float(cim.charging_rate),
-        dischargingRate=from_nullable_float(cim.discharging_rate),
-        reservePercent=from_nullable_float(cim.reserve_percent),
-        controlMode=_map_battery_control_mode.to_pb(cim.control_mode)
+        controlMode=_map_battery_control_mode.to_pb(cim.control_mode),
+        **set_or_null(
+            chargingRate=cim.charging_rate,
+            dischargingRate=cim.discharging_rate,
+            reservePercent=cim.reserve_percent,
+        )
     )
 
 
@@ -499,11 +511,13 @@ def cable_info_to_pb(cim: CableInfo) -> PBCableInfo:
 def no_load_test_to_pb(cim: NoLoadTest) -> PBNoLoadTest:
     return PBNoLoadTest(
         tt=transformer_test_to_pb(cim),
-        energisedEndVoltage=from_nullable_int(cim.energised_end_voltage),
-        excitingCurrent=from_nullable_float(cim.exciting_current),
-        excitingCurrentZero=from_nullable_float(cim.exciting_current_zero),
-        loss=from_nullable_int(cim.loss),
-        lossZero=from_nullable_int(cim.loss_zero),
+        **set_or_null(
+            energisedEndVoltage=cim.energised_end_voltage,
+            excitingCurrent=cim.exciting_current,
+            excitingCurrentZero=cim.exciting_current_zero,
+            loss=cim.loss,
+            lossZero=cim.loss_zero,
+        )
     )
 
 
@@ -511,11 +525,13 @@ def no_load_test_to_pb(cim: NoLoadTest) -> PBNoLoadTest:
 def open_circuit_test_to_pb(cim: OpenCircuitTest) -> PBOpenCircuitTest:
     return PBOpenCircuitTest(
         tt=transformer_test_to_pb(cim),
-        energisedEndStep=from_nullable_int(cim.energised_end_step),
-        energisedEndVoltage=from_nullable_int(cim.energised_end_voltage),
-        openEndStep=from_nullable_int(cim.open_end_step),
-        openEndVoltage=from_nullable_int(cim.open_end_voltage),
-        phaseShift=from_nullable_float(cim.phase_shift),
+        **set_or_null(
+            energisedEndStep=cim.energised_end_step,
+            energisedEndVoltage=cim.energised_end_voltage,
+            openEndStep=cim.open_end_step,
+            openEndVoltage=cim.open_end_voltage,
+            phaseShift=cim.phase_shift,
+        )
     )
 
 
@@ -536,16 +552,18 @@ def power_transformer_info_to_pb(cim: PowerTransformerInfo) -> PBPowerTransforme
 def short_circuit_test_to_pb(cim: ShortCircuitTest) -> PBShortCircuitTest:
     return PBShortCircuitTest(
         tt=transformer_test_to_pb(cim),
-        current=from_nullable_float(cim.current),
-        energisedEndStep=from_nullable_int(cim.energised_end_step),
-        groundedEndStep=from_nullable_int(cim.grounded_end_step),
-        leakageImpedance=from_nullable_float(cim.leakage_impedance),
-        leakageImpedanceZero=from_nullable_float(cim.leakage_impedance_zero),
-        loss=from_nullable_int(cim.loss),
-        lossZero=from_nullable_int(cim.loss_zero),
-        power=from_nullable_int(cim.power),
-        voltage=from_nullable_float(cim.voltage),
-        voltageOhmicPart=from_nullable_float(cim.voltage_ohmic_part),
+        **set_or_null(
+            current=cim.current,
+            energisedEndStep=cim.energised_end_step,
+            groundedEndStep=cim.grounded_end_step,
+            leakageImpedance=cim.leakage_impedance,
+            leakageImpedanceZero=cim.leakage_impedance_zero,
+            loss=cim.loss,
+            lossZero=cim.loss_zero,
+            power=cim.power,
+            voltage=cim.voltage,
+            voltageOhmicPart=cim.voltage_ohmic_part,
+        )
     )
 
 
@@ -553,10 +571,12 @@ def short_circuit_test_to_pb(cim: ShortCircuitTest) -> PBShortCircuitTest:
 def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensatorInfo:
     return PBShuntCompensatorInfo(
         ai=asset_info_to_pb(cim),
-        maxPowerLoss=from_nullable_int(cim.max_power_loss),
-        ratedCurrent=from_nullable_int(cim.rated_current),
-        ratedReactivePower=from_nullable_int(cim.rated_reactive_power),
-        ratedVoltage=from_nullable_int(cim.rated_voltage),
+        **set_or_null(
+            maxPowerLoss=cim.max_power_loss,
+            ratedCurrent=cim.rated_current,
+            ratedReactivePower=cim.rated_reactive_power,
+            ratedVoltage=cim.rated_voltage,
+        )
     )
 
 
@@ -564,7 +584,9 @@ def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensato
 def switch_info_to_pb(cim: SwitchInfo) -> PBSwitchInfo:
     return PBSwitchInfo(
         ai=asset_info_to_pb(cim),
-        ratedInterruptingTime=from_nullable_float(cim.rated_interrupting_time)
+        **set_or_null(
+            ratedInterruptingTime=cim.rated_interrupting_time
+        )
     )
 
 
@@ -573,14 +595,7 @@ def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=asset_info_to_pb(cim),
         connectionKind=_map_winding_connection.to_pb(cim.connection_kind),
-        emergencyS=from_nullable_int(cim.emergency_s),
-        endNumber=from_nullable_int(cim.end_number),
-        insulationU=from_nullable_int(cim.insulation_u),
-        phaseAngleClock=from_nullable_int(cim.phase_angle_clock),
-        r=from_nullable_float(cim.r),
-        ratedS=from_nullable_int(cim.rated_s),
-        ratedU=from_nullable_int(cim.rated_u),
-        shortTermS=from_nullable_int(cim.short_term_s),
+        endNumber=cim.end_number,
         transformerTankInfoMRID=mrid_or_empty(cim.transformer_tank_info),
         transformerStarImpedanceMRID=mrid_or_empty(cim.transformer_star_impedance),
         energisedEndNoLoadTestsMRID=mrid_or_empty(cim.energised_end_no_load_tests),
@@ -588,6 +603,15 @@ def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
         groundedEndShortCircuitTestsMRID=mrid_or_empty(cim.grounded_end_short_circuit_tests),
         openEndOpenCircuitTestsMRID=mrid_or_empty(cim.open_end_open_circuit_tests),
         energisedEndOpenCircuitTestsMRID=mrid_or_empty(cim.energised_end_open_circuit_tests),
+        **set_or_null(
+            emergencyS=cim.emergency_s,
+            insulationU=cim.insulation_u,
+            phaseAngleClock=cim.phase_angle_clock,
+            r=cim.r,
+            ratedS=cim.rated_s,
+            ratedU=cim.rated_u,
+            shortTermS=cim.short_term_s,
+        )
     )
 
 
@@ -603,8 +627,10 @@ def transformer_tank_info_to_pb(cim: TransformerTankInfo) -> PBTransformerTankIn
 def transformer_test_to_pb(cim: TransformerTest) -> PBTransformerTest:
     return PBTransformerTest(
         io=identified_object_to_pb(cim),
-        basePower=from_nullable_int(cim.base_power),
-        temperature=from_nullable_float(cim.temperature),
+        **set_or_null(
+            basePower=cim.base_power,
+            temperature=cim.temperature,
+        )
     )
 
 
@@ -612,8 +638,10 @@ def transformer_test_to_pb(cim: TransformerTest) -> PBTransformerTest:
 def wire_info_to_pb(cim: WireInfo) -> PBWireInfo:
     return PBWireInfo(
         ai=asset_info_to_pb(cim),
-        ratedCurrent=from_nullable_int(cim.rated_current),
-        material=_map_wire_material_kind.to_pb(cim.material)
+        material=_map_wire_material_kind.to_pb(cim.material),
+        **set_or_null(
+            ratedCurrent=cim.rated_current,
+        )
     )
 
 
@@ -626,7 +654,7 @@ def asset_to_pb(cim: Asset) -> PBAsset:
         io=identified_object_to_pb(cim),
         locationMRID=cim.location.mrid if cim.location else None,
         organisationRoleMRIDs=[str(io.mrid) for io in cim.organisation_roles],
-        powerSystemResourceMRIDs=[str(io.mrid) for io in cim.power_system_resources]
+        powerSystemResourceMRIDs=[str(io.mrid) for io in cim.power_system_resources],
     )
 
 
@@ -663,8 +691,10 @@ def streetlight_to_pb(cim: Streetlight) -> PBStreetlight:
     return PBStreetlight(
         at=asset_to_pb(cim),
         poleMRID=mrid_or_empty(cim.pole),
-        lightRating=from_nullable_uint(cim.light_rating),
-        lampKind=_map_streetlight_lamp_kind.to_pb(cim.lamp_kind)
+        lampKind=_map_streetlight_lamp_kind.to_pb(cim.lamp_kind),
+        **set_or_null(
+            lightRating=cim.light_rating,
+        )
     )
 
 
@@ -686,32 +716,44 @@ def location_to_pb(cim: Location) -> PBLocation:
 
 
 def position_point_to_pb(cim: PositionPoint) -> PBPositionPoint:
-    return PBPositionPoint(xPosition=cim.x_position, yPosition=cim.y_position)
+    return PBPositionPoint(
+        xPosition=cim.x_position,
+        yPosition=cim.y_position
+    )
 
 
 def street_address_to_pb(cim: StreetAddress) -> PBStreetAddress:
     return PBStreetAddress(
-        postalCode=cim.postal_code,
         townDetail=_get_or_none(town_detail_to_pb, cim.town_detail),
-        poBox=cim.po_box,
-        streetDetail=_get_or_none(street_detail_to_pb, cim.street_detail)
+        streetDetail=_get_or_none(street_detail_to_pb, cim.street_detail),
+        **set_or_null(
+            postalCode=cim.postal_code,
+            poBox=cim.po_box,
+        )
     )
 
 
 def street_detail_to_pb(cim: StreetDetail) -> PBStreetDetail:
     return PBStreetDetail(
-        buildingName=cim.building_name,
-        floorIdentification=cim.floor_identification,
-        name=cim.name,
-        number=cim.number,
-        suiteNumber=cim.suite_number,
-        type=cim.type,
-        displayAddress=cim.display_address
+        **set_or_null(
+            buildingName=cim.building_name,
+            floorIdentification=cim.floor_identification,
+            name=cim.name,
+            number=cim.number,
+            suiteNumber=cim.suite_number,
+            type=cim.type,
+            displayAddress=cim.display_address
+        )
     )
 
 
 def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
-    return PBTownDetail(name=cim.name, stateOrProvince=cim.state_or_province)
+    return PBTownDetail(
+        **set_or_null(
+            name=cim.name,
+            stateOrProvince=cim.state_or_province
+        )
+    )
 
 
 #####################################
@@ -722,18 +764,20 @@ def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
 def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTransformerInfo:
     return PBCurrentTransformerInfo(
         ai=asset_info_to_pb(cim),
-        accuracyClass=cim.accuracy_class,
-        accuracyLimit=from_nullable_float(cim.accuracy_limit),
-        coreCount=from_nullable_int(cim.core_count),
-        ctClass=cim.ct_class,
-        kneePointVoltage=from_nullable_int(cim.knee_point_voltage),
         maxRatio=_get_or_none(ratio_to_pb, cim.max_ratio),
         nominalRatio=_get_or_none(ratio_to_pb, cim.nominal_ratio),
-        primaryRatio=from_nullable_float(cim.primary_ratio),
-        ratedCurrent=from_nullable_int(cim.rated_current),
-        secondaryFlsRating=from_nullable_int(cim.secondary_fls_rating),
-        secondaryRatio=from_nullable_float(cim.secondary_ratio),
-        usage=cim.usage
+        **set_or_null(
+            accuracyClass=cim.accuracy_class,
+            accuracyLimit=cim.accuracy_limit,
+            coreCount=cim.core_count,
+            ctClass=cim.ct_class,
+            kneePointVoltage=cim.knee_point_voltage,
+            primaryRatio=cim.primary_ratio,
+            ratedCurrent=cim.rated_current,
+            secondaryFlsRating=cim.secondary_fls_rating,
+            secondaryRatio=cim.secondary_ratio,
+            usage=cim.usage,
+        )
     )
 
 
@@ -741,12 +785,15 @@ def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTran
 def potential_transformer_info_to_pb(cim: PotentialTransformerInfo) -> PBPotentialTransformerInfo:
     return PBPotentialTransformerInfo(
         ai=asset_info_to_pb(cim),
-        accuracyClass=cim.accuracy_class,
         nominalRatio=_get_or_none(ratio_to_pb, cim.nominal_ratio),
-        primaryRatio=from_nullable_float(cim.primary_ratio),
-        ptClass=cim.pt_class,
-        ratedVoltage=from_nullable_int(cim.rated_voltage),
-        secondaryRatio=from_nullable_float(cim.secondary_ratio)
+        **set_or_null(
+            accuracyClass=cim.accuracy_class,
+            primaryRatio=cim.primary_ratio,
+            ptClass=cim.pt_class,
+            ratedVoltage=cim.rated_voltage,
+            secondaryRatio=cim.secondary_ratio,
+
+        )
     )
 
 
@@ -759,7 +806,9 @@ def pole_to_pb(cim: Pole) -> PBPole:
     return PBPole(
         st=structure_to_pb(cim),
         streetlightMRIDs=[str(io.mrid) for io in cim.streetlights],
-        classification=cim.classification
+        **set_or_null(
+            classification=cim.classification,
+        )
     )
 
 
@@ -786,7 +835,7 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         endDeviceFunctionMRIDs=[str(io.mrid) for io in cim.functions],
         customerMRID=cim.customer_mrid,
-        serviceLocationMRID=mrid_or_empty(cim.service_location)
+        serviceLocationMRID=mrid_or_empty(cim.service_location),
     )
 
 
@@ -798,7 +847,9 @@ def end_device_function_to_pb(cim: EndDeviceFunction) -> PBEndDeviceFunction:
     """
     return PBEndDeviceFunction(
         af=asset_function_to_pb(cim),
-        **nullable_bool_settings("enabled", cim.enabled)
+        **set_or_null(
+            enabled=cim.enabled,
+        )
     )
 
 
@@ -814,11 +865,13 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
         usagePointLocationMRID=mrid_or_empty(cim.usage_point_location),
         equipmentMRIDs=[str(io.mrid) for io in cim.equipment],
         endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices],
-        isVirtual=cim.is_virtual,
-        connectionCategory=cim.connection_category,
-        ratedPower=from_nullable_int(cim.rated_power),
-        approvedInverterCapacity=from_nullable_int(cim.approved_inverter_capacity),
-        phaseCode=_map_phase_code.to_pb(cim.phase_code)
+        phaseCode=_map_phase_code.to_pb(cim.phase_code),
+        **set_or_null(
+            isVirtual=cim.is_virtual,
+            connectionCategory=cim.connection_category,
+            ratedPower=cim.rated_power,
+            approvedInverterCapacity=cim.approved_inverter_capacity,
+        ),
     )
 
 
@@ -846,7 +899,9 @@ def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment, include_asset_info: bool 
 def current_transformer_to_pb(cim: CurrentTransformer) -> PBCurrentTransformer:
     return PBCurrentTransformer(
         sn=sensor_to_pb(cim, True),
-        coreBurden=from_nullable_int(cim.core_burden)
+        **set_or_null(
+            coreBurden=cim.core_burden,
+        )
     )
 
 
@@ -914,8 +969,10 @@ def curve_data_to_pb(cim: CurveData) -> PBCurveData:
     return PBCurveData(
         xValue=cim.x_value,
         y1Value=cim.y1_value,
-        y2Value=from_nullable_float(cim.y2_value),
-        y3Value=from_nullable_float(cim.y3_value)
+        **set_or_null(
+            y2Value=cim.y2_value,
+            y3Value=cim.y3_value
+        )
     )
 
 
@@ -932,7 +989,7 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
         currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers],
-        commissionedDate=ts
+        commissionedDate=ts,
     )
 
 
@@ -1012,22 +1069,24 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
 def equivalent_branch_to_pb(cim: EquivalentBranch) -> PBEquivalentBranch:
     return PBEquivalentBranch(
         ee=equivalent_equipment_to_pb(cim),
-        negativeR12=from_nullable_float(cim.negative_r12),
-        negativeR21=from_nullable_float(cim.negative_r21),
-        negativeX12=from_nullable_float(cim.negative_x12),
-        negativeX21=from_nullable_float(cim.negative_x21),
-        positiveR12=from_nullable_float(cim.positive_r12),
-        positiveR21=from_nullable_float(cim.positive_r21),
-        positiveX12=from_nullable_float(cim.positive_x12),
-        positiveX21=from_nullable_float(cim.positive_x21),
-        r=from_nullable_float(cim.r),
-        r21=from_nullable_float(cim.r21),
-        x=from_nullable_float(cim.x),
-        x21=from_nullable_float(cim.x21),
-        zeroR12=from_nullable_float(cim.zero_r12),
-        zeroR21=from_nullable_float(cim.zero_r21),
-        zeroX12=from_nullable_float(cim.zero_x12),
-        zeroX21=from_nullable_float(cim.zero_x21),
+        **set_or_null(
+            negativeR12=cim.negative_r12,
+            negativeR21=cim.negative_r21,
+            negativeX12=cim.negative_x12,
+            negativeX21=cim.negative_x21,
+            positiveR12=cim.positive_r12,
+            positiveR21=cim.positive_r21,
+            positiveX12=cim.positive_x12,
+            positiveX21=cim.positive_x21,
+            r=cim.r,
+            r21=cim.r21,
+            x=cim.x,
+            x21=cim.x21,
+            zeroR12=cim.zero_r12,
+            zeroR21=cim.zero_r21,
+            zeroX12=cim.zero_x12,
+            zeroX21=cim.zero_x21,
+        )
     )
 
 
@@ -1049,9 +1108,11 @@ def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     return PBBatteryUnit(
         peu=power_electronics_unit_to_pb(cim),
         batteryControlMRIDs=[str(io.mrid) for io in cim.controls],
-        ratedE=from_nullable_long(cim.rated_e),
-        storedE=from_nullable_long(cim.stored_e),
-        batteryState=_map_battery_state_kind.to_pb(cim.battery_state)
+        batteryState=_map_battery_state_kind.to_pb(cim.battery_state),
+        **set_or_null(
+            ratedE=cim.rated_e,
+            storedE=cim.stored_e,
+        )
     )
 
 
@@ -1063,9 +1124,11 @@ def photo_voltaic_unit_to_pb(cim: PhotoVoltaicUnit) -> PBPhotoVoltaicUnit:
 def power_electronics_unit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronicsUnit:
     return PBPowerElectronicsUnit(
         eq=equipment_to_pb(cim),
-        maxP=from_nullable_int(cim.max_p),
-        minP=from_nullable_int(cim.min_p),
-        powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection)
+        powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection),
+        **set_or_null(
+            maxP=cim.max_p,
+            minP=cim.min_p,
+        )
     )
 
 
@@ -1087,7 +1150,9 @@ def accumulator_to_pb(cim: Accumulator) -> PBAccumulator:
 def analog_to_pb(cim: Analog) -> PBAnalog:
     return PBAnalog(
         measurement=measurement_to_pb(cim),
-        positiveFlowIn=cim.positive_flow_in
+        **set_or_null(
+            positiveFlowIn=cim.positive_flow_in
+        )
     )
 
 
@@ -1128,9 +1193,11 @@ def measurement_to_pb(cim: Measurement) -> PBMeasurement:
 def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     return PBCurrentRelay(
         prf=protection_relay_function_to_pb(cim, True),
-        currentLimit1=from_nullable_float(cim.current_limit_1),
-        **nullable_bool_settings("inverseTimeFlag", cim.inverse_time_flag),
-        timeDelay1=from_nullable_float(cim.time_delay_1),
+        **set_or_null(
+            currentLimit1=cim.current_limit_1,
+            inverseTimeFlag=cim.inverse_time_flag,
+            timeDelay1=cim.time_delay_1,
+        )
     )
 
 
@@ -1181,7 +1248,9 @@ def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
 def breaker_to_pb(cim: Breaker) -> PBBreaker:
     return PBBreaker(
         sw=protected_switch_to_pb(cim),
-        inTransitTime=from_nullable_float(cim.in_transit_time)
+        **set_or_null(
+            inTransitTime=cim.in_transit_time,
+        )
     )
 
 
@@ -1194,17 +1263,21 @@ def busbar_section_to_pb(cim: BusbarSection) -> PBBusbarSection:
 def clamp_to_pb(cim: Clamp) -> PBClamp:
     return PBClamp(
         ce=conducting_equipment_to_pb(cim),
-        lengthFromTerminal1=from_nullable_float(cim.length_from_terminal_1),
-        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment)
+        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment),
+        **set_or_null(
+            lengthFromTerminal1=cim.length_from_terminal_1,
+        )
     )
 
 
 def conductor_to_pb(cim: Conductor) -> PBConductor:
     return PBConductor(
         ce=conducting_equipment_to_pb(cim, True),
-        length=from_nullable_float(cim.length),
-        designTemperature=from_nullable_int(cim.design_temperature),
-        designRating=from_nullable_float(cim.design_rating)
+        **set_or_null(
+            length=cim.length,
+            designTemperature=cim.design_temperature,
+            designRating=cim.design_rating,
+        )
     )
 
 
@@ -1216,8 +1289,10 @@ def connector_to_pb(cim: Connector) -> PBConnector:
 def cut_to_pb(cim: Cut) -> PBCut:
     return PBCut(
         sw=switch_to_pb(cim),
-        lengthFromTerminal1=from_nullable_float(cim.length_from_terminal_1),
-        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment)
+        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment),
+        **set_or_null(
+            lengthFromTerminal1=cim.length_from_terminal_1,
+        )
     )
 
 
@@ -1229,7 +1304,9 @@ def disconnector_to_pb(cim: Disconnector) -> PBDisconnector:
 def earth_fault_compensator_to_pb(cim: EarthFaultCompensator) -> PBEarthFaultCompensator:
     return PBEarthFaultCompensator(
         ce=conducting_equipment_to_pb(cim),
-        r=from_nullable_float(cim.r)
+        **set_or_null(
+            r=cim.r
+        )
     )
 
 
@@ -1242,13 +1319,15 @@ def energy_consumer_to_pb(cim: EnergyConsumer) -> PBEnergyConsumer:
     return PBEnergyConsumer(
         ec=energy_connection_to_pb(cim),
         energyConsumerPhasesMRIDs=[str(io.mrid) for io in cim.phases],
-        customerCount=from_nullable_int(cim.customer_count),
-        grounded=cim.grounded,
         phaseConnection=_map_phase_shunt_connection_kind.to_pb(cim.phase_connection),
-        p=from_nullable_float(cim.p),
-        pFixed=from_nullable_float(cim.p_fixed),
-        q=from_nullable_float(cim.q),
-        qFixed=from_nullable_float(cim.q_fixed)
+        **set_or_null(
+            p=cim.p,
+            pFixed=cim.p_fixed,
+            q=cim.q,
+            qFixed=cim.q_fixed,
+            customerCount=cim.customer_count,
+            grounded=cim.grounded,
+        )
     )
 
 
@@ -1258,10 +1337,12 @@ def energy_consumer_phase_to_pb(cim: EnergyConsumerPhase) -> PBEnergyConsumerPha
         psr=power_system_resource_to_pb(cim),
         energyConsumerMRID=mrid_or_empty(cim.energy_consumer),
         phase=_map_single_phase_kind.to_pb(cim.phase),
-        p=from_nullable_float(cim.p),
-        pFixed=from_nullable_float(cim.p_fixed),
-        q=from_nullable_float(cim.q),
-        qFixed=from_nullable_float(cim.q_fixed)
+        **set_or_null(
+            p=cim.p,
+            pFixed=cim.p_fixed,
+            q=cim.q,
+            qFixed=cim.q_fixed,
+        )
     )
 
 
@@ -1270,31 +1351,33 @@ def energy_source_to_pb(cim: EnergySource) -> PBEnergySource:
     return PBEnergySource(
         ec=energy_connection_to_pb(cim),
         energySourcePhasesMRIDs=[str(io.mrid) for io in cim.phases],
-        activePower=from_nullable_float(cim.active_power),
-        reactivePower=from_nullable_float(cim.reactive_power),
-        voltageAngle=from_nullable_float(cim.voltage_angle),
-        voltageMagnitude=from_nullable_float(cim.voltage_magnitude),
-        r=from_nullable_float(cim.r),
-        x=from_nullable_float(cim.x),
-        pMax=from_nullable_float(cim.p_max),
-        pMin=from_nullable_float(cim.p_min),
-        r0=from_nullable_float(cim.r0),
-        rn=from_nullable_float(cim.rn),
-        x0=from_nullable_float(cim.x0),
-        xn=from_nullable_float(cim.xn),
-        isExternalGrid=cim.is_external_grid,
-        rMin=from_nullable_float(cim.r_min),
-        rnMin=from_nullable_float(cim.rn_min),
-        r0Min=from_nullable_float(cim.r0_min),
-        xMin=from_nullable_float(cim.x_min),
-        xnMin=from_nullable_float(cim.xn_min),
-        x0Min=from_nullable_float(cim.x0_min),
-        rMax=from_nullable_float(cim.r_max),
-        rnMax=from_nullable_float(cim.rn_max),
-        r0Max=from_nullable_float(cim.r0_max),
-        xMax=from_nullable_float(cim.x_max),
-        xnMax=from_nullable_float(cim.xn_max),
-        x0Max=from_nullable_float(cim.x0_max)
+        **set_or_null(
+            activePower=cim.active_power,
+            reactivePower=cim.reactive_power,
+            voltageAngle=cim.voltage_angle,
+            voltageMagnitude=cim.voltage_magnitude,
+            r=cim.r,
+            x=cim.x,
+            pMax=cim.p_max,
+            pMin=cim.p_min,
+            r0=cim.r0,
+            rn=cim.rn,
+            x0=cim.x0,
+            xn=cim.xn,
+            isExternalGrid=cim.is_external_grid,
+            rMin=cim.r_min,
+            rnMin=cim.rn_min,
+            r0Min=cim.r0_min,
+            xMin=cim.x_min,
+            xnMin=cim.xn_min,
+            x0Min=cim.x0_min,
+            rMax=cim.r_max,
+            rnMax=cim.rn_max,
+            r0Max=cim.r0_max,
+            xMax=cim.x_max,
+            xnMax=cim.xn_max,
+            x0Max=cim.x0_max,
+        )
     )
 
 
@@ -1333,7 +1416,9 @@ def ground_disconnector_to_pb(cim: GroundDisconnector) -> PBGroundDisconnector:
 def grounding_impedance_to_pb(cim: GroundingImpedance) -> PBGroundingImpedance:
     return PBGroundingImpedance(
         efc=earth_fault_compensator_to_pb(cim),
-        x=from_nullable_float(cim.x)
+        **set_or_null(
+            x=cim.x,
+        )
     )
 
 
@@ -1355,10 +1440,12 @@ def line_to_pb(cim: Line) -> PBLine:
 def linear_shunt_compensator_to_pb(cim: LinearShuntCompensator) -> PBLinearShuntCompensator:
     return PBLinearShuntCompensator(
         sc=shunt_compensator_to_pb(cim),
-        b0PerSection=from_nullable_float(cim.b0_per_section),
-        bPerSection=from_nullable_float(cim.b_per_section),
-        g0PerSection=from_nullable_float(cim.g0_per_section),
-        gPerSection=from_nullable_float(cim.g_per_section)
+        **set_or_null(
+            b0PerSection=cim.b0_per_section,
+            bPerSection=cim.b_per_section,
+            g0PerSection=cim.g0_per_section,
+            gPerSection=cim.g_per_section,
+        )
     )
 
 
@@ -1392,14 +1479,16 @@ def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengt
 def per_length_sequence_impedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPerLengthSequenceImpedance:
     return PBPerLengthSequenceImpedance(
         pli=per_length_impedance_to_pb(cim),
-        r=from_nullable_float(cim.r),
-        x=from_nullable_float(cim.x),
-        r0=from_nullable_float(cim.r0),
-        x0=from_nullable_float(cim.x0),
-        bch=from_nullable_float(cim.bch),
-        gch=from_nullable_float(cim.gch),
-        b0ch=from_nullable_float(cim.b0ch),
-        g0ch=from_nullable_float(cim.g0ch)
+        **set_or_null(
+            r=cim.r,
+            x=cim.x,
+            r0=cim.r0,
+            x0=cim.x0,
+            bch=cim.bch,
+            gch=cim.gch,
+            b0ch=cim.b0ch,
+            g0ch=cim.g0ch,
+        )
     )
 
 
@@ -1407,7 +1496,9 @@ def per_length_sequence_impedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPe
 def petersen_coil_to_pb(cim: PetersenCoil) -> PBPetersenCoil:
     return PBPetersenCoil(
         efc=earth_fault_compensator_to_pb(cim),
-        xGroundNominal=from_nullable_float(cim.x_ground_nominal)
+        **set_or_null(
+            xGroundNominal=cim.x_ground_nominal
+        )
     )
 
 
@@ -1420,10 +1511,12 @@ def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
     return PBPhaseImpedanceData(
         fromPhase=_map_single_phase_kind.to_pb(cim.from_phase),
         toPhase=_map_single_phase_kind.to_pb(cim.to_phase),
-        b=from_nullable_float(cim.b),
-        g=from_nullable_float(cim.g),
-        r=from_nullable_float(cim.r),
-        x=from_nullable_float(cim.x),
+        **set_or_null(
+            b=cim.b,
+            g=cim.g,
+            r=cim.r,
+            x=cim.x,
+        )
     )
 
 
@@ -1433,37 +1526,39 @@ def power_electronics_connection_to_pb(cim: PowerElectronicsConnection) -> PBPow
         rce=regulating_cond_eq_to_pb(cim),
         powerElectronicsUnitMRIDs=[str(io.mrid) for io in cim.units],
         powerElectronicsConnectionPhaseMRIDs=[str(io.mrid) for io in cim.phases],
-        maxIFault=from_nullable_int(cim.max_i_fault),
-        maxQ=from_nullable_float(cim.max_q),
-        minQ=from_nullable_float(cim.min_q),
-        p=from_nullable_float(cim.p),
-        q=from_nullable_float(cim.q),
-        ratedS=from_nullable_int(cim.rated_s),
-        ratedU=from_nullable_int(cim.rated_u),
-        inverterStandard=cim.inverter_standard,
-        sustainOpOvervoltLimit=from_nullable_int(cim.sustain_op_overvolt_limit),
-        stopAtOverFreq=from_nullable_float(cim.stop_at_over_freq),
-        stopAtUnderFreq=from_nullable_float(cim.stop_at_under_freq),
-        **nullable_bool_settings("invVoltWattRespMode", cim.inv_volt_watt_resp_mode),
-        invWattRespV1=from_nullable_int(cim.inv_watt_resp_v1),
-        invWattRespV2=from_nullable_int(cim.inv_watt_resp_v2),
-        invWattRespV3=from_nullable_int(cim.inv_watt_resp_v3),
-        invWattRespV4=from_nullable_int(cim.inv_watt_resp_v4),
-        invWattRespPAtV1=from_nullable_float(cim.inv_watt_resp_p_at_v1),
-        invWattRespPAtV2=from_nullable_float(cim.inv_watt_resp_p_at_v2),
-        invWattRespPAtV3=from_nullable_float(cim.inv_watt_resp_p_at_v3),
-        invWattRespPAtV4=from_nullable_float(cim.inv_watt_resp_p_at_v4),
-        **nullable_bool_settings("invVoltVarRespMode", cim.inv_volt_var_resp_mode),
-        invVarRespV1=from_nullable_int(cim.inv_var_resp_v1),
-        invVarRespV2=from_nullable_int(cim.inv_var_resp_v2),
-        invVarRespV3=from_nullable_int(cim.inv_var_resp_v3),
-        invVarRespV4=from_nullable_int(cim.inv_var_resp_v4),
-        invVarRespQAtV1=from_nullable_float(cim.inv_var_resp_q_at_v1),
-        invVarRespQAtV2=from_nullable_float(cim.inv_var_resp_q_at_v2),
-        invVarRespQAtV3=from_nullable_float(cim.inv_var_resp_q_at_v3),
-        invVarRespQAtV4=from_nullable_float(cim.inv_var_resp_q_at_v4),
-        **nullable_bool_settings("invReactivePowerMode", cim.inv_reactive_power_mode),
-        invFixReactivePower=from_nullable_float(cim.inv_fix_reactive_power)
+        **set_or_null(
+            maxIFault=cim.max_i_fault,
+            maxQ=cim.max_q,
+            minQ=cim.min_q,
+            p=cim.p,
+            q=cim.q,
+            ratedS=cim.rated_s,
+            ratedU=cim.rated_u,
+            inverterStandard=cim.inverter_standard,
+            sustainOpOvervoltLimit=cim.sustain_op_overvolt_limit,
+            stopAtOverFreq=cim.stop_at_over_freq,
+            stopAtUnderFreq=cim.stop_at_under_freq,
+            invVoltWattRespMode=cim.inv_volt_watt_resp_mode,
+            invWattRespV1=cim.inv_watt_resp_v1,
+            invWattRespV2=cim.inv_watt_resp_v2,
+            invWattRespV3=cim.inv_watt_resp_v3,
+            invWattRespV4=cim.inv_watt_resp_v4,
+            invWattRespPAtV1=cim.inv_watt_resp_p_at_v1,
+            invWattRespPAtV2=cim.inv_watt_resp_p_at_v2,
+            invWattRespPAtV3=cim.inv_watt_resp_p_at_v3,
+            invWattRespPAtV4=cim.inv_watt_resp_p_at_v4,
+            invVoltVarRespMode=cim.inv_volt_var_resp_mode,
+            invVarRespV1=cim.inv_var_resp_v1,
+            invVarRespV2=cim.inv_var_resp_v2,
+            invVarRespV3=cim.inv_var_resp_v3,
+            invVarRespV4=cim.inv_var_resp_v4,
+            invVarRespQAtV1=cim.inv_var_resp_q_at_v1,
+            invVarRespQAtV2=cim.inv_var_resp_q_at_v2,
+            invVarRespQAtV3=cim.inv_var_resp_q_at_v3,
+            invVarRespQAtV4=cim.inv_var_resp_q_at_v4,
+            invReactivePowerMode=cim.inv_reactive_power_mode,
+            invFixReactivePower=cim.inv_fix_reactive_power,
+        )
     )
 
 
@@ -1472,9 +1567,11 @@ def power_electronics_connection_phase_to_pb(cim: PowerElectronicsConnectionPhas
     return PBPowerElectronicsConnectionPhase(
         psr=power_system_resource_to_pb(cim),
         powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection),
-        p=from_nullable_float(cim.p),
-        q=from_nullable_float(cim.q),
-        phase=_map_single_phase_kind.to_pb(cim.phase)
+        phase=_map_single_phase_kind.to_pb(cim.phase),
+        **set_or_null(
+            p=cim.p,
+            q=cim.q,
+        )
     )
 
 
@@ -1484,9 +1581,11 @@ def power_transformer_to_pb(cim: PowerTransformer) -> PBPowerTransformer:
         ce=conducting_equipment_to_pb(cim, True),
         powerTransformerEndMRIDs=[str(io.mrid) for io in cim.ends],
         vectorGroup=_map_vector_group.to_pb(cim.vector_group),
-        transformerUtilisation=from_nullable_float(cim.transformer_utilisation),
         constructionKind=_map_transformer_construction_kind.to_pb(cim.construction_kind),
-        function=_map_transformer_function_kind.to_pb(cim.function)
+        function=_map_transformer_function_kind.to_pb(cim.function),
+        **set_or_null(
+            transformerUtilisation=cim.transformer_utilisation,
+        )
     )
 
 
@@ -1495,27 +1594,31 @@ def power_transformer_end_to_pb(cim: PowerTransformerEnd) -> PBPowerTransformerE
     return PBPowerTransformerEnd(
         te=transformer_end_to_pb(cim),
         powerTransformerMRID=mrid_or_empty(cim.power_transformer),
-        ratedS=from_nullable_int(cim.rated_s),
-        ratedU=from_nullable_int(cim.rated_u),
-        r=from_nullable_float(cim.r),
-        r0=from_nullable_float(cim.r0),
-        x=from_nullable_float(cim.x),
-        x0=from_nullable_float(cim.x0),
         connectionKind=_map_winding_connection.to_pb(cim.connection_kind),
-        b=from_nullable_float(cim.b),
-        b0=from_nullable_float(cim.b0),
-        g=from_nullable_float(cim.g),
-        g0=from_nullable_float(cim.g0),
-        phaseAngleClock=from_nullable_int(cim.phase_angle_clock),
-        ratings=[transformer_end_rated_s_to_pb(it) for it in cim.s_ratings]
+        ratings=[transformer_end_rated_s_to_pb(it) for it in cim.s_ratings],
+        **set_or_null(
+            ratedS=cim.rated_s,
+            ratedU=cim.rated_u,
+            r=cim.r,
+            r0=cim.r0,
+            x=cim.x,
+            x0=cim.x0,
+            b=cim.b,
+            b0=cim.b0,
+            g=cim.g,
+            g0=cim.g0,
+            phaseAngleClock=cim.phase_angle_clock,
+        )
     )
 
 
 def protected_switch_to_pb(cim: ProtectedSwitch) -> PBProtectedSwitch:
     return PBProtectedSwitch(
         sw=switch_to_pb(cim),
-        breakingCapacity=from_nullable_int(cim.breaking_capacity),
-        relayFunctionMRIDs=[str(io.mrid) for io in cim.relay_functions]
+        relayFunctionMRIDs=[str(io.mrid) for io in cim.relay_functions],
+        **set_or_null(
+            breakingCapacity=cim.breaking_capacity,
+        )
     )
 
 
@@ -1524,7 +1627,9 @@ def ratio_tap_changer_to_pb(cim: RatioTapChanger) -> PBRatioTapChanger:
     return PBRatioTapChanger(
         tc=tap_changer_to_pb(cim),
         transformerEndMRID=mrid_or_empty(cim.transformer_end),
-        stepVoltageIncrement=from_nullable_float(cim.step_voltage_increment)
+        **set_or_null(
+            stepVoltageIncrement=cim.step_voltage_increment,
+        )
     )
 
 
@@ -1541,8 +1646,10 @@ def recloser_to_pb(cim: Recloser) -> PBRecloser:
 def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info=False) -> PBRegulatingCondEq:
     return PBRegulatingCondEq(
         ec=energy_connection_to_pb(cim, include_asset_info),
-        controlEnabled=cim.control_enabled,
-        regulatingControlMRID=mrid_or_empty(cim.regulating_control)
+        regulatingControlMRID=mrid_or_empty(cim.regulating_control),
+        **set_or_null(
+            controlEnabled=cim.control_enabled,
+        )
     )
 
 
@@ -1554,30 +1661,34 @@ def regulating_control_to_pb(cim: RegulatingControl) -> PBRegulatingControl:
     """
     return PBRegulatingControl(
         psr=power_system_resource_to_pb(cim),
-        **nullable_bool_settings("discrete", cim.discrete),
         mode=_map_regulating_control_mode_kind.to_pb(cim.mode),
         monitoredPhase=_map_phase_code.to_pb(cim.monitored_phase),
-        targetDeadband=from_nullable_float(cim.target_deadband),
-        targetValue=from_nullable_float(cim.target_value),
-        **nullable_bool_settings("enabled", cim.enabled),
-        maxAllowedTargetValue=from_nullable_float(cim.max_allowed_target_value),
-        minAllowedTargetValue=from_nullable_float(cim.min_allowed_target_value),
-        ratedCurrent=from_nullable_float(cim.rated_current),
         terminalMRID=mrid_or_empty(cim.terminal),
-        ctPrimary=from_nullable_float(cim.ct_primary),
-        minTargetDeadband=from_nullable_float(cim.min_target_deadband),
-        regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_conducting_equipment]
+        regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_conducting_equipment],
+        **set_or_null(
+            discrete=cim.discrete,
+            targetDeadband=cim.target_deadband,
+            targetValue=cim.target_value,
+            enabled=cim.enabled,
+            maxAllowedTargetValue=cim.max_allowed_target_value,
+            minAllowedTargetValue=cim.min_allowed_target_value,
+            ratedCurrent=cim.rated_current,
+            ctPrimary=cim.ct_primary,
+            minTargetDeadband=cim.min_target_deadband,
+        )
     )
 
 
 def rotating_machine_to_pb(cim: RotatingMachine) -> PBRotatingMachine:
     return PBRotatingMachine(
         rce=regulating_cond_eq_to_pb(cim, True),
-        ratedPowerFactor=from_nullable_float(cim.rated_power_factor),
-        ratedS=from_nullable_float(cim.rated_s),
-        ratedU=from_nullable_int(cim.rated_u),
-        p=from_nullable_float(cim.p),
-        q=from_nullable_float(cim.q)
+        **set_or_null(
+            ratedPowerFactor=cim.rated_power_factor,
+            ratedS=cim.rated_s,
+            ratedU=cim.rated_u,
+            p=cim.p,
+            q=cim.q,
+        )
     )
 
 
@@ -1585,22 +1696,26 @@ def rotating_machine_to_pb(cim: RotatingMachine) -> PBRotatingMachine:
 def series_compensator_to_pb(cim: SeriesCompensator) -> PBSeriesCompensator:
     return PBSeriesCompensator(
         ce=conducting_equipment_to_pb(cim, True),
-        r=from_nullable_float(cim.r),
-        r0=from_nullable_float(cim.r0),
-        x=from_nullable_float(cim.x),
-        x0=from_nullable_float(cim.x0),
-        varistorRatedCurrent=from_nullable_int(cim.varistor_rated_current),
-        varistorVoltageThreshold=from_nullable_int(cim.varistor_voltage_threshold),
+        **set_or_null(
+            r=cim.r,
+            r0=cim.r0,
+            x=cim.x,
+            x0=cim.x0,
+            varistorRatedCurrent=cim.varistor_rated_current,
+            varistorVoltageThreshold=cim.varistor_voltage_threshold,
+        )
     )
 
 
 def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
     return PBShuntCompensator(
         rce=regulating_cond_eq_to_pb(cim, True),
-        sections=from_nullable_float(cim.sections),
-        grounded=cim.grounded,
-        nomU=from_nullable_int(cim.nom_u),
-        phaseConnection=_map_phase_shunt_connection_kind.to_pb(cim.phase_connection)
+        phaseConnection=_map_phase_shunt_connection_kind.to_pb(cim.phase_connection),
+        **set_or_null(
+            sections=cim.sections,
+            grounded=cim.grounded,
+            nomU=cim.nom_u,
+        )
     )
 
 
@@ -1613,20 +1728,24 @@ def static_var_compensator_to_pb(cim: StaticVarCompensator) -> PBStaticVarCompen
     """
     return PBStaticVarCompensator(
         rce=regulating_cond_eq_to_pb(cim),
-        capacitiveRating=from_nullable_float(cim.capacitive_rating),
-        inductiveRating=from_nullable_float(cim.inductive_rating),
-        q=from_nullable_float(cim.q),
         svcControlMode=_map_svc_control_mode.to_pb(cim.svc_control_mode),
-        voltageSetPoint=from_nullable_int(cim.voltage_set_point)
+        **set_or_null(
+            capacitiveRating=cim.capacitive_rating,
+            inductiveRating=cim.inductive_rating,
+            q=cim.q,
+            voltageSetPoint=cim.voltage_set_point,
+        )
     )
 
 
 def switch_to_pb(cim: Switch) -> PBSwitch:
     return PBSwitch(
         ce=conducting_equipment_to_pb(cim, True),
-        ratedCurrent=from_nullable_float(cim.rated_current),
         normalOpen=cim.get_normal_state() != 0,
-        open=cim.get_state() != 0
+        open=cim.get_state() != 0,
+        **set_or_null(
+            ratedCurrent=cim.rated_current,
+        )
     )
 
 
@@ -1636,41 +1755,45 @@ def synchronous_machine_to_pb(cim: SynchronousMachine) -> PBSynchronousMachine:
         rm=rotating_machine_to_pb(cim),
 
         reactiveCapabilityCurveMRIDs=[str(it.mrid) for it in cim.curves],
-        baseQ=from_nullable_float(cim.base_q),
-        condenserP=from_nullable_int(cim.condenser_p),
-        earthing=cim.earthing,
-        earthingStarPointR=from_nullable_float(cim.earthing_star_point_r),
-        earthingStarPointX=from_nullable_float(cim.earthing_star_point_x),
-        ikk=from_nullable_float(cim.ikk),
-        maxQ=from_nullable_float(cim.max_q),
-        maxU=from_nullable_int(cim.max_u),
-        minQ=from_nullable_float(cim.min_q),
-        minU=from_nullable_int(cim.min_u),
-        mu=from_nullable_float(cim.mu),
-        r=from_nullable_float(cim.r),
-        r0=from_nullable_float(cim.r0),
-        r2=from_nullable_float(cim.r2),
-        satDirectSubtransX=from_nullable_float(cim.sat_direct_subtrans_x),
-        satDirectSyncX=from_nullable_float(cim.sat_direct_sync_x),
-        satDirectTransX=from_nullable_float(cim.sat_direct_trans_x),
-        x0=from_nullable_float(cim.x0),
-        x2=from_nullable_float(cim.x2),
         type=_map_synchronous_machine_kind.to_pb(cim.type),
-        operatingMode=_map_synchronous_machine_kind.to_pb(cim.operating_mode)
+        operatingMode=_map_synchronous_machine_kind.to_pb(cim.operating_mode),
+        **set_or_null(
+            baseQ=cim.base_q,
+            condenserP=cim.condenser_p,
+            earthing=cim.earthing,
+            earthingStarPointR=cim.earthing_star_point_r,
+            earthingStarPointX=cim.earthing_star_point_x,
+            ikk=cim.ikk,
+            maxQ=cim.max_q,
+            maxU=cim.max_u,
+            minQ=cim.min_q,
+            minU=cim.min_u,
+            mu=cim.mu,
+            r=cim.r,
+            r0=cim.r0,
+            r2=cim.r2,
+            satDirectSubtransX=cim.sat_direct_subtrans_x,
+            satDirectSyncX=cim.sat_direct_sync_x,
+            satDirectTransX=cim.sat_direct_trans_x,
+            x0=cim.x0,
+            x2=cim.x2,
+        )
     )
 
 
 def tap_changer_to_pb(cim: TapChanger) -> PBTapChanger:
     return PBTapChanger(
         psr=power_system_resource_to_pb(cim),
-        highStep=from_nullable_int(cim.high_step),
-        lowStep=from_nullable_int(cim.low_step),
-        step=from_nullable_float(cim.step),
-        neutralStep=from_nullable_int(cim.neutral_step),
-        neutralU=from_nullable_int(cim.neutral_u),
-        normalStep=from_nullable_int(cim.normal_step),
-        controlEnabled=cim.control_enabled,
-        tapChangerControlMRID=mrid_or_empty(cim.tap_changer_control)
+        tapChangerControlMRID=mrid_or_empty(cim.tap_changer_control),
+        **set_or_null(
+            highStep=cim.high_step,
+            lowStep=cim.low_step,
+            step=cim.step,
+            neutralStep=cim.neutral_step,
+            neutralU=cim.neutral_u,
+            normalStep=cim.normal_step,
+            controlEnabled=cim.control_enabled,
+        )
     )
 
 
@@ -1678,15 +1801,17 @@ def tap_changer_to_pb(cim: TapChanger) -> PBTapChanger:
 def tap_changer_control_to_pb(cim: TapChangerControl) -> PBTapChangerControl:
     return PBTapChangerControl(
         rc=regulating_control_to_pb(cim),
-        limitVoltage=from_nullable_int(cim.limit_voltage),
-        **nullable_bool_settings("lineDropCompensation", cim.line_drop_compensation),
-        lineDropR=from_nullable_float(cim.line_drop_r),
-        lineDropX=from_nullable_float(cim.line_drop_x),
-        reverseLineDropR=from_nullable_float(cim.reverse_line_drop_r),
-        reverseLineDropX=from_nullable_float(cim.reverse_line_drop_x),
-        **nullable_bool_settings("forwardLDCBlocking", cim.forward_ldc_blocking),
-        timeDelay=from_nullable_float(cim.time_delay),
-        **nullable_bool_settings("coGenerationEnabled", cim.co_generation_enabled)
+        **set_or_null(
+            limitVoltage=cim.limit_voltage,
+            lineDropCompensation=cim.line_drop_compensation,
+            lineDropR=cim.line_drop_r,
+            lineDropX=cim.line_drop_x,
+            reverseLineDropR=cim.reverse_line_drop_r,
+            reverseLineDropX=cim.reverse_line_drop_x,
+            forwardLDCBlocking=cim.forward_ldc_blocking,
+            timeDelay=cim.time_delay,
+            coGenerationEnabled=cim.co_generation_enabled
+        )
     )
 
 
@@ -1698,16 +1823,18 @@ def transformer_end_to_pb(cim: TransformerEnd) -> PBTransformerEnd:
         ratioTapChangerMRID=mrid_or_empty(cim.ratio_tap_changer),
         starImpedanceMRID=mrid_or_empty(cim.star_impedance),
         endNumber=cim.end_number,
-        grounded=cim.grounded,
-        rGround=from_nullable_float(cim.r_ground),
-        xGround=from_nullable_float(cim.x_ground)
+        **set_or_null(
+            grounded=cim.grounded,
+            rGround=cim.r_ground,
+            xGround=cim.x_ground,
+        )
     )
 
 
 def transformer_end_rated_s_to_pb(cim: TransformerEndRatedS) -> PBTransformerEndRatedS:
     return PBTransformerEndRatedS(
+        coolingType=_map_transformer_cooling_type.to_pb(cim.cooling_type),
         ratedS=cim.rated_s,
-        coolingType=_map_transformer_cooling_type.to_pb(cim.cooling_type)
     )
 
 
@@ -1715,11 +1842,13 @@ def transformer_end_rated_s_to_pb(cim: TransformerEndRatedS) -> PBTransformerEnd
 def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransformerStarImpedance:
     return PBTransformerStarImpedance(
         io=identified_object_to_pb(cim),
-        r=cim.r if cim.r else 0.0,
-        r0=cim.r0 if cim.r0 else 0.0,
-        x=cim.x if cim.x else 0.0,
-        x0=cim.x0 if cim.x0 else 0.0,
-        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info)
+        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info),
+        **set_or_null(
+            r=cim.r,
+            r0=cim.r0,
+            x=cim.x,
+            x0=cim.x0
+        )
     )
 
 

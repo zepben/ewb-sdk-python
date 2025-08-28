@@ -10,10 +10,11 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import Di
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 
 import zepben.ewb.services.common.resolver as resolver
-from zepben.ewb import identified_object_to_cim, OrientationKind, DiagramStyle
+from zepben.ewb import identified_object_to_cim, OrientationKind, DiagramStyle, add_to_network_or_none, bind_to_cim
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.diagram.diagrams import DiagramService
 
 
@@ -21,6 +22,8 @@ from zepben.ewb.services.diagram.diagrams import DiagramService
 # IEC61970 Base Diagram Layout #
 ################################
 
+@bind_to_cim
+@add_to_network_or_none
 def diagram_to_cim(pb: PBDiagram, service: DiagramService):
     cim = Diagram(
         mrid=pb.mrid(),
@@ -32,14 +35,15 @@ def diagram_to_cim(pb: PBDiagram, service: DiagramService):
         service.resolve_or_defer_reference(resolver.diagram_objects(cim), mrid)
 
     identified_object_to_cim(pb.io, cim, service)
-    return cim if service.add(cim) else None
+    return cim
 
 
+@bind_to_cim
 def diagram_object_to_cim(pb: PBDiagramObject, service: DiagramService):
     cim = DiagramObject(
         mrid=pb.mrid(),
         identified_object_mrid=pb.identifiedObjectMRID if pb.identifiedObjectMRID else None,
-        style=pb.diagramObjectStyle if pb.diagramObjectStyle else None,
+        style=get_nullable(pb, 'diagramObjectStyle'),
         rotation=pb.rotation,
     )
 
@@ -51,11 +55,7 @@ def diagram_object_to_cim(pb: PBDiagramObject, service: DiagramService):
     return cim if service.add_diagram_object(cim) else None
 
 
+@bind_to_cim
 def diagram_object_point_to_cim(pb: PBDiagramObjectPoint) -> DiagramObjectPoint:
     # noinspection PyArgumentList
     return DiagramObjectPoint(pb.xPosition, pb.yPosition)
-
-
-PBDiagram.to_cim = diagram_to_cim
-PBDiagramObject.to_cim = diagram_object_to_cim
-PBDiagramObjectPoint.to_cim = diagram_object_point_to_cim

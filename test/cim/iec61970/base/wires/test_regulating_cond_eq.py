@@ -20,7 +20,7 @@ regulating_cond_eq_args = [*energy_connection_args, False, None]
 
 def verify_regulating_cond_eq_constructor_default(rce: RegulatingCondEq):
     verify_energy_connection_constructor_default(rce)
-    assert rce.control_enabled
+    assert rce.control_enabled is None
     assert rce.regulating_control is None
 
 

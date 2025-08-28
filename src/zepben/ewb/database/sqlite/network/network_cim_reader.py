@@ -1070,22 +1070,22 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_street_address(self, table: TableStreetAddresses, result_set: ResultSet) -> StreetAddress:
         return StreetAddress(
-            result_set.get_string(table.postal_code.query_index, on_none=""),
+            result_set.get_string(table.postal_code.query_index, on_none=None),
             self._load_town_detail(table, result_set),
-            result_set.get_string(table.po_box.query_index, on_none=""),
+            result_set.get_string(table.po_box.query_index, on_none=None),
             self._load_street_detail(table, result_set)
         )
 
     @staticmethod
     def _load_street_detail(table: TableStreetAddresses, result_set: ResultSet) -> Optional[StreetDetail]:
         sd = StreetDetail(
-            result_set.get_string(table.building_name.query_index, on_none=""),
-            result_set.get_string(table.floor_identification.query_index, on_none=""),
-            result_set.get_string(table.street_name.query_index, on_none=""),
-            result_set.get_string(table.number.query_index, on_none=""),
-            result_set.get_string(table.suite_number.query_index, on_none=""),
-            result_set.get_string(table.type.query_index, on_none=""),
-            result_set.get_string(table.display_address.query_index, on_none="")
+            result_set.get_string(table.building_name.query_index, on_none=None),
+            result_set.get_string(table.floor_identification.query_index, on_none=None),
+            result_set.get_string(table.street_name.query_index, on_none=None),
+            result_set.get_string(table.number.query_index, on_none=None),
+            result_set.get_string(table.suite_number.query_index, on_none=None),
+            result_set.get_string(table.type.query_index, on_none=None),
+            result_set.get_string(table.display_address.query_index, on_none=None)
         )
 
         return sd if not sd.all_fields_empty() else None
@@ -1178,7 +1178,7 @@ class NetworkCimReader(BaseCimReader):
         """
         pole = Pole(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        pole.classification = result_set.get_string(table.classification.query_index, on_none="")
+        pole.classification = result_set.get_string(table.classification.query_index, on_none=None)
 
         return self._load_structure(pole, table, result_set) and self._add_or_throw(pole)
 
@@ -1232,7 +1232,7 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.location_mrid.query_index, on_none=None),
             Location
         )
-        usage_point.is_virtual = result_set.get_boolean(table.is_virtual.query_index)
+        usage_point.is_virtual = result_set.get_boolean(table.is_virtual.query_index, on_none=None)
         usage_point.connection_category = result_set.get_string(table.connection_category.query_index, on_none=None)
         usage_point.rated_power = result_set.get_int(table.rated_power.query_index, on_none=None)
         usage_point.approved_inverter_capacity = result_set.get_int(table.approved_inverter_capacity.query_index, on_none=None)
@@ -1472,7 +1472,7 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.location_mrid.query_index, on_none=None),
             Location
         )
-        power_system_resource.num_controls = result_set.get_int(table.num_controls.query_index)
+        power_system_resource.num_controls = result_set.get_int(table.num_controls.query_index, on_none=None)
 
         return self._load_identified_object(power_system_resource, table, result_set)
 
@@ -1686,7 +1686,7 @@ class NetworkCimReader(BaseCimReader):
         """
         meas = Analog(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        meas.positive_flow_in = result_set.get_boolean(table.positive_flow_in.query_index)
+        meas.positive_flow_in = result_set.get_boolean(table.positive_flow_in.query_index, on_none=None)
 
         return self._load_measurement(meas, table, result_set) and self._add_or_throw(meas)
 
@@ -1956,7 +1956,7 @@ class NetworkCimReader(BaseCimReader):
         energy_consumer = EnergyConsumer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         energy_consumer.customer_count = result_set.get_int(table.customer_count.query_index, on_none=None)
-        energy_consumer.grounded = result_set.get_boolean(table.grounded.query_index)
+        energy_consumer.grounded = result_set.get_boolean(table.grounded.query_index, on_none=None)
         energy_consumer.p = result_set.get_float(table.p.query_index, on_none=None)
         energy_consumer.q = result_set.get_float(table.q.query_index, on_none=None)
         energy_consumer.p_fixed = result_set.get_float(table.p_fixed.query_index, on_none=None)
@@ -2018,7 +2018,7 @@ class NetworkCimReader(BaseCimReader):
         energy_source.x = result_set.get_float(table.x.query_index, on_none=None)
         energy_source.x0 = result_set.get_float(table.x0.query_index, on_none=None)
         energy_source.xn = result_set.get_float(table.xn.query_index, on_none=None)
-        energy_source.is_external_grid = result_set.get_boolean(table.is_external_grid.query_index)
+        energy_source.is_external_grid = result_set.get_boolean(table.is_external_grid.query_index, on_none=None)
         energy_source.r_min = result_set.get_float(table.r_min.query_index, on_none=None)
         energy_source.rn_min = result_set.get_float(table.rn_min.query_index, on_none=None)
         energy_source.r0_min = result_set.get_float(table.r0_min.query_index, on_none=None)
@@ -2488,7 +2488,7 @@ class NetworkCimReader(BaseCimReader):
         return self._load_protected_switch(recloser, table, result_set) and self._add_or_throw(recloser)
 
     def _load_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq, table: TableRegulatingCondEq, result_set: ResultSet) -> bool:
-        regulating_cond_eq.control_enabled = result_set.get_boolean(table.control_enabled.query_index)
+        regulating_cond_eq.control_enabled = result_set.get_boolean(table.control_enabled.query_index, on_none=None)
         # We use a resolver here because there is an ordering conflict between terminals, RegulatingCondEq, and RegulatingControls
         # We check this resolver has actually been resolved in the postLoad of the database read and throw there if it hasn't.
         self._service.resolve_or_defer_reference(
@@ -2556,7 +2556,7 @@ class NetworkCimReader(BaseCimReader):
             ShuntCompensatorInfo
         )
 
-        shunt_compensator.grounded = result_set.get_boolean(table.grounded.query_index)
+        shunt_compensator.grounded = result_set.get_boolean(table.grounded.query_index, on_none=None)
         shunt_compensator.nom_u = result_set.get_int(table.nom_u.query_index, on_none=None)
         shunt_compensator.phase_connection = PhaseShuntConnectionKind[result_set.get_string(table.phase_connection.query_index)]
         shunt_compensator.sections = result_set.get_float(table.sections.query_index, on_none=None)
@@ -2610,7 +2610,7 @@ class NetworkCimReader(BaseCimReader):
 
         synchronous_machine.base_q = result_set.get_float(table.base_q.query_index, on_none=None)
         synchronous_machine.condenser_p = result_set.get_int(table.condenser_p.query_index, on_none=None)
-        synchronous_machine.earthing = result_set.get_boolean(table.earthing.query_index)
+        synchronous_machine.earthing = result_set.get_boolean(table.earthing.query_index, on_none=None)
         synchronous_machine.earthing_star_point_r = result_set.get_float(table.earthing_star_point_r.query_index, on_none=None)
         synchronous_machine.earthing_star_point_x = result_set.get_float(table.earthing_star_point_x.query_index, on_none=None)
         synchronous_machine.ikk = result_set.get_float(table.ikk.query_index, on_none=None)
@@ -2633,7 +2633,7 @@ class NetworkCimReader(BaseCimReader):
         return self._load_rotating_machine(synchronous_machine, table, result_set) and self._add_or_throw(synchronous_machine)
 
     def _load_tap_changer(self, tap_changer: TapChanger, table: TableTapChangers, result_set: ResultSet) -> bool:
-        tap_changer.control_enabled = result_set.get_boolean(table.control_enabled.query_index)
+        tap_changer.control_enabled = result_set.get_boolean(table.control_enabled.query_index, on_none=None)
         tap_changer.high_step = result_set.get_int(table.high_step.query_index, on_none=None)
         tap_changer.low_step = result_set.get_int(table.low_step.query_index, on_none=None)
         tap_changer.neutral_step = result_set.get_int(table.neutral_step.query_index, on_none=None)
@@ -2681,7 +2681,7 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.base_voltage_mrid.query_index, on_none=None),
             BaseVoltage
         )
-        transformer_end.grounded = result_set.get_boolean(table.grounded.query_index)
+        transformer_end.grounded = result_set.get_boolean(table.grounded.query_index, on_none=None)
         transformer_end.r_ground = result_set.get_float(table.r_ground.query_index, on_none=None)
         transformer_end.x_ground = result_set.get_float(table.x_ground.query_index, on_none=None)
         transformer_end.star_impedance = self._ensure_get(

@@ -26,7 +26,7 @@ class EnergyConsumer(EnergyConnection):
     customer_count: Optional[int] = None
     """Number of individual customers represented by this demand."""
 
-    grounded: bool = False
+    grounded: Optional[bool] = None
     """Used for Yn and Zn connections. True if the neutral is solidly grounded."""
 
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.D

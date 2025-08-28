@@ -14,7 +14,10 @@ meter_args = end_device_args
 
 
 def test_meter_constructor_default():
-    verify_end_device_constructor_default(Meter())
+    meter = Meter()
+    verify_end_device_constructor_default(meter)
+    assert meter.company_meter_id is None
+    assert  meter.name is None
 
 
 @given(**meter_kwargs)

@@ -25,7 +25,7 @@ def test_name_type_constructor_default():
     nt = NameType("nt")
 
     assert nt.name == "nt"
-    assert not nt.description
+    assert nt.description is None
     assert not list(nt.names)
 
 

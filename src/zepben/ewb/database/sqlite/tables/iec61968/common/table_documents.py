@@ -15,9 +15,9 @@ class TableDocuments(TableIdentifiedObjects, ABC):
 
     def __init__(self):
         super().__init__()
-        self.title: Column = self._create_column("title", "TEXT", Nullable.NOT_NULL)
+        self.title: Column = self._create_column("title", "TEXT", Nullable.NULL)
         self.created_date_time: Column = self._create_column("created_date_time", "TEXT", Nullable.NULL)
-        self.author_name: Column = self._create_column("author_name", "TEXT", Nullable.NOT_NULL)
-        self.type: Column = self._create_column("type", "TEXT", Nullable.NOT_NULL)
-        self.status: Column = self._create_column("status", "TEXT", Nullable.NOT_NULL)
-        self.comment: Column = self._create_column("comment", "TEXT", Nullable.NOT_NULL)
+        self.author_name: Column = self._create_column("author_name", "TEXT", Nullable.NULL)
+        self.type: Column = self._create_column("type", "TEXT", Nullable.NULL)
+        self.status: Column = self._create_column("status", "TEXT", Nullable.NULL)
+        self.comment: Column = self._create_column("comment", "TEXT", Nullable.NULL)

@@ -15,5 +15,5 @@ class TableRegulatingCondEq(TableEnergyConnections, ABC):
 
     def __init__(self):
         super().__init__()
-        self.control_enabled: Column = self._create_column("control_enabled", "BOOLEAN", Nullable.NOT_NULL)
+        self.control_enabled: Column = self._create_column("control_enabled", "BOOLEAN", Nullable.NULL)
         self.regulating_control_mrid: Column = self._create_column("regulating_control_mrid", "TEXT", Nullable.NULL)

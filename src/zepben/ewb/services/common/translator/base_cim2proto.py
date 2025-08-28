@@ -6,10 +6,11 @@
 __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb", "organisation_to_pb"]
 
 import inspect
-from typing import ParamSpec, TypeVar, Callable
+from typing import ParamSpec, TypeVar, Callable, Generator
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
+from google.protobuf.struct_pb2 import NullValue
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
@@ -38,6 +39,11 @@ def bind_to_pb(func: Callable[P, R]) -> Callable[P, R]:
     inspect.get_annotations(func, eval_str=True)[func.__code__.co_varnames[0]].to_pb = func
     return func
 
+
+def set_or_null(**kwargs):
+    return {f'{k}{"Null" if v is None else "Set"}': v if v is not None else NullValue.NULL_VALUE for k, v in kwargs.items()}
+
+
 ###################
 # IEC61968 Common #
 ###################
@@ -51,12 +57,14 @@ def document_to_pb(cim: Document) -> PBDocument:
 
     return PBDocument(
         io=identified_object_to_pb(cim),
-        title=cim.title,
         createdDateTime=timestamp,
-        authorName=cim.author_name,
-        type=cim.type,
-        status=cim.status,
-        comment=cim.comment
+        **set_or_null(
+            title=cim.title,
+            authorName=cim.author_name,
+            type=cim.type,
+            status=cim.status,
+            comment=cim.comment
+        )
     )
 
 
@@ -81,8 +89,10 @@ def organisation_role_to_pb(cim: OrganisationRole) -> PBOrganisationRole:
 def identified_object_to_pb(cim: IdentifiedObject) -> PBIdentifiedObject:
     return PBIdentifiedObject(
         mRID=str(cim.mrid),
-        name=cim.name,
-        description=cim.description,
+        **set_or_null(
+            name=cim.name,
+            description=cim.description
+        ),
         names=[name_to_pb(name) for name in cim.names]
     )
 
@@ -99,5 +109,7 @@ def name_to_pb(cim: Name) -> PBName:
 def name_type_to_pb(cim: NameType) -> PBNameType:
     return PBNameType(
         name=cim.name,
-        description=cim.description
+        **set_or_null(
+            description=cim.description
+        )
     )

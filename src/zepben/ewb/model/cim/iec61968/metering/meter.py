@@ -5,6 +5,8 @@
 
 __all__ = ["Meter"]
 
+from typing import Optional
+
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
 
@@ -14,12 +16,12 @@ class Meter(EndDevice):
     """
 
     @property
-    def company_meter_id(self):
+    def company_meter_id(self) -> Optional[str]:
         """ Returns this `Meter`s ID. Currently stored in `IdentifiedObject.name` """
         return self.name
 
     @company_meter_id.setter
-    def company_meter_id(self, meter_id):
+    def company_meter_id(self, meter_id: Optional[str]):
         """
         `meter_id` The ID to set for this Meter. Will use `IdentifiedObject.name` as a backing field.
         """

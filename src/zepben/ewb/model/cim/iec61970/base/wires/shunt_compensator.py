@@ -20,7 +20,7 @@ class ShuntCompensator(RegulatingCondEq):
     is an individual capacitor or reactor.  A negative value for reactivePerSection indicates that the compensator is
     a reactor. ShuntCompensator is a single terminal device.  Ground is implied.
     """
-    grounded: bool = False
+    grounded: Optional[bool] = None
     """Used for Yn and Zn connections. True if the neutral is solidly grounded. nom_u : The voltage at which the nominal reactive power may be calculated. 
     This should normally be within 10% of the voltage at which the capacitor is connected to the network."""
 

@@ -11,7 +11,7 @@ from abc import ABC
 from contextlib import closing
 from pathlib import Path
 from sqlite3 import Connection, Cursor, OperationalError
-from typing import Callable, Union
+from typing import Callable, Union, Optional
 
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.ewb.database.sqlite.common.base_service_writer import BaseServiceWriter
@@ -66,7 +66,7 @@ class BaseDatabaseWriter(ABC):
         Provider of the connection to the specified database.
         """
 
-        self._save_connection: Connection
+        self._save_connection: Optional[Connection] = None
         self._has_been_used: bool = False
 
     def save(self) -> bool:

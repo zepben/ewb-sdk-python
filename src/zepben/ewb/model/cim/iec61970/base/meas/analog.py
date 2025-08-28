@@ -5,12 +5,14 @@
 
 __all__ = ["Analog"]
 
+from typing import Optional
+
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
 class Analog(Measurement):
     """Analog represents an analog Measurement."""
 
-    positive_flow_in: bool = False
+    positive_flow_in: Optional[bool] = None
     """If true then this measurement is an active power, reactive power or current with the convention that a positive value measured at the 
     Terminal means power is flowing into the related PowerSystemResource."""

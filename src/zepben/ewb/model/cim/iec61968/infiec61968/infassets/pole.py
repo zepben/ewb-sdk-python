@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class Pole(Structure):
     """A Pole Asset"""
 
-    classification: str = ""
+    classification: Optional[str] = None
     """Pole class: 1, 2, 3, 4, 5, 6, 7, H1, H2, Other, Unknown."""
 
     _streetlights: Optional[List[Streetlight]] = None

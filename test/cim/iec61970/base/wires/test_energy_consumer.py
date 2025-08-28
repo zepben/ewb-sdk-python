@@ -33,7 +33,7 @@ def test_energy_consumer_constructor_default():
     verify_energy_connection_constructor_default(ec)
     assert not list(ec.phases)
     assert ec.customer_count is None
-    assert not ec.grounded
+    assert ec.grounded is None
     assert ec.phase_connection == PhaseShuntConnectionKind.D
     assert ec.p is None
     assert ec.p_fixed is None

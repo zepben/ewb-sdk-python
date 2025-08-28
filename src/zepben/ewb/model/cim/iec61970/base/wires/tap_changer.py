@@ -19,7 +19,7 @@ class TapChanger(PowerSystemResource):
     Mechanism for changing transformer winding tap positions.
     """
 
-    control_enabled: bool = True
+    control_enabled: Optional[bool] = None
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
     neutral_u: Optional[int] = None

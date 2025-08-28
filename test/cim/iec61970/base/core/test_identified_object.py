@@ -36,8 +36,8 @@ identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
     assert io.mrid
-    assert io.name == ""
-    assert io.description == ""
+    assert io.name is None
+    assert io.description is None
     assert not list(io.names)
 
 

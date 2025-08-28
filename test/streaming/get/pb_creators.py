@@ -16,7 +16,7 @@ from typing import Optional, Dict
 from google.protobuf.struct_pb2 import NullValue
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids, one_of, none
+from hypothesis.strategies import builds, text, integers, sampled_from, lists as hypo_lists, floats as hypo_floats, booleans, composite, uuids, one_of, none
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
@@ -205,11 +205,19 @@ ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 # Extensions IEC61968 Asset Info #
 ##################################
 
+def floats(*args, **kwargs):
+    kwargs.update({"width": 32})
+    return hypo_floats(*args, **kwargs)
+
+def lists(*args, **kwargs):
+    kwargs.update({"min_size": 1})
+    return hypo_lists(*args, **kwargs)
+
 def relay_info():
     return builds(
         PBRelayInfo,
         ai=asset_info(),
-        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        curveSettingSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         **nullable_bool_settings("recloseFast"),
         recloseDelays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), max_size=3)
     )
@@ -224,7 +232,7 @@ def pan_demand_response_function():
         PBPanDemandResponseFunction,
         edf=end_device_function(),
         kind=sampled_from(PBEndDeviceFunctionKind.values()),
-        appliance=integers(min_value=0, max_value=4095),
+        applianceSet=integers(min_value=0, max_value=4095),
     )
 
 
@@ -275,15 +283,15 @@ def distance_relay():
     return builds(
         PBDistanceRelay,
         prf=protection_relay_function(),
-        backwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardBlind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardReach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forwardReactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operationPhaseAngle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backwardBlindSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backwardReachSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backwardReactanceSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardBlindSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardReachSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forwardReactanceSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle1Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle2Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operationPhaseAngle3Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     )
 
 
@@ -291,9 +299,9 @@ def protection_relay_function():
     return builds(
         PBProtectionRelayFunction,
         psr=power_system_resource(),
-        model=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        modelSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         **nullable_bool_settings("reclosing"),
-        relayDelayTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        relayDelayTimeSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         protectionKind=sampled_from(PBProtectionKind.values()),
         **nullable_bool_settings("directable"),
         powerDirection=sampled_from(PBPowerDirectionKind.values()),
@@ -326,7 +334,7 @@ def protection_relay_system():
 def relay_setting():
     return builds(
         PBRelaySetting,
-        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         unitSymbol=sampled_from(PBUnitSymbol.values()),
         value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
@@ -347,9 +355,9 @@ def battery_control():
     return builds(
         PBBatteryControl,
         rc=regulating_control(),
-        chargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        dischargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reservePercent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        chargingRateSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        dischargingRateSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reservePercentSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         controlMode=sampled_from(PBBatteryControlMode.values())
     )
 
@@ -374,11 +382,11 @@ def no_load_test():
     return builds(
         PBNoLoadTest,
         tt=transformer_test(),
-        energisedEndVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        excitingCurrent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        excitingCurrentZero=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        loss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        lossZero=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        energisedEndVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        excitingCurrentSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        excitingCurrentZeroSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lossSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        lossZeroSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
 
@@ -386,11 +394,11 @@ def open_circuit_test():
     return builds(
         PBOpenCircuitTest,
         tt=transformer_test(),
-        energisedEndStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        energisedEndVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        openEndStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        openEndVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        phaseShift=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        energisedEndStepSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        energisedEndVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        openEndStepSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        openEndVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        phaseShiftSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -410,16 +418,16 @@ def short_circuit_test():
     return builds(
         PBShortCircuitTest,
         tt=transformer_test(),
-        current=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        energisedEndStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        groundedEndStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        leakageImpedance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        leakageImpedanceZero=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        loss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        lossZero=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        voltage=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        voltageOhmicPart=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        currentSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        energisedEndStepSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        groundedEndStepSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        leakageImpedanceSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        leakageImpedanceZeroSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lossSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        lossZeroSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        powerSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        voltageSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltageOhmicPartSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -427,10 +435,10 @@ def shunt_compensator_info():
     return builds(
         PBShuntCompensatorInfo,
         ai=asset_info(),
-        maxPowerLoss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        ratedReactivePower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        ratedVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        maxPowerLossSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedCurrentSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedReactivePowerSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -438,7 +446,7 @@ def switch_info():
     return builds(
         PBSwitchInfo,
         ai=asset_info(),
-        ratedInterruptingTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        ratedInterruptingTimeSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -447,14 +455,14 @@ def transformer_end_info():
         PBTransformerEndInfo,
         ai=asset_info(),
         connectionKind=sampled_from(PBWindingConnection.values()),
-        emergencyS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        emergencySSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         endNumber=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        insulationU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        phaseAngleClock=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ratedS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        ratedU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        shortTermS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        insulationUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        phaseAngleClockSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedSSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        shortTermSSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         transformerStarImpedanceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
@@ -471,8 +479,8 @@ def transformer_test():
     return builds(
         PBTransformerTest,
         io=identified_object(),
-        basePower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        temperature=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        basePowerSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        temperatureSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -480,7 +488,7 @@ def wire_info():
     return builds(
         PBWireInfo,
         ai=asset_info(),
-        ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedCurrentSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         material=sampled_from(PBWireMaterialKind.values())
     )
 
@@ -525,7 +533,7 @@ def streetlight():
         PBStreetlight,
         at=asset(),
         poleMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        lightRating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        lightRatingSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         lampKind=sampled_from(PBStreetlightLampKind.values())
     )
 
@@ -546,12 +554,12 @@ def document():
     return builds(
         PBDocument,
         io=identified_object(),
-        title=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        titleSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         createdDateTime=timestamp(),
-        authorName=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        status=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        comment=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        authorNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        statusSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        commentSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -574,9 +582,9 @@ def position_point():
 def street_address():
     return builds(
         PBStreetAddress,
-        postalCode=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        postalCodeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         townDetail=town_detail(),
-        poBox=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        poBoxSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         streetDetail=street_detail()
     )
 
@@ -584,18 +592,18 @@ def street_address():
 def street_detail():
     return builds(
         PBStreetDetail,
-        buildingName=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        floorIdentification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        suiteNumber=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        displayAddress=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        buildingNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        floorIdentificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        numberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        suiteNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        displayAddressSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
 def town_detail():
-    return builds(PBTownDetail, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvince=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+    return builds(PBTownDetail, nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvinceSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
 ######################
@@ -645,18 +653,18 @@ def current_transformer_info():
     return builds(
         PBCurrentTransformerInfo,
         ai=asset_info(),
-        accuracyClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        accuracyLimit=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        coreCount=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        ctClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        kneePointVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        accuracyClassSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        accuracyLimitSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        coreCountSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ctClassSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        kneePointVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         maxRatio=ratio(),
         nominalRatio=ratio(),
-        primaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        secondaryFlsRating=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        secondaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        usage=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        primaryRatioSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedCurrentSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryFlsRatingSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryRatioSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        usageSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -664,12 +672,12 @@ def potential_transformer_info():
     return builds(
         PBPotentialTransformerInfo,
         ai=asset_info(),
-        accuracyClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        accuracyClassSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         nominalRatio=ratio(),
-        primaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ptClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        ratedVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        secondaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        primaryRatioSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ptClassSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        ratedVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryRatioSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -683,7 +691,7 @@ def pole():
         PBPole,
         st=structure(),
         streetlightMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        classificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -692,7 +700,7 @@ def pole():
 ##################################
 
 def ratio():
-    return builds(PBRatio, denominator=floats(min_value=0.1, max_value=1000.0), numerator=floats(min_value=0.0, max_value=1000.0))
+    return builds(PBRatio, denominator=floats(min_value=0.10000000149011612, max_value=1000.0), numerator=floats(min_value=0.0, max_value=1000.0))
 
 
 #####################
@@ -729,10 +737,10 @@ def usage_point():
         usagePointLocationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         equipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         endDeviceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        isVirtual=booleans(),
-        connectionCategory=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        ratedPower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        approvedInverterCapacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        isVirtualSet=booleans(),
+        connectionCategorySet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        ratedPowerSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        approvedInverterCapacitySet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
 
@@ -753,7 +761,7 @@ def auxiliary_equipment():
 
 
 def current_transformer():
-    return builds(PBCurrentTransformer, sn=sensor(), coreBurden=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+    return builds(PBCurrentTransformer, sn=sensor(), coreBurdenSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
 
 
 def fault_indicator():
@@ -810,8 +818,8 @@ def curve_data():
         PBCurveData,
         xValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         y1Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y2Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        y3Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y2ValueSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y3ValueSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     )
 
 
@@ -851,8 +859,8 @@ def identified_object():
     return builds(
         PBIdentifiedObject,
         mRID=uuids(version=4).map(lambda x: str(x)),
-        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        description=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        descriptionSet=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -919,7 +927,7 @@ def diagram_object():
         PBDiagramObject,
         io=identified_object(),
         diagramMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        diagramObjectStyle=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        diagramObjectStyleSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         rotation=floats(min_value=0.0, max_value=360.0),
         identifiedObjectMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         diagramObjectPoints=lists(diagram_object_point(), max_size=2)
@@ -942,22 +950,22 @@ def equivalent_branch():
     return builds(
         PBEquivalentBranch,
         ee=equivalent_equipment(),
-        negativeR12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        negativeR21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        negativeX12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        negativeX21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        positiveR12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        positiveR21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        positiveX12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        positiveX21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        zeroR12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        zeroR21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        zeroX12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        zeroX21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        negativeR12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negativeR21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negativeX12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negativeX21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positiveR12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positiveR21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positiveX12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positiveX21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zeroR12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zeroR21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zeroX12Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zeroX21Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -974,8 +982,8 @@ def battery_unit():
         PBBatteryUnit,
         peu=power_electronics_unit(),
         batteryState=sampled_from(PBBatteryStateKind.values()),
-        ratedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
-        storedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
+        ratedESet=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
+        storedESet=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
         batteryControlMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
@@ -989,8 +997,8 @@ def power_electronics_unit():
         PBPowerElectronicsUnit,
         eq=equipment(),
         powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        maxP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        minP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        maxPSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        minPSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
 
@@ -1007,7 +1015,7 @@ def accumulator():
 
 
 def analog():
-    return builds(PBAnalog, measurement=measurement(), positiveFlowIn=booleans())
+    return builds(PBAnalog, measurement=measurement(), positiveFlowInSet=booleans())
 
 
 def control():
@@ -1047,9 +1055,9 @@ def current_relay():
     return builds(
         PBCurrentRelay,
         prf=protection_relay_function(),
-        currentLimit1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        currentLimit1Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         **nullable_bool_settings("inverseTimeFlag"),
-        timeDelay1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        timeDelay1Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1081,7 +1089,7 @@ def breaker():
     return builds(
         PBBreaker,
         sw=protected_switch(),
-        inTransitTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        inTransitTimeSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1093,13 +1101,13 @@ def clamp():
     return builds(
         PBClamp,
         ce=conducting_equipment(),
-        lengthFromTerminal1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lengthFromTerminal1Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         acLineSegmentMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     )
 
 
 def conductor():
-    return builds(PBConductor, ce=conducting_equipment(), length=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    return builds(PBConductor, ce=conducting_equipment(), lengthSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def connector():
@@ -1110,7 +1118,7 @@ def cut():
     return builds(
         PBCut,
         sw=switch(),
-        lengthFromTerminal1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lengthFromTerminal1Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         acLineSegmentMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     )
 
@@ -1120,7 +1128,7 @@ def disconnector():
 
 
 def earth_fault_compensator():
-    return builds(PBEarthFaultCompensator, ce=conducting_equipment(), r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    return builds(PBEarthFaultCompensator, ce=conducting_equipment(), rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def energy_connection():
@@ -1132,12 +1140,12 @@ def energy_consumer():
         PBEnergyConsumer,
         ec=energy_connection(),
         energyConsumerPhasesMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        customerCount=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        grounded=booleans(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        pFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        customerCountSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        groundedSet=booleans(), pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        pFixedSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values()),
-        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        qFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qFixedSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1147,10 +1155,10 @@ def energy_consumer_phase():
         psr=power_system_resource(),
         energyConsumerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         phase=sampled_from(PBSinglePhaseKind.values()),
-        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        pFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        qFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        pFixedSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qFixedSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1159,18 +1167,18 @@ def energy_source():
         PBEnergySource,
         ec=energy_connection(),
         energySourcePhasesMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        activePower=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reactivePower=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        voltageAngle=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        voltageMagnitude=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        pMax=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        pMin=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        rn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        xn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        activePowerSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reactivePowerSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltageAngleSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltageMagnitudeSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        pMaxSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        pMinSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rnSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xnSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1196,7 +1204,7 @@ def ground_disconnector():
 
 
 def grounding_impedance():
-    return builds(PBGroundingImpedance, efc=earth_fault_compensator(), x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    return builds(PBGroundingImpedance, efc=earth_fault_compensator(), xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def jumper():
@@ -1215,10 +1223,10 @@ def linear_shunt_compensator():
     return builds(
         PBLinearShuntCompensator,
         sc=shunt_compensator(),
-        b0PerSection=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        bPerSection=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g0PerSection=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        gPerSection=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        b0PerSectionSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        bPerSectionSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0PerSectionSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        gPerSectionSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1246,14 +1254,14 @@ def per_length_sequence_impedance():
     return builds(
         PBPerLengthSequenceImpedance,
         pli=per_length_impedance(),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        bch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        gch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        b0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        bchSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        gchSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        b0chSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0chSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1262,10 +1270,10 @@ def phase_impedance_data():
         PBPhaseImpedanceData,
         fromPhase=sampled_from(PBSinglePhaseKind.values()),
         toPhase=sampled_from(PBSinglePhaseKind.values()),
-        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        bSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        gSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     )
 
 
@@ -1275,37 +1283,37 @@ def power_electronics_connection():
         rce=regulating_cond_eq(),
         powerElectronicsUnitMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         powerElectronicsConnectionPhaseMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
-        maxIFault=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        maxQ=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        minQ=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ratedS=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        ratedU=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        inverterStandard=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        sustainOpOvervoltLimit=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        stopAtOverFreq=floats(min_value=51.0, max_value=52.0),
-        stopAtUnderFreq=floats(min_value=47.0, max_value=49.0),
+        maxIFaultSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        maxQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedSSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        ratedUSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        inverterStandardSet=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        sustainOpOvervoltLimitSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        stopAtOverFreqSet=floats(min_value=51.0, max_value=52.0),
+        stopAtUnderFreqSet=floats(min_value=47.0, max_value=49.0),
         **nullable_bool_settings("invVoltWattRespMode"),
-        invWattRespV1=integers(min_value=200, max_value=300),
-        invWattRespV2=integers(min_value=216, max_value=230),
-        invWattRespV3=integers(min_value=235, max_value=255),
-        invWattRespV4=integers(min_value=244, max_value=265),
-        invWattRespPAtV1=floats(min_value=0.0, max_value=1.0),
-        invWattRespPAtV2=floats(min_value=0.0, max_value=1.0),
-        invWattRespPAtV3=floats(min_value=0.0, max_value=1.0),
-        invWattRespPAtV4=floats(min_value=0.0, max_value=0.2),
+        invWattRespV1Set=integers(min_value=200, max_value=300),
+        invWattRespV2Set=integers(min_value=216, max_value=230),
+        invWattRespV3Set=integers(min_value=235, max_value=255),
+        invWattRespV4Set=integers(min_value=244, max_value=265),
+        invWattRespPAtV1Set=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV2Set=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV3Set=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV4Set=floats(min_value=0.0, max_value=0.20000000298023224),
         **nullable_bool_settings("invVoltVarRespMode"),
-        invVarRespV1=integers(min_value=200, max_value=300),
-        invVarRespV2=integers(min_value=200, max_value=300),
-        invVarRespV3=integers(min_value=200, max_value=300),
-        invVarRespV4=integers(min_value=200, max_value=300),
-        invVarRespQAtV1=floats(min_value=0.0, max_value=0.6),
-        invVarRespQAtV2=floats(min_value=-1.0, max_value=1.0),
-        invVarRespQAtV3=floats(min_value=-1.0, max_value=1.0),
-        invVarRespQAtV4=floats(min_value=-0.6, max_value=0.0),
+        invVarRespV1Set=integers(min_value=200, max_value=300),
+        invVarRespV2Set=integers(min_value=200, max_value=300),
+        invVarRespV3Set=integers(min_value=200, max_value=300),
+        invVarRespV4Set=integers(min_value=200, max_value=300),
+        invVarRespQAtV1Set=floats(min_value=0.0, max_value=0.6000000238418579),
+        invVarRespQAtV2Set=floats(min_value=-1.0, max_value=1.0),
+        invVarRespQAtV3Set=floats(min_value=-1.0, max_value=1.0),
+        invVarRespQAtV4Set=floats(min_value=-0.6000000238418579, max_value=0.0),
         **nullable_bool_settings("invReactivePowerMode"),
-        invFixReactivePower=floats(min_value=-1.0, max_value=1.0),
+        invFixReactivePowerSet=floats(min_value=-1.0, max_value=1.0),
     )
 
 
@@ -1314,8 +1322,8 @@ def power_electronics_connection_phase():
         PBPowerElectronicsConnectionPhase,
         psr=power_system_resource(), powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         phase=sampled_from(PBSinglePhaseKind.values()),
-        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1325,7 +1333,7 @@ def power_transformer():
         ce=conducting_equipment(),
         powerTransformerEndMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         vectorGroup=sampled_from(PBVectorGroup.values()),
-        transformerUtilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        transformerUtilisationSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1334,17 +1342,17 @@ def power_transformer_end():
         PBPowerTransformerEnd,
         te=transformer_end(),
         powerTransformerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        ratedU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         connectionKind=sampled_from(PBWindingConnection.values()),
-        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phaseAngleClock=integers(min_value=0, max_value=11),
+        bSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        b0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        gSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        phaseAngleClockSet=integers(min_value=0, max_value=11),
         ratings=lists(transformer_end_rated_s(), max_size=3)
     )
 
@@ -1353,7 +1361,7 @@ def protected_switch():
     return builds(
         PBProtectedSwitch,
         sw=switch(),
-        breakingCapacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        breakingCapacitySet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         relayFunctionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
@@ -1363,7 +1371,7 @@ def ratio_tap_changer():
         PBRatioTapChanger,
         tc=tap_changer(),
         transformerEndMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        stepVoltageIncrement=floats(min_value=0.0, max_value=1.0)
+        stepVoltageIncrementSet=floats(min_value=0.0, max_value=1.0)
     )
 
 
@@ -1382,7 +1390,7 @@ def regulating_cond_eq():
     return builds(
         PBRegulatingCondEq,
         ec=energy_connection(),
-        controlEnabled=booleans(),
+        controlEnabledSet=booleans(),
         regulatingControlMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
@@ -1394,12 +1402,12 @@ def regulating_control():
         discreteSet=booleans(),
         mode=sampled_from(PBRegulatingControlModeKind.values()),
         monitoredPhase=sampled_from(PBPhaseCode.values()),
-        targetDeadband=floats(min_value=0.0, max_value=FLOAT_MAX),
-        targetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        targetDeadbandSet=floats(min_value=0.0, max_value=FLOAT_MAX),
+        targetValueSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         enabledSet=booleans(),
-        maxAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        minAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ratedCurrent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        maxAllowedTargetValueSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minAllowedTargetValueSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedCurrentSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         terminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         regulatingCondEqMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
@@ -1409,11 +1417,11 @@ def rotating_machine():
     return builds(
         PBRotatingMachine,
         rce=regulating_cond_eq(),
-        ratedPowerFactor=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ratedS=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ratedU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        p=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+        ratedPowerFactorSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedSSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        pSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -1421,12 +1429,12 @@ def series_compensator():
     return builds(
         PBSeriesCompensator,
         ce=conducting_equipment(),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        varistorRatedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        varistorVoltageThreshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        varistorRatedCurrentSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        varistorVoltageThresholdSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -1434,9 +1442,9 @@ def shunt_compensator():
     return builds(
         PBShuntCompensator,
         rce=regulating_cond_eq(),
-        sections=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        grounded=booleans(),
-        nomU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        sectionsSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        groundedSet=booleans(),
+        nomUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values())
     )
 
@@ -1445,11 +1453,11 @@ def static_var_compensator():
     return builds(
         PBStaticVarCompensator,
         rce=regulating_cond_eq(),
-        capacitiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        inductiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        capacitiveRatingSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        inductiveRatingSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         svcControlMode=sampled_from(PBSVCControlMode.values()),
-        voltageSetPoint=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        voltageSetPointSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
 
@@ -1457,7 +1465,7 @@ def switch():
     return builds(
         PBSwitch,
         ce=conducting_equipment(),
-        ratedCurrent=integers(min_value=1, max_value=MAX_32_BIT_INTEGER),
+        ratedCurrentSet=integers(min_value=1, max_value=MAX_32_BIT_INTEGER),
         normalOpen=booleans(),
         open=booleans()
     )
@@ -1467,25 +1475,25 @@ def synchronous_machine():
     return builds(
         PBSynchronousMachine,
         rm=rotating_machine(),
-        baseQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        condenserP=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        earthing=booleans(),
-        earthingStarPointR=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        earthingStarPointX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        ikk=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        maxQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        maxU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        minQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        minU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        mu=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        r2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectSubtransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectSyncX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        satDirectTransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        x0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        x2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        baseQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        condenserPSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        earthingSet=booleans(),
+        earthingStarPointRSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        earthingStarPointXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ikkSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        maxQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        maxUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        minQSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        muSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r2Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectSubtransXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectSyncXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        satDirectTransXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x2Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         type=sampled_from(PBSynchronousMachineKind.values()),
         operatingMode=sampled_from(PBSynchronousMachineKind.values()),
         reactiveCapabilityCurveMRIDs=one_of(none(), text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))),
@@ -1496,13 +1504,13 @@ def tap_changer():
     return builds(
         PBTapChanger,
         psr=power_system_resource(),
-        highStep=integers(min_value=10, max_value=15),
-        lowStep=integers(min_value=0, max_value=2),
-        step=floats(min_value=2.0, max_value=10.0),
-        neutralStep=integers(min_value=2, max_value=10),
-        neutralU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        normalStep=integers(min_value=2, max_value=10),
-        controlEnabled=booleans(),
+        highStepSet=integers(min_value=10, max_value=15),
+        lowStepSet=integers(min_value=0, max_value=2),
+        stepSet=floats(min_value=2.0, max_value=10.0),
+        neutralStepSet=integers(min_value=2, max_value=10),
+        neutralUSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        normalStepSet=integers(min_value=2, max_value=10),
+        controlEnabledSet=booleans(),
         tapChangerControlMRID=text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
     )
 
@@ -1511,14 +1519,14 @@ def tap_changer_control():
     return builds(
         PBTapChangerControl,
         rc=regulating_control(),
-        limitVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        limitVoltageSet=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         **nullable_bool_settings("lineDropCompensation"),
-        lineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        lineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverseLineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverseLineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lineDropRSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lineDropXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropRSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropXSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         **nullable_bool_settings("forwardLDCBlocking"),
-        timeDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        timeDelaySet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         **nullable_bool_settings("coGenerationEnabled")
     )
 
@@ -1531,9 +1539,9 @@ def transformer_end():
         baseVoltageMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         ratioTapChangerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         endNumber=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_END_NUMBER),
-        grounded=booleans(),
-        rGround=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        xGround=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        groundedSet=booleans(),
+        rGroundSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xGroundSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         starImpedanceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
@@ -1542,10 +1550,10 @@ def transformer_star_impedance():
     return builds(
         PBTransformerStarImpedance,
         io=identified_object(),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0Set=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         transformerEndInfoMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 

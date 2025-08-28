@@ -17,13 +17,13 @@
     description = "Python SDK for interacting with the Energy Workbench platform"
     readme = {file = "README.md", content-type = "text/markdown"}
     license = "MPL-2.0"
-    requires-python = '>=3.9,<3.13'
+    requires-python = '>=3.10,<3.13'
     authors = [
         {name = "Kurt Greaves", email = "kurt.greaves@zepben.com"},
         {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
     ]
     dependencies = [
-        "zepben.protobuf==1.0.0b1",
+        "zepben.protobuf==1.0.0",
         "typing_extensions==4.12.2",
         "requests>=2.26.0, <3.0.0",
         "urllib3>=1.26.6, <1.27.0",
@@ -32,7 +32,6 @@
     ]
     classifiers = [
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",

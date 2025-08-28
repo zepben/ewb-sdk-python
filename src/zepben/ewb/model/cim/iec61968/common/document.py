@@ -16,21 +16,21 @@ class Document(IdentifiedObject):
     Parent class for different groupings of information collected and managed as a part of a business process.
     It will frequently contain references to other objects, such as assets, people and power system resources.
     """
-    title: str = ""
+    title: Optional[str] = None
     """Document title."""
 
     created_date_time: Optional[datetime] = None
     """Date and time that this document was created."""
 
-    author_name: str = ""
+    author_name: Optional[str] = None
     """Name of the author of this document."""
 
-    type: str = ""
+    type: Optional[str] = None
     """Utility-specific classification of this document, according to its corporate standards, practices, 
     and existing IT systems (e.g., for management of assets, maintenance, work, outage, customers, etc.)."""
 
-    status: str = ""
+    status: Optional[str] = None
     """Status of subject matter (e.g., Agreement, Work) this document represents."""
 
-    comment: str = ""
+    comment: Optional[str] = None
     """Free text comment"""

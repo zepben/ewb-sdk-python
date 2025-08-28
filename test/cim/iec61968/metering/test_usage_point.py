@@ -33,11 +33,11 @@ def test_usage_point_constructor_default():
     up = UsagePoint()
 
     verify_identified_object_constructor_default(up)
-    assert not up.usage_point_location
-    assert not up.is_virtual
-    assert not up.connection_category
-    assert not up.rated_power
-    assert not up.approved_inverter_capacity
+    assert up.usage_point_location is None
+    assert up.is_virtual is None
+    assert up.connection_category is None
+    assert up.rated_power is None
+    assert up.approved_inverter_capacity is None
     assert not list(up.equipment)
     assert not list(up.end_devices)
 

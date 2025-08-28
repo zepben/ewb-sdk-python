@@ -69,7 +69,7 @@ class EnergySource(EnergyConnection):
     xn: Optional[float] = None
     """Negative sequence Thevenin reactance."""
 
-    is_external_grid: bool = False
+    is_external_grid: Optional[bool] = None
     """
     True if this energy source represents the higher-level power grid connection to an external grid
     that normally is modelled as the slack bus for power flow calculations.

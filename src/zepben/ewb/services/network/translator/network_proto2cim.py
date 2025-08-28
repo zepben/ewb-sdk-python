@@ -325,7 +325,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import 
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.ewb.services.common.translator.base_proto2cim import identified_object_to_cim, organisation_role_to_cim, document_to_cim, add_to_network_or_none, \
-    bind_to_cim
+    bind_to_cim, get_nullable
 from zepben.ewb.services.common.translator.util import int_or_none, float_or_none, long_or_none, str_or_none, uint_or_none
 from zepben.ewb.services.network.network_service import NetworkService
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
@@ -341,10 +341,11 @@ def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> Optio
     # noinspection PyUnresolvedReferences
     cim = RelayInfo(
         mrid=pb.mrid(),
-        curve_setting=str_or_none(pb.curveSetting),
-        reclose_fast=None if pb.HasField("recloseFastNull") else pb.recloseFastSet,
+        curve_setting=get_nullable(pb, 'curveSetting'),
+        reclose_fast=get_nullable(pb, 'recloseFast'),
         reclose_delays=list(pb.recloseDelays)
     )
+
 
     asset_info_to_cim(pb.ai, cim, network_service)
     return cim
@@ -365,7 +366,7 @@ def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network
     """
     # noinspection PyUnresolvedReferences
     cim = PanDemandResponseFunction(mrid=pb.mrid())
-    cim.appliance = int_or_none(pb.appliance)
+    cim.appliance = get_nullable(pb, 'appliance')
     cim.kind = EndDeviceFunctionKind(pb.kind)
     end_device_function_to_cim(pb.edf, cim, network_service)
 
@@ -445,15 +446,15 @@ def distance_relay_to_cim(pb: PBDistanceRelay, network_service: NetworkService) 
     # noinspection PyUnresolvedReferences
     cim = DistanceRelay(
         mrid=pb.mrid(),
-        backward_blind=float_or_none(pb.backwardBlind),
-        backward_reach=float_or_none(pb.backwardReach),
-        backward_reactance=float_or_none(pb.backwardReactance),
-        forward_blind=float_or_none(pb.forwardBlind),
-        forward_reach=float_or_none(pb.forwardReach),
-        forward_reactance=float_or_none(pb.forwardReactance),
-        operation_phase_angle1=float_or_none(pb.operationPhaseAngle1),
-        operation_phase_angle2=float_or_none(pb.operationPhaseAngle2),
-        operation_phase_angle3=float_or_none(pb.operationPhaseAngle3)
+        backward_blind=get_nullable(pb, 'backwardBlind'),
+        backward_reach=get_nullable(pb, 'backwardReach'),
+        backward_reactance=get_nullable(pb, 'backwardReactance'),
+        forward_blind=get_nullable(pb, 'forwardBlind'),
+        forward_reach=get_nullable(pb, 'forwardReach'),
+        forward_reactance=get_nullable(pb, 'forwardReactance'),
+        operation_phase_angle1=get_nullable(pb, 'operationPhaseAngle1'),
+        operation_phase_angle2=get_nullable(pb, 'operationPhaseAngle2'),
+        operation_phase_angle3=get_nullable(pb, 'operationPhaseAngle3'),
     )
 
     protection_relay_function_to_cim(pb.prf, cim, network_service)
@@ -461,17 +462,17 @@ def distance_relay_to_cim(pb: PBDistanceRelay, network_service: NetworkService) 
 
 
 def protection_relay_function_to_cim(pb: PBProtectionRelayFunction, cim: ProtectionRelayFunction, network_service: NetworkService):
-    cim.model = str_or_none(pb.model)
-    cim.reclosing = None if pb.HasField("reclosingNull") else pb.reclosingSet
+    cim.model = get_nullable(pb, 'model')
+    cim.reclosing = get_nullable(pb, 'reclosing')
     for time_limit in pb.timeLimits:
         cim.add_time_limit(time_limit)
     for threshold in pb.thresholds:
         cim.add_threshold(relay_setting_to_cim(threshold))
-    cim.relay_delay_time = float_or_none(pb.relayDelayTime)
+    cim.relay_delay_time = get_nullable(pb, 'relayDelayTime')
     cim.protection_kind = ProtectionKind(pb.protectionKind)
     for mrid in pb.protectedSwitchMRIDs:
         network_service.resolve_or_defer_reference(resolver.prf_protected_switch(cim), mrid)
-    cim.directable = None if pb.HasField("directableNull") else pb.directableSet
+    cim.directable = get_nullable(pb, 'directable')
     cim.power_direction = PowerDirectionKind(pb.powerDirection)
     for mrid in pb.sensorMRIDs:
         network_service.resolve_or_defer_reference(resolver.prf_sensor(cim), mrid)
@@ -519,7 +520,7 @@ def protection_relay_system_to_cim(pb: PBProtectionRelaySystem, network_service:
 
 def relay_setting_to_cim(pb: PBRelaySetting) -> Optional[RelaySetting]:
     return RelaySetting(
-        name=pb.name,
+        name=get_nullable(pb, 'name'),
         unit_symbol=unit_symbol_from_id(pb.unitSymbol),
         value=float_or_none(pb.value)
     )
@@ -551,10 +552,10 @@ def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService
     # noinspection PyUnresolvedReferences
     cim = BatteryControl(
         mrid=pb.mrid(),
-        charging_rate=float_or_none(pb.chargingRate),
-        discharging_rate=float_or_none(pb.dischargingRate),
-        reserve_percent=float_or_none(pb.reservePercent),
-        control_mode=BatteryControlMode(pb.controlMode)
+        charging_rate=get_nullable(pb, 'chargingRate'),
+        discharging_rate=get_nullable(pb, 'dischargingRate'),
+        reserve_percent=get_nullable(pb, 'reservePercent'),
+        control_mode=BatteryControlMode(pb.controlMode),
     )
 
     regulating_control_to_cim(pb.rc, cim, network_service)
@@ -583,11 +584,11 @@ def no_load_test_to_cim(pb: PBNoLoadTest, network_service: NetworkService) -> Op
     # noinspection PyUnresolvedReferences
     cim = NoLoadTest(
         mrid=pb.mrid(),
-        energised_end_voltage=int_or_none(pb.energisedEndVoltage),
-        exciting_current=float_or_none(pb.excitingCurrent),
-        exciting_current_zero=float_or_none(pb.excitingCurrentZero),
-        loss=int_or_none(pb.loss),
-        loss_zero=int_or_none(pb.lossZero),
+        energised_end_voltage=get_nullable(pb, 'energisedEndVoltage'),
+        exciting_current=get_nullable(pb, 'excitingCurrent'),
+        exciting_current_zero=get_nullable(pb, 'excitingCurrentZero'),
+        loss=get_nullable(pb, 'loss'),
+        loss_zero=get_nullable(pb, 'lossZero'),
     )
 
     transformer_test_to_cim(pb.tt, cim, network_service)
@@ -600,11 +601,11 @@ def open_circuit_test_to_cim(pb: PBOpenCircuitTest, network_service: NetworkServ
     # noinspection PyUnresolvedReferences
     cim = OpenCircuitTest(
         mrid=pb.mrid(),
-        energised_end_step=int_or_none(pb.energisedEndStep),
-        energised_end_voltage=int_or_none(pb.energisedEndVoltage),
-        open_end_step=int_or_none(pb.openEndStep),
-        open_end_voltage=int_or_none(pb.openEndVoltage),
-        phase_shift=float_or_none(pb.phaseShift),
+        energised_end_step=get_nullable(pb, 'energisedEndStep'),
+        energised_end_voltage=get_nullable(pb, 'energisedEndVoltage'),
+        open_end_step=get_nullable(pb, 'openEndStep'),
+        open_end_voltage=get_nullable(pb, 'openEndVoltage'),
+        phase_shift=get_nullable(pb, 'phaseShift'),
     )
 
     transformer_test_to_cim(pb.tt, cim, network_service)
@@ -640,16 +641,16 @@ def short_circuit_test_to_cim(pb: PBShortCircuitTest, network_service: NetworkSe
     # noinspection PyUnresolvedReferences
     cim = ShortCircuitTest(
         mrid=pb.mrid(),
-        current=float_or_none(pb.current),
-        energised_end_step=int_or_none(pb.energisedEndStep),
-        grounded_end_step=int_or_none(pb.groundedEndStep),
-        leakage_impedance=float_or_none(pb.leakageImpedance),
-        leakage_impedance_zero=float_or_none(pb.leakageImpedanceZero),
-        loss=int_or_none(pb.loss),
-        loss_zero=int_or_none(pb.lossZero),
-        power=int_or_none(pb.power),
-        voltage=float_or_none(pb.voltage),
-        voltage_ohmic_part=float_or_none(pb.voltageOhmicPart),
+        current=get_nullable(pb, 'current'),
+        energised_end_step=get_nullable(pb, 'energisedEndStep'),
+        grounded_end_step=get_nullable(pb, 'groundedEndStep'),
+        leakage_impedance=get_nullable(pb, 'leakageImpedance'),
+        leakage_impedance_zero=get_nullable(pb, 'leakageImpedanceZero'),
+        loss=get_nullable(pb, 'loss'),
+        loss_zero=get_nullable(pb, 'lossZero'),
+        power=get_nullable(pb, 'power'),
+        voltage=get_nullable(pb, 'voltage'),
+        voltage_ohmic_part=get_nullable(pb, 'voltageOhmicPart'),
     )
 
     transformer_test_to_cim(pb.tt, cim, network_service)
@@ -662,10 +663,10 @@ def shunt_compensator_info_to_cim(pb: PBShuntCompensatorInfo, network_service: N
     # noinspection PyUnresolvedReferences
     cim = ShuntCompensatorInfo(
         mrid=pb.mrid(),
-        max_power_loss=int_or_none(pb.maxPowerLoss),
-        rated_current=int_or_none(pb.ratedCurrent),
-        rated_reactive_power=int_or_none(pb.ratedReactivePower),
-        rated_voltage=int_or_none(pb.ratedVoltage),
+        max_power_loss=get_nullable(pb, 'maxPowerLoss'),
+        rated_current=get_nullable(pb, 'ratedCurrent'),
+        rated_reactive_power=get_nullable(pb, 'ratedReactivePower'),
+        rated_voltage=get_nullable(pb, 'ratedVoltage'),
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -678,7 +679,7 @@ def switch_info_to_cim(pb: PBSwitchInfo, network_service: NetworkService) -> Opt
     # noinspection PyUnresolvedReferences
     cim = SwitchInfo(
         mrid=pb.mrid(),
-        rated_interrupting_time=float_or_none(pb.ratedInterruptingTime)
+        rated_interrupting_time=get_nullable(pb, 'ratedInterruptingTime')
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -692,14 +693,14 @@ def transformer_end_info_to_cim(pb: PBTransformerEndInfo, network_service: Netwo
     cim = TransformerEndInfo(
         mrid=pb.mrid(),
         connection_kind=WindingConnection(pb.connectionKind),
-        emergency_s=int_or_none(pb.emergencyS),
+        emergency_s=get_nullable(pb, 'emergencyS'),
         end_number=pb.endNumber,
-        insulation_u=int_or_none(pb.insulationU),
-        phase_angle_clock=int_or_none(pb.phaseAngleClock),
-        r=float_or_none(pb.r),
-        rated_s=int_or_none(pb.ratedS),
-        rated_u=int_or_none(pb.ratedU),
-        short_term_s=int_or_none(pb.shortTermS),
+        insulation_u=get_nullable(pb, 'insulationU'),
+        phase_angle_clock=get_nullable(pb, 'phaseAngleClock'),
+        r=get_nullable(pb, 'r'),
+        rated_s=get_nullable(pb, 'ratedS'),
+        rated_u=get_nullable(pb, 'ratedU'),
+        short_term_s=get_nullable(pb, 'shortTermS'),
     )
 
     network_service.resolve_or_defer_reference(resolver.transformer_tank_info(cim), pb.transformerTankInfoMRID)
@@ -728,14 +729,14 @@ def transformer_tank_info_to_cim(pb: PBTransformerTankInfo, network_service: Net
 
 
 def transformer_test_to_cim(pb: PBTransformerTest, cim: TransformerTest, network_service: NetworkService):
-    cim.base_power = int_or_none(pb.basePower)
-    cim.temperature = float_or_none(pb.temperature)
+    cim.base_power = get_nullable(pb, 'basePower')
+    cim.temperature = get_nullable(pb, 'temperature')
 
     identified_object_to_cim(pb.io, cim, network_service)
 
 
 def wire_info_to_cim(pb: PBWireInfo, cim: WireInfo, network_service: NetworkService):
-    cim.rated_current = int_or_none(pb.ratedCurrent)
+    cim.rated_current = get_nullable(pb, 'ratedCurrent')
     cim.material = WireMaterialKind(pb.material)
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -797,7 +798,7 @@ def streetlight_to_cim(pb: PBStreetlight, network_service: NetworkService) -> Op
     # noinspection PyUnresolvedReferences
     cim = Streetlight(
         mrid=pb.mrid(),
-        light_rating=uint_or_none(pb.lightRating),
+        light_rating=get_nullable(pb, 'lightRating'),
         lamp_kind=StreetlightLampKind(pb.lampKind)
     )
 
@@ -834,27 +835,30 @@ def position_point_to_cim(pb: PBPositionPoint) -> Optional[PositionPoint]:
 
 def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
     return StreetAddress(
-        postal_code=pb.postalCode,
+        postal_code=get_nullable(pb, 'postalCode'),
         town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField("townDetail") else None,
-        po_box=pb.poBox,
+        po_box=get_nullable(pb, 'poBox'),
         street_detail=street_detail_to_cim(pb.streetDetail) if pb.HasField("streetDetail") else None
     )
 
 
 def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
     return StreetDetail(
-        building_name=pb.buildingName,
-        floor_identification=pb.floorIdentification,
-        name=pb.name,
-        number=pb.number,
-        suite_number=pb.suiteNumber,
-        type=pb.type,
-        display_address=pb.displayAddress
+        building_name=get_nullable(pb, 'buildingName'),
+        floor_identification=get_nullable(pb, 'floorIdentification'),
+        name=get_nullable(pb, 'name'),
+        number=get_nullable(pb, 'number'),
+        suite_number=get_nullable(pb, 'suiteNumber'),
+        type=get_nullable(pb, 'type'),
+        display_address=get_nullable(pb, 'displayAddress'),
     )
 
 
 def town_detail_to_cim(pb: PBTownDetail) -> Optional[TownDetail]:
-    return TownDetail(name=pb.name, state_or_province=pb.stateOrProvince)
+    return TownDetail(
+        name=get_nullable(pb, 'name'),
+        state_or_province=get_nullable(pb, 'stateOrProvince'),
+    )
 
 
 #####################################
@@ -867,18 +871,18 @@ def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_servic
     # noinspection PyUnresolvedReferences
     cim = CurrentTransformerInfo(
         mrid=pb.mrid(),
-        accuracy_class=str_or_none(pb.accuracyClass),
-        accuracy_limit=float_or_none(pb.accuracyLimit),
-        core_count=int_or_none(pb.coreCount),
-        ct_class=str_or_none(pb.ctClass),
-        knee_point_voltage=int_or_none(pb.kneePointVoltage),
+        accuracy_class=get_nullable(pb, 'accuracyClass'),
+        accuracy_limit=get_nullable(pb, 'accuracyLimit'),
+        core_count=get_nullable(pb, 'coreCount'),
+        ct_class=get_nullable(pb, 'ctClass'),
+        knee_point_voltage=get_nullable(pb, 'kneePointVoltage'),
         max_ratio=ratio_to_cim(pb.maxRatio) if pb.HasField("maxRatio") else None,
         nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField("nominalRatio") else None,
-        primary_ratio=float_or_none(pb.primaryRatio),
-        rated_current=int_or_none(pb.ratedCurrent),
-        secondary_fls_rating=int_or_none(pb.secondaryFlsRating),
-        secondary_ratio=float_or_none(pb.secondaryRatio),
-        usage=str_or_none(pb.usage)
+        primary_ratio=get_nullable(pb, 'primaryRatio'),
+        rated_current=get_nullable(pb, 'ratedCurrent'),
+        secondary_fls_rating=get_nullable(pb, 'secondaryFlsRating'),
+        secondary_ratio=get_nullable(pb, 'secondaryRatio'),
+        usage=get_nullable(pb, 'usage'),
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -891,12 +895,12 @@ def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_se
     # noinspection PyUnresolvedReferences
     cim = PotentialTransformerInfo(
         mrid=pb.mrid(),
-        accuracy_class=str_or_none(pb.accuracyClass),
+        accuracy_class=get_nullable(pb, 'accuracyClass'),
         nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField("nominalRatio") else None,
-        primary_ratio=float_or_none(pb.primaryRatio),
-        pt_class=str_or_none(pb.ptClass),
-        rated_voltage=int_or_none(pb.ratedVoltage),
-        secondary_ratio=float_or_none(pb.secondaryRatio)
+        primary_ratio=get_nullable(pb, 'primaryRatio'),
+        pt_class=get_nullable(pb, 'ptClass'),
+        rated_voltage=get_nullable(pb, 'ratedVoltage'),
+        secondary_ratio=get_nullable(pb, 'secondaryRatio'),
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -911,7 +915,10 @@ def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_se
 @add_to_network_or_none
 def pole_to_cim(pb: PBPole, network_service: NetworkService) -> Optional[Pole]:
     # noinspection PyUnresolvedReferences
-    cim = Pole(mrid=pb.mrid(), classification=pb.classification)
+    cim = Pole(
+        mrid=pb.mrid(),
+        classification=get_nullable(pb, 'classification')
+    )
 
     for mrid in pb.streetlightMRIDs:
         network_service.resolve_or_defer_reference(resolver.streetlights(cim), mrid)
@@ -983,10 +990,10 @@ def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Opt
     cim = UsagePoint(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.usage_point_location(cim), pb.usagePointLocationMRID)
-    cim.is_virtual = pb.isVirtual
-    cim.connection_category = pb.connectionCategory if pb.connectionCategory else None
-    cim.rated_power = int_or_none(pb.ratedPower)
-    cim.approved_inverter_capacity = int_or_none(pb.approvedInverterCapacity)
+    cim.is_virtual = get_nullable(pb, 'isVirtual')
+    cim.connection_category = get_nullable(pb, 'connectionCategory')
+    cim.rated_power = get_nullable(pb, 'ratedPower')
+    cim.approved_inverter_capacity = get_nullable(pb, 'approvedInverterCapacity')
     cim.phase_code = phase_code_by_id(pb.phaseCode)
 
     for mrid in pb.equipmentMRIDs:
@@ -1025,7 +1032,7 @@ def auxiliary_equipment_to_cim(pb: PBAuxiliaryEquipment, cim: AuxiliaryEquipment
 @add_to_network_or_none
 def current_transformer_to_cim(pb: PBCurrentTransformer, network_service: NetworkService) -> Optional[CurrentTransformer]:
     # noinspection PyUnresolvedReferences
-    cim = CurrentTransformer(mrid=pb.mrid(), core_burden=int_or_none(pb.coreBurden))
+    cim = CurrentTransformer(mrid=pb.mrid(), core_burden=int_or_none(get_nullable(pb, 'coreBurden')))
 
     # noinspection PyUnresolvedReferences
     network_service.resolve_or_defer_reference(resolver.current_transformer_info(cim), pb.asset_info_mrid())
@@ -1111,7 +1118,12 @@ def curve_to_cim(pb: PBCurve, cim: Curve, network_service: NetworkService):
 
 
 def curve_data_to_cim(pb: PBCurveData) -> Optional[CurveData]:
-    return CurveData(pb.xValue, pb.y1Value, float_or_none(pb.y2Value), float_or_none(pb.y3Value))
+    return CurveData(
+        pb.xValue,
+        pb.y1Value,
+        get_nullable(pb, 'y2Value'),
+        get_nullable(pb, 'y3Value'),
+    )
 
 
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
@@ -1237,22 +1249,22 @@ def equivalent_branch_to_cim(pb: PBEquivalentBranch, network_service: NetworkSer
     # noinspection PyUnresolvedReferences
     cim = EquivalentBranch(
         mrid=pb.mrid(),
-        negative_r12=float_or_none(pb.negativeR12),
-        negative_r21=float_or_none(pb.negativeR21),
-        negative_x12=float_or_none(pb.negativeX12),
-        negative_x21=float_or_none(pb.negativeX21),
-        positive_r12=float_or_none(pb.positiveR12),
-        positive_r21=float_or_none(pb.positiveR21),
-        positive_x12=float_or_none(pb.positiveX12),
-        positive_x21=float_or_none(pb.positiveX21),
-        r=float_or_none(pb.r),
-        r21=float_or_none(pb.r21),
-        x=float_or_none(pb.x),
-        x21=float_or_none(pb.x21),
-        zero_r12=float_or_none(pb.zeroR12),
-        zero_r21=float_or_none(pb.zeroR21),
-        zero_x12=float_or_none(pb.zeroX12),
-        zero_x21=float_or_none(pb.zeroX21),
+        negative_r12=get_nullable(pb, 'negativeR12'),
+        negative_r21=get_nullable(pb, 'negativeR21'),
+        negative_x12=get_nullable(pb, 'negativeX12'),
+        negative_x21=get_nullable(pb, 'negativeX21'),
+        positive_r12=get_nullable(pb, 'positiveR12'),
+        positive_r21=get_nullable(pb, 'positiveR21'),
+        positive_x12=get_nullable(pb, 'positiveX12'),
+        positive_x21=get_nullable(pb, 'positiveX21'),
+        r=get_nullable(pb, 'r'),
+        r21=get_nullable(pb, 'r21'),
+        x=get_nullable(pb, 'x'),
+        x21=get_nullable(pb, 'x21'),
+        zero_r12=get_nullable(pb, 'zeroR12'),
+        zero_r21=get_nullable(pb, 'zeroR21'),
+        zero_x12=get_nullable(pb, 'zeroX12'),
+        zero_x21=get_nullable(pb, 'zeroX21'),
     )
 
     equivalent_equipment_to_cim(pb.ee, cim, network_service)
@@ -1280,8 +1292,8 @@ def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> O
     cim = BatteryUnit(
         mrid=pb.mrid(),
         battery_state=BatteryStateKind(pb.batteryState),
-        rated_e=long_or_none(pb.ratedE),
-        stored_e=long_or_none(pb.storedE),
+        rated_e=get_nullable(pb, "ratedE"),
+        stored_e=get_nullable(pb, "storedE"),
     )
 
     for mrid in pb.batteryControlMRIDs:
@@ -1302,8 +1314,8 @@ def photo_voltaic_unit_to_cim(pb: PBPhotoVoltaicUnit, network_service: NetworkSe
 
 
 def power_electronics_unit_to_cim(pb: PBPowerElectronicsUnit, cim: PowerElectronicsUnit, network_service: NetworkService):
-    cim.max_p = int_or_none(pb.maxP)
-    cim.min_p = int_or_none(pb.minP)
+    cim.max_p = get_nullable(pb, 'maxP')
+    cim.min_p = get_nullable(pb, 'minP')
 
     network_service.resolve_or_defer_reference(resolver.unit_power_electronics_connection(cim), pb.powerElectronicsConnectionMRID)
 
@@ -1338,7 +1350,7 @@ def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Op
 @add_to_network_or_none
 def analog_to_cim(pb: PBAnalog, network_service: NetworkService) -> Optional[Analog]:
     # noinspection PyUnresolvedReferences
-    cim = Analog(mrid=pb.mrid(), positive_flow_in=pb.positiveFlowIn)
+    cim = Analog(mrid=pb.mrid(), positive_flow_in=get_nullable(pb, "positiveFlowIn"))
 
     measurement_to_cim(pb.measurement, cim, network_service)
     return cim
@@ -1394,9 +1406,9 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
     # noinspection PyUnresolvedReferences
     cim = CurrentRelay(
         mrid=pb.mrid(),
-        current_limit_1=float_or_none(pb.currentLimit1),
-        inverse_time_flag=None if pb.HasField("inverseTimeFlagNull") else pb.inverseTimeFlagSet,
-        time_delay_1=float_or_none(pb.timeDelay1)
+        current_limit_1=get_nullable(pb, "currentLimit1"),
+        inverse_time_flag=get_nullable(pb, "inverseTimeFlag"),
+        time_delay_1=get_nullable(pb, "timeDelay1"),
     )
 
     protection_relay_function_to_cim(pb.prf, cim, network_service)
@@ -1467,7 +1479,7 @@ def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[B
     # noinspection PyUnresolvedReferences
     cim = Breaker(
         mrid=pb.mrid(),
-        in_transit_time=float_or_none(pb.inTransitTime)
+        in_transit_time=get_nullable(pb, "inTransitTime")
     )
 
     protected_switch_to_cim(pb.sw, cim, network_service)
@@ -1490,7 +1502,7 @@ def clamp_to_cim(pb: PBClamp, network_service: NetworkService) -> Optional[Clamp
     # noinspection PyUnresolvedReferences
     cim = Clamp(mrid=pb.mrid())
 
-    cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
+    cim.length_from_terminal_1 = get_nullable(pb, "lengthFromTerminal1")
     network_service.resolve_or_defer_reference(resolver.clamp_ac_line_segment(cim), pb.acLineSegmentMRID)
 
     conducting_equipment_to_cim(pb.ce, cim, network_service)
@@ -1498,9 +1510,9 @@ def clamp_to_cim(pb: PBClamp, network_service: NetworkService) -> Optional[Clamp
 
 
 def conductor_to_cim(pb: PBConductor, cim: Conductor, network_service: NetworkService):
-    cim.length = float_or_none(pb.length)
-    cim.design_temperature = int_or_none(pb.designTemperature)
-    cim.design_rating = float_or_none(pb.designRating)
+    cim.length = get_nullable(pb, 'length')
+    cim.design_temperature = get_nullable(pb, 'designTemperature')
+    cim.design_rating = get_nullable(pb, 'designRating')
 
     # noinspection PyUnresolvedReferences
     network_service.resolve_or_defer_reference(resolver.wire_info(cim), pb.asset_info_mrid())
@@ -1518,7 +1530,7 @@ def cut_to_cim(pb: PBCut, network_service: NetworkService) -> Optional[Cut]:
     # noinspection PyUnresolvedReferences
     cim = Cut(mrid=pb.mrid())
 
-    cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
+    cim.length_from_terminal_1 = get_nullable(pb, 'lengthFromTerminal1')
     network_service.resolve_or_defer_reference(resolver.cut_ac_line_segment(cim), pb.acLineSegmentMRID)
 
     switch_to_cim(pb.sw, cim, network_service)
@@ -1536,7 +1548,7 @@ def disconnector_to_cim(pb: PBDisconnector, network_service: NetworkService) -> 
 
 
 def earth_fault_compensator_to_cim(pb: PBEarthFaultCompensator, cim: EarthFaultCompensator, network_service: NetworkService):
-    cim.r = float_or_none(pb.r)
+    cim.r = get_nullable(pb, 'r')
 
     conducting_equipment_to_cim(pb.ce, cim, network_service)
 
@@ -1551,13 +1563,13 @@ def energy_consumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService
     # noinspection PyUnresolvedReferences
     cim = EnergyConsumer(
         mrid=pb.mrid(),
-        customer_count=int_or_none(pb.customerCount),
-        grounded=pb.grounded,
+        customer_count=get_nullable(pb, "customerCount"),
+        grounded=get_nullable(pb, 'grounded'),
         phase_connection=PhaseShuntConnectionKind(pb.phaseConnection),
-        p=float_or_none(pb.p),
-        p_fixed=float_or_none(pb.pFixed),
-        q=float_or_none(pb.q),
-        q_fixed=float_or_none(pb.qFixed)
+        p=get_nullable(pb, 'p'),
+        p_fixed=get_nullable(pb, 'pFixed'),
+        q=get_nullable(pb, 'q'),
+        q_fixed=get_nullable(pb, 'qFixed'),
     )
 
     for mrid in pb.energyConsumerPhasesMRIDs:
@@ -1574,10 +1586,10 @@ def energy_consumer_phase_to_cim(pb: PBEnergyConsumerPhase, network_service: Net
     cim = EnergyConsumerPhase(
         mrid=pb.mrid(),
         phase=single_phase_kind_by_id(pb.phase),
-        p=float_or_none(pb.p),
-        p_fixed=float_or_none(pb.pFixed),
-        q=float_or_none(pb.q),
-        q_fixed=float_or_none(pb.qFixed)
+        p=get_nullable(pb, 'p'),
+        p_fixed=get_nullable(pb, 'pFixed'),
+        q=get_nullable(pb, 'q'),
+        q_fixed=get_nullable(pb, 'qFixed'),
     )
 
     network_service.resolve_or_defer_reference(resolver.energy_consumer(cim), pb.energyConsumerMRID)
@@ -1592,31 +1604,31 @@ def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) ->
     # noinspection PyUnresolvedReferences
     cim = EnergySource(
         mrid=pb.mrid(),
-        active_power=float_or_none(pb.activePower),
-        reactive_power=float_or_none(pb.reactivePower),
-        voltage_angle=float_or_none(pb.voltageAngle),
-        voltage_magnitude=float_or_none(pb.voltageMagnitude),
-        r=float_or_none(pb.r),
-        x=float_or_none(pb.x),
-        p_max=float_or_none(pb.pMax),
-        p_min=float_or_none(pb.pMin),
-        r0=float_or_none(pb.r0),
-        rn=float_or_none(pb.rn),
-        x0=float_or_none(pb.x0),
-        xn=float_or_none(pb.xn),
-        is_external_grid=pb.isExternalGrid,
-        r_min=float_or_none(pb.rMin),
-        rn_min=float_or_none(pb.rnMin),
-        r0_min=float_or_none(pb.r0Min),
-        x_min=float_or_none(pb.xMin),
-        xn_min=float_or_none(pb.xnMin),
-        x0_min=float_or_none(pb.x0Min),
-        r_max=float_or_none(pb.rMax),
-        rn_max=float_or_none(pb.rnMax),
-        r0_max=float_or_none(pb.r0Max),
-        x_max=float_or_none(pb.xMax),
-        xn_max=float_or_none(pb.xnMax),
-        x0_max=float_or_none(pb.x0Max)
+        active_power=get_nullable(pb, 'activePower'),
+        reactive_power=get_nullable(pb, 'reactivePower'),
+        voltage_angle=get_nullable(pb, 'voltageAngle'),
+        voltage_magnitude=get_nullable(pb, 'voltageMagnitude'),
+        r=get_nullable(pb, 'r'),
+        x=get_nullable(pb, 'x'),
+        p_max=get_nullable(pb, 'pMax'),
+        p_min=get_nullable(pb, 'pMin'),
+        r0=get_nullable(pb, 'r0'),
+        rn=get_nullable(pb, 'rn'),
+        x0=get_nullable(pb, 'x0'),
+        xn=get_nullable(pb, 'xn'),
+        is_external_grid=get_nullable(pb, 'isExternalGrid'),
+        r_min=get_nullable(pb, 'rMin'),
+        rn_min=get_nullable(pb, 'rnMin'),
+        r0_min=get_nullable(pb, 'r0Min'),
+        x_min=get_nullable(pb, 'xMin'),
+        xn_min=get_nullable(pb, 'xnMin'),
+        x0_min=get_nullable(pb, 'x0Min'),
+        r_max=get_nullable(pb, 'rMax'),
+        rn_max=get_nullable(pb, 'rnMax'),
+        r0_max=get_nullable(pb, 'r0Max'),
+        x_max=get_nullable(pb, 'xMax'),
+        xn_max=get_nullable(pb, 'xnMax'),
+        x0_max=get_nullable(pb, 'x0Max'),
     )
 
     for mrid in pb.energySourcePhasesMRIDs:
@@ -1674,7 +1686,7 @@ def ground_disconnector_to_cim(pb: PBGroundDisconnector, network_service: Networ
 @add_to_network_or_none
 def grounding_impedance_to_cim(pb: PBGroundingImpedance, network_service: NetworkService) -> Optional[GroundingImpedance]:
     # noinspection PyUnresolvedReferences
-    cim = GroundingImpedance(mrid=pb.mrid(), x=float_or_none(pb.x))
+    cim = GroundingImpedance(mrid=pb.mrid(), x=get_nullable(pb, "x"))
 
     earth_fault_compensator_to_cim(pb.efc, cim, network_service)
     return cim
@@ -1710,10 +1722,10 @@ def linear_shunt_compensator_to_cim(pb: PBLinearShuntCompensator, network_servic
     # noinspection PyUnresolvedReferences
     cim = LinearShuntCompensator(
         mrid=pb.mrid(),
-        b0_per_section=float_or_none(pb.b0PerSection),
-        b_per_section=float_or_none(pb.bPerSection),
-        g0_per_section=float_or_none(pb.g0PerSection),
-        g_per_section=float_or_none(pb.gPerSection)
+        b0_per_section=get_nullable(pb, 'b0PerSection'),
+        b_per_section=get_nullable(pb, 'bPerSection'),
+        g0_per_section=get_nullable(pb, 'g0PerSection'),
+        g_per_section=get_nullable(pb, 'gPerSection'),
     )
 
     shunt_compensator_to_cim(pb.sc, cim, network_service)
@@ -1763,14 +1775,14 @@ def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, netwo
     # noinspection PyUnresolvedReferences
     cim = PerLengthSequenceImpedance(
         mrid=pb.mrid(),
-        r=float_or_none(pb.r),
-        x=float_or_none(pb.x),
-        r0=float_or_none(pb.r0),
-        x0=float_or_none(pb.x0),
-        bch=float_or_none(pb.bch),
-        gch=float_or_none(pb.gch),
-        b0ch=float_or_none(pb.b0ch),
-        g0ch=float_or_none(pb.g0ch)
+        r=get_nullable(pb, 'r'),
+        x=get_nullable(pb, 'x'),
+        r0=get_nullable(pb, 'r0'),
+        x0=get_nullable(pb, 'x0'),
+        bch=get_nullable(pb, 'bch'),
+        gch=get_nullable(pb, 'gch'),
+        b0ch=get_nullable(pb, 'b0ch'),
+        g0ch=get_nullable(pb, 'g0ch'),
     )
 
     per_length_impedance_to_cim(pb.pli, cim, network_service)
@@ -1781,7 +1793,7 @@ def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, netwo
 @add_to_network_or_none
 def petersen_coil_to_cim(pb: PBPetersenCoil, network_service: NetworkService) -> Optional[PetersenCoil]:
     # noinspection PyUnresolvedReferences
-    cim = PetersenCoil(mrid=pb.mrid(), x_ground_nominal=float_or_none(pb.xGroundNominal))
+    cim = PetersenCoil(mrid=pb.mrid(), x_ground_nominal=get_nullable(pb, 'xGroundNominal'))
 
     earth_fault_compensator_to_cim(pb.efc, cim, network_service)
     return cim
@@ -1796,10 +1808,10 @@ def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImped
     return PhaseImpedanceData(
         single_phase_kind_by_id(pb.fromPhase),
         single_phase_kind_by_id(pb.toPhase),
-        float_or_none(pb.b),
-        float_or_none(pb.g),
-        float_or_none(pb.r),
-        float_or_none(pb.x),
+        get_nullable(pb, "b"),
+        get_nullable(pb, "g"),
+        get_nullable(pb, "r"),
+        get_nullable(pb, "x"),
     )
 
 
@@ -1809,37 +1821,37 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
     # noinspection PyUnresolvedReferences
     cim = PowerElectronicsConnection(
         mrid=pb.mrid(),
-        max_i_fault=int_or_none(pb.maxIFault),
-        p=float_or_none(pb.p),
-        q=float_or_none(pb.q),
-        max_q=float_or_none(pb.maxQ),
-        min_q=float_or_none(pb.minQ),
-        rated_s=int_or_none(pb.ratedS),
-        rated_u=int_or_none(pb.ratedU),
-        inverter_standard=str_or_none(pb.inverterStandard),
-        sustain_op_overvolt_limit=int_or_none(pb.sustainOpOvervoltLimit),
-        stop_at_over_freq=float_or_none(pb.stopAtOverFreq),
-        stop_at_under_freq=float_or_none(pb.stopAtUnderFreq),
-        inv_volt_watt_resp_mode=None if pb.HasField("invVoltWattRespModeNull") else pb.invVoltWattRespModeSet,
-        inv_watt_resp_v1=int_or_none(pb.invWattRespV1),
-        inv_watt_resp_v2=int_or_none(pb.invWattRespV2),
-        inv_watt_resp_v3=int_or_none(pb.invWattRespV3),
-        inv_watt_resp_v4=int_or_none(pb.invWattRespV4),
-        inv_watt_resp_p_at_v1=float_or_none(pb.invWattRespPAtV1),
-        inv_watt_resp_p_at_v2=float_or_none(pb.invWattRespPAtV2),
-        inv_watt_resp_p_at_v3=float_or_none(pb.invWattRespPAtV3),
-        inv_watt_resp_p_at_v4=float_or_none(pb.invWattRespPAtV4),
-        inv_volt_var_resp_mode=None if pb.HasField("invVoltVarRespModeNull") else pb.invVoltVarRespModeSet,
-        inv_var_resp_v1=int_or_none(pb.invVarRespV1),
-        inv_var_resp_v2=int_or_none(pb.invVarRespV2),
-        inv_var_resp_v3=int_or_none(pb.invVarRespV3),
-        inv_var_resp_v4=int_or_none(pb.invVarRespV4),
-        inv_var_resp_q_at_v1=float_or_none(pb.invVarRespQAtV1),
-        inv_var_resp_q_at_v2=float_or_none(pb.invVarRespQAtV2),
-        inv_var_resp_q_at_v3=float_or_none(pb.invVarRespQAtV3),
-        inv_var_resp_q_at_v4=float_or_none(pb.invVarRespQAtV4),
-        inv_reactive_power_mode=None if pb.HasField("invReactivePowerModeNull") else pb.invReactivePowerModeSet,
-        inv_fix_reactive_power=float_or_none(pb.invFixReactivePower)
+        max_i_fault=get_nullable(pb, "maxIFault"),
+        p=get_nullable(pb, 'p'),
+        q=get_nullable(pb, 'q'),
+        max_q=get_nullable(pb, 'maxQ'),
+        min_q=get_nullable(pb, 'minQ'),
+        rated_s=get_nullable(pb, 'ratedS'),
+        rated_u=get_nullable(pb, 'ratedU'),
+        inverter_standard=get_nullable(pb, 'inverterStandard'),
+        sustain_op_overvolt_limit=get_nullable(pb, 'sustainOpOvervoltLimit'),
+        stop_at_over_freq=get_nullable(pb, 'stopAtOverFreq'),
+        stop_at_under_freq=get_nullable(pb, 'stopAtUnderFreq'),
+        inv_volt_watt_resp_mode=get_nullable(pb, "invVoltWattRespMode"),
+        inv_watt_resp_v1=get_nullable(pb, 'invWattRespV1'),
+        inv_watt_resp_v2=get_nullable(pb, 'invWattRespV2'),
+        inv_watt_resp_v3=get_nullable(pb, 'invWattRespV3'),
+        inv_watt_resp_v4=get_nullable(pb, 'invWattRespV4'),
+        inv_watt_resp_p_at_v1=get_nullable(pb, 'invWattRespPAtV1'),
+        inv_watt_resp_p_at_v2=get_nullable(pb, 'invWattRespPAtV2'),
+        inv_watt_resp_p_at_v3=get_nullable(pb, 'invWattRespPAtV3'),
+        inv_watt_resp_p_at_v4=get_nullable(pb, 'invWattRespPAtV4'),
+        inv_volt_var_resp_mode=get_nullable(pb, "invVoltVarRespMode"),
+        inv_var_resp_v1=get_nullable(pb, 'invVarRespV1'),
+        inv_var_resp_v2=get_nullable(pb, 'invVarRespV2'),
+        inv_var_resp_v3=get_nullable(pb, 'invVarRespV3'),
+        inv_var_resp_v4=get_nullable(pb, 'invVarRespV4'),
+        inv_var_resp_q_at_v1=get_nullable(pb, 'invVarRespQAtV1'),
+        inv_var_resp_q_at_v2=get_nullable(pb, 'invVarRespQAtV2'),
+        inv_var_resp_q_at_v3=get_nullable(pb, 'invVarRespQAtV3'),
+        inv_var_resp_q_at_v4=get_nullable(pb, 'invVarRespQAtV4'),
+        inv_reactive_power_mode=get_nullable(pb, "invReactivePowerMode"),
+        inv_fix_reactive_power=get_nullable(pb, 'invFixReactivePower'),
     )
 
     for mrid in pb.powerElectronicsUnitMRIDs:
@@ -1860,8 +1872,8 @@ def power_electronics_connection_phase_to_cim(
     # noinspection PyUnresolvedReferences
     cim = PowerElectronicsConnectionPhase(
         mrid=pb.mrid(),
-        p=float_or_none(pb.p),
-        q=float_or_none(pb.q),
+        p=get_nullable(pb, "p"),
+        q=get_nullable(pb, "q"),
         phase=single_phase_kind_by_id(pb.phase)
     )
 
@@ -1878,7 +1890,7 @@ def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkSer
     cim = PowerTransformer(
         mrid=pb.mrid(),
         vector_group=VectorGroup(pb.vectorGroup),
-        transformer_utilisation=float_or_none(pb.transformerUtilisation),
+        transformer_utilisation=get_nullable(pb, "transformerUtilisation"),
         construction_kind=TransformerConstructionKind(pb.constructionKind),
         function=TransformerFunctionKind(pb.function)
     )
@@ -1898,17 +1910,17 @@ def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: Net
     # noinspection PyUnresolvedReferences
     cim = PowerTransformerEnd(
         mrid=pb.mrid(),
-        rated_u=int_or_none(pb.ratedU),
-        r=float_or_none(pb.r),
-        r0=float_or_none(pb.r0),
-        x=float_or_none(pb.x),
-        x0=float_or_none(pb.x0),
-        b=float_or_none(pb.b),
-        b0=float_or_none(pb.b0),
-        g=float_or_none(pb.g),
-        g0=float_or_none(pb.g0),
+        rated_u=get_nullable(pb, 'ratedU'),
+        r=get_nullable(pb, 'r'),
+        r0=get_nullable(pb, 'r0'),
+        x=get_nullable(pb, 'x'),
+        x0=get_nullable(pb, 'x0'),
+        b=get_nullable(pb, 'b'),
+        b0=get_nullable(pb, 'b0'),
+        g=get_nullable(pb, 'g'),
+        g0=get_nullable(pb, 'g0'),
         connection_kind=WindingConnection(pb.connectionKind),
-        phase_angle_clock=int_or_none(pb.phaseAngleClock)
+        phase_angle_clock=get_nullable(pb, 'phaseAngleClock'),
     )
 
     for rating in pb.ratings:
@@ -1922,7 +1934,7 @@ def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: Net
 
 
 def protected_switch_to_cim(pb: PBProtectedSwitch, cim: ProtectedSwitch, network_service: NetworkService):
-    cim.breaking_capacity = int_or_none(pb.breakingCapacity)
+    cim.breaking_capacity = get_nullable(pb, 'breakingCapacity')
 
     for mrid in pb.relayFunctionMRIDs:
         network_service.resolve_or_defer_reference(resolver.ps_relay_function(cim), mrid)
@@ -1936,7 +1948,7 @@ def ratio_tap_changer_to_cim(pb: PBRatioTapChanger, network_service: NetworkServ
     # noinspection PyUnresolvedReferences
     cim = RatioTapChanger(
         mrid=pb.mrid(),
-        step_voltage_increment=float_or_none(pb.stepVoltageIncrement)
+        step_voltage_increment=get_nullable(pb, "stepVoltageIncrement")
     )
 
     network_service.resolve_or_defer_reference(resolver.transformer_end(cim), pb.transformerEndMRID)
@@ -1966,7 +1978,7 @@ def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Optional
 
 
 def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, network_service: NetworkService):
-    cim.control_enabled = pb.controlEnabled
+    cim.control_enabled = get_nullable(pb, 'controlEnabled')
     network_service.resolve_or_defer_reference(resolver.rce_regulating_control(cim), pb.regulatingControlMRID)
 
     energy_connection_to_cim(pb.ec, cim, network_service)
@@ -1976,27 +1988,27 @@ def regulating_control_to_cim(pb: PBRegulatingControl, cim: RegulatingControl, n
     cim.discrete = None if pb.HasField("discreteNull") else pb.discreteSet
     cim.mode = RegulatingControlModeKind(pb.mode)
     cim.monitored_phase = phase_code_by_id(pb.monitoredPhase)
-    cim.target_deadband = float_or_none(pb.targetDeadband)
-    cim.target_value = float_or_none(pb.targetValue)
-    cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
-    cim.max_allowed_target_value = float_or_none(pb.maxAllowedTargetValue)
-    cim.min_allowed_target_value = float_or_none(pb.minAllowedTargetValue)
-    cim.rated_current = float_or_none(pb.ratedCurrent)
+    cim.target_deadband = get_nullable(pb, 'targetDeadband')
+    cim.target_value = get_nullable(pb, 'targetValue')
+    cim.enabled = get_nullable(pb, 'enabled')
+    cim.max_allowed_target_value = get_nullable(pb, 'maxAllowedTargetValue')
+    cim.min_allowed_target_value = get_nullable(pb, 'minAllowedTargetValue')
+    cim.rated_current = get_nullable(pb, 'ratedCurrent')
     network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
     for mrid in pb.regulatingCondEqMRIDs:
         network_service.resolve_or_defer_reference(resolver.rc_regulating_cond_eq(cim), mrid)
-    cim.ct_primary = float_or_none(pb.ctPrimary)
-    cim.min_target_deadband = float_or_none(pb.minTargetDeadband)
+    cim.ct_primary = get_nullable(pb, 'ctPrimary')
+    cim.min_target_deadband = get_nullable(pb, 'minTargetDeadband')
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
 
 def rotating_machine_to_cim(pb: PBRotatingMachine, cim: RotatingMachine, network_service: NetworkService):
-    cim.rated_power_factor = float_or_none(pb.ratedPowerFactor)
-    cim.rated_s = float_or_none(pb.ratedS)
-    cim.rated_u = int_or_none(pb.ratedU)
-    cim.p = float_or_none(pb.p)
-    cim.q = float_or_none(pb.q)
+    cim.rated_power_factor = get_nullable(pb, 'ratedPowerFactor')
+    cim.rated_s = get_nullable(pb, 'ratedS')
+    cim.rated_u = get_nullable(pb, 'ratedU')
+    cim.p = get_nullable(pb, 'p')
+    cim.q = get_nullable(pb, 'q')
 
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
 
@@ -2007,12 +2019,12 @@ def series_compensator_to_cim(pb: PBSeriesCompensator, network_service: NetworkS
     # noinspection PyUnresolvedReferences
     cim = SeriesCompensator(
         mrid=pb.mrid(),
-        r=float_or_none(pb.r),
-        r0=float_or_none(pb.r0),
-        x=float_or_none(pb.x),
-        x0=float_or_none(pb.x0),
-        varistor_rated_current=int_or_none(pb.varistorRatedCurrent),
-        varistor_voltage_threshold=int_or_none(pb.varistorVoltageThreshold)
+        r=get_nullable(pb, 'r'),
+        r0=get_nullable(pb, 'r0'),
+        x=get_nullable(pb, 'x'),
+        x0=get_nullable(pb, 'x0'),
+        varistor_rated_current=get_nullable(pb, 'varistorRatedCurrent'),
+        varistor_voltage_threshold=get_nullable(pb, 'varistorVoltageThreshold'),
     )
 
     conducting_equipment_to_cim(pb.ce, cim, network_service)
@@ -2022,9 +2034,9 @@ def series_compensator_to_cim(pb: PBSeriesCompensator, network_service: NetworkS
 def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, network_service: NetworkService):
     # noinspection PyUnresolvedReferences
     network_service.resolve_or_defer_reference(resolver.shunt_compensator_info(cim), pb.asset_info_mrid())
-    cim.sections = float_or_none(pb.sections)
-    cim.grounded = pb.grounded
-    cim.nom_u = int_or_none(pb.nomU)
+    cim.sections = get_nullable(pb, 'sections')
+    cim.grounded = get_nullable(pb, 'grounded')
+    cim.nom_u = get_nullable(pb, 'nomU')
     cim.phase_connection = PhaseShuntConnectionKind(pb.phaseConnection)
 
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
@@ -2042,11 +2054,11 @@ def static_var_compensator_to_cim(pb: PBStaticVarCompensator, network_service: N
     # noinspection PyUnresolvedReferences
     cim = StaticVarCompensator(
         mrid=pb.mrid(),
-        capacitive_rating=float_or_none(pb.capacitiveRating),
-        inductive_rating=float_or_none(pb.inductiveRating),
-        q=float_or_none(pb.q),
+        capacitive_rating=get_nullable(pb, 'capacitiveRating'),
+        inductive_rating=get_nullable(pb, 'inductiveRating'),
+        q=get_nullable(pb, 'q'),
         svc_control_mode=SVCControlMode(pb.svcControlMode),
-        voltage_set_point=int_or_none(pb.voltageSetPoint)
+        voltage_set_point=get_nullable(pb, 'voltageSetPoint'),
     )
 
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
@@ -2056,7 +2068,7 @@ def static_var_compensator_to_cim(pb: PBStaticVarCompensator, network_service: N
 def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
     # noinspection PyUnresolvedReferences
     network_service.resolve_or_defer_reference(resolver.switch_info(cim), pb.asset_info_mrid())
-    cim.rated_current = float_or_none(pb.ratedCurrent)
+    cim.rated_current = get_nullable(pb, 'ratedCurrent')
     cim.set_normally_open(pb.normalOpen)
     cim.set_open(pb.open)
 
@@ -2069,25 +2081,25 @@ def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: Networ
     # noinspection PyUnresolvedReferences
     cim = SynchronousMachine(
         mrid=pb.mrid(),
-        base_q=float_or_none(pb.baseQ),
-        condenser_p=int_or_none(pb.condenserP),
-        earthing=pb.earthing,
-        earthing_star_point_r=float_or_none(pb.earthingStarPointR),
-        earthing_star_point_x=float_or_none(pb.earthingStarPointX),
-        ikk=float_or_none(pb.ikk),
-        max_q=float_or_none(pb.maxQ),
-        max_u=int_or_none(pb.maxU),
-        min_q=float_or_none(pb.minQ),
-        min_u=int_or_none(pb.minU),
-        mu=float_or_none(pb.mu),
-        r=float_or_none(pb.r),
-        r0=float_or_none(pb.r0),
-        r2=float_or_none(pb.r2),
-        sat_direct_subtrans_x=float_or_none(pb.satDirectSubtransX),
-        sat_direct_sync_x=float_or_none(pb.satDirectSyncX),
-        sat_direct_trans_x=float_or_none(pb.satDirectTransX),
-        x0=float_or_none(pb.x0),
-        x2=float_or_none(pb.x2),
+        base_q=get_nullable(pb, 'baseQ'),
+        condenser_p=get_nullable(pb, 'condenserP'),
+        earthing=get_nullable(pb, 'earthing'),
+        earthing_star_point_r=get_nullable(pb, 'earthingStarPointR'),
+        earthing_star_point_x=get_nullable(pb, 'earthingStarPointX'),
+        ikk=get_nullable(pb, 'ikk'),
+        max_q=get_nullable(pb, 'maxQ'),
+        max_u=get_nullable(pb, 'maxU'),
+        min_q=get_nullable(pb, 'minQ'),
+        min_u=get_nullable(pb, 'minU'),
+        mu=get_nullable(pb, 'mu'),
+        r=get_nullable(pb, 'r'),
+        r0=get_nullable(pb, 'r0'),
+        r2=get_nullable(pb, 'r2'),
+        sat_direct_subtrans_x=get_nullable(pb, 'satDirectSubtransX'),
+        sat_direct_sync_x=get_nullable(pb, 'satDirectSyncX'),
+        sat_direct_trans_x=get_nullable(pb, 'satDirectTransX'),
+        x0=get_nullable(pb, 'x0'),
+        x2=get_nullable(pb, 'x2'),
         type=SynchronousMachineKind(pb.type),
         operating_mode=SynchronousMachineKind(pb.operatingMode)
     )
@@ -2100,13 +2112,13 @@ def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: Networ
 
 
 def tap_changer_to_cim(pb: PBTapChanger, cim: TapChanger, network_service: NetworkService):
-    cim.high_step = int_or_none(pb.highStep)
-    cim.step = float_or_none(pb.step)
-    cim.neutral_step = int_or_none(pb.neutralStep)
-    cim.normal_step = int_or_none(pb.normalStep)
-    cim.low_step = int_or_none(pb.lowStep)
-    cim.neutral_u = int_or_none(pb.neutralU)
-    cim.control_enabled = pb.controlEnabled
+    cim.high_step = get_nullable(pb, 'highStep')
+    cim.step = get_nullable(pb, 'step')
+    cim.neutral_step = get_nullable(pb, 'neutralStep')
+    cim.normal_step = get_nullable(pb, 'normalStep')
+    cim.low_step = get_nullable(pb, 'lowStep')
+    cim.neutral_u = get_nullable(pb, 'neutralU')
+    cim.control_enabled = get_nullable(pb, 'controlEnabled')
     network_service.resolve_or_defer_reference(resolver.tc_tap_changer_control(cim), pb.tapChangerControlMRID)
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
@@ -2118,15 +2130,15 @@ def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: Network
     # noinspection PyUnresolvedReferences
     cim = TapChangerControl(
         mrid=pb.mrid(),
-        limit_voltage=int_or_none(pb.limitVoltage),
-        line_drop_compensation=None if pb.HasField("lineDropCompensationNull") else pb.lineDropCompensationSet,
-        line_drop_r=float_or_none(pb.lineDropR),
-        line_drop_x=float_or_none(pb.lineDropX),
-        reverse_line_drop_r=float_or_none(pb.reverseLineDropR),
-        reverse_line_drop_x=float_or_none(pb.reverseLineDropX),
-        forward_ldc_blocking=None if pb.HasField("forwardLDCBlockingNull") else pb.forwardLDCBlockingSet,
-        time_delay=float_or_none(pb.timeDelay),
-        co_generation_enabled=None if pb.HasField("coGenerationEnabledNull") else pb.coGenerationEnabledSet
+        limit_voltage=get_nullable(pb, 'limitVoltage'),
+        line_drop_compensation=get_nullable(pb, "lineDropCompensation"),
+        line_drop_r=get_nullable(pb, 'lineDropR'),
+        line_drop_x=get_nullable(pb, 'lineDropX'),
+        reverse_line_drop_r=get_nullable(pb, 'reverseLineDropR'),
+        reverse_line_drop_x=get_nullable(pb, 'reverseLineDropX'),
+        forward_ldc_blocking=get_nullable(pb, "forwardLDCBlocking"),
+        time_delay=get_nullable(pb, 'timeDelay'),
+        co_generation_enabled=get_nullable(pb, "coGenerationEnabled"),
     )
 
     regulating_control_to_cim(pb.rc, cim, network_service)
@@ -2135,9 +2147,9 @@ def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: Network
 
 def transformer_end_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_service: NetworkService):
     cim.end_number = pb.endNumber
-    cim.grounded = pb.grounded
-    cim.r_ground = float_or_none(pb.rGround)
-    cim.x_ground = float_or_none(pb.xGround)
+    cim.grounded = get_nullable(pb, 'grounded')
+    cim.r_ground = get_nullable(pb, 'rGround')
+    cim.x_ground = get_nullable(pb, 'xGround')
 
     network_service.resolve_or_defer_reference(resolver.te_terminal(cim), pb.terminalMRID)
     network_service.resolve_or_defer_reference(resolver.te_base_voltage(cim), pb.baseVoltageMRID)
@@ -2155,7 +2167,13 @@ def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> Optional[Trans
 @add_to_network_or_none
 def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_service: NetworkService) -> Optional[TransformerStarImpedance]:
     # noinspection PyUnresolvedReferences
-    cim = TransformerStarImpedance(mrid=pb.mrid(), r=pb.r, r0=pb.r0, x=pb.x, x0=pb.x0)
+    cim = TransformerStarImpedance(
+        mrid=pb.mrid(),
+        r=get_nullable(pb, 'r'),
+        r0=get_nullable(pb, 'r0'),
+        x=get_nullable(pb, 'x'),
+        x0=get_nullable(pb, 'x0'),
+    )
 
     network_service.resolve_or_defer_reference(resolver.star_impedance_transformer_end_info(cim), pb.transformerEndInfoMRID)
 

@@ -21,16 +21,16 @@ class TransformerStarImpedance(IdentifiedObject):
     For transmission networks use PowerTransformerEnd impedances (r, r0, x, x0, b, b0, g and g0).
     """
 
-    r: Optional[float] = 0.0
+    r: Optional[float] = None
     """ r : Resistance of the transformer end. Unit: Ohms  """
 
-    r0: Optional[float] = 0.0
+    r0: Optional[float] = None
     """ r0 : Zero sequence series resistance of the transformer end. Unit: Ohms"""
 
-    x: Optional[float] = 0.0
+    x: Optional[float] = None
     """ x : Positive sequence series reactance  of the transformer end. Unit: Ohms"""
 
-    x0: Optional[float] = 0.0
+    x0: Optional[float] = None
     """ x0 : Zero sequence series reactance of the transformer end. Unit: Ohms"""
 
     transformer_end_info: Optional['TransformerEndInfo'] = None

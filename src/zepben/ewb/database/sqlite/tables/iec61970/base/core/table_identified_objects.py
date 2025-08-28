@@ -16,9 +16,9 @@ class TableIdentifiedObjects(SqliteTable, ABC):
 
     def __init__(self):
         self.mrid: Column = self._create_column("mrid", "TEXT", Nullable.NOT_NULL)
-        self.name_: Column = self._create_column("name", "TEXT", Nullable.NOT_NULL)
-        self.description: Column = self._create_column("description", "TEXT", Nullable.NOT_NULL)
-        self.num_diagram_objects: Column = self._create_column("num_diagram_objects", "INTEGER", Nullable.NOT_NULL)
+        self.name_: Column = self._create_column("name", "TEXT", Nullable.NULL)
+        self.description: Column = self._create_column("description", "TEXT", Nullable.NULL)
+        self.num_diagram_objects: Column = self._create_column("num_diagram_objects", "INTEGER", Nullable.NULL)
 
     @property
     def unique_index_columns(self) -> Generator[List[Column], None, None]:

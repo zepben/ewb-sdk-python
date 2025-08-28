@@ -62,7 +62,7 @@ def test_energy_source_constructor_default():
     assert es.x is None
     assert es.x0 is None
     assert es.xn is None
-    assert es.is_external_grid is False
+    assert es.is_external_grid is None
     assert es.r_min is None
     assert es.rn_min is None
     assert es.r0_min is None
