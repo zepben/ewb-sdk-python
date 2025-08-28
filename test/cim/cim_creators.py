@@ -45,12 +45,13 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
 from datetime import datetime
 from random import choice
 
+from streaming.get.pb_creators import lists, floats
 # @formatter:off
 
 # This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
 from zepben.ewb import *
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
+from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none
 
 # @formatter:on
 
@@ -632,7 +633,7 @@ def create_ratio():
     return builds(
         Ratio,
         numerator=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        denominator=floats(min_value=0.1, max_value=FLOAT_MAX)
+        denominator=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -857,7 +858,7 @@ def create_identified_object(include_runtime: bool):
         "mrid": uuids(version=4).map(lambda x: str(x)),
         "name": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         "description": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
-        "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()), max_size=2, unique_by=lambda it: it.name)
+        "names": one_of(none(), lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()), max_size=2, unique_by=lambda it: it.name))
     }
 
 
@@ -1466,16 +1467,16 @@ def create_power_electronics_connection(include_runtime: bool = True):
         inv_watt_resp_p_at_v1=floats(min_value=0.0, max_value=1.0),
         inv_watt_resp_p_at_v2=floats(min_value=0.0, max_value=1.0),
         inv_watt_resp_p_at_v3=floats(min_value=0.0, max_value=1.0),
-        inv_watt_resp_p_at_v4=floats(min_value=0.0, max_value=0.2),
+        inv_watt_resp_p_at_v4=floats(min_value=0.0, max_value=0.12300000339746475),
         inv_volt_var_resp_mode=boolean_or_none(),
         inv_var_resp_v1=integers(min_value=200, max_value=300),
         inv_var_resp_v2=integers(min_value=200, max_value=300),
         inv_var_resp_v3=integers(min_value=200, max_value=300),
         inv_var_resp_v4=integers(min_value=200, max_value=300),
-        inv_var_resp_q_at_v1=floats(min_value=0.0, max_value=0.6),
+        inv_var_resp_q_at_v1=floats(min_value=0.0, max_value=0.5120000243186951),
         inv_var_resp_q_at_v2=floats(min_value=-1.0, max_value=1.0),
         inv_var_resp_q_at_v3=floats(min_value=-1.0, max_value=1.0),
-        inv_var_resp_q_at_v4=floats(min_value=-0.6, max_value=0.0),
+        inv_var_resp_q_at_v4=floats(min_value=-0.5120000243186951, max_value=0.0),
         inv_reactive_power_mode=boolean_or_none(),
         inv_fix_reactive_power=floats(min_value=-1.0, max_value=1.0),
     )

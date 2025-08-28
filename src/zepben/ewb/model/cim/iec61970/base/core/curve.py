@@ -76,7 +76,8 @@ class Curve(IdentifiedObject):
         require(all([it.x_value != x for it in self.data]),
                 lambda: f"Unable to add datapoint to {self}. x_value {x} is invalid, as data with same x_value already exist in this Curve.")
 
-        self._data = self._data or []
+        if self._data is None:
+            self._data = []
         self._data.append(CurveData(x, y1, y2, y3))
         self._data.sort(key=lambda it: it.x_value)
 

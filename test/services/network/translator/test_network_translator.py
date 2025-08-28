@@ -228,7 +228,7 @@ types_to_test = {
 
 @pytest.mark.timeout(100000)
 @given(**types_to_test)
-@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example, HealthCheck.data_too_large])
 def test_network_service_translations(**kwargs):
     #
     # NOTE: To prevent the `assume` required for the location from making this test take way too long, it has been separated out.

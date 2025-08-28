@@ -16,7 +16,7 @@ from typing import Optional, Dict
 from google.protobuf.struct_pb2 import NullValue
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids, one_of, none
+from hypothesis.strategies import builds, text, integers, sampled_from, lists as hypo_lists, floats as hypo_floats, booleans, composite, uuids, one_of, none
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
@@ -204,6 +204,14 @@ ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 ##################################
 # Extensions IEC61968 Asset Info #
 ##################################
+
+def floats(*args, **kwargs):
+    kwargs.update({"width": 32})
+    return hypo_floats(*args, **kwargs)
+
+def lists(*args, **kwargs):
+    kwargs.update({"min_size": 1})
+    return hypo_lists(*args, **kwargs)
 
 def relay_info():
     return builds(
@@ -692,7 +700,7 @@ def pole():
 ##################################
 
 def ratio():
-    return builds(PBRatio, denominator=floats(min_value=0.1, max_value=1000.0), numerator=floats(min_value=0.0, max_value=1000.0))
+    return builds(PBRatio, denominator=floats(min_value=0.10000000149011612, max_value=1000.0), numerator=floats(min_value=0.0, max_value=1000.0))
 
 
 #####################
@@ -1294,16 +1302,16 @@ def power_electronics_connection():
         invWattRespPAtV1Set=floats(min_value=0.0, max_value=1.0),
         invWattRespPAtV2Set=floats(min_value=0.0, max_value=1.0),
         invWattRespPAtV3Set=floats(min_value=0.0, max_value=1.0),
-        invWattRespPAtV4Set=floats(min_value=0.0, max_value=0.2),
+        invWattRespPAtV4Set=floats(min_value=0.0, max_value=0.20000000298023224),
         **nullable_bool_settings("invVoltVarRespMode"),
         invVarRespV1Set=integers(min_value=200, max_value=300),
         invVarRespV2Set=integers(min_value=200, max_value=300),
         invVarRespV3Set=integers(min_value=200, max_value=300),
         invVarRespV4Set=integers(min_value=200, max_value=300),
-        invVarRespQAtV1Set=floats(min_value=0.0, max_value=0.6),
+        invVarRespQAtV1Set=floats(min_value=0.0, max_value=0.6000000238418579),
         invVarRespQAtV2Set=floats(min_value=-1.0, max_value=1.0),
         invVarRespQAtV3Set=floats(min_value=-1.0, max_value=1.0),
-        invVarRespQAtV4Set=floats(min_value=-0.6, max_value=0.0),
+        invVarRespQAtV4Set=floats(min_value=-0.6000000238418579, max_value=0.0),
         **nullable_bool_settings("invReactivePowerMode"),
         invFixReactivePowerSet=floats(min_value=-1.0, max_value=1.0),
     )

@@ -970,8 +970,8 @@ def curve_data_to_pb(cim: CurveData) -> PBCurveData:
         xValue=cim.x_value,
         y1Value=cim.y1_value,
         **set_or_null(
-            y2Value=from_nullable_float(cim.y2_value),
-            y3Value=from_nullable_float(cim.y3_value)
+            y2Value=cim.y2_value,
+            y3Value=cim.y3_value
         )
     )
 

@@ -26,10 +26,10 @@ def test_transformer_star_impedance_constructor_default():
     tsi = TransformerStarImpedance()
 
     verify_identified_object_constructor_default(tsi)
-    assert tsi.r == 0.0
-    assert tsi.r0 == 0.0
-    assert tsi.x == 0.0
-    assert tsi.x0 == 0.0
+    assert tsi.r is None
+    assert tsi.r0 is None
+    assert tsi.x is None
+    assert tsi.x0 is None
     assert not tsi.transformer_end_info
 
 
