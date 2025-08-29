@@ -1,5 +1,5 @@
 # Zepben Python SDK
-## [1.0.1] - UNRELEASED
+## [1.0.2] - UNRELEASED
 ### Breaking Changes
 * None.
 
