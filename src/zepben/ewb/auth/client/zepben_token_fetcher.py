@@ -7,7 +7,7 @@
 __all__ = ["ZepbenTokenFetcher", "create_token_fetcher", "get_token_fetcher", "create_token_fetcher_managed_identity"]
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, Field, field, InitVar
 from datetime import datetime
 from typing import Optional, Callable
 
@@ -89,7 +89,7 @@ def _fetch_token_generator(
         return _get_token_response
 
 
-@dataclass
+@dataclass(init=True, repr=True, eq=True)
 class ZepbenTokenFetcher:
     """
     Fetches access tokens from an authentication provider using the OAuth 2.0 protocol.
@@ -104,37 +104,25 @@ class ZepbenTokenFetcher:
     :param auth_method:  Deprecated. Kept for backwards compatibility, but this is now unused.
     """
 
-    def __init__(
-        self,
-        audience: str,
-        issuer: Optional[str] = None,  # TODO: document in params
-        token_endpoint: Optional[str] = None,
-        token_request_data: Optional[dict] = None,
-        refresh_request_data: Optional[dict] = None,
-        verify: Optional[bool | str] = True,
-        auth_method: Optional[AuthMethod] = AuthMethod.OAUTH,
+    audience: str
+    issuer: Optional[str] = None
+    token_endpoint: Optional[str] = None
+    token_request_data: Optional[dict] = field(default_factory=dict)
+    refresh_request_data: Optional[dict] = field(default_factory=dict)
+    verify: Optional[bool | str] = None
+    auth_method: Optional[AuthMethod] = None
 
-        _request_token: Optional[
-            Callable[[dict, dict, str, Optional[bool], Optional[bool]], requests.Response]
-        ] = _fetch_token_generator(False, False),
+    _request_token: InitVar[Callable[[dict, dict, str, Optional[bool], Optional[bool]], requests.Response]] = None
 
-        _access_token=None,
-        _refresh_token=None,
-        _token_expiry=datetime.min,
-        _token_type=None,
-    ):
-        self.audience: str = audience
-        self.issuer: str = issuer
-        self.token_endpoint: str = token_endpoint
-        self.token_request_data: dict = token_request_data if token_request_data is not None else {}
-        self.refresh_request_data: dict = refresh_request_data if refresh_request_data is not None else {}
-        self.verify: bool | str = verify
-        self.auth_method: AuthMethod = auth_method
+    _access_token: Optional[str] = None
+    _refresh_token: Optional[str] = None
+    _token_expiry: Optional[datetime] = datetime.min
+    token_type: Optional[str] = None
+
+    def __post_init__(self, _request_token):
+        if _request_token is None:
+            _request_token = _fetch_token_generator(False, False)
         self._request_token = _request_token
-        self._access_token = _access_token
-        self._refresh_token = _refresh_token
-        self._token_expiry = _token_expiry
-        self.token_type = _token_type
 
         self.token_request_data["audience"] = self.audience
         self.refresh_request_data["audience"] = self.audience
