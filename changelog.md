@@ -15,6 +15,13 @@
 ### Notes
 * None.
 
+## [1.0.3] - 2025-08-29
+### Fixes
+* Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
+
+### Notes
+* Releases 1.0.1 and 1.0.2 were skipped due to CI issues.
+
 ## [1.0.0] - 2025-08-28
 ### Breaking Changes
 * Renamed the package to `zepben.ewb`. You will need to update all your imports `zepben.evolve.*` -> `zepben.ewb.*`. This also updates the pypi artifact to
