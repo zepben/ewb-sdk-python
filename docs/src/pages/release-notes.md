@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[1.0.3](#103)| `29 August 2025` |
 |[0.48.0](#v0480)| `10 July 2025` |
 |[0.47.1](#v0471)| `13 May 2025` |
 |[0.47.0](#v0470)| `08 May 2025` |
@@ -57,6 +58,13 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.0.3]
+
+### Fixes
+* Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
 
 ---
 
