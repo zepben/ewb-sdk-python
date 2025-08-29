@@ -1,19 +1,7 @@
 # Zepben Python SDK
-## [1.0.2] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
+## [1.0.3] - UNRELEASED
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
-
-### Notes
-* None.
 
 ## [1.0.0] - 2025-08-29
 ### Breaking Changes
