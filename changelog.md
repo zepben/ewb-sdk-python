@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [1.0.0] - UNRELEASED
+## [1.0.1] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [1.0.0] - 2025-08-29
 ### Breaking Changes
 * Renamed the package to `zepben.ewb`. You will need to update all your imports `zepben.evolve.*` -> `zepben.ewb.*`. This also updates the pypi artifact to
   `zepben.ewb`.
