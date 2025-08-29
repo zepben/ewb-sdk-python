@@ -6,7 +6,7 @@ The Python Evolve SDK contains everything necessary to communicate with a [Zepbe
 
 # Requirements #
 
-- Python 3.9 or later
+- Python 3.10 or later
 
 # Installation #
 
