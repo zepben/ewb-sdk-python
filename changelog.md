@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
 
 ### Notes
 * None.
