@@ -7,8 +7,9 @@ from __future__ import annotations
 
 __all__ = ["Name"]
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
+
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 # NOTE: unsafe_hash is used as we can't mark this class frozen due to needing to update/lazy initialise the identified_object, which shouldn't change once
 #       it has been initialised.
 #
-@dataclass(unsafe_hash=True)
+@autoslot_dataclass(unsafe_hash=True)
 class Name:
     """
     The Name class provides the means to define any number of human-readable names for an object. A name is **not** to be used for defining inter-object

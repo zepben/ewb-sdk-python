@@ -2,21 +2,18 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import sys
+from _weakref import ref
 from abc import ABCMeta
 from dataclasses import dataclass
 from typing import ClassVar, List
+
 from typing_extensions import dataclass_transform
 
 
 class BackedDescriptor(metaclass=ABCMeta):
     def __init__(self, default=None):
         self.default = default
-
-class ValidatedDescriptor(BackedDescriptor):
-
-    def __init__(self, default=None, validate = None):
-        super().__init__(default=default)
-        self.validate = validate
 
     def __set_name__(self, owner, name):
         print(f'set name {owner} {name}')
@@ -25,21 +22,28 @@ class ValidatedDescriptor(BackedDescriptor):
 
     def __get__(self, obj, *_):
         value = getattr(obj, self.private_name)
-        print(f'Accessing {self.private_name} giving {value}')
         if value is self:
             self.__set_default(obj)
             return self.default
         return value
 
     def __set__(self, obj, value, do_validate: bool=True):
-        if value is not self and do_validate:
-            if self.validate:
-                value = self.validate(obj, value)
-        print(f'Updating {self.private_name} to {value}')
         setattr(obj, self.private_name, value)
 
     def __set_default(self, obj):
         self.__set__(obj, self.default, do_validate=False)
+
+class ValidatedDescriptor(BackedDescriptor):
+
+    def __init__(self, default = None, validate = None):
+        super().__init__(default=default)
+        self.validate = validate
+
+    def __set__(self, obj, value, do_validate: bool=True):
+        if value is not self and do_validate:
+            if self.validate:
+                value = self.validate(obj, value)
+        setattr(obj, self.private_name, value)
 
 
 
@@ -57,9 +61,26 @@ class NoResetDescriptor(ValidatedDescriptor):
                          f' has already been set to {old},' +
                          f' cannot reset this field to {value}')
 
+class WeakrefDescriptor(BackedDescriptor):
+    def __init__(self, default=None):
+        super().__init__(default=default)
+
+    def __get__(self, obj, *_):
+        value = getattr(obj, self.private_name)
+        if value is self:
+            self.__set_default(obj)
+            value = self.default
+        if value is not None:
+            value = value()
+        return value
+
+    def __set__(self, obj, value, do_validate: bool=True):
+        if value:
+            value = ref(value)
+        setattr(obj, self.private_name, value)
 
 
-DEBUG_LOG = True
+DEBUG_LOG = False
 
 def _spew(cls):
     print(cls.__name__, '::')
@@ -109,13 +130,34 @@ if __name__ == '__main__':
         x: int = 42
 
 
+    @dataclass
+    class C:
+        __slots__ = ('__weakref__', )
+
     @autoslot_dataclass
     class B(A):
         l2: List[int] = None
 
+        c: C = WeakrefDescriptor()
+
+
 
     l = [42, 24, 4]
     a = B(l)
+
+    c = C()
+
+    print(sys.getrefcount(a.c))
+
+    a.c = c
+    print('ref', a.c)
+
+    print(sys.getrefcount(a.c))
+
+    del c
+
+    print(sys.getrefcount(a.c))
+
 
     print(a.l)
 

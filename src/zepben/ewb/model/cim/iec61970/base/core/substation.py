@@ -7,11 +7,11 @@ from __future__ import annotations
 
 __all__ = ["Substation"]
 
-from typing import Optional, Generator, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
+@autoslot_dataclass
 class Substation(EquipmentContainer):
     """
     A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk

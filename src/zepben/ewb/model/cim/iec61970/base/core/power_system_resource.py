@@ -7,8 +7,9 @@ from __future__ import annotations
 
 __all__ = ['PowerSystemResource']
 
-from typing import Optional, TYPE_CHECKING, List, Iterable
+from typing import Optional, TYPE_CHECKING, List
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
 
 
+@autoslot_dataclass
 class PowerSystemResource(IdentifiedObject):
     """
     Abstract class, should only be used through subclasses.

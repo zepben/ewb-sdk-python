@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["Feeder"]
 
-from dataclasses import InitVar, field
 from typing import Optional, Dict, TYPE_CHECKING
 
 from zepben.ewb.collections.autoslot import autoslot_dataclass, ValidatedDescriptor
@@ -19,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
+
 
 @autoslot_dataclass
 class Feeder(EquipmentContainer):

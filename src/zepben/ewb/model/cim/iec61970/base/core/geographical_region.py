@@ -9,11 +9,13 @@ __all__ = ["GeographicalRegion"]
 
 from typing import Optional, List
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 
 
+@autoslot_dataclass
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.

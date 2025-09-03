@@ -18,7 +18,6 @@ from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFee
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
+
 
 @autoslot_dataclass
 class Equipment(PowerSystemResource):

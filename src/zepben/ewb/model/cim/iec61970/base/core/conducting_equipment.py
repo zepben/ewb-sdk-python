@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
+
 @autoslot_dataclass
 class ConductingEquipment(Equipment):
     """

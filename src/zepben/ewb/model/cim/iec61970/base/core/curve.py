@@ -5,14 +5,13 @@
 
 __all__ = ["Curve"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List
 
 from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.curve_list import CurveList
-from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import require, ngen, nlen, safe_remove
+
 
 @autoslot_dataclass
 class Curve(IdentifiedObject):

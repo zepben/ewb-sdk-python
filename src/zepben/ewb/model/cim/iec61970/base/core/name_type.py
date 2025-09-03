@@ -7,16 +7,17 @@ from __future__ import annotations
 
 __all__ = ["NameType"]
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-@dataclass(slots=True)
+@autoslot_dataclass(slots=True)
 class NameType:
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
