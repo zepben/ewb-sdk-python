@@ -9,6 +9,7 @@ __all__ = ['EquipmentContainer']
 
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
-
+@autoslot_dataclass
 class EquipmentContainer(ConnectivityNodeContainer):
     """
     A modeling construct to provide a root class for containing equipment.

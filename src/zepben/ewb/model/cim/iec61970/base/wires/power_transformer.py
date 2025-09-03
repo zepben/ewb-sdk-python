@@ -195,6 +195,7 @@ class PowerTransformer(ConductingEquipment):
         Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
         with the same mRID.
         """
+        # TODO: Internalise the checks
         if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
             return True
 

@@ -10,6 +10,7 @@ __all__ = ['Equipment']
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
-
+@autoslot_dataclass
 class Equipment(PowerSystemResource):
     """
     Abstract class, should only be used through subclasses.

@@ -5,9 +5,10 @@
 
 __all__ = ["BaseVoltage"]
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
-
+@autoslot_dataclass
 class BaseVoltage(IdentifiedObject):
     """
     Defines a system base voltage which is referenced.

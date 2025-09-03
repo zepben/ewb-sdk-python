@@ -7,9 +7,9 @@ from __future__ import annotations
 
 __all__ = ["ConnectivityNode"]
 
-from dataclasses import dataclass
 from typing import List, TYPE_CHECKING, Optional
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.terminal_list import TerminalList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -17,13 +17,13 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-@dataclass(slots=False)
+@autoslot_dataclass(slots=False)
 class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
     # noinspection PyDunderSlots
-    # __slots__ = ["terminals", "__weakref__"]
+    __slots__ = ["terminals", "__weakref__"]
     # __weakref__
     terminals: Optional[List[Terminal]] = None
 

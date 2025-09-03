@@ -10,6 +10,7 @@ __all__ = ['ConductingEquipment']
 import sys
 from typing import List, Optional, TYPE_CHECKING, Union
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.terminal_list import TerminalList
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import require
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
-
+@autoslot_dataclass
 class ConductingEquipment(Equipment):
     """
     Abstract class, should only be used through subclasses.
@@ -36,7 +37,6 @@ class ConductingEquipment(Equipment):
     used for transformers.
     """
 
-    # _terminals: List[Terminal] = []
     terminals: Optional[List[Terminal]] = None
     max_terminals = int(sys.maxsize)
 

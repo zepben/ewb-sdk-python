@@ -71,21 +71,67 @@ def _spew(cls):
     eq_default=True,
     order_default=False,
 )
-def autoslot_dataclass(cls):
-    new_annotations = cls.__annotations__.copy()
-    if DEBUG_LOG: _spew(cls)
+def autoslot_dataclass(cls=None, *_, slots=True, **kwargs):
+    def decorator(cls):
+        new_annotations = cls.__annotations__.copy()
+        if DEBUG_LOG: _spew(cls)
 
-    for attr, _type in cls.__annotations__.items():
-        val = cls.__dict__.get(attr, None)
-        if isinstance(val, BackedDescriptor):
-            _attr = f'_{attr}'
-            new_annotations[ attr] = ClassVar[_type]
-            new_annotations[_attr] = _type
-            setattr(cls, _attr, val.default)
-    cls.__annotations__ = new_annotations
+        for attr, _type in cls.__annotations__.items():
+            val = cls.__dict__.get(attr, None)
+            if isinstance(val, BackedDescriptor):
+                _attr = f'_{attr}'
+                new_annotations[ attr] = ClassVar[_type]
+                new_annotations[_attr] = _type
+                setattr(cls, _attr, val.default)
+        cls.__annotations__ = new_annotations
 
-    if DEBUG_LOG: _spew(cls)
+        if DEBUG_LOG: _spew(cls)
 
-    return dataclass(slots=True)(cls)
+        return dataclass(slots=slots, **kwargs)(cls)
+
+    if cls is None:
+        return decorator
+    return decorator(cls)
 
 
+
+
+
+
+if __name__ == '__main__':
+
+    @autoslot_dataclass(slots=False)
+    class A:
+        l: List[int]
+
+        y: str = NoResetDescriptor()
+
+        x: int = 42
+
+
+    @autoslot_dataclass
+    class B(A):
+        l2: List[int] = None
+
+
+    l = [42, 24, 4]
+    a = B(l)
+
+    print(a.l)
+
+
+    print(a.y)
+
+
+    a.y = 'cool'
+    print(a)
+
+    a.y = 'cool'
+    print(1)
+
+    a.l = []
+    a.x = 24
+    print(a)
+
+    a.y = 'cool2'
+    print(2)

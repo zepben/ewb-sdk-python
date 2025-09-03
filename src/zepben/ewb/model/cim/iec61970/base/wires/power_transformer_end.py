@@ -8,8 +8,10 @@ from __future__ import annotations
 __all__ = ["PowerTransformerEnd"]
 
 import warnings
+from dataclasses import InitVar, field
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb import Terminal
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
@@ -38,9 +40,11 @@ class PowerTransformerEnd(TransformerEnd):
     Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
     """
 
-    _power_transformer: Optional[PowerTransformer] = None
+    _power_transformer: Optional[PowerTransformer] = field(init=False, repr=False)
+    power_transformer: InitVar[Terminal | None]
     """The power transformer of this power transformer end."""
-    _rated_s: Optional[int] = None
+    _rated_s: Optional[int] = field(init=False, repr=False)
+    rated_s: InitVar[int | None]
 
     rated_u: Optional[int] = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
@@ -83,25 +87,31 @@ class PowerTransformerEnd(TransformerEnd):
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
     Should not be used directly, instead use add_rating and get_rating functions. 
     """
+    
+    def __post_init__(self,
+                      power_transformer: PowerTransformer = None,
+                      rated_s: int | None = None):
+        
+        ...
 
-    def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, **kwargs):
-        super(PowerTransformerEnd, self).__init__(**kwargs)
-        if power_transformer:
-            self.power_transformer = power_transformer
-        if self._s_ratings:
-            raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
-        if rated_s and self._rated_s:
-            raise ValueError(f"Cannot specify both rated_s and _rated_s properties when constructing {self}. Check your constructor parameters.")
-        if rated_s is not None:
-            warnings.warn(
-                "`rated_s` has been replaced by `s_ratings`. Please use `add_rating()` to add one of more ratings and their related [TransformerCoolingType].",
-                DeprecationWarning,
-                stacklevel=3
-            )
-            self.rated_s = rated_s
-        if self._rated_s is not None:
-            self.rated_s = self._rated_s
-            self._rated_s = None
+    # def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, **kwargs):
+    #     super(PowerTransformerEnd, self).__init__(**kwargs)
+    #     if power_transformer:
+    #         self.power_transformer = power_transformer
+    #     if self._s_ratings:
+    #         raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
+    #     if rated_s and self._rated_s:
+    #         raise ValueError(f"Cannot specify both rated_s and _rated_s properties when constructing {self}. Check your constructor parameters.")
+    #     if rated_s is not None:
+    #         warnings.warn(
+    #             "`rated_s` has been replaced by `s_ratings`. Please use `add_rating()` to add one of more ratings and their related [TransformerCoolingType].",
+    #             DeprecationWarning,
+    #             stacklevel=3
+    #         )
+    #         self.rated_s = rated_s
+    #     if self._rated_s is not None:
+    #         self.rated_s = self._rated_s
+    #         self._rated_s = None
 
     @property
     def power_transformer(self):
