@@ -2,11 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from abc import ABCMeta
 from dataclasses import dataclass
-from typing import dataclass_transform, ClassVar
+from typing import ClassVar, List
+from typing_extensions import dataclass_transform
 
 
-class BackedDescriptor:
+class BackedDescriptor(metaclass=ABCMeta):
     def __init__(self, default=None):
         self.default = default
 
@@ -70,22 +72,20 @@ def _spew(cls):
     order_default=False,
 )
 def autoslot_dataclass(cls):
-    nann = cls.__annotations__.copy()
+    new_annotations = cls.__annotations__.copy()
     if DEBUG_LOG: _spew(cls)
 
-    for k, v in cls.__annotations__.items():
-        val = cls.__dict__.get(k, None)
+    for attr, _type in cls.__annotations__.items():
+        val = cls.__dict__.get(attr, None)
         if isinstance(val, BackedDescriptor):
-            _k = f'_{k}'
-            nann[k] = ClassVar[v]
-            nann[_k] = v
-            setattr(cls, _k, val.default)
-    cls.__annotations__ = nann
+            _attr = f'_{attr}'
+            new_annotations[ attr] = ClassVar[_type]
+            new_annotations[_attr] = _type
+            setattr(cls, _attr, val.default)
+    cls.__annotations__ = new_annotations
 
     if DEBUG_LOG: _spew(cls)
 
     return dataclass(slots=True)(cls)
-
-
 
 
