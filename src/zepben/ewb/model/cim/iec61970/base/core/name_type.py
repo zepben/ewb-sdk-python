@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-@autoslot_dataclass(slots=True)
+@autoslot_dataclass()
 class NameType:
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple

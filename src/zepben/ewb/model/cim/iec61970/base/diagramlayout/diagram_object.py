@@ -7,9 +7,9 @@ from __future__ import annotations
 
 __all__ = ["DiagramObject"]
 
-from dataclasses import field, InitVar
 from typing import Optional, List, Callable, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass, NoResetDescriptor
 from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -18,6 +18,8 @@ from zepben.ewb.util import require
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
+
+@autoslot_dataclass
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything
@@ -25,8 +27,7 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    _diagram: Optional[Diagram] = field(init=False, repr=False)
-    diagram: InitVar[Diagram]
+    diagram: Optional[Diagram] = NoResetDescriptor()
     """A diagram object is part of a diagram."""
 
     identified_object_mrid: Optional[str] = None
@@ -52,16 +53,16 @@ class DiagramObject(IdentifiedObject):
             for point in diagram_object_points:
                 self.add_point(point)
 
-    @property
-    def diagram(self):
-        return self._diagram
-
-    @diagram.setter
-    def diagram(self, diag):
-        if self._diagram is None or self._diagram is diag:
-            self._diagram = diag
-        else:
-            raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
+    # @property
+    # def diagram(self):
+    #     return self._diagram
+    #
+    # @diagram.setter
+    # def diagram(self, diag):
+    #     if self._diagram is None or self._diagram is diag:
+    #         self._diagram = diag
+    #     else:
+    #         raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
 
     def num_points(self):
         """

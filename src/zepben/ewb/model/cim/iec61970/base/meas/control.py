@@ -7,12 +7,14 @@ __all__ = ["Control"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.meas.iopoint import IoPoint
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 
 
+@autoslot_dataclass
 class Control(IoPoint):
     """
     Control is used for supervisory/device control. It represents control outputs that are used to change the state in a

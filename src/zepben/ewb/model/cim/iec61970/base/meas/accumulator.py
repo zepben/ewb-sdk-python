@@ -5,9 +5,11 @@
 
 __all__ = ["Accumulator"]
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
+@autoslot_dataclass
 class Accumulator(Measurement):
     """Accumulator represents an accumulated (counted) Measurement, e.g. an energy value."""
     pass

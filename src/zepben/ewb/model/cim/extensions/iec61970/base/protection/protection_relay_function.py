@@ -7,13 +7,16 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayFunction"]
 
-from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
+from typing import Optional, List, Iterable, Callable, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass, TypeRestrictedDescriptor
+from zepben.ewb.collections.mrid_list import MRIDList
+from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.util import require, nlen, ngen, safe_remove, get_by_mrid
+from zepben.ewb.util import require, nlen, safe_remove, get_by_mrid
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
@@ -24,6 +27,7 @@ if TYPE_CHECKING:
 
 
 @zbex
+@autoslot_dataclass
 class ProtectionRelayFunction(PowerSystemResource):
     """
     [ZBEX]
@@ -48,60 +52,37 @@ class ProtectionRelayFunction(PowerSystemResource):
     power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN
     """[ZBEX] The flow of the power direction used by this ProtectionRelayFunction."""
 
-    _sensors: Optional[List[Sensor]] = None
+    sensors: Optional[List[Sensor]] = None
 
-    _protected_switches: Optional[List[ProtectedSwitch]] = None
+    protected_switches: Optional[List[ProtectedSwitch]] = None
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    schemes: Optional[List[ProtectionRelayScheme]] = None
 
-    _time_limits: Optional[List[float]] = None
+    time_limits: Optional[List[float]] = None
 
-    _thresholds: Optional[List[RelaySetting]] = None
+    thresholds: Optional[List[RelaySetting]] = None
 
-    def __init__(self,
-                 sensors: Iterable[Sensor] = None,
-                 protected_switches: Iterable[ProtectedSwitch] = None,
-                 schemes: Iterable[ProtectionRelayScheme] = None,
-                 time_limits: Iterable[float] = None,
-                 thresholds: Iterable[RelaySetting] = None,
-                 relay_info: RelayInfo = None, **kwargs):
-        super(ProtectionRelayFunction, self).__init__(**kwargs)
 
-        if sensors is not None:
-            for sensor in sensors:
-                self.add_sensor(sensor)
-        if protected_switches is not None:
-            for protected_switch in protected_switches:
-                self.add_protected_switch(protected_switch)
-        if schemes is not None:
-            for scheme in schemes:
-                self.add_scheme(scheme)
-        if time_limits is not None:
-            for time_limit in time_limits:
-                self.add_time_limit(time_limit)
-        if thresholds is not None:
-            for threshold in thresholds:
-                self.add_threshold(threshold)
-        if relay_info is not None:
-            self.relay_info = relay_info
+    relay_info: RelayInfo = TypeRestrictedDescriptor()
 
-    @property
-    def relay_info(self):
-        """Datasheet information for this CurrentRelay"""
-        return self.asset_info
 
-    @relay_info.setter
-    def relay_info(self, relay_info: Optional[RelayInfo]):
-        self.asset_info = relay_info
+    def __post_init__(self):
+        self.sensors: MRIDList[Sensor] = MRIDList(self.sensors)
+        self.protected_switches: MRIDList[Sensor] = MRIDList(self.protected_switches)
+        self.schemes: MRIDList[Sensor] = MRIDList(self.schemes)
+        self.time_limits: ZepbenList[float] = ZepbenList(self.time_limits)
+        self.thresholds: ZepbenList[RelaySetting] = ZepbenList(self.thresholds)
 
-    @property
-    def thresholds(self) -> Generator[RelaySetting, None, None]:
-        """
-        [ZBEX] Yields all the thresholds[:class:`RelaySettings<RelaySetting>`] for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
 
-        :return: A generator that iterates over all thresholds[:class:`RelaySettings<RelaySetting>`] for this relay function.
-        """
-        return ngen(self._thresholds)
+    #
+    # @property
+    # def relay_info(self):
+    #     """Datasheet information for this CurrentRelay"""
+    #     return self.asset_info
+    #
+    # @relay_info.setter
+    # def relay_info(self, relay_info: Optional[RelayInfo]):
+    #     self.asset_info = relay_info
 
     def for_each_threshold(self, action: Callable[[int, RelaySetting], None]):
         """
@@ -182,15 +163,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         self._thresholds = None
         return self
 
-    @property
-    def time_limits(self) -> Generator[float, None, None]:
-        """
-        [ZBEX] Yields all the time limits (in seconds) for this relay function. Order of entries corresponds to the order of entries in thresholds.
-
-        :return: A generator that iterates over all time limits for this relay function.
-        """
-        return ngen(self._time_limits)
-
     def for_each_time_limit(self, action: Callable[[int, float], None]):
         """
         Call the `action` on each time limit in the `time_limits` collection
@@ -267,15 +239,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         self._time_limits = None
         return self
 
-    @property
-    def sensors(self) -> Generator[Sensor, None, None]:
-        """
-        [ZBEX] Yields all the :class:`Sensors<Sensor>` for this relay function.
-
-        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
-        """
-        return ngen(self._sensors)
-
     def get_sensor(self, mrid: str) -> Sensor:
         """
         Get a sensor :class:`Sensor` for this :class:`ProtectionRelayFunction` by its mrid.
@@ -327,15 +290,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         self._sensors = None
         return self
 
-    @property
-    def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-
-        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return ngen(self._protected_switches)
-
     def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
         """
         Get a :class:`ProtectedSwitch` operated by this :class:`ProtectionRelayFunction` by its mrid.
@@ -386,15 +340,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         self._protected_switches = None
         return self
-
-    @property
-    def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-
-        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-        """
-        return ngen(self._schemes)
 
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """

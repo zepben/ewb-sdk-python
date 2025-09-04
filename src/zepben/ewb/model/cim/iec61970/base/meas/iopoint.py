@@ -5,9 +5,11 @@
 
 __all__ = ["IoPoint"]
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
+@autoslot_dataclass
 class IoPoint(IdentifiedObject):
     """
     This class describes a measurement or control value.

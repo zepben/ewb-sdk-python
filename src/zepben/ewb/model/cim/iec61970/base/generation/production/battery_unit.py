@@ -7,16 +7,17 @@ __all__ = ["BatteryUnit"]
 
 from typing import List, Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
-from zepben.ewb.util import nlen, get_by_mrid, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 
+@autoslot_dataclass
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
 
@@ -32,7 +33,7 @@ class BatteryUnit(PowerElectronicsUnit):
     controls: Optional[List['BatteryControl']] = None
 
     def __post_init__(self):
-        self.controls: MRIDList['BatteryControl'] = MRIDList(self.controls, unique=True)
+        self.controls: MRIDList['BatteryControl'] = MRIDList(self.controls)
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
     def num_battery_controls(self):

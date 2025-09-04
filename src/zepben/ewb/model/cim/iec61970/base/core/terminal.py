@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from dataclasses import InitVar, field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass, NoResetDescriptor
+from zepben.ewb.collections.autoslot import autoslot_dataclass, NoResetDescriptor, WeakrefDescriptor
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -56,18 +55,9 @@ class Terminal(AcDcTerminal):
     """
 
 
-    connectivity_node: InitVar[ReferenceType | None]
-    _cn: Optional[ReferenceType] = field(init=False, repr=False)
+    connectivity_node: Optional[ConnectivityNode] = WeakrefDescriptor()
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
-
-    def __post_init__(self, connectivity_node: ConnectivityNode = None):
-
-        # We set the connectivity node to itself if the name parameter is not used to make sure the positional argument is wrapped in a reference.
-        if connectivity_node:
-            self.connectivity_node = connectivity_node
-        else:
-            self.connectivity_node = self._cn
 
     @property
     def normal_phases(self) -> PhaseStatus:
@@ -94,19 +84,19 @@ class Terminal(AcDcTerminal):
     #     else:
     #         raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self._conducting_equipment}, cannot reset this field to {ce}")
 
-    @property
-    def connectivity_node(self) -> Optional[ConnectivityNode]:
-        if self._cn:
-            return self._cn()
-        else:
-            return None
-
-    @connectivity_node.setter
-    def connectivity_node(self, cn: Optional[ConnectivityNode]):
-        if cn:
-            self._cn = ref(cn)
-        else:
-            self._cn = None
+    # @property
+    # def connectivity_node(self) -> Optional[ConnectivityNode]:
+    #     if self._cn:
+    #         return self._cn()
+    #     else:
+    #         return None
+    #
+    # @connectivity_node.setter
+    # def connectivity_node(self, cn: Optional[ConnectivityNode]):
+    #     if cn:
+    #         self._cn = ref(cn)
+    #     else:
+    #         self._cn = None
 
     @property
     def connected(self) -> bool:
@@ -165,6 +155,7 @@ class Terminal(AcDcTerminal):
         for feeder in filter(lambda c: isinstance(c, Feeder), self.conducting_equipment.containers):
             if feeder.normal_head_terminal == self:
                 return True
+        return False
 
     def has_connected_busbars(self):
         try:

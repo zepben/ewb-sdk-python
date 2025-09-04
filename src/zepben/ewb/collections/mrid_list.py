@@ -30,6 +30,11 @@ class MRIDList(ZepbenList[T_MRID]):
             return self.has_mrid(identifier)
         return super().__contains__(identifier)
 
+    def __getitem__(self, identifier: str | int):
+        if isinstance(identifier, str):
+            return self.get_by_mrid(identifier)
+        return super().__getitem__(identifier)
+
     def add(self, item: T_MRID, safe: bool=False):
         if (other := self.get_by_mrid(item.mrid)) is not None:
             if not safe:

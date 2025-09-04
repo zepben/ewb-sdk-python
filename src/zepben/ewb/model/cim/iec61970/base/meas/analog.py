@@ -5,9 +5,11 @@
 
 __all__ = ["Analog"]
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
+@autoslot_dataclass
 class Analog(Measurement):
     """Analog represents an analog Measurement."""
 

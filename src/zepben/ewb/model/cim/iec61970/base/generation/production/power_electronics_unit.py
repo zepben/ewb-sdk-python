@@ -7,12 +7,14 @@ __all__ = ["PowerElectronicsUnit"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import autoslot_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 
 
+@autoslot_dataclass
 class PowerElectronicsUnit(Equipment):
     """
     A generating unit or battery or aggregation that connects to the AC network using power electronics rather than rotating machines.
