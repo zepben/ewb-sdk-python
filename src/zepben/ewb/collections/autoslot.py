@@ -72,6 +72,15 @@ class NoResetDescriptor(ValidatedDescriptor):
                          f' cannot reset this field to {value}')
 
 
+class _WeakRefLink:
+    __slots__ = '__weakref__', '_obj'
+
+    def __init__(self, obj: object):
+        self._obj = obj
+
+    def unwrap(self):
+        return self._obj
+
 
 class WeakrefDescriptor(BackedDescriptor):
 
@@ -84,14 +93,16 @@ class WeakrefDescriptor(BackedDescriptor):
             self._set_default(obj)
             value = self.default
         if value is not None:
-            value = value()
+            if value() is None:
+                return None
+            value = value().unwrap()
         return value
 
     def __set__(self, obj, value, do_validate: bool=True):
         if value:
-            value = ref(value)
+            wrapper = _WeakRefLink(value)
+            value = ref(wrapper)
         setattr(obj, self.private_name, value)
-
 
 
 class TypeRestrictedDescriptor(BackedDescriptor):
