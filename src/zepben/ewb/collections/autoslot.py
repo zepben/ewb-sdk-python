@@ -2,10 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import inspect
 import sys
 from _weakref import ref
 from abc import ABCMeta
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass
 from typing import ClassVar, List
 
 from typing_extensions import dataclass_transform
@@ -106,42 +107,129 @@ class TypeRestrictedDescriptor(BackedDescriptor):
 
 DEBUG_LOG = True
 
+
 def _spew(cls):
     print(cls.__name__, '::')
     # for k, v in cls.__dict__.items():
     #     print(f'\t{k}: {v}')
 
-def generate_slots(annotations):
-    slots = []
-    for attr, _type in annotations.items():
-        if _type is ClassVar or _type is InitVar or isinstance(_type, BackedDescriptor):
+
+def _get_descriptors(cls: type):
+    """
+    Find class variables of cls that inherit BackedDescriptor.
+    """
+    dict_ = cls.__dict__
+    return [dict_[attr] for attr in dict_
+            if isinstance(dict_[attr], BackedDescriptor)]
+
+
+def _get_descriptors_inherited(cls: type):
+    """
+    Find all class variables of cls and its superclasses
+    that are descriptors.
+    """
+    descriptors = _get_descriptors(cls)
+    for base in cls.__bases__:
+        descriptors += _get_descriptors(base)
+    return set(descriptors)
+
+
+def amend_init(obj: type, cls: type):
+    """
+    Intercept dataclass init and initialise descriptors separately.
+    Call the original init to allow the dataclass to handle fields.
+    """
+    init_signature = inspect.signature(obj.__init__)
+    dc_kwargs = {}
+    descriptor_values = {}
+
+    # Make dictionaries for easy access
+    descriptors = _get_descriptors_inherited(cls)
+    public_names = {d.public_name: d for d in descriptors}
+    private_names = {d.private_name: d for d in descriptors}
+    del descriptors  # Free memory
+
+    def add_kv(attr, val):
+        if attr in private_names:
+            desc = private_names[attr]
+            name = desc.public_name
+            descriptor_values[name] = val
+        elif attr in public_names:
+            descriptor_values[attr] = val
+        else:
+            dc_kwargs[attr] = val
+
+    def __init__(self, *args, **kwargs):
+        it = iter(init_signature.parameters)
+        it.__next__()
+        for val in args:
+            attr = it.__next__()
+            add_kv(attr, val)
+        for attr, val in kwargs.items():
+            add_kv(attr, val)
+
+        print('= ', dc_kwargs, descriptor_values)
+
+        self.__dataclass_init__(**dc_kwargs)
+        for k, v in descriptor_values.items():
+            setattr(self, k, v)
+
+    obj.__dataclass_init__ = obj.__init__
+    obj.__init__ = __init__
+
+
+def _validate_backed_name(cls: type, attr, _attr):
+    """
+    Check that the name about to be used to back a descriptor
+    is not already in use.
+    """
+    if _attr in cls.__annotations__:
+        raise AttributeError(f'Cannot create a descriptor {attr} ' +
+                             f'backed by field {_attr} ' +
+                             f'because the field already exists in class {cls.__name__}')
+    for base in cls.__bases__:
+        if not hasattr(base, '__annotations__'):
             continue
-        slots.append(attr)
-    return tuple(slots)
+        if _attr in base.__annotations__:
+            raise AttributeError(f'Cannot create a descriptor {attr} ' +
+                                 f'backed by field {_attr} ' +
+                                 f'because the field already exists in superclass {base.__name__}')
 
 
 def _autoslot(cls, slots=True, **kwargs):
+    """
+    Wrangle object creation to enable descriptor use
+    in dataclasses with slots.
+
+    This creates annotations and defaults for the internal variables,
+    and re-types descriptors as ClassVar to force the dataclass
+    creator to skip them.
+    """
     print(cls, slots, kwargs)
     new_annotations = cls.__annotations__.copy()
     if DEBUG_LOG: _spew(cls)
 
     for attr, _type in cls.__annotations__.items():
         val = cls.__dict__.get(attr, None)
+        del new_annotations[attr]
         if isinstance(val, BackedDescriptor):
-            _attr = f'_{attr}'
+            _attr = val.private_name
+            _validate_backed_name(cls, attr, _attr)
+
             new_annotations[attr] = ClassVar[_type]
             new_annotations[_attr] = _type
             setattr(cls, _attr, val.default)
             val.set_type(_type)
+        else:
+            new_annotations[attr] = _type
 
     cls.__annotations__ = new_annotations
 
     if DEBUG_LOG: _spew(cls)
 
-    # cls.__slots__ = generate_slots(new_annotations)
-
-    return dataclass(slots=False, **kwargs)(cls)
-
+    obj = dataclass(slots=slots, **kwargs)(cls)
+    amend_init(obj, cls)
+    return obj
 
 
 @dataclass_transform(
@@ -149,16 +237,13 @@ def _autoslot(cls, slots=True, **kwargs):
     eq_default=True,
     order_default=False,
 )
-def autoslot_dataclass(cls_outer = None, *, slots=True, **kwargs):
+def autoslot_dataclass(cls_outer=None, *, slots=True, **kwargs):
     def dec(cls):
         return _autoslot(cls, slots=slots, **kwargs)
 
     if cls_outer:
         return dec(cls_outer)
     return dec
-
-
-
 
 
 
@@ -187,7 +272,7 @@ if __name__ == '__main__':
 
     @autoslot_dataclass
     class T(A):
-        t: int = TypeRestrictedDescriptor(backed_name='x')
+        t: int = TypeRestrictedDescriptor(backed_name='z')
 
 
     t = T([])
@@ -195,11 +280,12 @@ if __name__ == '__main__':
     print(t.x)
 
     l = [42, 24, 4]
-    a = B(l)
+    a = B([1], 'abc', 24)
 
-    print(A.__slots__)
-    print(a.__slots__)
-    print(a.__dict__)
+    b = B([2], 'de', 25)
+    print('!!!', a.y, a.x, b.y, b.x)
+
+
 
     c = C()
 
