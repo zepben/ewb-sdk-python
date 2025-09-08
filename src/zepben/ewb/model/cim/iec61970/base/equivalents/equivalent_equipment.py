@@ -5,11 +5,11 @@
 
 __all__ = ["EquivalentEquipment"]
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
-@autoslot_dataclass
+@dataslot
 class EquivalentEquipment(ConductingEquipment):
     """
     The class represents equivalent objects that are the result of a network reduction. The class is the base for equivalent objects of different types.

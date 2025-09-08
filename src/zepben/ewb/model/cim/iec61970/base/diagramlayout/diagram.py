@@ -9,7 +9,7 @@ __all__ = ["Diagram"]
 
 from typing import Optional, Dict, List, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
-@autoslot_dataclass
+@dataslot
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation

@@ -5,9 +5,11 @@
 
 __all__ = ["Connector"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class Connector(ConductingEquipment):
     """
     A conductor, or group of conductors, with negligible impedance, that serve to connect other conducting equipment

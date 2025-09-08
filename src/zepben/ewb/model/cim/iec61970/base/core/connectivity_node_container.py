@@ -5,11 +5,11 @@
 
 __all__ = ["ConnectivityNodeContainer"]
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 
 
-@autoslot_dataclass
+@dataslot
 class ConnectivityNodeContainer(PowerSystemResource):
     """
     A base class for all objects that may contain connectivity nodes or topological nodes.

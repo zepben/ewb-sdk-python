@@ -5,9 +5,9 @@
 
 __all__ = ["EnergyConsumerPhase"]
 
-from dataclasses import field, InitVar
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot, NoResetDescriptor
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -15,11 +15,11 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 
 
+@dataslot
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
-    _energy_consumer: Optional['EnergyConsumer'] = field(init=False, repr=False)
-    energy_consumer: InitVar[EnergyConsumer | None]
+    energy_consumer: Optional['EnergyConsumer'] = NoResetDescriptor()
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
@@ -42,15 +42,3 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     def __post_init__(self, energy_consumer: EnergyConsumer=None):
         self.energy_consumer = energy_consumer
-
-    @property
-    def energy_consumer(self):
-        """The `EnergyConsumer` that has this phase."""
-        return self._energy_consumer
-
-    @energy_consumer.setter
-    def energy_consumer(self, ec):
-        if self._energy_consumer is None or self._energy_consumer is ec:
-            self._energy_consumer = ec
-        else:
-            raise ValueError(f"energy_consumer for {str(self)} has already been set to {self._energy_consumer}, cannot reset this field to {ec}")

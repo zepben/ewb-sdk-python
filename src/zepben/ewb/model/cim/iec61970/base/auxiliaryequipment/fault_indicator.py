@@ -5,9 +5,11 @@
 
 __all__ = ["FaultIndicator"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 
 
+@dataslot
 class FaultIndicator(AuxiliaryEquipment):
     """
     A FaultIndicator is typically only an indicator (which may or may not be remotely monitored), and not a piece of

@@ -9,6 +9,7 @@ __all__ = ["EnergyConsumer"]
 
 from typing import Optional, List, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 
+@dataslot
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 

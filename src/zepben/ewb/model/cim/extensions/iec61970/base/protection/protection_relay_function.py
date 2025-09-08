@@ -7,9 +7,9 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayFunction"]
 
-from typing import Optional, List, Iterable, Callable, TYPE_CHECKING
+from typing import Optional, List, Callable, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass, TypeRestrictedDescriptor
+from zepben.ewb.collections.autoslot import dataslot, TypeRestrictedDescriptor
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @zbex
-@autoslot_dataclass
+@dataslot
 class ProtectionRelayFunction(PowerSystemResource):
     """
     [ZBEX]

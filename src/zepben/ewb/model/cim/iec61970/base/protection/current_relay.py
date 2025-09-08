@@ -7,11 +7,11 @@ __all__ = ["CurrentRelay"]
 
 from typing import Optional
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
-@autoslot_dataclass
+@dataslot
 class CurrentRelay(ProtectionRelayFunction):
     """A device that checks current flow values in any direction or designated direction."""
 

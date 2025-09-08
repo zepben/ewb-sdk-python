@@ -9,6 +9,7 @@ __all__ = ["Sensor"]
 
 from typing import Optional, TYPE_CHECKING, Iterable
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
+@dataslot
 class Sensor(AuxiliaryEquipment):
     """
     This class describes devices that transform a measured quantity into signals that can be presented at displays,

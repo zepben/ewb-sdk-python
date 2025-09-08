@@ -5,9 +5,11 @@
 
 __all__ = ["BusbarSection"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.wires.connector import Connector
 
 
+@dataslot
 class BusbarSection(Connector):
     """
     A conductor, or group of conductors, with negligible impedance, that serve to connect other conducting equipment within a single substation.

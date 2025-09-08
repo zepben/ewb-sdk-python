@@ -7,7 +7,7 @@ __all__ = ["BatteryUnit"]
 
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 
-@autoslot_dataclass
+@dataslot
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
 

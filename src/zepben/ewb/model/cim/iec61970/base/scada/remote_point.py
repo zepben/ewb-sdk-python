@@ -5,9 +5,11 @@
 
 __all__ = ["RemotePoint"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
+@dataslot
 class RemotePoint(IdentifiedObject):
     """
     For a RTU remote points correspond to telemetered values or control outputs. Other units (e.g. control centers)

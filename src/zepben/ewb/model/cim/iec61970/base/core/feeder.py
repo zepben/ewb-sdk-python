@@ -9,7 +9,7 @@ __all__ = ["Feeder"]
 
 from typing import Optional, Dict, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass, ValidatedDescriptor
+from zepben.ewb.collections.autoslot import dataslot, ValidatedDescriptor
 from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-@autoslot_dataclass
+@dataslot
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.

@@ -7,7 +7,7 @@ __all__ = ["Measurement"]
 
 from typing import Optional, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 
 
-@autoslot_dataclass
+@dataslot
 class Measurement(IdentifiedObject):
     """
     A Measurement represents any measured, calculated or non-measured non-calculated quantity. Any piece of equipment

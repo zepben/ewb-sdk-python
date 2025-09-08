@@ -7,9 +7,11 @@ __all__ = ["Breaker"]
 
 from typing import Optional
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 
 
+@dataslot
 class Breaker(ProtectedSwitch):
     """
     A mechanical switching device capable of making, carrying, and breaking currents under normal circuit conditions

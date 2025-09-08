@@ -7,12 +7,14 @@ __all__ = ["AuxiliaryEquipment"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@dataslot
 class AuxiliaryEquipment(Equipment):
     """
     `AuxiliaryEquipment` describe equipment that is not performing any primary functions but support for the

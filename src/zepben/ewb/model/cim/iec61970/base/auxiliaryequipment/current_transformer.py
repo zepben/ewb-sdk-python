@@ -7,12 +7,14 @@ __all__ = ["CurrentTransformer"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 
 
+@dataslot
 class CurrentTransformer(Sensor):
     """
     Instrument transformer used to measure electrical qualities of the circuit that is being protected and/or monitored.

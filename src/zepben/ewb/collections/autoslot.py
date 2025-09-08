@@ -248,7 +248,7 @@ def _autoslot(cls, slots=True, **kwargs):
     eq_default=True,
     order_default=False,
 )
-def autoslot_dataclass(cls_outer=None, *, slots=True, **kwargs):
+def dataslot(cls_outer=None, *, slots=True, **kwargs):
     def dec(cls):
         return _autoslot(cls, slots=slots, **kwargs)
 
@@ -260,7 +260,7 @@ def autoslot_dataclass(cls_outer=None, *, slots=True, **kwargs):
 
 if __name__ == '__main__':
 
-    @autoslot_dataclass
+    @dataslot
     class A:
         l: List[int]
 
@@ -274,14 +274,14 @@ if __name__ == '__main__':
     class C:
         l1 : List[int] = None
 
-    @autoslot_dataclass
+    @dataslot
     class B(A):
         l2: List[int] = None
 
         c: C = WeakrefDescriptor()
 
 
-    @autoslot_dataclass
+    @dataslot
     class T(A):
         t: int = TypeRestrictedDescriptor(backed_name='z')
 

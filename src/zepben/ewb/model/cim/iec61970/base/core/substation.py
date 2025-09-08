@@ -9,7 +9,7 @@ __all__ = ["Substation"]
 
 from typing import Optional, List, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
-@autoslot_dataclass
+@dataslot
 class Substation(EquipmentContainer):
     """
     A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk

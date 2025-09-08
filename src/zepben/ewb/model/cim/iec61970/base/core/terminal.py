@@ -7,9 +7,8 @@ from __future__ import annotations
 
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
-from weakref import ref, ReferenceType
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass, NoResetDescriptor, WeakrefDescriptor
+from zepben.ewb.collections.autoslot import dataslot, NoResetDescriptor, WeakrefDescriptor
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ["Terminal"]
 
 
-@autoslot_dataclass
+@dataslot
 class Terminal(AcDcTerminal):
     """
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.

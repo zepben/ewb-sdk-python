@@ -5,9 +5,11 @@
 
 __all__ = ["Ground"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class Ground(ConductingEquipment):
     """
     A point where the system is grounded used for connecting conducting equipment to ground. The power system model can have any number of grounds.

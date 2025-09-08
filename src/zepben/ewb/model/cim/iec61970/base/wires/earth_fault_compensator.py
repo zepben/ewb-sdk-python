@@ -7,9 +7,11 @@ __all__ = ["EarthFaultCompensator"]
 
 from typing import Optional
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class EarthFaultCompensator(ConductingEquipment):
     """
     A conducting equipment used to represent a connection to ground which is typically used to compensate earth faults. An earth fault compensator device

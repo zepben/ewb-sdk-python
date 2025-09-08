@@ -6,11 +6,12 @@
 __all__ = ["AcLineSegment"]
 
 from dataclasses import field
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
+@dataslot
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,

@@ -9,7 +9,7 @@ __all__ = ["DiagramObject"]
 
 from typing import Optional, List, Callable, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass, NoResetDescriptor
+from zepben.ewb.collections.autoslot import dataslot, NoResetDescriptor
 from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
 
-@autoslot_dataclass
+@dataslot
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything

@@ -5,11 +5,11 @@
 
 __all__ = ["Discrete"]
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
-@autoslot_dataclass
+@dataslot
 class Discrete(Measurement):
     """Discrete represents a discrete Measurement, i.e. a Measurement representing discrete values, e.g. a Breaker position."""
     pass

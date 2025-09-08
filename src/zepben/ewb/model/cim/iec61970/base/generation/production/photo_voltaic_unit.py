@@ -5,11 +5,11 @@
 
 __all__ = ["PhotoVoltaicUnit"]
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
 
 
-@autoslot_dataclass
+@dataslot
 class PhotoVoltaicUnit(PowerElectronicsUnit):
     """A photovoltaic device or an aggregation of such devices."""
     pass

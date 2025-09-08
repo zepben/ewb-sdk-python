@@ -7,6 +7,7 @@ __all__ = ["Conductor"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 if TYPE_CHECKING:
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
 
 
+@dataslot
 class Conductor(ConductingEquipment):
     """
     Combination of conducting material with consistent electrical characteristics, building a single electrical

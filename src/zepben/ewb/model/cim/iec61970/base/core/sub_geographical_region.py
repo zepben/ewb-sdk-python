@@ -9,7 +9,7 @@ __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, TYPE_CHECKING
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
-@autoslot_dataclass
+@dataslot
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.

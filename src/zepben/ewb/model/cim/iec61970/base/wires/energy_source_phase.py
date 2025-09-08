@@ -7,6 +7,7 @@ __all__ = ["EnergySourcePhase"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot, NoResetDescriptor
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -14,32 +15,16 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_source import EnergySource
 
 
+@dataslot
 class EnergySourcePhase(PowerSystemResource):
     """
     A single phase of an energy source.
     """
 
-    _energy_source: Optional['EnergySource'] = None
+    energy_source: Optional['EnergySource'] = NoResetDescriptor()
     """The `zepben.ewb.model.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE
     """A `zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
-
-    def __init__(self, energy_source: 'EnergySource' = None, **kwargs):
-        super(EnergySourcePhase, self).__init__(**kwargs)
-        if energy_source:
-            self.energy_source = energy_source
-
-    @property
-    def energy_source(self):
-        """The `EnergySource` with this `EnergySourcePhase`"""
-        return self._energy_source
-
-    @energy_source.setter
-    def energy_source(self, es):
-        if self._energy_source is None or self._energy_source is es:
-            self._energy_source = es
-        else:
-            raise ValueError(f"energy_source for {str(self)} has already been set to {self._energy_source}, cannot reset this field to {es}")

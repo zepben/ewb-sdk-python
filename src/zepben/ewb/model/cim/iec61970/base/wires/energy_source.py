@@ -7,21 +7,23 @@ from __future__ import annotations
 
 __all__ = ["EnergySource"]
 
-from typing import List, Optional, Generator, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
+from zepben.ewb.collections.mrid_list import MRIDList
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 
 
+@dataslot
 class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
     """
 
-    _energy_source_phases: Optional[List[EnergySourcePhase]] = None
+    energy_source_phases: Optional[List[EnergySourcePhase]] = None
 
     active_power: Optional[float] = None
     """
@@ -111,22 +113,19 @@ class EnergySource(EnergyConnection):
     x0_max: Optional[float] = None
     """Maximum zero sequence Thevenin reactance."""
 
-    def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
-        super(EnergySource, self).__init__(**kwargs)
-        if energy_source_phases:
-            for phase in energy_source_phases:
-                self.add_phase(phase)
+    def __post_init__(self):
+        self.energy_source_phases: MRIDList[EnergySourcePhase] = MRIDList(self.energy_source_phases)
 
     @property
-    def phases(self) -> Generator[EnergySourcePhase, None, None]:
+    def phases(self):
         """
         The `EnergySourcePhase`s for this `EnergySource`.
         """
-        return ngen(self._energy_source_phases)
+        return self.energy_source_phases
 
     def num_phases(self):
         """Return the number of `EnergySourcePhase`s associated with this `EnergySource`"""
-        return nlen(self._energy_source_phases)
+        return len(self.energy_source_phases)
 
     def get_phase(self, mrid: str) -> EnergySourcePhase:
         """
@@ -136,7 +135,7 @@ class EnergySource(EnergyConnection):
         Returns The `EnergySourcePhase` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._energy_source_phases, mrid)
+        return self.energy_source_phases.get_by_mrid(mrid)
 
     def add_phase(self, phase: EnergySourcePhase) -> EnergySource:
         """
@@ -146,10 +145,7 @@ class EnergySource(EnergyConnection):
         Returns A reference to this `EnergySource` to allow fluent use.
         Raises `ValueError` if another `EnergySourcePhase` with the same `mrid` already exists for this `EnergySource`.
         """
-        if self._validate_reference(phase, self.get_phase, "An EnergySourcePhase"):
-            return self
-        self._energy_source_phases = list() if self._energy_source_phases is None else self._energy_source_phases
-        self._energy_source_phases.append(phase)
+        self.energy_source_phases.add(phase)
         return self
 
     def remove_phase(self, phase: EnergySourcePhase) -> EnergySource:
@@ -160,7 +156,7 @@ class EnergySource(EnergyConnection):
         Returns A reference to this `EnergySource` to allow fluent use.
         Raises `ValueError` if `phase` was not associated with this `EnergySource`.
         """
-        self._energy_source_phases = safe_remove(self._energy_source_phases, phase)
+        self.energy_source_phases.remove(phase)
         return self
 
     def clear_phases(self) -> EnergySource:
@@ -168,5 +164,5 @@ class EnergySource(EnergyConnection):
         Clear all phases.
         Returns A reference to this `EnergySource` to allow fluent use.
         """
-        self._energy_source_phases = None
+        self.energy_source_phases.clear()
         return self

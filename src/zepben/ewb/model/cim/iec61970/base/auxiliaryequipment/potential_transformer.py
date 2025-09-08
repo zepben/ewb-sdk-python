@@ -7,6 +7,7 @@ __all__ = ["PotentialTransformer"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 
 
+@dataslot
 class PotentialTransformer(Sensor):
     """
     Instrument transformer (also known as Voltage Transformer) used to measure electrical qualities of the circuit that

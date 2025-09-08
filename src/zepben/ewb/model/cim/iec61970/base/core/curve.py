@@ -7,13 +7,13 @@ __all__ = ["Curve"]
 
 from typing import Optional, List
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.curve_list import CurveList
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-@autoslot_dataclass
+@dataslot
 class Curve(IdentifiedObject):
     """
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.

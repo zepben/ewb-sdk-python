@@ -5,9 +5,11 @@
 
 __all__ = ["EnergyConnection"]
 
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class EnergyConnection(ConductingEquipment):
     """
     A connection of energy generation or consumption on the power system phases.

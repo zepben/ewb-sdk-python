@@ -11,7 +11,7 @@ import logging
 from abc import ABCMeta
 from typing import Callable, Any, List, Optional, overload, TypeVar
 
-from zepben.ewb.collections.autoslot import autoslot_dataclass
+from zepben.ewb.collections.autoslot import dataslot
 from zepben.ewb.collections.zepben_list import ZepbenList
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
@@ -20,7 +20,7 @@ from zepben.ewb.util import require, CopyableUUID
 logger = logging.getLogger(__name__)
 
 
-@autoslot_dataclass
+@dataslot
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.
