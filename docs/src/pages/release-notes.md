@@ -71,6 +71,7 @@ a 1.0.0 release.
 
 ## [1.0.0] - 2025-08-28
 ### Breaking Changes
+* Removed support for Python 3.9. Upgrade your Python environment to at least 3.10.
 * Renamed the package to `zepben.ewb`. You will need to update all your imports `zepben.evolve.*` -> `zepben.ewb.*`. This also updates the pypi artifact to
   `zepben.ewb`.
 * Renamed `length_from_t1_or_0` to `length_from_t1_or_0`.
