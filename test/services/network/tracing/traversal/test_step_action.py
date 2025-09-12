@@ -48,3 +48,14 @@ class TestStepAction:
         step_action.apply(expected_item, expected_ctx)
 
         assert captured == [(expected_item, expected_ctx)]
+
+    async def test_async_step_action(self):
+        captured = []
+
+        class MyStepAction(StepAction):
+            async def _apply(self, item: T, context: StepContext):
+                captured.append(item)
+
+        step_action = MyStepAction()
+        await step_action.apply(1, None)
+        assert captured == [1]

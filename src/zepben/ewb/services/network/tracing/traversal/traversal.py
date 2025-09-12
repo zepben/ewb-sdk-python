@@ -390,10 +390,9 @@ class Traversal(Generic[T, D]):
 
     async def apply_step_actions(self, item: T, context: StepContext) -> D:
         for it in self.step_actions:
-            try:
-                await it.apply(item, context)
-            except TypeError:
-                pass
+            _apply = it.apply(item, context)
+            if inspect.iscoroutine(_apply):
+                await _apply
         return self
 
     def add_context_value_computer(self, computer: ContextValueComputer[T]) -> D:

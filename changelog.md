@@ -11,6 +11,7 @@
 
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
+* `TypeError`s occurring in `StepAction`s will no longer silently pass
 
 ### Notes
 * None.
