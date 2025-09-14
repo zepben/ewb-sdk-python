@@ -510,3 +510,39 @@ class TestTraversal:
         await traversal.run(can_stop_on_start_item=False)
 
         assert steps == [1, 11, 2, 12]
+
+    @pytest.mark.asyncio
+    async def test_can_use_async_step_action(self):
+        steps = []
+
+        class MyStepAction(StepAction):
+            async def _apply(self, item: T, context: StepContext):
+                steps.append(item)
+
+        traversal = (
+            _create_traversal(queue=TraversalQueue.breadth_first())
+            .add_stop_condition(lambda item, x: True)
+            .add_step_action(MyStepAction())
+            .add_start_item(1)
+            .add_start_item(11)
+        )
+        await traversal.run(can_stop_on_start_item=False)
+
+        assert steps == [1, 11, 2, 12]
+
+    @pytest.mark.asyncio
+    async def test_errors_in_step_action_arent_masked(self):
+        class MyStepAction(StepAction):
+            async def _apply(self, item: T, context: StepContext):
+                # noinspection PyTypeChecker
+                int(1 + "abc")
+
+        traversal = (
+            _create_traversal(queue=TraversalQueue.breadth_first())
+            .add_stop_condition(lambda item, x: True)
+            .add_step_action(MyStepAction())
+            .add_start_item(1)
+            .add_start_item(11)
+        )
+        with pytest.raises(TypeError):
+            await traversal.run(can_stop_on_start_item=False)
