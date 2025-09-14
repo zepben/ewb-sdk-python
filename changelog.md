@@ -11,6 +11,7 @@
 
 ### Fixes
 * Fix an ImportError being raised when calling `Conductor.is_underground()`
+* `TypeError`s occurring in `StepAction`s will no longer silently pass
 
 ### Notes
 * None.
