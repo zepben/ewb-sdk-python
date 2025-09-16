@@ -22,7 +22,7 @@ class CurrentTransformer(Sensor):
     A typical secondary current rating would be 5A.
     """
 
-    core_burden: Optional[int] = None
+    core_burden: int | None = None
     """Power burden of the CT core in watts."""
 
     @property

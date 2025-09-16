@@ -12,6 +12,9 @@ from typing import ClassVar, List
 from typing_extensions import dataclass_transform
 
 
+class BackingValue:
+    ...
+
 class BackedDescriptor(metaclass=ABCMeta):
 
     def __init__(self, default=None, backed_name=None):
@@ -179,8 +182,6 @@ def amend_init(obj: type, cls: type):
         for attr, val in kwargs.items():
             add_kv(attr, val)
 
-        print('= ', dc_kwargs, descriptor_values)
-
         self.__dataclass_init__(**dc_kwargs)
         for k, v in descriptor_values.items():
             setattr(self, k, v)
@@ -195,9 +196,14 @@ def _validate_backed_name(cls: type, attr, _attr):
     is not already in use.
     """
     if _attr in cls.__annotations__:
+        an = cls.__annotations__[_attr]
+        if an == ClassVar or an.__origin__ == ClassVar:
+            val = cls.__dict__.get(_attr)
+            if isinstance(val, BackingValue):
+                return
         raise AttributeError(f'Cannot create a descriptor {attr} ' +
-                             f'backed by field {_attr} ' +
-                             f'because the field already exists in class {cls.__name__}')
+                         f'backed by field {_attr} ' +
+                         f'because the field already exists in class {cls.__name__}')
     for base in cls.__bases__:
         if not hasattr(base, '__annotations__'):
             continue
@@ -283,12 +289,15 @@ if __name__ == '__main__':
 
     @dataslot
     class T(A):
-        t: int = TypeRestrictedDescriptor(backed_name='z')
+        _z: ClassVar = BackingValue()
+        t: int = TypeRestrictedDescriptor(backed_name='_z')
 
 
     t = T([])
     t.t = 24
     print(t.x)
+    print(t.t)
+    # print(t._z)
 
     l = [42, 24, 4]
     a = B([1], 'abc', 24)
@@ -318,16 +327,18 @@ if __name__ == '__main__':
     print(a.y)
 
 
-    a.y = 'cool'
+    try:
+        a.y = 'cool'
+    except ValueError as e:
+        print(e)
     print(a)
 
-    a.y = 'cool'
-    print(1)
 
     a.l = []
     a.x = 24
     print(a)
 
-    a.y = 'cool2'
-    print(2)
-    t.t = C()
+    try:
+        a.y = 'cool'
+    except ValueError as e:
+        print(e)

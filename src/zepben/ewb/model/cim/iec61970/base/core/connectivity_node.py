@@ -7,10 +7,13 @@ from __future__ import annotations
 
 __all__ = ["ConnectivityNode"]
 
-from typing import List, TYPE_CHECKING, Optional
+from typing import List, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
+from zepben.ewb import Switch
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.terminal_list import TerminalList
+from zepben.ewb.collections.boilerplate import MRIDListAccessor
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 if TYPE_CHECKING:
@@ -22,74 +25,34 @@ class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
-    terminals: Optional[List[Terminal]] = None
-
-    def __post_init__(self):
-        self.terminals : TerminalList = TerminalList(self.terminals)
+    terminals: List[Terminal] | None = MRIDListAccessor()
 
     def __iter__(self):
         return iter(self.terminals)
 
-    def num_terminals(self):
-        """
-        Get the number of `Terminal`s for this `ConnectivityNode`.
-        """
-        return len(self.terminals)
+    @deprecated("Use len(terminals) instead.")
+    def num_terminals(self) -> int: ...
 
-    def get_terminal(self, mrid: str) -> Terminal:
-        """
-        Get the `Terminal` for this `ConnectivityNode` identified by `mrid`
+    @deprecated("Use terminals[mrid] instead.")
+    def get_terminal(self, mrid: str) -> Terminal: ...
 
-        `mrid` The mRID of the required `Terminal`
-        Returns The `Terminal` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.terminals.get_by_mrid(mrid)
+    @deprecated("Use terminals.append(terminal) instead.")
+    def add_terminal(self, terminal: Terminal) -> ConnectivityNode: ...
 
-    def add_terminal(self, terminal: Terminal) -> ConnectivityNode:
-        """
-        Associate a `terminal.Terminal` with this `ConnectivityNode`
+    @deprecated("Use len(terminals) instead.")
+    def remove_terminal(self, terminal: Terminal) -> ConnectivityNode: ...
 
-        `terminal` The `Terminal` to add. Will only add to this object if it is not already associated.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConnectivityNode`.
-        """
-        if self._validate_reference(terminal, self.get_terminal, "A Terminal"):
-            return self
+    @deprecated("Use terminals.clear() instead.")
+    def clear_terminals(self) -> ConnectivityNode: ...
 
-        self.terminals.add(terminal)
-        return self
-
-    def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
-        """
-        Disassociate `terminal` from this `ConnectivityNode`.
-
-        `terminal` The `Terminal` to disassociate from this `ConnectivityNode`.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
-        """
-        self.terminals.remove(terminal)
-        return self
-
-    def clear_terminals(self) -> ConnectivityNode:
-        """
-        Clear all terminals.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        """
-        self.terminals.clear()
-        return self
 
     def is_switched(self):
         return self.get_switch() is not None
 
     def get_switch(self):
         for term in self.terminals:
-            try:
-                # All switches should implement is_open
-                _ = term.conducting_equipment.is_open()
-                return term.conducting_equipment
-            except AttributeError:
-                pass
+            if isinstance(ce := term.conducting_equipment, Switch):
+                return ce
         return None
 
 

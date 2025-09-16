@@ -7,10 +7,11 @@ from __future__ import annotations
 
 __all__ = ["Sensor"]
 
-from typing import Optional, TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, List
+from warnings import deprecated
 
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.mrid_list import MRIDList
+from zepben.ewb.collections.boilerplate import MRIDListAccessor, boilermaker
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 
 if TYPE_CHECKING:
@@ -18,70 +19,28 @@ if TYPE_CHECKING:
 
 
 @dataslot
+@boilermaker
 class Sensor(AuxiliaryEquipment):
     """
     This class describes devices that transform a measured quantity into signals that can be presented at displays,
     used in control or be recorded.
     """
 
-    relay_functions: Optional[Iterable[ProtectionRelayFunction]] = None
+    relay_functions: List[ProtectionRelayFunction] | None = MRIDListAccessor()
     """The relay functions influenced by this [Sensor]."""
 
 
-    def __post_init__(self):
-        _relay_functions = MRIDList(self.relay_functions)
-        self.relay_functions: MRIDList = _relay_functions
+    @deprecated("Use len(relay_functions) instead.")
+    def num_relay_functions(self) -> int: ...
 
+    @deprecated("Use relay_functions[mrid] instead.")
+    def get_item(self, mrid: str) -> ProtectionRelayFunction: ...
 
+    @deprecated("Use relay_functions.append(item) instead.")
+    def add_item(self, protection_relay_function: ProtectionRelayFunction) -> Sensor: ...
 
-    def num_relay_functions(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
+    @deprecated("Use len(relay_functions) instead.")
+    def remove_item(self, protection_relay_function: ProtectionRelayFunction) -> Sensor: ...
 
-        :return: The number of ProtectionRelayFunction influenced by this Sensor.
-        """
-        return len(self.relay_functions)
-
-    def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
-        """
-        Get a :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
-
-        :param mrid: The mRID of the desired ProtectionRelayFunction
-        :return: The ProtectionRelayFunction with the specified mRID if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return self.relay_functions.get_by_mrid(mrid)
-
-    def add_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        """
-        Associate this :class:`Sensor` with a :class:`ProtectionRelayFunction` it is influencing.
-
-        :param protection_relay_function: The ProtectionRelayFunction to associate with this Sensor.
-        :return: A reference to this Sensor for fluent use.
-        """
-        # if self._validate_reference(protection_relay_function, self.get_relay_function, "A ProtectionRelayFunction"):
-        #     return self
-
-        self.relay_functions.add(protection_relay_function)
-        return self
-
-    def remove_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        """
-        Disassociate this :class:`Sensor` from a :class:`ProtectionRelayFunction` it is influencing.
-
-        :param protection_relay_function: The ProtectionRelayFunction to disassociate from this Sensor.
-        :return: A reference to this Sensor for fluent use.
-        """
-        # self._relay_functions = safe_remove(self._relay_functions, protection_relay_function)
-        self.relay_functions.remove(protection_relay_function)
-        return self
-
-    def clear_relay_function(self) -> Sensor:
-        """
-        Disassociate all :class:`ProtectionRelayFunction` from this :class:`Sensor`.
-
-        :return: A reference to this Sensor for fluent use.
-        """
-        # self._relay_functions = None
-        self.relay_functions.clear()
-        return self
+    @deprecated("Use relay_functions.clear() instead.")
+    def clear_item(self) -> Sensor: ...

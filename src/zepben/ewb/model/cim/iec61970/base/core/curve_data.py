@@ -6,7 +6,6 @@
 __all__ = ["CurveData"]
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,8 +21,8 @@ class CurveData:
     y1_value: float
     """The data value of the first Y-axis variable, depending on the Y-axis units."""
 
-    y2_value: Optional[float] = None
+    y2_value: float | None = None
     """The data value of the second Y-axis variable (if present), depending on the Y-axis units."""
 
-    y3_value: Optional[float] = None
+    y3_value: float | None = None
     """The data value of the third Y-axis variable (if present), depending on the Y-axis units."""

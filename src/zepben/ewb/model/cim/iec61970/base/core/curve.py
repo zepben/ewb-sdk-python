@@ -2,13 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from __future__ import annotations
 __all__ = ["Curve"]
 
-from typing import Optional, List
+from typing import Optional, List, ClassVar
 
-from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.curve_list import CurveList
+from typing_extensions import deprecated
+
+from zepben.ewb.collections.autoslot import dataslot, BackingValue
+from zepben.ewb.collections.boilerplate import ListAccessor, NamingOptions, ListActions
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -19,18 +21,17 @@ class Curve(IdentifiedObject):
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.
     """
 
-    data: Optional[List[CurveData]] = None
+    _data: ClassVar[List[CurveData]] = BackingValue()
+    data: List[CurveData] | None = ListAccessor(
+        naming_options=NamingOptions(
+            singular=True,
+            aliases={
+                ListActions.ADD: 'add_curve_data'
+            }
+        ))
 
-    def __post_init__(self):
-        """
-        `data` A list of `CurveData`s to associate with this `Curve`.
-        """
-        _data = self.data
-        self.data : CurveList = CurveList(self.data)
-
-    def num_data(self):
-        """Return the number of :class:`CurveData` associated with this :class:`Curve`."""
-        return len(self.data)
+    @deprecated("Use len(data) instead.")
+    def num_data(self) -> int: ...
 
     def get_data(self, x: float) -> CurveData:
         """
@@ -40,7 +41,10 @@ class Curve(IdentifiedObject):
         :returns: The :class:`CurveData` with the specified `x` if it exists.
         :raises KeyError: When no `CurveData` was found with `x`.
         """
-        return self.data.get(x)
+        try:
+            return next(it for it in self._data if it.x_value == x)
+        except StopIteration:
+            raise KeyError(x)
 
     def __getitem__(self, x: float) -> CurveData:
         """
@@ -62,31 +66,16 @@ class Curve(IdentifiedObject):
         :param y3: The data value of the third Y-axis variable (if present), depending on the Y-axis units.
         :raises ValueError: if a :class:`CurveData` for the provided `x` value already exists for this :class:`Curve`.
         """
-        self.data.add_data(x, y1, y2, y3)
+        self._data.append(CurveData(x, y1, y2, y3))
         return self
 
-    def add_curve_data(self, curve_data: CurveData) -> 'Curve':
-        """
-        Associate a :class:`CurveData` with this :class:`Curve`.
+    @deprecated("Use data.append(curve_data) instead.")
+    def add_curve_data(self, curve_data: CurveData) -> Curve: ...
 
-        :param curve_data: The :class:`CurveData` to associate with this :class:`Curve`.
-        :returns: A reference to this :class:`Curve` to allow fluent use.
-        :raises ValueError: If another :class:`CurveData` with the same `x_value` already exists for this :class:`Curve`.
-        """
-        return self.data.add(curve_data)
+    @deprecated("Use len(items) instead.")
+    def remove_data(self, curve_data: CurveData) -> 'Curve': ...
 
-    def remove_data(self, curve_data: CurveData) -> 'Curve':
-        """
-        Disassociate a :class:`CurveData` from this :class:`Curve`.
-
-        :param curve_data: The :class:`CurveData` to disassociate from this :class:`Curve`.
-        :returns: A reference to this :class:`Curve` to allow fluent use.
-        :raises ValueError: If `curve_data` was not associated with this :class:`Curve`.
-        """
-        self.data.remove(curve_data)
-        return self
-
-    def remove_data_at(self, x: float) -> CurveData:
+    def remove_data_at(self, x: float) -> 'CurveData':
         """
         Disassociate a :class:`CurveData` from this :class:`Curve` based on its `x_value`.
 
@@ -94,12 +83,9 @@ class Curve(IdentifiedObject):
         :returns: A reference to the removed :class:`CurveData`.
         :raises IndexError: If no :class:`CurveData` with a value of `x` was not associated with this :class:`Curve`.
         """
-        return self.data.remove_at(x)
+        cd = self[x]
+        self._data.remove(cd)
+        return cd
 
-    def clear_data(self) -> 'Curve':
-        """
-        Clear all :class:`CurveData` associated with this :class:`Curve`.
-        :returns: A reference to this :class:`Curve` to allow fluent use.
-        """
-        self.data.clear()
-        return self
+    @deprecated("Use data.clear() instead.")
+    def clear_data(self) -> 'Curve': ...
