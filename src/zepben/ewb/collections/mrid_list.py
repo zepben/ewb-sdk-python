@@ -9,7 +9,7 @@ from typing import TypeVar, TYPE_CHECKING
 from zepben.ewb.collections.zepben_list import ZepbenList
 
 if TYPE_CHECKING:
-    from zepben.ewb import IdentifiedObject
+    pass
 
 T_MRID = TypeVar('T_MRID', bound='IdentifiedObject')
 
@@ -36,7 +36,7 @@ class MRIDList(ZepbenList[T_MRID]):
         return super().__getitem__(identifier)
 
     def add(self, item: T_MRID, safe: bool=False):
-        if (other := self.get_by_mrid(item.mrid)) is not None:
+        if (other := self.get_by_mrid(item.mrid, safe=False)) is not None:
             if not safe:
                 if item is not other:
                     self.error_duplicate(item)

@@ -10,7 +10,7 @@ from typing import Optional, List, ClassVar
 from typing_extensions import deprecated
 
 from zepben.ewb.collections.autoslot import dataslot, BackingValue
-from zepben.ewb.collections.boilerplate import ListAccessor, NamingOptions, ListActions
+from zepben.ewb.collections.boilerplate import ListAccessor, NamingOptions, ListActions, MRIDListRouter, custom_get, custom_add
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -21,18 +21,12 @@ class Curve(IdentifiedObject):
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.
     """
 
-    _data: ClassVar[List[CurveData]] = BackingValue()
-    data: List[CurveData] | None = ListAccessor(
-        naming_options=NamingOptions(
-            singular=True,
-            aliases={
-                ListActions.ADD: 'add_curve_data'
-            }
-        ))
+    data: List[CurveData] | None = ListAccessor()
 
-    @deprecated("Use len(data) instead.")
-    def num_data(self) -> int: ...
+    def _retype(self):
+        self.data: MRIDListRouter = ...
 
+    @custom_get(data)
     def get_data(self, x: float) -> CurveData:
         """
         Get the :class:`CurveData` for this :class:`Curve` identified by its `x_value`.
@@ -42,7 +36,7 @@ class Curve(IdentifiedObject):
         :raises KeyError: When no `CurveData` was found with `x`.
         """
         try:
-            return next(it for it in self._data if it.x_value == x)
+            return next(it for it in self.data if it.x_value == x)
         except StopIteration:
             raise KeyError(x)
 
@@ -56,6 +50,7 @@ class Curve(IdentifiedObject):
         """
         return self.get_data(x)
 
+    @custom_add(data)
     def add_data(self, x: float, y1: float, y2: Optional[float], y3: Optional[float]) -> 'Curve':
         """
         Add a data point to this :class:`Curve`.
@@ -66,14 +61,8 @@ class Curve(IdentifiedObject):
         :param y3: The data value of the third Y-axis variable (if present), depending on the Y-axis units.
         :raises ValueError: if a :class:`CurveData` for the provided `x` value already exists for this :class:`Curve`.
         """
-        self._data.append(CurveData(x, y1, y2, y3))
+        self.data.append_unchecked(CurveData(x, y1, y2, y3))
         return self
-
-    @deprecated("Use data.append(curve_data) instead.")
-    def add_curve_data(self, curve_data: CurveData) -> Curve: ...
-
-    @deprecated("Use len(items) instead.")
-    def remove_data(self, curve_data: CurveData) -> 'Curve': ...
 
     def remove_data_at(self, x: float) -> 'CurveData':
         """
@@ -84,8 +73,17 @@ class Curve(IdentifiedObject):
         :raises IndexError: If no :class:`CurveData` with a value of `x` was not associated with this :class:`Curve`.
         """
         cd = self[x]
-        self._data.remove(cd)
+        self.data.remove(cd)
         return cd
+
+    @deprecated("Use len(data) instead.")
+    def num_data(self) -> int: ...
+
+    @deprecated("Use data.append(curve_data) instead.")
+    def add_curve_data(self, curve_data: CurveData) -> Curve: ...
+
+    @deprecated("Use len(items) instead.")
+    def remove_data(self, curve_data: CurveData) -> 'Curve': ...
 
     @deprecated("Use data.clear() instead.")
     def clear_data(self) -> 'Curve': ...

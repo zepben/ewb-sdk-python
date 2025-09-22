@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, List
 from warnings import deprecated
 
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.boilerplate import MRIDListAccessor, boilermaker
+from zepben.ewb.collections.boilerplate import MRIDListAccessor, boilermaker, MRIDListRouter
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 
 if TYPE_CHECKING:
@@ -28,6 +28,9 @@ class Sensor(AuxiliaryEquipment):
 
     relay_functions: List[ProtectionRelayFunction] | None = MRIDListAccessor()
     """The relay functions influenced by this [Sensor]."""
+
+    def _retype(self):
+        self.relay_functions: MRIDListRouter = ...
 
 
     @deprecated("Use len(relay_functions) instead.")

@@ -13,7 +13,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb import Switch
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.boilerplate import MRIDListAccessor
+from zepben.ewb.collections.boilerplate import MRIDListAccessor, MRIDListRouter
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 if TYPE_CHECKING:
@@ -26,6 +26,9 @@ class ConnectivityNode(IdentifiedObject):
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
     terminals: List[Terminal] | None = MRIDListAccessor()
+
+    def _retype(self):
+        self.terminals: MRIDListRouter = ...
 
     def __iter__(self):
         return iter(self.terminals)

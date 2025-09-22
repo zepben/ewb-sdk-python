@@ -70,7 +70,8 @@ class ZepbenList(typing.Iterator[T]):
     def has(self, item: T):
         """
         Check if an item is inside this Zepben List.
-        Equivalent to `some_item in zblist_object`
+        Equivalent to `some_item in zblist_object`        return super()._make_add()
+
         """
         return item in self
 

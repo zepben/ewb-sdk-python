@@ -9,8 +9,10 @@ __all__ = ['EquipmentContainer']
 
 from typing import Optional, Dict, Generator, TYPE_CHECKING, TypeVar
 
+from typing_extensions import deprecated
+
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.mrid_dict import MRIDDict
+from zepben.ewb.collections.boilerplate import MRIDDictAccessor, NamingOptions, MRIDDictRouter
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 
 if TYPE_CHECKING:
@@ -28,58 +30,29 @@ class EquipmentContainer(ConnectivityNodeContainer):
     Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
     """
 
-    equipment: Optional[Dict[str, Equipment]] = None
+    equipment: Optional[Dict[str, Equipment]] = MRIDDictAccessor(
+        naming_options=NamingOptions(singular=True))
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __post_init__(self):
-        self.equipment: MRIDDict[Equipment] = MRIDDict(self.equipment)
+    def _retype(self):
+        self.equipment: MRIDDictRouter = ...
 
-    def num_equipment(self):
-        """
-        Returns The number of `Equipment` associated with this `EquipmentContainer`
-        """
-        return len(self.equipment)
+    @deprecated("Use len(equipment) instead.")
+    def num_equipment(self) -> int: ...
 
-    def get_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `EquipmentContainer` identified by `mrid`
+    @deprecated("Use equipment[mrid] instead.")
+    def get_equipment(self, mrid: str) -> Equipment: ...
 
-        `mrid` the mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.equipment.get_by_mrid(mrid)
+    @deprecated("Use equipment.append(equipment) instead.")
+    def add_equipment(self, equipment: Equipment) -> EquipmentContainer: ...
 
-    def add_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Associate `equipment` with this `EquipmentContainer`.
+    @deprecated("Use equipment.remove() instead.")
+    def remove_equipment(self, equipment: Equipment) -> EquipmentContainer: ...
 
-        `equipment` The `Equipment` to associate with this `EquipmentContainer`.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
-        """
-        self.equipment.add(equipment)
-        return self
+    @deprecated("Use equipment.clear() instead.")
+    def clear_equipment(self) -> EquipmentContainer: ...
 
-    def remove_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Disassociate `equipment` from this `EquipmentContainer`
-
-        `equipment` The `Equipment` to disassociate with this `EquipmentContainer`.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
-        """
-        self.equipment.remove(equipment)
-        return self
-
-    def clear_equipment(self) -> EquipmentContainer:
-        """
-        Clear all equipment.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        """
-        self.equipment.clear()
-        return self
-
+    @deprecated("Use equipment instead.")
     @property
     def current_equipment(self):
         """

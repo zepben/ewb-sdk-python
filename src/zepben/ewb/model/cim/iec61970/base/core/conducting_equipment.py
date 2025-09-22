@@ -9,10 +9,11 @@ __all__ = ['ConductingEquipment']
 
 import sys
 from typing import List, TYPE_CHECKING, Union
-from warnings import deprecated
 
-from zepben.ewb.collections.autoslot import dataslot, BackingValue
-from zepben.ewb.collections.boilerplate import MRIDListAccessor
+from typing_extensions import deprecated
+
+from zepben.ewb.collections.autoslot import dataslot
+from zepben.ewb.collections.boilerplate import MRIDListAccessor, MRIDListRouter, custom_get, custom_add
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import require
 
@@ -39,9 +40,12 @@ class ConductingEquipment(Equipment):
     used for transformers.
     """
 
-    _terminals: List[Terminal] | None = BackingValue()
     terminals: List[Terminal] | None = MRIDListAccessor()
     max_terminals = int(sys.maxsize)
+
+
+    def _retype(self):
+        self.terminals: MRIDListRouter = ...
 
     # pylint: disable=unused-argument
     def get_base_voltage(self, terminal: Terminal = None):
@@ -61,9 +65,8 @@ class ConductingEquipment(Equipment):
         """
         return self.base_voltage.nominal_voltage if self.base_voltage and self.base_voltage.nominal_voltage else 0
 
-    @deprecated("Use len(items) instead.")
-    def num_items(self) -> int: ...
 
+    @custom_get(terminals)
     def get_terminal(self, identifier: Union[int, str]):
         """
         Get the `Terminal` for this `ConductingEquipment` identified by `mrid` or `sequence_number`
@@ -82,9 +85,6 @@ class ConductingEquipment(Equipment):
         raise TypeError(f'Attempting to access MRID list with identifier ' +
                         f'of type {type(identifier)}.')
 
-    @deprecated("Use terminals[mrid] instead.")
-    def get_terminal_by_mrid(self, mrid: str) -> Terminal: ...
-
     def get_terminal_by_sn(self, sequence_number: int):
         """
         Get the `Terminal` on this `ConductingEquipment` by its `sequence_number`.
@@ -95,7 +95,7 @@ class ConductingEquipment(Equipment):
 
         Raises IndexError if no `Terminal` was found with sequence_number `sequence_number`.
         """
-        term = self._terminals[sequence_number-1] # Correct for one-indexed lists in UML
+        term = self.terminals[sequence_number-1] # Correct for one-indexed lists in UML
         if term.sequence_number != sequence_number:
             raise IndexError(f"No Terminal with sequence_number {sequence_number} " +
                              f"was found in ConductingEquipment {str(self)}")
@@ -104,6 +104,7 @@ class ConductingEquipment(Equipment):
     def __getitem__(self, item: int):
         return self.get_terminal_by_sn(item)
 
+    @custom_add(terminals)
     def add_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
         Associate `terminal` with this `ConductingEquipment`. If `terminal.sequence_number` == 0, the terminal will be assigned a sequence_number of
@@ -117,15 +118,24 @@ class ConductingEquipment(Equipment):
         # TODO: Remove this filth
         if self._validate_terminal(terminal):
             return self
-        self._terminals.append(terminal)
+        self.terminals.append_unchecked(terminal)
         return self
+
+    @deprecated("Use len(terminals) instead.")
+    def num_items(self) -> int:
+        return len(self.terminals)
+
+    @deprecated("Use terminals.get_by_mrid() instead.")
+    def get_terminal_by_mrid(self, mrid: str) -> Terminal:
+        return self.terminals.get_by_mrid(mrid)
 
     @deprecated("Use terminals.remove() instead.")
     def remove_terminal(self, terminal: Terminal) -> ConductingEquipment:
-        ...
+        return self.terminals.remove(terminal)
 
     @deprecated("Use terminals.clear() instead.")
-    def clear_terminals(self) -> ConductingEquipment: ...
+    def clear_terminals(self) -> ConductingEquipment:
+        return self.terminals.clear()
 
     def __repr__(self):
         return (f"{super(ConductingEquipment, self).__repr__()}, in_service={self.in_service}, "

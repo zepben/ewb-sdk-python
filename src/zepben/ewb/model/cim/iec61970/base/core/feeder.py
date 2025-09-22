@@ -7,9 +7,12 @@ from __future__ import annotations
 
 __all__ = ["Feeder"]
 
-from typing import Optional, Dict, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
+
+from typing_extensions import deprecated
 
 from zepben.ewb.collections.autoslot import dataslot, ValidatedDescriptor
+from zepben.ewb.collections.boilerplate import MRIDDictAccessor, MRIDDictRouter
 from zepben.ewb.collections.mrid_dict import MRIDDict
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 
@@ -26,59 +29,56 @@ class Feeder(EquipmentContainer):
     A collection of equipment for organizational purposes, used for grouping distribution resources.
     The organization of a feeder does not necessarily reflect connectivity or current operation state.
     """
-    def __validate_normal_head_terminal(self, term: Optional[Terminal]):
+    def __validate_normal_head_terminal(self, term: Terminal | None):
         if self.normal_head_terminal is None or self.normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
             return term
         else:
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
-    normal_head_terminal: Optional[Terminal] = ValidatedDescriptor(validate=__validate_normal_head_terminal)
+    normal_head_terminal: Terminal | None = ValidatedDescriptor(validate=__validate_normal_head_terminal)
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Optional[Substation] = None
+    normal_energizing_substation: Substation | None = None
     """The substation that nominally energizes the feeder. Also used for naming purposes."""
 
-    current_equipment: Optional[Dict[str, Equipment]] = None
+    current_equipment: Dict[str, Equipment] | None = MRIDDictAccessor()
     """The equipment contained in this feeder in the current state of the network."""
 
-    normal_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
+    normal_energized_lv_feeders: Dict[str, LvFeeder] | None = MRIDDictAccessor()
     """The LV feeders that are energized by this feeder in the normal state of the network."""
 
-    current_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
+    current_energized_lv_feeders: Dict[str, LvFeeder] | None = MRIDDictAccessor()
     """The LV feeders that are energized by this feeder in the current state of the network."""
 
-    def __post_init__(self, normal_head_terminal: Terminal = None):
-        if normal_head_terminal:
-            self.normal_head_terminal = normal_head_terminal
-        self.current_equipment: MRIDDict[Equipment] = MRIDDict(self.current_equipment)
-        self.normal_energized_lv_feeders: MRIDDict[LvFeeder] = MRIDDict(self.normal_energized_lv_feeders)
-        self.current_energized_lv_feeders: MRIDDict[LvFeeder] = MRIDDict(self.current_energized_lv_feeders)
+    def _retype(self):
+        self.current_equipment: MRIDDictRouter = ...
+        self.normal_energizing_substation: MRIDDictRouter = ...
+        self.current_energized_lv_feeders: MRIDDictRouter = ...
 
-    # @property
-    # def normal_head_terminal(self) -> Optional[Terminal]:
-    #     """The normal head terminal or terminals of the feeder."""
-    #     return self._normal_head_terminal
+    @deprecated("Use len(items) instead.")
+    def num_items(self) -> int:
+        ...
 
-    # @normal_head_terminal.setter
-    # def normal_head_terminal(self, term: Optional[Terminal]):
-    #     if self._normal_head_terminal is None or self._normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
-    #         self._normal_head_terminal = term
-    #     else:
-    #         raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
+    @deprecated("Use items[mrid] instead.")
+    def get_item(self, mrid: str) -> Equipment:
+        ...
 
+    @deprecated("Use items.append(item) instead.")
+    def add_item(self, item: Equipment) -> Feeder:
+        ...
+
+    @deprecated("Use items.remove() instead.")
+    def remove_item(self, item: Equipment) -> Feeder:
+        ...
+
+    @deprecated("Use items.clear() instead.")
+    def clear_items(self) -> Feeder:
+        ...
+    @deprecated("Use len(current_equipment) instead")
     def num_current_equipment(self):
-        """
-        Returns The number of `Equipment` associated with this `Feeder`
-        """
         return len(self.current_equipment)
 
+    @deprecated("Use current_equipment instead")
     def get_current_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `Feeder` identified by `mrid`
-
-        `mrid` The mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
         return self.current_equipment.get_by_mrid(mrid)
 
     def add_current_equipment(self, equipment: Equipment) -> Feeder:

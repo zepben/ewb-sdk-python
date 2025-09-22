@@ -8,11 +8,12 @@ from __future__ import annotations
 __all__ = ['Equipment']
 
 import datetime
-from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
+from typing import Generator, List, TYPE_CHECKING, TypeVar, Type, Iterable
+
+from typing_extensions import deprecated
 
 from zepben.ewb.collections.autoslot import dataslot
-from zepben.ewb.collections.mrid_list import MRIDList
-from zepben.ewb.collections.zepben_list import ZepbenList
+from zepben.ewb.collections.boilerplate import MRIDListAccessor, MRIDListRouter, NamingOptions
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
@@ -38,20 +39,20 @@ class Equipment(PowerSystemResource):
     """If True, the equipment is in service."""
     normally_in_service: bool = True
     """If True, the equipment is _normally_ in service."""
-    commissioned_date: Optional[datetime.datetime] = None
+    commissioned_date: datetime.datetime | None = None
     """The date this equipment was commissioned into service."""
 
-    usage_points: Optional[List[UsagePoint]] = None
-    equipment_containers: Optional[List[EquipmentContainer]] = None
-    operational_restrictions: Optional[List[OperationalRestriction]] = None
-    current_containers: Optional[List[EquipmentContainer]] = None
+    usage_points: List[UsagePoint] | None = MRIDListAccessor()
+    equipment_containers: List[EquipmentContainer] | None = MRIDListAccessor(
+        naming_options = NamingOptions(attr_alias='containers'))
+    operational_restrictions: List[OperationalRestriction] | None = MRIDListAccessor()
+    current_containers: List[EquipmentContainer] | None = MRIDListAccessor()
 
-    def __post_init__(self):
-        self.usage_points : MRIDList[UsagePoint] = MRIDList(self.usage_points)
-        self.equipment_containers : MRIDList[EquipmentContainer] = MRIDList(self.equipment_containers)
-        self.operational_restrictions : MRIDList[OperationalRestriction] = MRIDList(self.operational_restrictions)
-        self.current_containers : MRIDList[EquipmentContainer] = MRIDList(self.current_containers)
-
+    def _retype(self):
+        self.usage_points: MRIDListRouter = ...
+        self.equipment_containers: MRIDListRouter = ...
+        self.operational_restrictions: MRIDListRouter = ...
+        self.current_containers: MRIDListRouter = ...
 
     @property
     def sites(self) -> Generator[Site, None, None]:
@@ -114,17 +115,11 @@ class Equipment(PowerSystemResource):
         return self.current_containers.of_type(LvFeeder)
 
     @property
-    def containers(self) -> ZepbenList[EquipmentContainer]:
+    def containers(self) -> Iterable[EquipmentContainer]:
         """
         The `EquipmentContainer`s this equipment belongs to.
         """
         return self.equipment_containers
-
-    def num_containers(self) -> int:
-        """
-        Returns The number of `EquipmentContainer`s associated with this `Equipment`
-        """
-        return len(self.equipment_containers)
 
     def num_substations(self) -> int:
         """
@@ -144,192 +139,70 @@ class Equipment(PowerSystemResource):
         """
         return self.equipment_containers.num_of_type(Feeder)
 
-    def num_usage_points(self) -> int:
-        """
-        Returns The number of `UsagePoint`s associated with this `Equipment`
-        """
-        return len(self.usage_points)
+    # Equipment containers
 
-    def num_current_containers(self) -> int:
-        """
-        Returns The number of `EquipmentContainer`s associated with this `Equipment`
-        """
-        return len(self.current_containers)
+    @deprecated("Use len(equipment_containers) instead.")
+    def num_containers(self) -> int: ...
 
-    def num_operational_restrictions(self) -> int:
-        """
-        Returns The number of `OperationalRestriction`s associated with this `Equipment`
-        """
-        return len(self.operational_restrictions)
+    @deprecated("Use equipment_containers.get_by_mrid() instead")
+    def get_container(self, mrid: str) -> EquipmentContainer: ...
 
-    def get_container(self, mrid: str) -> EquipmentContainer:
-        """
-        Get the `EquipmentContainer` for this `Equipment` identified by `mrid`
+    @deprecated("Use equipment_containers.append() instead")
+    def add_container(self, ec: EquipmentContainer) -> Equipment: ...
 
-        `mrid` The mRID of the required `EquipmentContainer`
-        Returns The `EquipmentContainer` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.equipment_containers.get_by_mrid(mrid)
+    @deprecated("Use equipment_containers.remove() instead")
+    def remove_container(self, ec: EquipmentContainer) -> Equipment: ...
 
-    def add_container(self, ec: EquipmentContainer) -> Equipment:
-        """
-        Associate an `EquipmentContainer` with this `Equipment`
+    @deprecated("Use equipment_containers.clear() instead")
+    def clear_containers(self) -> Equipment: ...
 
-        `ec` The `EquipmentContainer` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
-        """
-        # TODO: remove this blasphemy
-        if self._validate_reference(ec, self.get_container, "An EquipmentContainer"):
-            return self
-        self.equipment_containers.add(ec)
-        return self
+    # Current containers
 
-    def remove_container(self, ec: EquipmentContainer) -> Equipment:
-        """
-        Disassociate `ec` from this `Equipment`.
+    @deprecated("Use len(current_containers) instead.")
+    def num_current_containers(self) -> int: ...
 
-        `ec` The `EquipmentContainer` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `ec` was not associated with this `Equipment`.
-        """
+    @deprecated("Use current_containers.get_by_mrid() instead")
+    def get_current_container(self, mrid: str) -> EquipmentContainer: ...
 
-        self.equipment_containers.remove(ec)
-        return self
+    @deprecated("Use current_containers.append() instead")
+    def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment: ...
 
-    def clear_containers(self) -> Equipment:
-        """
-        Clear all equipment.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self.equipment_containers.clear()
-        return self
+    @deprecated("Use current_containers.remove() instead")
+    def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment: ...
 
-    def get_current_container(self, mrid: str) -> EquipmentContainer:
-        """
-        Get the `EquipmentContainer` for this `Equipment` in the current state of the network, identified by `mrid`
+    @deprecated("Use current_containers.clear() instead")
+    def clear_current_containers(self) -> Equipment: ...
 
-        `mrid` The mRID of the required `EquipmentContainer`
-        Returns The `EquipmentContainer` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.current_containers.get_by_mrid(mrid)
+    # Usage points
 
-    def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        """
-        Associate `equipment_container` with this `Equipment` in the current state of the network.
+    @deprecated("Use len(usage_points) instead.")
+    def num_usage_points(self) -> int: ...
 
-        `equipment_container` The `EquipmentContainer` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(equipment_container, self.get_current_container, "A current EquipmentContainer"):
-            return self
-        self.current_containers.add(equipment_container)
-        return self
+    @deprecated("Use usage_points.get_by_mrid() instead")
+    def get_usage_point(self, mrid: str) -> UsagePoint: ...
 
-    def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        """
-        Disassociate `equipment_container` from this `Equipment` in the current state of the network.
+    @deprecated("Use usage_points.append() instead")
+    def add_usage_point(self, up: UsagePoint) -> Equipment: ...
 
-        `equipment_container` The `EquipmentContainer` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `equipment_container` was not associated with this `Equipment`.
-        """
-        self.current_containers.remove(equipment_container)
-        return self
+    @deprecated("Use usage_points.remove() instead")
+    def remove_usage_point(self, up: UsagePoint) -> Equipment: ...
 
-    def clear_current_containers(self) -> Equipment:
-        """
-        Clear all current `EquipmentContainer`s in the current state of the network.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self.current_containers.clear()
-        return self
+    @deprecated("Use usage_points.clear() instead")
+    def clear_usage_points(self) -> Equipment: ...
 
-    def get_usage_point(self, mrid: str) -> UsagePoint:
-        """
-        Get the `UsagePoint` for this `Equipment` identified by `mrid`
+    # Operational restrictions
 
-        `mrid` The mRID of the required `UsagePoint`
-        Returns The `UsagePoint` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.usage_points.get_by_mrid(mrid)
+    @deprecated("Use len(operational_restrictions) instead.")
+    def num_operational_restrictions(self) -> int: ...
 
-    def add_usage_point(self, up: UsagePoint) -> Equipment:
-        """
-        Associate `up` with this `Equipment`.
+    @deprecated("Use operational_restrictions.get_by_mrid() instead")
+    def get_operational_restriction(self, mrid: str) -> OperationalRestriction: ...
 
-        `up` the `UsagePoint` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `UsagePoint` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(up, self.get_usage_point, "A UsagePoint"):
-            return self
-        self.usage_points.add(up)
-        return self
+    @deprecated("Use operational_restrictions.append() instead")
+    def add_operational_restriction(self, op: OperationalRestriction) -> Equipment: ...
 
-    def remove_usage_point(self, up: UsagePoint) -> Equipment:
-        """
-        Disassociate `up` from this `Equipment`.
+    @deprecated("Use operational_restrictions.remove() instead")
+    def remove_operational_restriction(self, op: OperationalRestriction) -> Equipment: ...
 
-        `up` The `UsagePoint` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `up` was not associated with this `Equipment`.
-        """
-        self.usage_points.remove(up)
-        return self
-
-    def clear_usage_points(self) -> Equipment:
-        """
-        Clear all usage_points.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self.usage_points.clear()
-        return self
-
-    def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
-        """
-        Get the `OperationalRestriction` for this `Equipment` identified by `mrid`
-
-        `mrid` The mRID of the required `OperationalRestriction`
-        Returns The `OperationalRestriction` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.operational_restrictions.get_by_mrid(mrid)
-
-    def add_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        """
-        Associate `op` with this `Equipment`.
-
-        `op` The `OperationalRestriction` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `OperationalRestriction` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(op, self.get_operational_restriction, "An OperationalRestriction"):
-            return self
-        self.operational_restrictions.add(op)
-        return self
-
-    def remove_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        """
-        Disassociate `up` from this `Equipment`.
-
-        `op` The `OperationalRestriction` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `op` was not associated with this `Equipment`.
-        """
-        self.operational_restrictions.remove(op)
-        return self
-
-    def clear_operational_restrictions(self) -> Equipment:
-        """
-        Clear all `OperationalRestrictions`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self.operational_restrictions.clear()
-        return self
-
-
+    @deprecated("Use operational_restrictions.clear() instead")
+    def clear_operational_restrictions(self) -> Equipment: ...
