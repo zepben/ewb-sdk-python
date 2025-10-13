@@ -24,10 +24,11 @@
     ]
     dependencies = [
         "zepben.protobuf==1.0.0",
-        "typing_extensions==4.12.2",
-        "requests>=2.26.0, <3.0.0",
-        "urllib3>=1.26.6, <1.27.0",
-        "PyJWT>=2.1.0, <2.2.0",
+        "typing_extensions==4.14.1",
+        "requests==2.32.5",
+        "urllib3==2.5.0",
+        "PyJWT==2.10.1",
+        "dataclassy==0.6.2",
     ]
     classifiers = [
         "Programming Language :: Python :: 3",
@@ -43,12 +44,12 @@
 
 [project.optional-dependencies]
     test = [
-        "pytest>=7.4.4, <9",
-        "pytest-cov==6.1.1",
-        "pytest-asyncio==0.26.0",
+        "pytest==8.4.1",
+        "pytest-cov==6.2.1",
+        "pytest-asyncio==1.1.0",
         "pytest-timeout==2.4.0",
-        "pytest-subtests",
-        "hypothesis==6.119.4",  # 6.120.0 has issues with one of our large tests
+        "pytest-subtests==0.14.2",
+        "hypothesis==6.138.2",
         "grpcio-testing==1.61.3",
         "pylint==2.14.5",
         "six==1.16.0",

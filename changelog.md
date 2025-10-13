@@ -7,7 +7,8 @@
 * None.
 
 ### Enhancements
-* None.
+* Bumped `hypothesis` version for tests to latest (6.138.2), fixed examples generating large numbers of results causing tests to run extremely slow.
+* Bumped every other dependency to the latest version aside from dataclassy.
 
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.

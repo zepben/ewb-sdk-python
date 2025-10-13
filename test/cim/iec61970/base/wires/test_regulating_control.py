@@ -24,7 +24,7 @@ regulating_control_kwargs = {
     "terminal": builds(Terminal),
     "ct_primary": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "min_target_deadband": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection))
+    "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection), max_size=2)
 }
 
 regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, 5.5, Terminal(), 6.6,
