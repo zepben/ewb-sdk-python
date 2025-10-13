@@ -83,6 +83,8 @@ class ControlledAppliance:
                 if len(appliances) > 1:
                     _ = [acc := f(acc, app) for app in appliances[1:]]
                 self._bitmask = acc
+        else:
+            raise TypeError('appliances must be a int or Appliance')
 
     @property
     def bitmask(self):

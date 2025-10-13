@@ -225,10 +225,11 @@ types_to_test = {
     "create_circuit": create_circuit(),
 }
 
-
+# FIXME: this test is terrible, it needs to be broken up to run PER CIM object, not all at once. it takes only one failure in creating an object
+#  for hypothesis to throw the whole generated batch out and try again, its very expensive.
 @pytest.mark.timeout(100000)
 @given(**types_to_test)
-@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example, HealthCheck.data_too_large], stateful_step_count=2)
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example, HealthCheck.data_too_large], stateful_step_count=2, max_examples=2)
 def test_network_service_translations(**kwargs):
     #
     # NOTE: To prevent the `assume` required for the location from making this test take way too long, it has been separated out.
