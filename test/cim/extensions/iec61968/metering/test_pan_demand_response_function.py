@@ -18,7 +18,7 @@ pan_demand_response_function_kwargs = {
     "appliance": builds(ControlledAppliance, appliances=lists(sampled_from(Appliance), max_size=4, min_size=1, unique=True))
 }
 
-pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, sampled_from(Appliance)]
+pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, Appliance.IRRIGATION_PUMP]
 
 
 def test_pan_demand_response_function_constructor_default():
@@ -45,7 +45,7 @@ def test_pan_demand_response_function_constructor_args():
     verify_end_device_function_constructor_args(pdrf)
 
     assert pan_demand_response_function_args[-2] == pdrf.kind
-    assert pan_demand_response_function_args[-1][0].bitmask == pdrf.appliance.bitmask
+    assert pan_demand_response_function_args[-1].bitmask == pdrf.appliance.bitmask
 
 
 def test_constructor_with_controlled_appliance():

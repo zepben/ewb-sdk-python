@@ -2,13 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from traceback import print_tb, format_tb
-from typing import TypeVar, Type, Set
+from traceback import print_tb
+from typing import TypeVar, Type, Set, Any
+
+from hypothesis import given, settings, Verbosity
+from hypothesis.strategies import SearchStrategy
 
 from zepben.ewb import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
     TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
-from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
+from zepben.ewb.streaming.get.consumer import PBIdentifiedObject
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -20,11 +23,11 @@ def validate_service_translations(
     comparator: BaseServiceComparator,
     database_tables: BaseDatabaseTables,
     excluded_tables: Set[Type[SqliteTable]],
-    **kwargs
+    types_to_test: dict[str, SearchStrategy[Any]],
 ):
     expected_tables = {it.__class__ for it in database_tables.tables} - excluded_tables - _excluded_base_tables
-    if len(kwargs) != len(expected_tables):
-        actual = {k.removeprefix("create_") for k, v in kwargs.items()}
+    if len(types_to_test) != len(expected_tables):
+        actual = {k.removeprefix("create_") for k in types_to_test.keys()}
         expected = {it().name for it in expected_tables}
 
         # create variant without the last two letters to cater for `s` and `es` plurals in the logging.
@@ -47,37 +50,45 @@ def validate_service_translations(
     print()
     diffs = {}
     processing = ""
+
     try:
-        for desc, cim in kwargs.items():
-            processing = f"blank {desc}"
-            blank = type(cim)()
+        for desc, _cim in types_to_test.items():
+            print(desc)
 
-            # Convert the blank object to protobuf and ensure it didn't get converted to an instance of PBIdentifiedObject,
-            # which indicates a missing `to_pb` implementation or import.
-            blank_as_pb = blank.to_pb()
-            assert type(blank_as_pb) is not PBIdentifiedObject, f"There is something wrong with {type(cim)}.to_pb. It is calling directly to the base class."
+            @given(_cim)
+            @settings(verbosity=Verbosity.verbose)
+            def run_test(cim):
+                nonlocal processing
+                blank = type(cim)()
 
-            # noinspection PyUnresolvedReferences
-            translated_blank = service_type().add_from_pb(blank_as_pb)
-            assert translated_blank is not None, f"{blank_as_pb}: Failed to add the translated protobuf object to the service."
-            assert type(translated_blank) is type(cim), f"{translated_blank}: Converted object should be the same type as {cim}"
+                # Convert the blank object to protobuf and ensure it didn't get converted to an instance of PBIdentifiedObject,
+                # which indicates a missing `to_pb` implementation or import.
+                blank_as_pb = blank.to_pb()
+                assert type(
+                    blank_as_pb) is not PBIdentifiedObject, f"There is something wrong with {type(cim)}.to_pb. It is calling directly to the base class."
 
-            result = comparator.compare_objects(blank, translated_blank)
-            if result.differences:
-                diffs[f"blank {desc}"] = result
+                # noinspection PyUnresolvedReferences
+                translated_blank = service_type('test').add_from_pb(blank_as_pb)
+                assert translated_blank is not None, f"{blank_as_pb}: Failed to add the translated protobuf object to the service."
+                assert type(translated_blank) is type(cim), f"{translated_blank}: Converted object should be the same type as {cim}"
 
-            processing = f"populated {desc}"
-            _remove_unsent_references(cim)
-            # noinspection PyUnresolvedReferences
-            service = service_type()  # outside _add_with_unresolved_references so weak references on `cim` cant be garbage collected before being compared.
-            result = comparator.compare_objects(cim, _add_with_unresolved_references(service, cim))
-            if result.differences:
-                diffs[f"populated {desc}"] = result
+                result = comparator.compare_objects(blank, translated_blank)
+                if result.differences:
+                    diffs[f"blank {desc}"] = result
+
+                processing = f"populated {desc}"
+                _remove_unsent_references(cim)
+                # outside _add_with_unresolved_references so weak references on `cim` cant be garbage collected before being compared.
+                service = service_type('test')
+                result = comparator.compare_objects(cim, _add_with_unresolved_references(service, cim))
+                if result.differences:
+                    diffs[f"populated {desc}"] = result
+
+            run_test()
     except BaseException as e:
         print("###########################")
         print(f"Processing {processing}:")
         print(f"Exception [{type(e).__name__}: {e}")
-        test = format_tb(e.__traceback__)
         print_tb(e.__traceback__)
         print("---------------------------")
         print(diffs)
@@ -87,7 +98,6 @@ def validate_service_translations(
         if diffs:
             print(diffs)
         assert not diffs
-
 
 def _format_validation_error(description: str, classes: Set[str]) -> str:
     return f"\n{description}: {classes}\n" if classes else ""

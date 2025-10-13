@@ -49,7 +49,7 @@
         "pytest-asyncio==1.1.0",
         "pytest-timeout==2.4.0",
         "pytest-subtests==0.14.2",
-        "hypothesis==6.138.2",
+        "hypothesis==6.140.3",
         "grpcio-testing==1.61.3",
         "pylint==2.14.5",
         "six==1.16.0",

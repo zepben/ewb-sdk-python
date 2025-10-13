@@ -818,7 +818,7 @@ def create_equipment(include_runtime: bool):
 
 def create_equipment_container(include_runtime: bool, add_equipment: bool = True):
     equipment = {
-        "equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
+        "equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=30)
     } if add_equipment else {}
 
     return {

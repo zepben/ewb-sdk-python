@@ -5,10 +5,10 @@
 from typing import TypeVar
 
 import pytest
-from hypothesis import given, HealthCheck, settings
+from hypothesis import given, HealthCheck, settings, Verbosity
 
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
-from services.common.translator.base_test_translator import validate_service_translations
+from services.common.translator.base_test_translator import validate_service_translations, _remove_unsent_references, _add_with_unresolved_references
 from test.cim.cim_creators import *
 from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
     NetworkDatabaseTables, TableLocations, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
@@ -21,7 +21,7 @@ from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 
 T = TypeVar("T", bound=IdentifiedObject)
 
-types_to_test = {
+types_to_test_creators = {
     ##################################
     # Extensions IEC61968 Asset Info #
     ##################################
@@ -223,24 +223,12 @@ types_to_test = {
     ###############################
 
     "create_circuit": create_circuit(),
+
+    "create_location": create_location(),
 }
 
-# FIXME: this test is terrible, it needs to be broken up to run PER CIM object, not all at once. it takes only one failure in creating an object
-#  for hypothesis to throw the whole generated batch out and try again, its very expensive.
-@pytest.mark.timeout(100000)
-@given(**types_to_test)
-@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example, HealthCheck.data_too_large], stateful_step_count=2, max_examples=2)
-def test_network_service_translations(**kwargs):
-    #
-    # NOTE: To prevent the `assume` required for the location from making this test take way too long, it has been separated out.
-    #
-    # If this test still appears to lock up, it is likely you have missed validating a class or forgot to exclude the table. Either figure out which
-    # case you have, or wait for the test to finish, and it will tell you.
-    #
-    # NOTE: updating hypothesis can break this test on python 3.9 to 1.200.0 and beyond, if you do that, and it breaks, this command
-    # will run only this test:
-    #    tox -e py39 -- test/services/network/translator/test_network_translator.py::test_network_service_translations --no-cov
-    #
+@pytest.mark.timeout(20000)
+def test_network_service_translations():
     validate_service_translations(
         NetworkService,
         NetworkServiceComparator(),
@@ -273,31 +261,11 @@ def test_network_service_translations(**kwargs):
             TableProtectionRelayFunctionsSensors,
             TableRecloseDelays,
 
-            # Excluded location table in the other test.
-            TableLocations
         },
-        **kwargs
+        types_to_test=types_to_test_creators,
     )
 
-
-@given(location=create_location())
-@settings(suppress_health_check=[HealthCheck.too_slow])
-def test_network_service_translations_location(location: Location):
-    # If this `assume` is placed with the other checks it makes the test take a very long time to run due to the number of falsifying examples it creates.
-    assume_non_blank_street_address_details(location.main_address)
-    validate_service_translations(
-        NetworkService,
-        NetworkServiceComparator(),
-        NetworkDatabaseTables(),
-        excluded_tables={it.__class__ for it in NetworkDatabaseTables().tables if not isinstance(it, TableLocations)},
-        location=location
-    )
-
-
-#
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
-#
-
 def test_creates_new_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
     pb = NameType("nt1 name", "nt1 desc").to_pb()
