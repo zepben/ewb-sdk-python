@@ -354,7 +354,7 @@ class Traversal(Generic[T, D]):
 
     @if_not_stopping.register
     def _(self, action: StepAction) -> D:
-        action.apply = lambda it, context: action._func(it, context) if not context.is_stopping else None
+        action.apply = lambda it, context: StepAction.apply(action, it, context) if not context.is_stopping else None
         return self.add_step_action(action)
 
     @singledispatchmethod
@@ -373,7 +373,7 @@ class Traversal(Generic[T, D]):
 
     @if_stopping.register
     def _(self, action: StepAction) -> D:
-        action.apply = lambda it, context: action._func(it, context) if context.is_stopping else None
+        action.apply = lambda it, context: StepAction.apply(action, it, context) if context.is_stopping else None
         return self.add_step_action(action)
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:

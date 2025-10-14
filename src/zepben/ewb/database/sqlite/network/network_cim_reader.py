@@ -8,6 +8,7 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
+from zepben.ewb import ControlledAppliance
 from zepben.ewb.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.ewb.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
@@ -401,10 +402,16 @@ class NetworkCimReader(BaseCimReader):
         :return: True if the :class:`PanDemandResponseFunction` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
-        pan_demand_response_function = PanDemandResponseFunction(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+        pan_demand_response_function = PanDemandResponseFunction(
+            mrid=set_identifier(result_set.get_string(table.mrid.query_index)),
+            appliances=(
+                ControlledAppliance(appliances=appliance_bitmask)
+                if (appliance_bitmask := result_set.get_int(table.appliance.query_index, on_none=None)) is not None
+                else None
+            ),
+            kind=EndDeviceFunctionKind[result_set.get_string(table.kind.query_index)]
+        )
 
-        pan_demand_response_function.kind = EndDeviceFunctionKind[result_set.get_string(table.kind.query_index)]
-        pan_demand_response_function._appliance_bitmask = result_set.get_int(table.appliance.query_index, on_none=None)
 
         return self._load_end_device_functions(pan_demand_response_function, table, result_set) and self._add_or_throw(pan_demand_response_function)
 
@@ -2590,8 +2597,8 @@ class NetworkCimReader(BaseCimReader):
             SwitchInfo
         )
         switch.rated_current = result_set.get_float(table.rated_current.query_index, on_none=None)
-        switch._normally_open = result_set.get_int(table.normal_open.query_index)
-        switch._open = result_set.get_int(table.open.query_index)
+        switch.set_normally_open(bool(result_set.get_int(table.normal_open.query_index)))
+        switch.set_open(bool(result_set.get_int(table.open.query_index)))
 
         return self._load_conducting_equipment(switch, table, result_set)
 

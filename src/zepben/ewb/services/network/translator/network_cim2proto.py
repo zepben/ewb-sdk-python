@@ -352,7 +352,7 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
         edf=end_device_function_to_pb(cim),
         kind=_map_end_device_function_kind.to_pb(cim.kind),
         **set_or_null(
-            appliance=cim._appliance_bitmask
+            appliance=appliance.bitmask if (appliance := cim.appliance) is not None else None
         )
     )
 

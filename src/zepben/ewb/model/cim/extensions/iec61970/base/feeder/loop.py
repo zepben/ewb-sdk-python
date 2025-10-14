@@ -89,7 +89,8 @@ class Loop(IdentifiedObject):
         """
         if self._validate_reference(circuit, self.get_circuit, "An Circuit"):
             return self
-        self._circuits = list() if self._circuits is None else self._circuits
+        if self._circuits is None:
+            self._circuits = []
         self._circuits.append(circuit)
         return self
 
@@ -136,7 +137,8 @@ class Loop(IdentifiedObject):
         """
         if self._validate_reference(substation, self.get_substation, "An Substation"):
             return self
-        self._substations = list() if self._substations is None else self._substations
+        if self._substations is None:
+            self._substations = []
         self._substations.append(substation)
         return self
 
@@ -183,7 +185,8 @@ class Loop(IdentifiedObject):
         """
         if self._validate_reference(substation, self.get_energizing_substation, "An Substation"):
             return self
-        self._energizing_substations = list() if self._energizing_substations is None else self._energizing_substations
+        if self._energizing_substations is None:
+            self._energizing_substations = []
         self._energizing_substations.append(substation)
         return self
 

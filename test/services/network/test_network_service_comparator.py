@@ -97,7 +97,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: EndDeviceFunctionKind.demandResponse,
             lambda _: EndDeviceFunctionKind.onRequestRead
         )
-        self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PanDemandResponseFunction.appliance, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
     #################################
     # Extensions IEC61970 Base Core #

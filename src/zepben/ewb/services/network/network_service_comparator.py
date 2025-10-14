@@ -167,7 +167,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         # noinspection PyProtectedMember
-        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction._appliance_bitmask)
+        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction.appliance)
 
         return self._compare_end_device_function(diff)
 

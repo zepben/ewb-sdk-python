@@ -354,7 +354,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert = self._database_tables.get_insert(TablePanDemandResponseFunctions)
 
         insert.add_value(table.kind.query_index, pan_demand_response_function.kind.short_name)
-        insert.add_value(table.appliance.query_index, pan_demand_response_function._appliance_bitmask)
+        insert.add_value(table.appliance.query_index, appliance.bitmask if (appliance := pan_demand_response_function.appliance) else None)
 
         return self._save_end_device_function(table, insert, pan_demand_response_function, "pan demand response function")
 
@@ -2259,10 +2259,8 @@ class NetworkCimWriter(BaseCimWriter):
         return self._save_regulating_cond_eq(table, insert, static_var_compensator, "static var compensator")
 
     def _save_switch(self, table: TableSwitches, insert: PreparedStatement, switch: Switch, description: str) -> bool:
-        # noinspection PyProtectedMember
-        insert.add_value(table.normal_open.query_index, switch._normally_open)
-        # noinspection PyProtectedMember
-        insert.add_value(table.open.query_index, switch._open)
+        insert.add_value(table.normal_open.query_index, int(switch.is_normally_open()))
+        insert.add_value(table.open.query_index, int(switch.is_open()))
         insert.add_value(table.rated_current.query_index, switch.rated_current)
         insert.add_value(table.switch_info_mrid.query_index, self._mrid_or_none(switch.switch_info))
 
