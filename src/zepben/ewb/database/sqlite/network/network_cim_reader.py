@@ -8,7 +8,6 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
-from zepben.ewb import ControlledAppliance
 from zepben.ewb.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.ewb.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
@@ -32,6 +31,7 @@ from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_functi
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.ewb.model.cim.iec61968.metering.controlled_appliance import ControlledAppliance
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.ewb.model.cim.iec61970.base.core.curve import Curve
 from zepben.ewb.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
