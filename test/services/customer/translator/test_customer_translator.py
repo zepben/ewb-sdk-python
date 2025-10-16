@@ -4,7 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
-from hypothesis import given
 from zepben.ewb import IdentifiedObject, CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
     TablePricingStructuresTariffs
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
@@ -35,8 +34,7 @@ types_to_test = {
 }
 
 
-@given(**types_to_test)
-def test_customer_service_translations(**kwargs):
+def test_customer_service_translations():
     validate_service_translations(
         CustomerService,
         CustomerServiceComparator(),
@@ -45,7 +43,7 @@ def test_customer_service_translations(**kwargs):
             TableCustomerAgreementsPricingStructures,
             TablePricingStructuresTariffs
         },
-        **kwargs
+        types_to_test=types_to_test,
     )
 
 

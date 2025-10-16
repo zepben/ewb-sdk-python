@@ -4,10 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import sampled_from, integers
+from hypothesis.strategies import sampled_from, lists, builds
 
-from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default, \
-    verify_end_device_function_constructor_args
+from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, \
+    verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
@@ -15,10 +15,10 @@ from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndD
 pan_demand_response_function_kwargs = {
     **end_device_function_kwargs,
     "kind": sampled_from(EndDeviceFunctionKind),
-    "appliance": integers(min_value=0, max_value=4095)
+    "appliance": builds(ControlledAppliance, appliances=lists(sampled_from(Appliance), max_size=4, min_size=1, unique=True))
 }
 
-pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, 1]
+pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, Appliance.IRRIGATION_PUMP]
 
 
 def test_pan_demand_response_function_constructor_default():
@@ -36,7 +36,7 @@ def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwar
 
     verify_end_device_function_constructor_kwargs(pdrf, **kwargs)
     assert pdrf.kind == kind
-    assert pdrf.appliance.bitmask == appliance
+    assert pdrf.appliance == appliance
 
 
 def test_pan_demand_response_function_constructor_args():
@@ -44,7 +44,8 @@ def test_pan_demand_response_function_constructor_args():
 
     verify_end_device_function_constructor_args(pdrf)
 
-    assert pan_demand_response_function_args[-2:] == [pdrf.kind, pdrf.appliance.bitmask]
+    assert pan_demand_response_function_args[-2] == pdrf.kind
+    assert pan_demand_response_function_args[-1].bitmask == pdrf.appliance.bitmask
 
 
 def test_constructor_with_controlled_appliance():

@@ -13,6 +13,7 @@
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
 * `TypeError`s occurring in `StepAction`s will no longer silently pass
+* Drop python 3.9 from list of test envs in tox
 
 ### Notes
 * None.

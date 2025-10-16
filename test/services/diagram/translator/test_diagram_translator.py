@@ -4,7 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
-from hypothesis import given
 from zepben.ewb import IdentifiedObject, DiagramService, NameType, DiagramDatabaseTables, TableDiagramObjectPoints
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
@@ -26,8 +25,7 @@ types_to_test = {
 }
 
 
-@given(**types_to_test)
-def test_diagram_service_translations(**kwargs):
+def test_diagram_service_translations():
     validate_service_translations(
         DiagramService,
         DiagramServiceComparator(),
@@ -35,7 +33,7 @@ def test_diagram_service_translations(**kwargs):
         excluded_tables={
             TableDiagramObjectPoints
         },
-        **kwargs
+        types_to_test=types_to_test,
     )
 
 

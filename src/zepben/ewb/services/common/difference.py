@@ -30,8 +30,8 @@ class CollectionDifference(Difference):
 
 @dataclass()
 class ObjectDifference(Difference):
-    source: T
-    target: T
+    source: IdentifiedObject
+    target: IdentifiedObject
     differences: Dict[str, Difference] = field(default_factory=dict)
 
 
