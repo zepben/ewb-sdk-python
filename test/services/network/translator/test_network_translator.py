@@ -1,17 +1,15 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
 import pytest
-from hypothesis import given, HealthCheck, settings, Verbosity
 
-from database.sqlite.schema_utils import assume_non_blank_street_address_details
-from services.common.translator.base_test_translator import validate_service_translations, _remove_unsent_references, _add_with_unresolved_references
+from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.cim_creators import *
-from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
-    NetworkDatabaseTables, TableLocations, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
+from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
+    NetworkDatabaseTables, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
@@ -21,7 +19,7 @@ from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 
 T = TypeVar("T", bound=IdentifiedObject)
 
-types_to_test_creators = {
+types_to_test = {
     ##################################
     # Extensions IEC61968 Asset Info #
     ##################################
@@ -94,8 +92,7 @@ types_to_test_creators = {
     # IEC61968 Common #
     ###################
 
-    # NOTE: location is tested separately due to constraints on the translation.
-    # "create_location": create_location(),
+    "create_location": create_location(),
     "create_organisation": create_organisation(),
 
     #####################################
@@ -223,8 +220,6 @@ types_to_test_creators = {
     ###############################
 
     "create_circuit": create_circuit(),
-
-    "create_location": create_location(),
 }
 
 @pytest.mark.timeout(20000)
@@ -262,7 +257,7 @@ def test_network_service_translations():
             TableRecloseDelays,
 
         },
-        types_to_test=types_to_test_creators,
+        types_to_test=types_to_test,
     )
 
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately

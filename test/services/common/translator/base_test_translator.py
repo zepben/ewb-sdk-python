@@ -1,17 +1,17 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from traceback import print_tb
 from typing import TypeVar, Type, Set, Any
 
-from hypothesis import given, settings, Verbosity
+from hypothesis import given
 from hypothesis.strategies import SearchStrategy
 
 from zepben.ewb import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
-    TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable
+    TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable, NetworkService, CustomerService, DiagramService
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
-from zepben.ewb.streaming.get.consumer import PBIdentifiedObject
+from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -19,7 +19,7 @@ _excluded_base_tables: Set[Type[SqliteTable]] = {TableVersion, TableMetadataData
 
 
 def validate_service_translations(
-    service_type: Type[BaseService],
+    service_type: Type[NetworkService | CustomerService | DiagramService],
     comparator: BaseServiceComparator,
     database_tables: BaseDatabaseTables,
     excluded_tables: Set[Type[SqliteTable]],
@@ -52,13 +52,13 @@ def validate_service_translations(
     processing = ""
 
     try:
-        for desc, _cim in types_to_test.items():
+        for desc, cim_builder in types_to_test.items():
             print(desc)
 
-            @given(_cim)
-            @settings(verbosity=Verbosity.verbose)
+            @given(cim_builder)
             def run_test(cim):
                 nonlocal processing
+                processing = f"blank {desc}"
                 blank = type(cim)()
 
                 # Convert the blank object to protobuf and ensure it didn't get converted to an instance of PBIdentifiedObject,
@@ -68,7 +68,7 @@ def validate_service_translations(
                     blank_as_pb) is not PBIdentifiedObject, f"There is something wrong with {type(cim)}.to_pb. It is calling directly to the base class."
 
                 # noinspection PyUnresolvedReferences
-                translated_blank = service_type('test').add_from_pb(blank_as_pb)
+                translated_blank = service_type().add_from_pb(blank_as_pb)
                 assert translated_blank is not None, f"{blank_as_pb}: Failed to add the translated protobuf object to the service."
                 assert type(translated_blank) is type(cim), f"{translated_blank}: Converted object should be the same type as {cim}"
 
@@ -79,7 +79,7 @@ def validate_service_translations(
                 processing = f"populated {desc}"
                 _remove_unsent_references(cim)
                 # outside _add_with_unresolved_references so weak references on `cim` cant be garbage collected before being compared.
-                service = service_type('test')
+                service = service_type()
                 result = comparator.compare_objects(cim, _add_with_unresolved_references(service, cim))
                 if result.differences:
                     diffs[f"populated {desc}"] = result
