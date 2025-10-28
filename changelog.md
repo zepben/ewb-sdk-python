@@ -1,7 +1,8 @@
 # Zepben Python SDK
 ## [1.1.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Updated `EwbDataFilePaths` to be an abstract class that supports variants. Added `LocalEwbDataFilePaths` which is a local file system implementation of
+  `EwbDataFilePaths`, and should be used in place of the old `EwbDataFilePaths`.
 
 ### New Features
 * None.
@@ -176,7 +177,7 @@
   * `RegulatingControl.ratedCurrent`
   * `Sensor.relayFunctions`
   * `UsagePoint.approvedInverterCapacity`
-* using `EquipmentTreeBuilder` more then once per interpreter will no longer cause the `roots` to contain more objects then it should due to `_roots` being a 
+* using `EquipmentTreeBuilder` more then once per interpreter will no longer cause the `roots` to contain more objects then it should due to `_roots` being a
   class var
 * Errors when initiating gRPC connections will now properly be propagated to users.
 

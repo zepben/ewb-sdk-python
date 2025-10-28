@@ -352,6 +352,7 @@ from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServic
 
 from zepben.ewb.database.paths.database_type import *
 from zepben.ewb.database.paths.ewb_data_file_paths import *
+from zepben.ewb.database.paths.local_ewb_data_file_paths import *
 
 from zepben.ewb.database.sql.column import *
 from zepben.ewb.database.sqlite.tables.sqlite_table import *
