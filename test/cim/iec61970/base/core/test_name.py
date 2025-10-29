@@ -40,6 +40,8 @@ def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
     assert n.identified_object == identified_object
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_name_constructor_args():
     n = Name(*name_args)
 

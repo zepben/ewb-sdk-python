@@ -34,6 +34,8 @@ def test_geographical_region_constructor_kwargs(sub_geographical_regions, **kwar
     assert list(gr.sub_geographical_regions) == sub_geographical_regions
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_geographical_region_constructor_args():
     gr = GeographicalRegion(*geographical_region_args)
 

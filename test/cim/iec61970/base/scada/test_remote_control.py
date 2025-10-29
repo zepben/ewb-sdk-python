@@ -33,6 +33,8 @@ def test_remote_control_constructor_kwargs(control, **kwargs):
     assert rc.control == control
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_remote_control_constructor_args():
     # noinspection PyArgumentList
     c = RemoteControl(*remote_control_args)

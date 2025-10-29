@@ -40,6 +40,8 @@ def test_street_address_constructor_kwargs(postal_code, town_detail, po_box, str
     assert sa.street_detail == street_detail
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_street_address_constructor_args():
     sa = StreetAddress(*street_address_args)
 

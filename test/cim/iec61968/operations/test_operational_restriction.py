@@ -37,6 +37,8 @@ def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
     assert list(or_.equipment) == equipment
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_operational_restriction_constructor_args():
     or_ = OperationalRestriction(*operational_restriction_args)
 

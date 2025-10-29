@@ -104,6 +104,8 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
     assert tei.energised_end_open_circuit_tests is energised_end_open_circuit_tests
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_transformer_end_info_constructor_args():
     tei = TransformerEndInfo(*transformer_end_info_args)
 

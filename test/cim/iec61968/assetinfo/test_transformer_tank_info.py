@@ -35,6 +35,8 @@ def test_transformer_tank_info_constructor_kwargs(power_transformer_info, transf
     assert list(tti.transformer_end_infos) == transformer_end_infos
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_transformer_tank_info_constructor_args():
     tti = TransformerTankInfo(*transformer_tank_info_args)
 

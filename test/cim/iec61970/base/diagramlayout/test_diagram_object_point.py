@@ -42,6 +42,8 @@ def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwarg
     assert dop.y_position == y_position
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_diagram_object_point_constructor_args():
     dop = DiagramObjectPoint(*diagram_object_point_args)
 

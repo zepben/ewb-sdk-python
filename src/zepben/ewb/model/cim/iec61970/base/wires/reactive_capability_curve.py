@@ -5,9 +5,12 @@
 
 __all__ = ["ReactiveCapabilityCurve"]
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.curve import Curve
 
 
+@dataslot
 class ReactiveCapabilityCurve(Curve):
     """
     Reactive power rating envelope versus the synchronous machine's active power, in both the generating and motoring modes. For each active power value there

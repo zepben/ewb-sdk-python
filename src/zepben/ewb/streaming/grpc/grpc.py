@@ -7,14 +7,17 @@ from __future__ import annotations
 
 __all__ = ["GrpcResult", "GrpcClient"]
 
+from dataclasses import dataclass, field
 from typing import TypeVar, Generic, Callable, List, Union, Coroutine
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 
-from zepben.ewb.dataclassy import dataclass
+
 
 T = TypeVar("T")
 
 
-@dataclass(slots=True)
+@dataclass
 class GrpcResult(Generic[T]):
     result: Union[T, Exception]
     was_error_handled: bool = False
@@ -79,10 +82,9 @@ class GrpcResult(Generic[T]):
             raise self.result
         return self
 
-
 @dataclass(init=False, slots=True)
 class GrpcClient(object):
-    error_handlers: List[Callable[[Exception], bool]] = []
+    error_handlers: List[Callable[[Exception], bool]] = field(default_factory=list)
 
     timeout: int = 0
     '''Timeout for client gRPC requests'''

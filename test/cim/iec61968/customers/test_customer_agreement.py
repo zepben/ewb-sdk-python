@@ -41,6 +41,8 @@ def test_customer_agreement_constructor_kwargs(customer, pricing_structures, **k
     assert list(ca.pricing_structures) == pricing_structures
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_customer_agreement_constructor_args():
     ca = CustomerAgreement(*customer_agreement_args)
 

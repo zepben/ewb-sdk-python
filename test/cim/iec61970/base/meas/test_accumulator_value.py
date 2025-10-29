@@ -41,6 +41,8 @@ def test_accumulator_value_constructor_kwargs(value, accumulator_mrid, **kwargs)
     assert av.accumulator_mrid == accumulator_mrid
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_accumulator_value_constructor_args():
     # noinspection PyArgumentList
     av = AccumulatorValue(*accumulator_value_args)

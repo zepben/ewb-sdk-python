@@ -9,6 +9,8 @@ __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
@@ -17,77 +19,38 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
+@dataslot
+@boilermaker
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.
     """
 
-    geographical_region: Optional[GeographicalRegion] = None
+    geographical_region: GeographicalRegion | None = None
     """The geographical region to which this sub-geographical region is within."""
 
-    _substations: Optional[List[Substation]] = None
+    substations: List[Substation] | None = MRIDListAccessor()
 
-    def __init__(self, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(**kwargs)
-        if substations:
-            for sub in substations:
-                self.add_substation(sub)
-
+    def _retype(self):
+        self.substations: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(substations) instead")
     def num_substations(self) -> int:
-        """
-        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
-        """
-        return nlen(self._substations)
+        return len(self.substations)
 
-    @property
-    def substations(self) -> Generator[Substation, None, None]:
-        """
-        All substations belonging to this sub geographical region.
-        """
-        return ngen(self._substations)
-
+    @deprecated("BOILERPLATE: Use substations.get_by_mrid(mrid) instead")
     def get_substation(self, mrid: str) -> Substation:
-        """
-        Get the `Substation` for this `SubGeographicalRegion` identified by `mrid`
+        return self.substations.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Substation`
-        Returns The `Substation` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._substations, mrid)
-
+    @deprecated("BOILERPLATE: Use substations.append(substation) instead")
     def add_substation(self, substation: Substation) -> SubGeographicalRegion:
-        """
-        Associate a `Substation` with this `GeographicalRegion`
+        return self.substations.append(substation)
 
-        `substation` the `Substation` to associate with this `SubGeographicalRegion`.
-
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this
-        `GeographicalRegion`.
-        """
-        if self._validate_reference(substation, self.get_substation, "A Substation"):
-            return self
-        self._substations = list() if self._substations is None else self._substations
-        self._substations.append(substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use substations.remove(substation) instead")
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:
-        """
-        Disassociate `substation` from this `GeographicalRegion`
+        return self.substations.remove(substation)
 
-        `substation` The `Substation` to disassociate from this `SubGeographicalRegion`.
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-        Raises `ValueError` if `substation` was not associated with this `SubGeographicalRegion`.
-        """
-        self._substations = safe_remove(self._substations, substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use substations.clear() instead")
     def clear_substations(self) -> SubGeographicalRegion:
-        """
-        Clear all `Substations`.
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-        """
-        self._substations = None
+        return self.substations.clear()
         return self

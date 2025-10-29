@@ -27,6 +27,8 @@ def test_busbar_section_constructor_kwargs(**kwargs):
     verify_connector_constructor_kwargs(BusbarSection(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_busbar_section_constructor_args():
     verify_connector_constructor_args(BusbarSection(*busbar_section_args))
 

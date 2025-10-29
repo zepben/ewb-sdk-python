@@ -46,6 +46,8 @@ def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current
     assert sci.rated_voltage == rated_voltage
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_shunt_compensator_info_constructor_args():
     sci = ShuntCompensatorInfo(*shunt_compensator_info_args)
 

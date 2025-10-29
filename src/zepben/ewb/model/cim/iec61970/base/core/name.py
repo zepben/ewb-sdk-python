@@ -7,7 +7,8 @@ from __future__ import annotations
 
 __all__ = ["Name"]
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from email.policy import default
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -32,5 +33,5 @@ class Name:
     type: NameType
     """Type of this name."""
 
-    identified_object: Optional[IdentifiedObject] = None
+    identified_object: Optional[IdentifiedObject] = field(default=None, hash=False)
     """Identified object that this name designates."""

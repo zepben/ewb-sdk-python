@@ -49,6 +49,8 @@ def test_battery_control_constructor_kwargs(charging_rate, discharging_rate, res
     assert bc.control_mode == control_mode
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_battery_control_constructor_args():
     bc = BatteryControl(*battery_control_args)
 

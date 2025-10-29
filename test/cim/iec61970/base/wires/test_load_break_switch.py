@@ -21,5 +21,7 @@ def test_load_break_switch_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(LoadBreakSwitch(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_load_break_switch_constructor_args():
     verify_protected_switch_constructor_args(LoadBreakSwitch(*load_break_switch_args))

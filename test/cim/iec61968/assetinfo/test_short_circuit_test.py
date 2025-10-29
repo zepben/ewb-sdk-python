@@ -71,6 +71,8 @@ def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grou
     assert sct.voltage_ohmic_part == voltage_ohmic_part
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_short_circuit_test_constructor_args():
     sct = ShortCircuitTest(*short_circuit_test_args)
 

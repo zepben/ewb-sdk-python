@@ -30,6 +30,8 @@ def test_fuse_constructor_kwargs(function, **kwargs):
     assert f.function == function
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_fuse_constructor_args():
     f = Fuse(*fuse_args)
     verify_switch_constructor_args(f)

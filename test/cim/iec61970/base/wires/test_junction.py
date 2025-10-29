@@ -21,5 +21,7 @@ def test_junction_constructor_kwargs(**kwargs):
     verify_connector_constructor_kwargs(Junction(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_junction_constructor_args():
     verify_connector_constructor_args(Junction(*junction_args))

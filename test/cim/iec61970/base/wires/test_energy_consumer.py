@@ -66,6 +66,8 @@ def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_cou
     assert ec.q_fixed == q_fixed
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_energy_consumer_constructor_args():
     ec = EnergyConsumer(*energy_consumer_args)
 

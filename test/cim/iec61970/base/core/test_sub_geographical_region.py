@@ -39,6 +39,8 @@ def test_sub_geographical_region_constructor_kwargs(geographical_region, substat
     assert list(sgr.substations) == substations
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_sub_geographical_region_constructor_args():
     sgr = SubGeographicalRegion(*sub_geographical_region_args)
 

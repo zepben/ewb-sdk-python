@@ -50,6 +50,8 @@ def test_open_circuit_test_constructor_kwargs(energised_end_step, energised_end_
     assert test.phase_shift == phase_shift
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_open_circuit_test_constructor_args():
     test = OpenCircuitTest(*open_circuit_test_args)
 

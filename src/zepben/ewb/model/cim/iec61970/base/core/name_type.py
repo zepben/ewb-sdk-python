@@ -7,16 +7,19 @@ from __future__ import annotations
 
 __all__ = ["NameType"]
 
+from dataclasses import field, dataclass
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, unsafe_hash=True)
 class NameType:
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
@@ -33,8 +36,8 @@ class NameType:
     description: Optional[str] = None
     """Description of the name type."""
 
-    _names_index: Dict[str, Name] = dict()
-    _names_multi_index: Dict[str, List[Name]] = dict()
+    _names_index: Dict[str, Name] = field(default_factory=dict, hash=False)
+    _names_multi_index: Dict[str, List[Name]] = field(default_factory=dict, hash=False)
 
     def __str__(self):
         return f"NameType(name='{self.name}', description='{self.description}')"
@@ -49,29 +52,14 @@ class NameType:
         for name_ in self._names_index.values():
             yield name_
 
-    @overload
-    def has_name(self, name: str):
-        """Indicates if this :class:`NameType` contains `Name` with `name`."""
-
-    @overload
-    def has_name(self, name: Name):
-        """Indicates if this :class:`NameType` contains specific `name`."""
-
-    def has_name(self, name):
+    def has_name(self, name: Name | str):
+        """Indicates if this :class:`NameType` contains `name` or `Name` with `name`."""
         if isinstance(name, str):
             return name in self._names_index or name in self._names_multi_index
         if isinstance(name, Name):
             return name in self._names_index.values() or name in self._names_multi_index.values()
 
-    @overload
-    def get_names(self, name: str) -> Generator[Name, None, None]:
-        ...
-
-    @overload
-    def get_names(self, io) -> Generator[Name, None, None]:
-        ...
-
-    def get_names(self, name_or_io) -> Generator[Name, None, None]:
+    def get_names(self, name_or_io: IdentifiedObject | Name) -> Generator[Name, None, None]:
         """Get all the :class:`Name` instances for the provided `name` or `IdentifiedObject`.
 
         :return: A `Generator` of `Name`

@@ -2,29 +2,30 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclassy import dataclass
+
 from datetime import datetime
 from typing import Type, List, Optional
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb import IdentifiedObject, Document, OrganisationRole, Organisation, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 
-@dataclass
+@dataslot
+@boilermaker
 class UnorderedProperties(object):
 
-    _values: Optional[List[int]] = None
+    values: List[int] | None = ListAccessor()
 
-    @property
-    def values(self):
-        return self._values
-
-
-@dataclass
+    def _retype(self):
+        self.values: ListRouter = ...
+    
+@dataslot
 class UnorderedCheck(object):
 
     key: int

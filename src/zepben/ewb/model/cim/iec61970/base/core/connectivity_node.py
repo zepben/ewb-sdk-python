@@ -9,7 +9,9 @@ __all__ = ["ConnectivityNode"]
 
 from typing import Generator, List, TYPE_CHECKING
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, ngen
 
@@ -17,47 +19,30 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-@dataclass(slots=False)
+@dataslot(weakref=True)
+@boilermaker
 class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
     # noinspection PyDunderSlots
-    __slots__ = ["_terminals", "__weakref__"]
-    _terminals: List[Terminal] = []
+    terminals: List[Terminal] | None = MRIDListAccessor()
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConnectivityNode, self).__init__(**kwargs)
-        if terminals:
-            for term in terminals:
-                self.add_terminal(term)
-
+    def _retype(self):
+        self.terminals: MRIDListRouter = ...
+    
     def __iter__(self):
-        return iter(self._terminals)
+        return iter(self.terminals)
 
+    @deprecated("BOILERPLATE: Use len(terminals) instead")
     def num_terminals(self):
-        """
-        Get the number of `Terminal`s for this `ConnectivityNode`.
-        """
-        return len(self._terminals)
+        return len(self.terminals)
 
-    @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        """
-        The `Terminal`s attached to this `ConnectivityNode`
-        """
-        return ngen(self._terminals)
-
+    @deprecated("BOILERPLATE: Use terminals.get_by_mrid(mrid) instead")
     def get_terminal(self, mrid: str) -> Terminal:
-        """
-        Get the `Terminal` for this `ConnectivityNode` identified by `mrid`
+        return self.terminals.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Terminal`
-        Returns The `Terminal` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._terminals, mrid)
-
+    @custom_add(terminals)
     def add_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
         Associate a `terminal.Terminal` with this `ConnectivityNode`
@@ -69,9 +54,10 @@ class ConnectivityNode(IdentifiedObject):
         if self._validate_reference(terminal, self.get_terminal, "A Terminal"):
             return self
 
-        self._terminals.append(terminal)
+        self.terminals.append_unchecked(terminal)
         return self
 
+    @custom_remove(terminals)
     def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
         Disassociate `terminal` from this `ConnectivityNode`.
@@ -80,22 +66,24 @@ class ConnectivityNode(IdentifiedObject):
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
         """
-        self._terminals.remove(terminal)
+        self.terminals.raw.remove(terminal)
         return self
 
+    @custom_clear(terminals)
     def clear_terminals(self) -> ConnectivityNode:
         """
         Clear all terminals.
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         """
-        self._terminals.clear()
+        self.terminals.raw.clear()
         return self
 
     def is_switched(self):
         return self.get_switch() is not None
 
+    @custom_get(terminals)
     def get_switch(self):
-        for term in self._terminals:
+        for term in self.terminals:
             try:
                 # All switches should implement is_open
                 _ = term.conducting_equipment.is_open()

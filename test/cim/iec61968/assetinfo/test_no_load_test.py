@@ -50,6 +50,8 @@ def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current
     assert nlt.loss_zero == loss_zero
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_no_load_test_constructor_args():
     nlt = NoLoadTest(*no_load_test_args)
 

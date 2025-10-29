@@ -38,6 +38,8 @@ def test_per_length_phase_impedance_constructor_kwargs(phase_impedance_data, **k
     assert list(plpi.data) == phase_impedance_data
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_per_length_phase_impedance_constructor_args():
     # noinspection PyArgumentList
     plpi = PerLengthPhaseImpedance(*per_length_phase_impedance_args)

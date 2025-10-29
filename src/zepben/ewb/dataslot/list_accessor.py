@@ -390,7 +390,7 @@ class ListAccessor(_ListAccessorBase):
         return self.router_class(instance, self, self.private_name, self.public_name, self.options)
 
     @cache
-    def _get_cached(self, instance):
+    def _get_cached(self, instance, _id):
         return self._rawdog(instance)
 
     def get_method(self, action: _Actions):
@@ -399,7 +399,7 @@ class ListAccessor(_ListAccessorBase):
     @override
     def __get__(self, instance, default=None):
         try:
-            return self._get_cached(instance)
+            return self._get_cached(instance, id(instance))
         except TypeError:
             return self._rawdog(instance)
 
@@ -472,11 +472,15 @@ class _Router(Iterable):
     def raw(self):
         return self._get_safe()
 
+
     def _set(self, val):
         setattr(self._owner, self._attr, val)
 
     def __iter__(self):
         return iter(self._get_safe())
+
+    def __next__(self):
+        return next(iter(self._get_safe()))
 
     def __repr__(self):
         l = self._get_safe()
@@ -487,6 +491,7 @@ class _Router(Iterable):
             self.append(e)
         if len(self) == 0:
             self._set(None)
+
 
     def append_unchecked(self, item):
         raise NotImplementedError()
@@ -586,6 +591,9 @@ class ListRouter(_Router):
     def num_of_type(self, t: Type) -> int:
         return sum(1 for item in self._get_safe() if isinstance(item, t))
 
+    def set_raw(self, val):
+        self._set(list(val))
+
     def append_unchecked(self, item):
         l: List = self._get()
         if l is None:
@@ -593,10 +601,31 @@ class ListRouter(_Router):
         else:
             l.append(item)
 
+    def insert_raw(self, index, item):
+        l = self._get()
+        if l is None :
+            if index == 0:
+                self._set([item])
+                return
+            else:
+                l = []
+        l.insert(index, item)
+
+    def pop(self, index):
+        return self._get_safe().pop(index)
+
+    def fget(self, it) -> List:
+        import warnings
+        warnings.warn("Lists are no longer properties! Do not use fget()")
+        return getattr(it, self._attr) or []
+
+
 def _error_duplicate(obj, item):
-    raise ValueError(f"{item.__class__.__name__} " +
+    raise ValueError(f"A {item.__class__.__name__} " +
                      f"with mRID {item.mrid} already exists " +
-                     f"in this {obj.__class__.__name__}.")
+                     f"in {obj}.")
+# E       ValueError: AssetOrganisationRole with mRID 1 already exists in this Asset.
+# An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {re.escape(str(it))}
 
 class MRIDListRouter(ListRouter):
 
@@ -735,6 +764,10 @@ class MRIDDictRouter(_Router):
         self.get_by_mrid = self._method(_Actions.GET_BY_MRID)
         return self.get_by_mrid(mrid)
 
+    def fget(self, it) -> List:
+        import warnings
+        warnings.warn("Lists are no longer properties! Do not use fget()")
+        return list((getattr(it, self._attr) or {}).values())
 
 
 def override_boilerplate(l: Iterable, action: _Actions):

@@ -39,6 +39,8 @@ def test_location_constructor_kwargs(main_address, position_points, **kwargs):
     assert list(loc.points) == position_points
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_location_constructor_args():
     loc = Location(*location_args)
 

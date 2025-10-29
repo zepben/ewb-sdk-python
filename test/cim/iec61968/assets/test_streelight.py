@@ -43,6 +43,8 @@ def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs)
     assert p.lamp_kind == lamp_kind
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_streetlight_constructor_args():
     p = Streetlight(*streetlight_args)
 

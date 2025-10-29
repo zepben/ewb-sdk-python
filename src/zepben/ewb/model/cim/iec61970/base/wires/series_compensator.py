@@ -7,32 +7,35 @@ __all__ = ["SeriesCompensator"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class SeriesCompensator(ConductingEquipment):
     """
     A Series Compensator is a series capacitor or reactor or an AC transmission line without charging susceptance. It is a two terminal device.
     """
-    r: Optional[float] = None
+    r: float | None = None
     """Positive sequence resistance in ohms."""
 
-    r0: Optional[float] = None
+    r0: float | None = None
     """Zero sequence resistance in ohms."""
 
-    x: Optional[float] = None
+    x: float | None = None
     """Positive sequence reactance in ohms."""
 
-    x0: Optional[float] = None
+    x0: float | None = None
     """Zero sequence reactance in ohms."""
 
-    varistor_rated_current: Optional[int] = None
+    varistor_rated_current: int | None = None
     """
     The maximum current in amps the varistor is designed to handle at specified duration. It is used for short circuit calculations. The attribute shall 
     be a positive value. If null and varistorVoltageThreshold is null, a varistor is not present.
     """
 
-    varistor_voltage_threshold: Optional[int] = None
+    varistor_voltage_threshold: int | None = None
     """
     The dc voltage in volts at which the varistor starts conducting. It is used for short circuit calculations. If null and varistorRatedCurrent is null, 
     a varistor is not present.

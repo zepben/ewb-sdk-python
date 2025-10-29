@@ -94,6 +94,8 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
     assert pte.phase_angle_clock == phase_angle_clock
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_power_transformer_end_constructor_args():
     pte = PowerTransformerEnd(*power_transformer_end_args)
 

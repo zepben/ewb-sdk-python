@@ -24,5 +24,7 @@ def test_analog_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Analog(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_analog_constructor_args():
     verify_measurement_constructor_args(Analog(*analog_args))

@@ -9,9 +9,12 @@ __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 
 import warnings
 from asyncio import get_event_loop
+from dataclasses import dataclass, field
 from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
@@ -30,7 +33,7 @@ from zepben.ewb import NetworkService, IdentifiedObject, Organisation, Location,
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
-from zepben.ewb.dataclassy import dataclass
+
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
@@ -66,8 +69,8 @@ MAX_64_BIT_INTEGER = 9223372036854775807
 
 @dataclass(slots=True)
 class NetworkResult(object):
-    network_service: Optional[NetworkService]
-    failed: Set[str] = set()
+    network_service: NetworkService | None
+    failed: Set[str] = field(default_factory=set)
 
 
 _map_include_energizing_containers = EnumMapper(IncludedEnergizingContainers, PBIncludedEnergizingContainers)
@@ -75,6 +78,7 @@ _map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIn
 _map_network_state = EnumMapper(NetworkState, PBNetworkState)
 
 
+@dataclass
 class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     """
     Consumer client for a :class:`NetworkService`.
@@ -89,31 +93,14 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     CIM_IO = TypeVar('CIM_IO', bound=IdentifiedObject)
     PB_IO = TypeVar('PB_IO')
 
-    __service: NetworkService
-    __network_hierarchy: Optional[NetworkHierarchy]
+    __service: NetworkService = None
+    __network_hierarchy: NetworkHierarchy | None = None
 
     @property
     def service(self) -> NetworkService:
         return self.__service
 
     _stub: NetworkConsumerStub = None
-
-    def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        """
-        :param channel: a gRPC channel used to create a stub if no stub is provided.
-        :param stub: the gRPC stub to use for this consumer client.
-        :param error_handlers: a collection of handlers to be processed for any errors that occur.
-        """
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
-        if stub is not None:
-            self._stub = stub
-        else:
-            self._stub = NetworkConsumerStub(channel)
-
-        self.__service = NetworkService()
-        self.__network_hierarchy = None
 
     async def get_equipment_for_container(
         self,
@@ -346,7 +333,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
         network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
-        async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
+        async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> GrpcResult[MultiObjectResult] | None:
             result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers, network_state)
 
             if result.was_failure:
@@ -362,7 +349,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         MultiObjectResult]:
         mrid = loop.mrid if isinstance(loop, Loop) else loop
 
-        async def get_additional(it: Loop, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
+        async def get_additional(it: Loop, mor: MultiObjectResult) -> GrpcResult[MultiObjectResult] | None:
             mor.objects.update({cir.mrid: cir for cir in it.circuits})
             mor.objects.update({sub.mrid: sub for sub in it.substations})
             mor.objects.update({sub.mrid: sub for sub in it.energizing_substations})
@@ -475,7 +462,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             # noinspection PyUnresolvedReferences
             yield self.service.get(response.terminal.mrid(), Terminal, default=None) or self.service.add_from_pb(response.terminal), response.terminal.mrid()
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -515,7 +502,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _get_with_references(self,
                                    mrid: str,
                                    expected_class: type(Generic[CIM_IO]),
-                                   get_additional: Callable[[Generic[CIM_IO], MultiObjectResult], Awaitable[Optional[GrpcResult[MultiObjectResult]]]]
+                                   get_additional: Callable[[Generic[CIM_IO], MultiObjectResult], Awaitable[GrpcResult[MultiObjectResult] | None]]
                                    ) -> GrpcResult[MultiObjectResult]:
         if not self.__network_hierarchy:
             response = await self._get_network_hierarchy()
@@ -551,7 +538,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         # noinspection PyArgumentList
         return GrpcResult(mor)
 
-    async def _resolve_references(self, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
+    async def _resolve_references(self, mor: MultiObjectResult) -> GrpcResult[MultiObjectResult] | None:
         res = mor
         keep_processing = True
         subsequent = False
@@ -595,6 +582,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         return result
 
 
+@dataclass
 class SyncNetworkConsumerClient(NetworkConsumerClient):
     """Synchronised wrapper for :class:`NetworkConsumerClient`"""
 

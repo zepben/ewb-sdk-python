@@ -151,4 +151,6 @@ class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, EB, PT
 
 
 def create_terminal_based_id(terminals: Iterable[Terminal]) -> str:
+
+    print([t for t in terminals])
     return "_".join(sorted([t.mrid for t in terminals]))

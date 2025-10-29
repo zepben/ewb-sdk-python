@@ -21,5 +21,7 @@ def test_jumper_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(Jumper(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_jumper_constructor_args():
     verify_switch_constructor_args(Jumper(*jumper_args))

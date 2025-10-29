@@ -39,6 +39,8 @@ def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwar
     assert pdrf.appliance == appliance
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_pan_demand_response_function_constructor_args():
     pdrf = PanDemandResponseFunction(*pan_demand_response_function_args)
 

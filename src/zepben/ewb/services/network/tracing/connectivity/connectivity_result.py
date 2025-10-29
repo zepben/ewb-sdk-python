@@ -7,10 +7,13 @@ from __future__ import annotations
 
 __all__ = ["ConnectivityResult", "terminal_compare"]
 
+from dataclasses import dataclass
 from operator import attrgetter
 from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -48,11 +51,6 @@ class ConnectivityResult:
     nominal_phase_paths: Tuple[NominalPhasePath]
     """The mapping of nominal phase paths between the from and to terminals."""
 
-    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, nominal_phase_paths: Iterable[NominalPhasePath]):
-        self.nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_phase', 'to_phase')))
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
-
     def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
@@ -85,12 +83,12 @@ class ConnectivityResult:
         return res
 
     @property
-    def from_equip(self) -> Optional[ConductingEquipment]:
+    def from_equip(self) -> ConductingEquipment | None:
         """The conducting equipment that owns the `from_terminal."""
         return self.from_terminal.conducting_equipment
 
     @property
-    def to_equip(self) -> Optional[ConductingEquipment]:
+    def to_equip(self) -> ConductingEquipment | None:
         """The conducting equipment that owns the `to_terminal`."""
         return self.to_terminal.conducting_equipment
 

@@ -7,36 +7,39 @@ __all__ = ["OpenCircuitTest"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
 
 
+@dataslot
 class OpenCircuitTest(TransformerTest):
     """
     Open-circuit test results verify winding turn ratios and phase shifts. They include induced voltage and phase shift measurements on open-circuit windings,
     with voltage applied to the energised end. For three-phase windings, the excitation can be a positive sequence (the default) or a zero sequence.
     """
 
-    energised_end_step: Optional[int] = None
+    energised_end_step: int | None = None
     """
     Tap step number for the energised end of the test pair.
     """
 
-    energised_end_voltage: Optional[int] = None
+    energised_end_voltage: int | None = None
     """
     Voltage applied to the winding (end) during test in volts.
     """
 
-    open_end_step: Optional[int] = None
+    open_end_step: int | None = None
     """
     Tap step number for the open end of the test pair.
     """
 
-    open_end_voltage: Optional[int] = None
+    open_end_voltage: int | None = None
     """
     Voltage measured at the open-circuited end, with the energised end set to rated voltage and all other ends open in volts.
     """
 
-    phase_shift: Optional[float] = None
+    phase_shift: float | None = None
     """
     Phase shift measured at the open end with the energised end set to rated voltage and all other ends open in angle degrees.
     """

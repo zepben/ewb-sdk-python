@@ -9,12 +9,15 @@ __all__ = ["RatioTapChanger"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 
+@dataslot
 class RatioTapChanger(TapChanger):
     """
     A tap changer that changes the voltage ratio impacting the voltage magnitude but not the phase angle across the transformer.
@@ -23,8 +26,8 @@ class RatioTapChanger(TapChanger):
     (for a two-winding transformer).
     """
 
-    transformer_end: Optional[TransformerEnd] = None
+    transformer_end: TransformerEnd | None = None
     """`TransformerEnd` to which this ratio tap changer belongs."""
 
-    step_voltage_increment: Optional[float] = None
+    step_voltage_increment: float | None = None
     """Tap step increment, in per cent of neutral voltage, per step position."""

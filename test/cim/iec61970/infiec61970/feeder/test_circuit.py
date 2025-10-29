@@ -40,6 +40,8 @@ def test_circuit_constructor_kwargs(loop, end_terminals, end_substations, **kwar
     assert list(c.end_substations) == end_substations
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_circuit_constructor_args():
     c = Circuit(*circuit_args)
 

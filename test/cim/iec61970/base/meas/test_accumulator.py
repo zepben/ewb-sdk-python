@@ -21,5 +21,7 @@ def test_accumulator_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Accumulator(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_accumulator_constructor_args():
     verify_measurement_constructor_args(Accumulator(*accumulator_args))

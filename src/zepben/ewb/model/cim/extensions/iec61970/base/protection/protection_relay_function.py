@@ -9,6 +9,10 @@ __all__ = ["ProtectionRelayFunction"]
 
 from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
@@ -24,84 +28,50 @@ if TYPE_CHECKING:
 
 
 @zbex
+@dataslot
+@boilermaker
 class ProtectionRelayFunction(PowerSystemResource):
     """
     [ZBEX]
     A function that a relay implements to protect equipment.
     """
 
-    model: Optional[str] = None
+    model: str | None = None
     """[ZBEX] The protection equipment type name(manufacturer information)."""
 
-    reclosing: Optional[bool] = None
+    reclosing: bool | None = None
     """[ZBEX] True if the protection equipment is reclosing or False otherwise."""
 
-    relay_delay_time: Optional[float] = None
+    relay_delay_time: float | None = None
     """[ZBEX] The time delay from detection of abnormal conditions to relay operation in seconds."""
 
     protection_kind: ProtectionKind = ProtectionKind.UNKNOWN
     """[ZBEX] The kind of protection being provided by this ProtectionRelayFunction."""
 
-    directable: Optional[bool] = None
+    directable: bool | None = None
     """[ZBEX] Whether this ProtectionRelayFunction responds to power flow in a given direction."""
 
     power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN
     """[ZBEX] The flow of the power direction used by this ProtectionRelayFunction."""
 
-    _sensors: Optional[List[Sensor]] = None
+    sensors: List[Sensor] | None = MRIDListAccessor()
 
-    _protected_switches: Optional[List[ProtectedSwitch]] = None
+    protected_switches: List[ProtectedSwitch] | None = MRIDListAccessor()
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    schemes: List[ProtectionRelayScheme] | None = MRIDListAccessor()
 
-    _time_limits: Optional[List[float]] = None
+    time_limits: List[float] | None = ListAccessor()
 
-    _thresholds: Optional[List[RelaySetting]] = None
+    thresholds: List[RelaySetting] | None = ListAccessor()
 
-    def __init__(self,
-                 sensors: Iterable[Sensor] = None,
-                 protected_switches: Iterable[ProtectedSwitch] = None,
-                 schemes: Iterable[ProtectionRelayScheme] = None,
-                 time_limits: Iterable[float] = None,
-                 thresholds: Iterable[RelaySetting] = None,
-                 relay_info: RelayInfo = None, **kwargs):
-        super(ProtectionRelayFunction, self).__init__(**kwargs)
+    relay_info: RelayInfo | None = Alias(backed_name="asset_info")
 
-        if sensors is not None:
-            for sensor in sensors:
-                self.add_sensor(sensor)
-        if protected_switches is not None:
-            for protected_switch in protected_switches:
-                self.add_protected_switch(protected_switch)
-        if schemes is not None:
-            for scheme in schemes:
-                self.add_scheme(scheme)
-        if time_limits is not None:
-            for time_limit in time_limits:
-                self.add_time_limit(time_limit)
-        if thresholds is not None:
-            for threshold in thresholds:
-                self.add_threshold(threshold)
-        if relay_info is not None:
-            self.relay_info = relay_info
-
-    @property
-    def relay_info(self):
-        """Datasheet information for this CurrentRelay"""
-        return self.asset_info
-
-    @relay_info.setter
-    def relay_info(self, relay_info: Optional[RelayInfo]):
-        self.asset_info = relay_info
-
-    @property
-    def thresholds(self) -> Generator[RelaySetting, None, None]:
-        """
-        [ZBEX] Yields all the thresholds[:class:`RelaySettings<RelaySetting>`] for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
-
-        :return: A generator that iterates over all thresholds[:class:`RelaySettings<RelaySetting>`] for this relay function.
-        """
-        return ngen(self._thresholds)
+    def _retype(self):
+        self.sensors: MRIDListRouter = ...
+        self.protected_switches: MRIDListRouter = ...
+        self.schemes: MRIDListRouter = ...
+        self.time_limits: ListRouter = ...
+        self.thresholds: ListRouter = ...
 
     def for_each_threshold(self, action: Callable[[int, RelaySetting], None]):
         """
@@ -112,6 +82,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         for index, point in enumerate(self.thresholds):
             action(index, point)
 
+    @custom_add(thresholds)
     def add_threshold(self, threshold: RelaySetting, sequence_number: int = None) -> ProtectionRelayFunction:
         """
         Add a threshold[:class:`RelaySetting`] to this :class:`ProtectionRelayFunction`'s list of thresholds.
@@ -126,18 +97,14 @@ class ProtectionRelayFunction(PowerSystemResource):
                 lambda: f"Unable to add RelaySetting to {str(self)}. Sequence number {sequence_number} "
                         f"is invalid. Expected a value between 0 and {self.num_thresholds()}. Make sure you are "
                         f"adding the items in order and there are no gaps in the numbering.")
-        self._thresholds = list() if self._thresholds is None else self._thresholds
-        self._thresholds.insert(sequence_number, threshold)
+        self.thresholds.insert_raw(sequence_number, threshold)
         return self
 
+    @deprecated("BOILERPLATE: Use len(thresholds) instead")
     def num_thresholds(self) -> int:
-        """
-        Get the number of thresholds for this :class:`ProtectionRelayFunction`.
+        return len(self.thresholds)
 
-        :return: The number of thresholds for this `ProtectionRelayFunction`.
-        """
-        return nlen(self._thresholds)
-
+    @deprecated("BOILERPLATE: Use self.thresholds[sequence_number] instead")
     def get_threshold(self, sequence_number: int) -> RelaySetting:
         """
         Get the threshold[:class:`RelaySetting`] for this :class:`ProtectionRelayFunction` by its `sequence_number`.
@@ -146,11 +113,9 @@ class ProtectionRelayFunction(PowerSystemResource):
         :returns: The threshold[:class:`RelaySetting`]  for this :class:`ProtectionRelayFunction` with sequence number `sequence_number`
         :raises IndexError: if no :class:`RelaySetting` was found with sequence_number `sequence_number`.
         """
-        if self._thresholds is not None:
-            return self._thresholds[sequence_number]
-        else:
-            raise IndexError(sequence_number)
+        return self.thresholds[sequence_number]
 
+    @deprecated("BOILERPLATE: Use thresholds.remove(threshold) instead")
     def remove_threshold(self, threshold: RelaySetting) -> ProtectionRelayFunction:
         """
         Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
@@ -158,7 +123,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         :param threshold: The threshold[:class:`RelaySetting`] to disassociate from this :class:`ProtectionRelayFunction`.
         :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
-        self._thresholds = safe_remove(self._thresholds, threshold)
+        self.thresholds.remove(threshold)
         return self
 
     def remove_threshold_at(self, sequence_number: int) -> RelaySetting:
@@ -170,26 +135,12 @@ class ProtectionRelayFunction(PowerSystemResource):
         :raises IndexError: If `sequence_number` is out of range.
         """
         threshold = self.get_threshold(sequence_number)
-        self._thresholds = safe_remove(self._thresholds, threshold)
+        self.thresholds.raw.remove(threshold)
         return threshold
 
+    @deprecated("BOILERPLATE: Use thresholds.clear() instead")
     def clear_thresholds(self) -> ProtectionRelayFunction:
-        """
-        Removes all thresholds from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._thresholds = None
-        return self
-
-    @property
-    def time_limits(self) -> Generator[float, None, None]:
-        """
-        [ZBEX] Yields all the time limits (in seconds) for this relay function. Order of entries corresponds to the order of entries in thresholds.
-
-        :return: A generator that iterates over all time limits for this relay function.
-        """
-        return ngen(self._time_limits)
+        return self.thresholds.clear()
 
     def for_each_time_limit(self, action: Callable[[int, float], None]):
         """
@@ -200,6 +151,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         for index, limit in enumerate(self.time_limits):
             action(index, limit)
 
+    @custom_add(time_limits)
     def add_time_limit(self, time_limit: float, index: int = None) -> ProtectionRelayFunction:
         """
         Add a time limit.
@@ -214,13 +166,14 @@ class ProtectionRelayFunction(PowerSystemResource):
                 lambda: f"Unable to add float to {str(self)}. Sequence number {index} "
                         f"is invalid. Expected a value between 0 and {self.num_time_limits()}. Make sure you are "
                         f"adding the items in order and there are no gaps in the numbering.")
-        self._time_limits = list() if self._time_limits is None else self._time_limits
-        self._time_limits.insert(index, time_limit)
+        self.time_limits.insert_raw(index, time_limit)
         return self
 
+    @deprecated("BOILERPLATE: Use len(time_limits) instead")
     def num_time_limits(self) -> int:
-        return nlen(self._time_limits)
+        return len(self.time_limits)
 
+    @deprecated("BOILERPLATE: Use self.time_limits[index] instead")
     def get_time_limit(self, index: int):
         """
         Get the time limit for this :class:`ProtectionRelayFunction` by its `index`.
@@ -229,11 +182,9 @@ class ProtectionRelayFunction(PowerSystemResource):
         :returns: The time limit with the specified `index` if it exists.
         :raises IndexError: if no time limit was found with provided index.
         """
-        if self._time_limits is not None:
-            return self._time_limits[index]
-        else:
-            raise IndexError(index)
+        return self.time_limits[index]
 
+    @deprecated("BOILERPLATE: Use time_limits.remove() instead")
     def remove_time_limit(self, time_limit: float) -> ProtectionRelayFunction:
         """
         Remove a time limit from the list.
@@ -241,7 +192,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         :param time_limit: The time limit to remove.
         :returns: A reference to this `ProtectionRelayFunction` to allow fluent use.
         """
-        self._time_limits = safe_remove(self._time_limits, time_limit)
+        self.time_limits.remove(time_limit)
         return self
 
     def remove_time_limit_at(self, index: int) -> float:
@@ -252,197 +203,72 @@ class ProtectionRelayFunction(PowerSystemResource):
         :returns: The time limit that was removed, or `None` if no time limit was present at `index`.
         :raises IndexError: If `sequence_number` is out of range.
         """
-        if self._time_limits:
-            limit = self._time_limits.pop(index)
-            self._time_limits = self._time_limits if self._time_limits else None
+        if self.time_limits:
+            limit = self.time_limits.pop(index)
             return limit
         raise IndexError(index)
 
+    @deprecated("BOILERPLATE: Use time_limits.clear() instead")
     def clear_time_limits(self) -> ProtectionRelayFunction:
-        """
-        Removes all time limits from this :class:`ProtectionRelayFunction`.
+        return self.time_limits.clear()
 
-        :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._time_limits = None
-        return self
-
-    @property
-    def sensors(self) -> Generator[Sensor, None, None]:
-        """
-        [ZBEX] Yields all the :class:`Sensors<Sensor>` for this relay function.
-
-        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
-        """
-        return ngen(self._sensors)
-
+    @deprecated("BOILERPLATE: Use sensors.get_by_mrid(mrid) instead")
     def get_sensor(self, mrid: str) -> Sensor:
-        """
-        Get a sensor :class:`Sensor` for this :class:`ProtectionRelayFunction` by its mrid.
+        return self.sensors.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the desired :class:`Sensor`.
-        :returns: The :class:`Sensor` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._sensors, mrid)
-
+    @deprecated("BOILERPLATE: Use sensors.append(sensor) instead")
     def add_sensor(self, sensor: Sensor) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`Sensor`.
+        return self.sensors.append(sensor)
 
-        :param sensor: The :class:`Sensor` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(sensor, self.get_sensor, "A Sensor"):
-            return self
-        self._sensors = list() if self._sensors is None else self._sensors
-        self._sensors.append(sensor)
-        return self
-
+    @deprecated("BOILERPLATE: Use len(sensors) instead")
     def num_sensors(self) -> int:
-        """
-        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
+        return len(self.sensors)
 
-        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._sensors)
+    @deprecated("BOILERPLATE: Use sensors.remove(sensor) instead")
+    def remove_sensor(self, sensor: Sensor | None) -> ProtectionRelayFunction:
+        return self.sensors.remove(sensor)
 
-    def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`Sensor`.
-
-        :param sensor: The :class:`Sensor` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If sensor was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = safe_remove(self._sensors, sensor)
-        return self
-
+    @deprecated("BOILERPLATE: Use sensors.clear() instead")
     def clear_sensors(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`Sensors<Sensor>` from this :class:`ProtectionRelayFunction`.
+        return self.sensors.clear()
 
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = None
-        return self
-
-    @property
-    def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-
-        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return ngen(self._protected_switches)
-
+    @deprecated("BOILERPLATE: Use protected_switches.get_by_mrid(mrid) instead")
     def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
-        """
-        Get a :class:`ProtectedSwitch` operated by this :class:`ProtectionRelayFunction` by its mrid.
+        return self.protected_switches.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the desired :class:`ProtectedSwitch`.
-        :returns: The :class:`ProtectedSwitch` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._protected_switches, mrid)
-
+    @deprecated("BOILERPLATE: Use protected_switches.append(protected_switch) instead")
     def add_protected_switch(self, protected_switch: ProtectedSwitch) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectedSwitch` it operates.
+        return self.protected_switches.append(protected_switch)
 
-        :param protected_switch: The :class:`ProtectedSwitch` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(protected_switch, self.get_protected_switch, "A ProtectedSwitch"):
-            return self
-        self._protected_switches = list() if self._protected_switches is None else self._protected_switches
-        self._protected_switches.append(protected_switch)
-        return self
-
+    @deprecated("BOILERPLATE: Use len(protected_switches) instead")
     def num_protected_switches(self) -> int:
-        """
-        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+        return len(self.protected_switches)
 
-        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._protected_switches)
+    @deprecated("BOILERPLATE: Use protected_switches.remove(protected_switch) instead")
+    def remove_protected_switch(self, protected_switch: ProtectedSwitch | None) -> ProtectionRelayFunction:
+        return self.protected_switches.remove(protected_switch)
 
-    def remove_protected_switch(self, protected_switch: Optional[ProtectedSwitch]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectedSwitch`.
-
-        :param protected_switch: The :class:`ProtectedSwitch` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If protected_switch was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = safe_remove(self._protected_switches, protected_switch)
-        return self
-
+    @deprecated("BOILERPLATE: Use protected_switches.clear() instead")
     def clear_protected_switches(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectedSwitches<ProtectedSwitch>` from this :class:`ProtectionRelayFunction`.
+        return self.protected_switches.clear()
 
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._protected_switches = None
-        return self
-
-    @property
-    def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-
-        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-        """
-        return ngen(self._schemes)
-
+    @deprecated("BOILERPLATE: Use schemes.get_by_mrid(mrid) instead")
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
-        """
-        Get a :class:`ProtectionRelayScheme` this :class:`ProtectionRelayFunction` operates under by its mRID.
+        return self.schemes.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the desired :class:`ProtectionRelayScheme`.
-        :returns: The :class:`ProtectionRelayScheme` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._schemes, mrid)
-
+    @deprecated("BOILERPLATE: Use schemes.append(scheme) instead")
     def add_scheme(self, scheme: ProtectionRelayScheme) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectionRelayScheme` it operates under.
+        return self.schemes.append(scheme)
 
-        :param scheme: The :class:`ProtectionRelayScheme` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(scheme, self.get_scheme, "A ProtectionRelayScheme"):
-            return self
-        self._schemes = list() if self._schemes is None else self._schemes
-        self._schemes.append(scheme)
-        return self
-
+    @deprecated("BOILERPLATE: Use len(schemes) instead")
     def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        return len(self.schemes)
 
-        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._schemes)
+    @deprecated("BOILERPLATE: Use schemes.remove(scheme) instead")
+    def remove_scheme(self, scheme: ProtectionRelayScheme | None) -> ProtectionRelayFunction:
+        return self.schemes.remove(scheme)
 
-    def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectionRelayScheme`.
-
-        :param scheme: The :class:`ProtectionRelayScheme` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If scheme was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = safe_remove(self._schemes, scheme)
-        return self
-
+    @deprecated("BOILERPLATE: Use schemes.clear() instead")
     def clear_schemes(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = None
+        return self.schemes.clear()
         return self

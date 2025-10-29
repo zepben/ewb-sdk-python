@@ -7,6 +7,8 @@ __all__ = ["TransformerStarImpedance"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 
@@ -14,6 +16,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 
+@dataslot
 class TransformerStarImpedance(IdentifiedObject):
     """
     Transformer star impedance (Pi-model) that accurately reflects impedance for transformers with 2 or 3 windings. For transformers with 4 or more windings,
@@ -21,16 +24,16 @@ class TransformerStarImpedance(IdentifiedObject):
     For transmission networks use PowerTransformerEnd impedances (r, r0, x, x0, b, b0, g and g0).
     """
 
-    r: Optional[float] = None
+    r: float | None = None
     """ r : Resistance of the transformer end. Unit: Ohms  """
 
-    r0: Optional[float] = None
+    r0: float | None = None
     """ r0 : Zero sequence series resistance of the transformer end. Unit: Ohms"""
 
-    x: Optional[float] = None
+    x: float | None = None
     """ x : Positive sequence series reactance  of the transformer end. Unit: Ohms"""
 
-    x0: Optional[float] = None
+    x0: float | None = None
     """ x0 : Zero sequence series reactance of the transformer end. Unit: Ohms"""
 
     transformer_end_info: Optional['TransformerEndInfo'] = None

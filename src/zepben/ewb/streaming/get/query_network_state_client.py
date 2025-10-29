@@ -8,6 +8,8 @@ __all__ = ["QueryNetworkStateClient"]
 from datetime import datetime
 from typing import List, Callable, AsyncGenerator
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
@@ -18,6 +20,7 @@ from zepben.ewb.streaming.grpc.grpc import GrpcClient
 from zepben.ewb.util import datetime_to_timestamp
 
 
+@dataslot
 class QueryNetworkStateClient(GrpcClient):
     """
     A client class that provides functionality to interact with the gRPC service for querying network states.
@@ -25,15 +28,6 @@ class QueryNetworkStateClient(GrpcClient):
     """
 
     _stub: QueryNetworkStateServiceStub = None
-
-    def __init__(self, channel=None, stub: QueryNetworkStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
-        if stub is not None:
-            self._stub = stub
-        else:
-            self._stub = QueryNetworkStateServiceStub(channel)
 
     async def get_current_states(self, query_id: int, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
         """

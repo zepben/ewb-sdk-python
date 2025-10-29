@@ -7,17 +7,20 @@ __all__ = ["CurrentRelay"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
+@dataslot
 class CurrentRelay(ProtectionRelayFunction):
     """A device that checks current flow values in any direction or designated direction."""
 
-    current_limit_1: Optional[float] = None
+    current_limit_1: float | None = None
     """Current limit number 1 for inverse time pickup in amperes."""
 
-    inverse_time_flag: Optional[bool] = None
+    inverse_time_flag: bool | None = None
     """Set true if the current relay has inverse time characteristic."""
 
-    time_delay_1: Optional[float] = None
+    time_delay_1: float | None = None
     """Inverse time delay number 1 for current limit number 1 in seconds."""

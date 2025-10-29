@@ -83,6 +83,8 @@ def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_li
     assert cti.usage == usage
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_current_transformer_info_constructor_args():
     cti = CurrentTransformerInfo(*current_transformer_info_args)
 

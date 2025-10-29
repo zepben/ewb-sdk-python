@@ -7,15 +7,17 @@ __all__ = ["MeasurementValue"]
 
 from datetime import datetime
 from typing import Optional
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 
-from zepben.ewb.dataclassy import dataclass
 
 
-@dataclass(slots=True)
+
+@dataslot
 class MeasurementValue(object):
     """
     The current state for a measurement. A state value is an instance of a measurement from a specific source.
     Measurements can be associated with many state values, each representing a different source for the measurement.
     """
-    time_stamp: Optional[datetime] = None
+    time_stamp: datetime | None = None
     """The time when the value was last updated."""

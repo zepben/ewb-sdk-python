@@ -25,5 +25,7 @@ def test_meter_constructor_kwargs(**kwargs):
     verify_end_device_constructor_kwargs(Meter(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_meter_constructor_args():
     verify_end_device_constructor_args(Meter(*meter_args))

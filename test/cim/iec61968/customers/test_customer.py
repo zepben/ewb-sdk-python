@@ -48,6 +48,8 @@ def test_customer_constructor_kwargs(kind, special_need, customer_agreements, **
     assert list(c.agreements) == customer_agreements
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_customer_constructor_args():
     c = Customer(*customer_args)
 

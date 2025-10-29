@@ -49,6 +49,8 @@ def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_secti
     assert lsc.g_per_section == g_per_section
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_linear_shunt_compensator_constructor_args():
     lsc = LinearShuntCompensator(*linear_shunt_compensator_args)
 

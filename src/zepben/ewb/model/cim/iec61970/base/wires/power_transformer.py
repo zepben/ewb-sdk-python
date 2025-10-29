@@ -9,6 +9,8 @@ __all__ = ["PowerTransformer"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -21,6 +23,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
+@dataslot
+@boilermaker
 class PowerTransformer(ConductingEquipment):
     """
     An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing
@@ -60,9 +64,9 @@ class PowerTransformer(ConductingEquipment):
     numerical sequence if they are numbered: the phasors are assumed to rotate in a counter-clockwise sense.
     """
 
-    _power_transformer_ends: Optional[List[PowerTransformerEnd]] = None
+    power_transformer_ends: List[PowerTransformerEnd] | None = MRIDListAccessor()
 
-    transformer_utilisation: Optional[float] = None
+    transformer_utilisation: float | None = None
     """
     The fraction of the transformer’s normal capacity (nameplate rating) that is in use. It may be expressed as the
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
@@ -78,32 +82,25 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
-    def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
-        super(PowerTransformer, self).__init__(**kwargs)
-        if power_transformer_ends:
-            for end in power_transformer_ends:
-                if end.power_transformer is None:
-                    end.power_transformer = self
-                self.add_end(end)
-
+    def _retype(self):
+        self.power_transformer_ends: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(power_transformer_ends) instead")
     def num_ends(self):
-        """
-        Get the number of `PowerTransformerEnd`s for this `PowerTransformer`.
-        """
-        return nlen(self._power_transformer_ends)
+        return len(self.power_transformer_ends)
 
     @property
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
-        return ngen(self._power_transformer_ends)
+        return ngen(self.power_transformer_ends)
 
     @property
-    def power_transformer_info(self) -> Optional[PowerTransformerInfo]:
+    def power_transformer_info(self) -> PowerTransformerInfo | None:
         """The `PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 
     @power_transformer_info.setter
-    def power_transformer_info(self, pti: Optional[PowerTransformerInfo]):
+    def power_transformer_info(self, pti: PowerTransformerInfo | None):
         """
         Set the `PowerTransformerInfo` for this `PowerTransformer`
         `pti` The `PowerTransformerInfo` to associate with this `PowerTransformer`
@@ -119,15 +116,9 @@ class PowerTransformer(ConductingEquipment):
         else:
             return None
 
+    @deprecated("BOILERPLATE: Use power_transformer_ends.get_by_mrid(mrid) instead")
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
-        """
-        Get the `PowerTransformerEnd` for this `PowerTransformer` identified by `mrid`
-
-        `mrid` the mRID of the required `PowerTransformerEnd`
-        Returns The `PowerTransformerEnd` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._power_transformer_ends, mrid)
+        return self.power_transformer_ends.get_by_mrid(mrid)
 
     def get_end_by_num(self, end_number: int) -> PowerTransformerEnd:
         """
@@ -137,12 +128,13 @@ class PowerTransformer(ConductingEquipment):
         Returns The `PowerTransformerEnd` referred to by `end_number`
         Raises IndexError if no `PowerTransformerEnd` was found with end_number `end_number`.
         """
-        if self._power_transformer_ends:
-            for end in self._power_transformer_ends:
+        if self.power_transformer_ends:
+            for end in self.power_transformer_ends:
                 if end.end_number == end_number:
                     return end
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self)}")
 
+    @custom_get(power_transformer_ends)
     def get_end_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
         """
         Get the `PowerTransformerEnd` on this `PowerTransformer` by its `terminal`.
@@ -151,12 +143,13 @@ class PowerTransformer(ConductingEquipment):
         Returns The `PowerTransformerEnd` connected to the specified `terminal`
         Raises IndexError if no `PowerTransformerEnd` connected to `terminal` was found on this `PowerTransformer`.
         """
-        if self._power_transformer_ends:
-            for end in self._power_transformer_ends:
+        if self.power_transformer_ends:
+            for end in self.power_transformer_ends:
                 if end.terminal is terminal:
                     return end
         raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self)}")
 
+    @custom_add(power_transformer_ends)
     def add_end(self, end: PowerTransformerEnd) -> PowerTransformer:
         """
         Associate a `PowerTransformerEnd` with this `PowerTransformer`. If `end.end_number` == 0, the end will be assigned an end_number of
@@ -172,26 +165,21 @@ class PowerTransformer(ConductingEquipment):
         if end.end_number == 0:
             end.end_number = self.num_ends() + 1
 
-        self._power_transformer_ends = list() if self._power_transformer_ends is None else self._power_transformer_ends
-        self._power_transformer_ends.append(end)
-        self._power_transformer_ends.sort(key=lambda t: t.end_number)
+        self.power_transformer_ends.append_unchecked(end)
+        self.power_transformer_ends.sort(key=lambda t: t.end_number)
         return self
 
+    @deprecated("BOILERPLATE: Use power_transformer_ends.remove(end) instead")
     def remove_end(self, end: PowerTransformerEnd) -> PowerTransformer:
-        """
-        `end` the `PowerTransformerEnd` to disassociate from this `PowerTransformer`.
-        Raises `ValueError` if `end` was not associated with this `PowerTransformer`.
-        Returns A reference to this `PowerTransformer` to allow fluent use.
-        """
-        self._power_transformer_ends = safe_remove(self._power_transformer_ends, end)
-        return self
+        return self.power_transformer_ends.remove(end)
 
+    @custom_clear(power_transformer_ends)
     def clear_ends(self) -> PowerTransformer:
         """
         Clear all `PowerTransformerEnd`s.
         Returns A reference to this `PowerTransformer` to allow fluent use.
         """
-        self._power_transformer_ends.clear()
+        self.power_transformer_ends.raw.clear()
         return self
 
     def _validate_end(self, end: PowerTransformerEnd) -> bool:

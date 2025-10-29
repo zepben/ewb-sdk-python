@@ -7,6 +7,10 @@ __all__ = ["PotentialTransformer"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
@@ -14,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 
 
+@dataslot
 class PotentialTransformer(Sensor):
     """
     Instrument transformer (also known as Voltage Transformer) used to measure electrical qualities of the circuit that
@@ -24,15 +29,4 @@ class PotentialTransformer(Sensor):
     type: PotentialTransformerKind = PotentialTransformerKind.UNKNOWN
     """Potential transformer construction type."""
 
-    @property
-    def potential_transformer_info(self) -> Optional['PotentialTransformerInfo']:
-        """The `PotentialTransformerInfo` for this `PotentialTransformer`"""
-        return self.asset_info
-
-    @potential_transformer_info.setter
-    def potential_transformer_info(self, vti: Optional['PotentialTransformerInfo']):
-        """
-        Set the `PotentialTransformerInfo` for this `PotentialTransformer`
-        `vti` The `PotentialTransformerInfo` for this `PotentialTransformer`
-        """
-        self.asset_info = vti
+    potential_transformer_info: Optional['PotentialTransformerInfo'] = Alias(backed_name='asset_info')

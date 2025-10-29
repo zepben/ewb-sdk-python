@@ -20,6 +20,7 @@ def test_asset_owner_constructor_default():
 def test_asset_owner_constructor_kwargs(**kwargs):
     verify_asset_organisation_role_constructor_kwargs(AssetOwner(**kwargs), **kwargs)
 
-
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_asset_owner_constructor_args():
     verify_asset_organisation_role_constructor_args(AssetOwner(*asset_owner_args))

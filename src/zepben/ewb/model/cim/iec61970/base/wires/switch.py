@@ -9,6 +9,8 @@ __all__ = ["Switch"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import require
@@ -35,6 +37,7 @@ def _check_open(current_state: int, phase: SinglePhaseKind = None) -> bool:
         return (current_state & phase.bit_mask) != 0
 
 
+@dataslot
 class Switch(ConductingEquipment):
     """
     A generic device designed to close, or open, or both, one or more electric circuits.
@@ -45,7 +48,7 @@ class Switch(ConductingEquipment):
       value for each phase of the switch.
     """
 
-    rated_current: Optional[float] = None
+    rated_current: float | None = None
     """The maximum continuous current carrying capacity in amps governed by the device material and construction. The attribute shall be a positive value."""
 
     _open: int = 0
@@ -56,12 +59,12 @@ class Switch(ConductingEquipment):
     is expected to match with the Switch.normalOpen."""
 
     @property
-    def switch_info(self) -> Optional[SwitchInfo]:
+    def switch_info(self) -> SwitchInfo | None:
         """Datasheet information for this Switch."""
         return self.asset_info
 
     @switch_info.setter
-    def switch_info(self, si: Optional[SwitchInfo]):
+    def switch_info(self, si: SwitchInfo | None):
         """
         Set the :class:`SwitchInfo` for this :class:`Switch`
         :param si: The SwitchInfo for this Switch

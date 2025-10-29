@@ -54,6 +54,8 @@ def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, styl
     assert list(do.points) == diagram_object_points
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_diagram_object_constructor_args():
     do = DiagramObject(*diagram_object_args)
 

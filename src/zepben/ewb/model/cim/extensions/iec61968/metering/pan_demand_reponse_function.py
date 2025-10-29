@@ -7,6 +7,8 @@ __all__ = ["PanDemandResponseFunction"]
 
 from typing import Optional, List, Union
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.metering.controlled_appliance import ControlledAppliance, Appliance
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
@@ -15,6 +17,7 @@ from zepben.ewb.util import require
 
 
 @zbex
+@dataslot
 class PanDemandResponseFunction(EndDeviceFunction):
     """
     [ZBEX] PAN function that an end device supports, distinguished by 'kind'.
@@ -23,36 +26,20 @@ class PanDemandResponseFunction(EndDeviceFunction):
     kind: EndDeviceFunctionKind = EndDeviceFunctionKind.UNKNOWN
     """[ZBEX] `zepben.ewb.model.cim.iec61968.metering.metering.EndDeviceFunctionKind` of this `PanDemandResponseFunction`"""
 
-    _appliance_bitmask: Optional[int] = None
+    appliance: int | None = ValidatedDescriptor(None)
 
-    def __init__(self, appliances: Union[int, ControlledAppliance] = None, **kwargs):
-        super(PanDemandResponseFunction, self).__init__(**kwargs)
-        if appliances is not None:
-            self.appliance = appliances
-
-    @property
-    def appliance(self) -> Optional[ControlledAppliance]:
-        """
-        [ZBEX]
-        The `ControlledAppliance`s being controlled by this `PanDemandResponseFunction`.
-        """
-        if self._appliance_bitmask is None:
-            return None
-        else:
-            return ControlledAppliance(self._appliance_bitmask)
-
-    @appliance.setter
-    def appliance(self, appliance: Optional[Union[int, ControlledAppliance]]):
+    @validate(appliance)
+    def _appliance_validate(self, appliance: Union[int, ControlledAppliance] | None):
         if isinstance(appliance, int):
-            self._appliance_bitmask = appliance
+            return appliance
         elif isinstance(appliance, ControlledAppliance):
             if appliance:
-                self._appliance_bitmask = appliance.bitmask
+                return appliance.bitmask
         else:
             if appliance:
                 raise ValueError(f"Unsupported type for appliance: {appliance}. Must be either an int or ControlledAppliance")
             else:
-                self._appliance_bitmask = None
+                return None
 
     def add_appliance(self, appliance: Appliance) -> bool:
         """

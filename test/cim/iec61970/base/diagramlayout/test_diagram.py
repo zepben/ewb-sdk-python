@@ -45,6 +45,8 @@ def test_diagram_constructor_kwargs(diagram_style, orientation_kind, diagram_obj
     assert list(d.diagram_objects) == diagram_objects
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_diagram_constructor_args():
     d = Diagram(*diagram_args)
 

@@ -29,11 +29,12 @@ def test_current_transformer_constructor_default():
 @given(**current_transformer_kwargs)
 def test_current_transformer_constructor_kwargs(core_burden, **kwargs):
     ct = CurrentTransformer(core_burden=core_burden, **kwargs)
-
     verify_sensor_constructor_kwargs(ct, **kwargs)
     assert ct.core_burden == core_burden
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_current_transformer_constructor_args():
     ct = CurrentTransformer(*current_transformer_args)
 

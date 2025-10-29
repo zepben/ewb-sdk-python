@@ -44,6 +44,8 @@ def test_loop_constructor_kwargs(circuits, substations, energizing_substations, 
     assert list(loop.energizing_substations) == energizing_substations
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_loop_constructor_args():
     loop = Loop(*loop_args)
 

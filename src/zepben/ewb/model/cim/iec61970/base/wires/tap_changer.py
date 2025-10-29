@@ -7,6 +7,8 @@ __all__ = ["TapChanger"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.util import require
 
@@ -14,104 +16,55 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 
 
+@dataslot
 class TapChanger(PowerSystemResource):
     """
     Mechanism for changing transformer winding tap positions.
     """
 
-    control_enabled: Optional[bool] = None
+    control_enabled: bool | None = None
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    neutral_u: Optional[int] = None
+    neutral_u: int | None = None
     """Voltage at which the winding operates at the neutral tap setting."""
 
     tap_changer_control: Optional['TapChangerControl'] = None
     """The regulating control scheme in which this tap changer participates."""
 
-    _high_step: Optional[int] = None
-    _low_step: Optional[int] = None
-    _neutral_step: Optional[int] = None
-    _normal_step: Optional[int] = None
-    _step: Optional[float] = None
+    high_step: int | None = ValidatedDescriptor(None)
+    low_step: int | None = ValidatedDescriptor(None)
+    neutral_step: int | None = ValidatedDescriptor(None)
+    normal_step: int | None = ValidatedDescriptor(None)
+    step: float | None = ValidatedDescriptor(None)
 
-    def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
-        super(TapChanger, self).__init__(**kwargs)
-        if high_step is not None:
-            self._high_step = high_step
-        if low_step is not None:
-            self._low_step = low_step
-        if neutral_step is not None:
-            self._neutral_step = neutral_step
-        if normal_step is not None:
-            self._normal_step = normal_step
-        if step is not None:
-            self._step = step
-        self._validate_steps()
-
-    @property
-    def high_step(self):
-        """
-        Highest possible tap step position, advance from neutral. The attribute shall be greater than lowStep. This tap position results in the
-        maximum voltage boost on secondary winding(s).
-        """
-        return self._high_step
-
-    @high_step.setter
-    def high_step(self, val):
+    @validate(high_step)
+    def _high_step_validate(self, val):
         require((val is None) or (self._low_step is None) or (val > self._low_step),
                 lambda: f"High step [{val}] must be greater than low step [{self._low_step}]")
         self._check_steps(self.low_step, val)
-        self._high_step = val
+        return val
 
-    @property
-    def low_step(self):
-        """Lowest possible tap step position, retard from neutral. This tap position results in the maximum voltage buck on secondary winding(s)."""
-        return self._low_step
-
-    @low_step.setter
-    def low_step(self, val):
+    @validate(low_step)
+    def _low_step_validate(self, val):
         require((val is None) or (self._high_step is None) or (val < self._high_step),
                 lambda: f"Low step [{val}] must be less than high step [{self._high_step}]")
         self._check_steps(val, self.high_step)
-        self._low_step = val
+        return val
 
-    @property
-    def neutral_step(self):
-        """The neutral tap step position for this winding. The attribute shall be equal or greater than lowStep and equal or less than highStep."""
-        return self._neutral_step
-
-    @neutral_step.setter
-    def neutral_step(self, val):
+    @validate(neutral_step)
+    def _neutral_step_validate(self, val):
         require(self._is_in_range(val), lambda: f"Neutral step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        self._neutral_step = val
+        return val
 
-    @property
-    def normal_step(self):
-        """
-        The tap step position used in "normal" network operation for this winding. For a "Fixed" tap changer indicates the current physical tap setting.
-        The attribute shall be equal or greater than lowStep and equal or less than highStep.
-        """
-        return self._normal_step
-
-    @normal_step.setter
-    def normal_step(self, val):
+    @validate(normal_step)
+    def _normal_step_validate(self, val):
         require(self._is_in_range(val), lambda: f"Normal step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        self._normal_step = val
+        return val
 
-    @property
-    def step(self):
-        """
-        Tap changer position. Starting step for a steady state solution. Non integer values are allowed to support continuous tap variables.
-        The reasons for continuous value are to support study cases where no discrete tap changers has yet been designed, a solutions where a narrow voltage
-        band force the tap step to oscillate or accommodate for a continuous solution as input.
-        The attribute shall be equal or greater than lowStep and equal or less than highStep.
-        """
-        return self._step
-
-    @step.setter
-    def step(self, val):
+    @validate(step)
+    def _step_validate(self, val):
         require(self._is_in_range(val), lambda: f"Step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        self._step = val
+        return val
 
     def _check_steps(self, low, high):
         if low is not None:

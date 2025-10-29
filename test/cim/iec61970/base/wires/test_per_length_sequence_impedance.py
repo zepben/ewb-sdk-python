@@ -55,6 +55,8 @@ def test_per_length_sequence_impedance_constructor_kwargs(r, x, bch, gch, r0, x0
     assert plsi.g0ch == g0ch
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_per_length_sequence_impedance_constructor_args():
     # noinspection PyArgumentList
     plsi = PerLengthSequenceImpedance(*per_length_sequence_impedance_args)

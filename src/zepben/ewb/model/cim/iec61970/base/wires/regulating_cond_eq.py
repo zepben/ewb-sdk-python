@@ -9,37 +9,29 @@ __all__ = ["RegulatingCondEq"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
 
+@dataslot
 class RegulatingCondEq(EnergyConnection):
     """
     A short section of conductor with negligible impedance which can be manually removed and replaced if the circuit is
     de-energized. Note that zero-impedance branches can potentially be modeled by other equipment types.
     """
 
-    control_enabled: Optional[bool] = None
+    control_enabled: bool | None = None
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    _regulating_control: Optional[RegulatingControl] = None
+    regulating_control: RegulatingControl | None = ValidatedDescriptor(None)
 
-    def __init__(self, regulating_control: Optional[RegulatingControl] = None, **kwargs):
-        super(RegulatingCondEq, self).__init__(**kwargs)
-        self.regulating_control = regulating_control
-
-    @property
-    def regulating_control(self):
-        """
-        The `RegulatingControl` associated with this `RegulatingCondEq`
-        """
-        return self._regulating_control
-
-    @regulating_control.setter
-    def regulating_control(self, rc):
+    @validate(regulating_control)
+    def _regulating_control_validate(self, rc):
         if self._regulating_control is None or rc is self._regulating_control:
-            self._regulating_control = rc
+            return rc
         else:
             raise ValueError(f"regulating_control for {str(self)} has already been set to {self._regulating_control}, cannot set this field again")

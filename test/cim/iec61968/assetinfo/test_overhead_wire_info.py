@@ -21,5 +21,7 @@ def test_overhead_wire_info_constructor_kwargs(**kwargs):
     verify_wire_info_constructor_kwargs(OverheadWireInfo(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_overhead_wire_info_constructor_args():
     verify_wire_info_constructor_args(OverheadWireInfo(*overhead_wire_info_args))

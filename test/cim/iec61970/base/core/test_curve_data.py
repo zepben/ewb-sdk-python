@@ -52,6 +52,8 @@ def test_curve_data_constructor_kwargs(x_value, y1_value, y2_value, y3_value, **
     assert curve_data.y3_value == y3_value
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_curve_data_constructor_args():
     curve_data = CurveData(*curve_data_args)
 

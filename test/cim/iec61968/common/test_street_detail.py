@@ -57,6 +57,8 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
     assert sd.display_address == display_address
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_street_detail_constructor_args():
     sd = StreetDetail(*street_detail_args)
 

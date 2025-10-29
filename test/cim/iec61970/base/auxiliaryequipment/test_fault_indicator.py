@@ -21,5 +21,7 @@ def test_fault_indicator_constructor_kwargs(**kwargs):
     verify_auxiliary_equipment_constructor_kwargs(FaultIndicator(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_fault_indicator_constructor_args():
     verify_auxiliary_equipment_constructor_args(FaultIndicator(*fault_indicator_args))

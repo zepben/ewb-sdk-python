@@ -9,9 +9,12 @@ __all__ = ["IdentifiedObject", "TIdentifiedObject"]
 
 import logging
 from abc import ABCMeta
+from dataclasses import field, KW_ONLY
 from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.util import require, CopyableUUID, nlen, ngen, safe_remove
@@ -19,7 +22,8 @@ from zepben.ewb.util import require, CopyableUUID, nlen, ngen, safe_remove
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataslot
+@boilermaker
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.
@@ -30,57 +34,51 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     relation, however must be in snake case to keep the phases PEP compliant.
     """
 
-    mrid: str = CopyableUUID()
+    mrid: str = field(default_factory=CopyableUUID)
     """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
-    name: Optional[str] = None
+    _: KW_ONLY = ... # Everything from this point on will have to be a kwarg
+
+    name: str | None = None
     """The name is any free human readable and possibly non unique text naming the object."""
 
-    description: Optional[str] = None
+    description: str | None = None
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
-    _names: Optional[List[Name]] = None
+    names: List[Name] | None = ListAccessor()
 
     # TODO: Missing num_diagram_objects: int = None  def has_diagram_objects(self): return (self.num_diagram_objects or 0) > 0
 
-    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
-        super(IdentifiedObject, self).__init__(**kwargs)
-        if names:
-            for name in names:
-                self.add_name(name.type, name.name)
+    def _retype(self):
+        self.names: ListRouter = ...
 
+    def __hash__(self):
+        return self.mrid.__hash__()
+
+    def __eq__(self, other: IdentifiedObject | str):
+        if isinstance(other, IdentifiedObject):
+            return self.mrid.__eq__(other.mrid)
+        return self.mrid.__eq__(other)
+    
     def __str__(self):
         class_name = f'{self.__class__.__name__}'
         if self.name:
             return f'{class_name}{{{self.mrid}|{self.name}}}'
         return f'{class_name}{{{self.mrid}}}'
 
-    @property
-    def names(self) -> Generator[Name, None, None]:
-        """All names of this identified object. The returned collection is read only."""
-        return ngen(self._names)
-
+    @deprecated("BOILERPLATE: Use len(names) instead")
     def num_names(self) -> int:
-        """Get the number of entries in the `Name` collection."""
-        return nlen(self._names)
+        return len(self.names)
 
-    @overload
-    def has_name(self, name_type: NameType, name: str) -> bool:
-        ...
-
-    @overload
-    def has_name(self, name_type: str, name: str) -> bool:
-        ...
-
-    def has_name(self, name_type, name) -> bool:
+    def has_name(self, name_type: NameType | str, name) -> bool:
         """
         Check to see if this object has a `Name` with the matching `name_type` and `name`
 
         :return: True if a matching `Name` was found, otherwise False.
         """
-        if self._names:
-            for name_ in self._names:
+        if self.names:
+            for name_ in self.names:
                 if isinstance(name_type, str):
                     if name_.type.name == name_type and name_.name == name:
                         return True
@@ -89,23 +87,15 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                         return True
         return False
 
-    @overload
-    def get_name(self, name_type: NameType, name: str) -> Name:
-        ...
-
-    @overload
-    def get_name(self, name_type: str, name: str) -> Name:
-        ...
-
-    def get_name(self, name_type, name):
+    def get_name(self, name_type: NameType | str, name):
         """
         Find the `Name` with the matching `name_type` and `name`
 
         :return: The matched Name or None
         :raises KeyError: If `name` in `name_type` wasn't present.
         """
-        if self._names:
-            for name_ in self._names:
+        if self.names:
+            for name_ in self.names:
                 if isinstance(name_type, str):
                     if name_.type.name == name_type and name_.name == name:
                         return name_
@@ -114,15 +104,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                         return name_
         raise KeyError(name_type, name)
 
-    @overload
-    def get_names(self, name_type: NameType) -> List[Name]:
-        ...
-
-    @overload
-    def get_names(self, name_type: str) -> List[Name]:
-        ...
-
-    def get_names(self, name_type):
+    @custom_get(names)
+    def get_names(self, name_type: NameType | str):
         """
         Find all `Name` with the matching `name_type`
 
@@ -130,16 +113,20 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         :raises KeyError: If `name_type` wasn't present.
         """
         matches = None
-        if self._names:
+        if self.names:
             if isinstance(name_type, str):
-                matches = [name for name in self._names if name.type.name == name_type]
+                matches = [name for name in self.names if name.type.name == name_type]
             elif isinstance(name_type, NameType):
-                matches = [name for name in self._names if name.type == name_type]
+                matches = [name for name in self.names if name.type == name_type]
 
         if matches:
             return matches
         else:
             raise KeyError(f"{name_type}")
+
+    @custom_add(names)
+    def add_name_obj(self, name: Name):
+        self.add_name(name.type, name.name)
 
     def add_name(self, name_type: NameType, name: str) -> IdentifiedObject:
         """
@@ -164,10 +151,10 @@ class IdentifiedObject(object, metaclass=ABCMeta):
             else:
                 raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")
 
-        self._names = list() if not self._names else self._names
-        self._names.append(name_obj)
+        self.names.append_unchecked(name_obj)
         return self
 
+    @custom_remove(names)
     def remove_name(self, name: Name) -> IdentifiedObject:
         """
         Disassociate a `Name` from this `IdentifiedObject` and remove the `name` from its `nameType`
@@ -176,7 +163,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         :raises ValueError: If `name` was not associated with this `IdentifiedObject`.
         """
-        self._names = safe_remove(self._names, name)
+        self.names.raw.remove(name)
 
         # Remove the reverse reference from the NameType if it still exists.
         if name.type.has_name(name):
@@ -184,15 +171,15 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
         return self
 
+    @custom_clear(names)
     def clear_names(self) -> IdentifiedObject:
         """
         Clear all names.
 
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         """
-        for name in list(self._names):
+        for name in list(self.names):
             self.remove_name(name)
-        self._names = None
 
         return self
 

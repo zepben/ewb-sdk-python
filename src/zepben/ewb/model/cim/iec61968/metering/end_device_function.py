@@ -5,9 +5,12 @@
 
 __all__ = ["EndDeviceFunction"]
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
 
 
+@dataslot
 class EndDeviceFunction(AssetFunction):
     """
     Function performed by an end device such as a meter, communication equipment, controllers, etc.

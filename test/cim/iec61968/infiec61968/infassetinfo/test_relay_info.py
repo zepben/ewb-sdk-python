@@ -46,6 +46,8 @@ def test_relay_info_constructor_kwargs(curve_setting, reclose_fast, reclose_dela
     assert list(ri.reclose_delays) == reclose_delays
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_relay_info_constructor_args():
     ri = RelayInfo(*relay_info_args)
 

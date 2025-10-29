@@ -7,6 +7,8 @@ __all__ = ["TransformerEnd"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require
 
@@ -18,25 +20,26 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
+@dataslot
 class TransformerEnd(IdentifiedObject):
     """
     A conducting connection point of a power transformer. It corresponds to a physical transformer winding terminal.
     In earlier CIM versions, the TransformerWinding class served a similar purpose, but this class is more flexible
     because it associates to terminal but is not a specialization of ConductingEquipment.
     """
-    grounded: Optional[bool] = None
+    grounded: bool | None = None
     """(for Yn and Zn connections) True if the neutral is solidly grounded."""
 
-    r_ground: Optional[float] = None
+    r_ground: float | None = None
     """(for Yn and Zn connections) Resistance part of neutral impedance where 'grounded' is true"""
 
-    x_ground: Optional[float] = None
+    x_ground: float | None = None
     """(for Yn and Zn connections) Reactive part of neutral impedance where 'grounded' is true"""
 
     ratio_tap_changer: Optional['RatioTapChanger'] = None
     """Ratio tap changer associated with this transformer end."""
 
-    _terminal: Optional['Terminal'] = None
+    terminal: Optional['Terminal'] = ValidatedDescriptor(None)
     """The terminal of the transformer that this end is associated with"""
 
     base_voltage: Optional['BaseVoltage'] = None
@@ -51,23 +54,11 @@ class TransformerEnd(IdentifiedObject):
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
-    def __init__(self, terminal: Optional['Terminal'] = None, **kwargs):
-        super(TransformerEnd, self).__init__(**kwargs)
-        if terminal is not None:
-            self.terminal = terminal
-
-    @property
-    def terminal(self) -> Optional['Terminal']:
-        """
-        The terminal of the transformer that this end is associated with
-        """
-        return self._terminal
-
-    @terminal.setter
-    def terminal(self, value: Optional['Terminal']):
+    @validate(terminal)
+    def _terminal_validate(self, value: Optional['Terminal']):
         if value is not None:
             from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
             require(value.conducting_equipment is None or isinstance(value.conducting_equipment, PowerTransformer),
                     lambda: f"Cannot assign {self.__class__.__name__}[{self.mrid}] to {value.__class__.__name__}[{value.mrid}], which is connected to a " +
                             f"{value.conducting_equipment.__class__.__name__}[{value.conducting_equipment.mrid}] rather than a PowerTransformer.")
-            self._terminal = value
+            return value

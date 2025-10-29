@@ -9,6 +9,8 @@ __all__ = ["EndDevice"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 
 
+@dataslot
+@boilermaker
 class EndDevice(AssetContainer):
     """
     Asset container that performs one or more end device functions. One type of end device is a meter which can perform
@@ -33,133 +37,57 @@ class EndDevice(AssetContainer):
     Some devices may use an optical port that conforms to the ANSI C12.18 standard for communications.
     """
 
-    customer_mrid: Optional[str] = None
+    customer_mrid: str | None = None
     """The `zepben.ewb.model.cim.iec61968.customers.customer.Customer` owning this `EndDevice`."""
 
-    service_location: Optional[Location] = None
+    service_location: Location | None = None
     """Service `zepben.ewb.model.cim.iec61968.common.location.Location` whose service delivery is measured by this `EndDevice`."""
 
-    _usage_points: Optional[List[UsagePoint]] = None
+    usage_points: List[UsagePoint] | None = MRIDListAccessor()
 
-    _functions: Optional[List[EndDeviceFunction]] = None
+    functions: List[EndDeviceFunction] | None = MRIDListAccessor()
 
-    def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
-        super(EndDevice, self).__init__(**kwargs)
-        if usage_points:
-            for up in usage_points:
-                self.add_usage_point(up)
-        if functions:
-            for edf in functions:
-                self.add_function(edf)
-
+    def _retype(self):
+        self.usage_points: MRIDListRouter = ...
+        self.functions: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(usage_points) instead")
     def num_usage_points(self):
-        """
-        Returns The number of `UsagePoint`s associated with this `EndDevice`
-        """
-        return nlen(self._usage_points)
+        return len(self.usage_points)
 
-    @property
-    def usage_points(self) -> Generator[UsagePoint, None, None]:
-        """
-        The `UsagePoint`s associated with this `EndDevice`
-        """
-        return ngen(self._usage_points)
-
+    @deprecated("BOILERPLATE: Use usage_points.get_by_mrid(mrid) instead")
     def get_usage_point(self, mrid: str) -> UsagePoint:
-        """
-        Get the `UsagePoint` for this `EndDevice` identified by `mrid`
+        return self.usage_points.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `UsagePoint`
-        Returns The `UsagePoint` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._usage_points, mrid)
-
+    @deprecated("BOILERPLATE: Use usage_points.append(up) instead")
     def add_usage_point(self, up: UsagePoint) -> EndDevice:
-        """
-        Associate `up` to this `EndDevice`.
+        return self.usage_points.append(up)
 
-        `up` the `UsagePoint` to associate with this `EndDevice`.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        Raises `ValueError` if another `UsagePoint` with the same `mrid` already exists for this `EndDevice`.
-        """
-        if self._validate_reference(up, self.get_usage_point, "A UsagePoint"):
-            return self
-        self._usage_points = list() if self._usage_points is None else self._usage_points
-        self._usage_points.append(up)
-        return self
-
+    @deprecated("BOILERPLATE: Use usage_points.remove(up) instead")
     def remove_usage_point(self, up: UsagePoint) -> EndDevice:
-        """
-        Disassociate `up` from this `EndDevice`
+        return self.usage_points.remove(up)
 
-        `up` the `UsagePoint` to disassociate from this `EndDevice`.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        Raises `ValueError` if `up` was not associated with this `EndDevice`.
-        """
-        self._usage_points = safe_remove(self._usage_points, up)
-        return self
-
+    @deprecated("BOILERPLATE: Use usage_points.clear() instead")
     def clear_usage_points(self) -> EndDevice:
-        """
-        Clear all usage_points.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        """
-        self._usage_points = None
-        return self
+        return self.usage_points.clear()
 
+    @deprecated("BOILERPLATE: Use len(functions) instead")
     def num_functions(self):
-        """
-        Returns The number of `EndDeviceFunction`s associated with this `EndDevice`
-        """
-        return nlen(self._functions)
+        return len(self.functions)
 
-    @property
-    def functions(self) -> Generator[EndDeviceFunction, None, None]:
-        """
-        The `EndDeviceFunction`s associated with this `EndDevice`
-        """
-        return ngen(self._functions)
-
+    @deprecated("BOILERPLATE: Use functions.get_by_mrid(mrid) instead")
     def get_function(self, mrid: str) -> EndDeviceFunction:
-        """
-        Get the `EndDeviceFunction` for this `EndDevice` identified by `mrid`
+        return self.functions.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `EndDeviceFunction`
-        Returns The `EndDeviceFunction` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._functions, mrid)
-
+    @deprecated("BOILERPLATE: Use functions.append(edf) instead")
     def add_function(self, edf: EndDeviceFunction) -> EndDevice:
-        """
-        Associate `edf` to this `EndDevice`.
+        return self.functions.append(edf)
 
-        `edf` the `EndDeviceFunction` to associate with this `EndDevice`.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        Raises `ValueError` if another `EndDeviceFunction` with the same `mrid` already exists for this `EndDevice`.
-        """
-        if self._validate_reference(edf, self.get_function, "An EndDeviceFunction"):
-            return self
-        self._functions = list() if self._functions is None else self._functions
-        self._functions.append(edf)
-        return self
-
+    @deprecated("BOILERPLATE: Use functions.remove(edf) instead")
     def remove_function(self, edf: EndDeviceFunction) -> EndDevice:
-        """
-        Disassociate `edf` from this `EndDevice`
+        return self.functions.remove(edf)
 
-        `up` the `EndDeviceFunction` to disassociate from this `EndDevice`.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        Raises `ValueError` if `up` was not associated with this `EndDevice`.
-        """
-        self._functions = safe_remove(self._functions, edf)
-        return self
-
+    @deprecated("BOILERPLATE: Use functions.clear() instead")
     def clear_functions(self) -> EndDevice:
-        """
-        Clear all end_device_functions.
-        Returns A reference to this `EndDevice` to allow fluent use.
-        """
-        self._functions = None
+        return self.functions.clear()
         return self

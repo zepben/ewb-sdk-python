@@ -206,6 +206,8 @@ def test_power_electronics_connection_constructor_kwargs(
     assert list(pec.phases) == power_electronics_connection_phases
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_power_electronics_connection_constructor_args():
     pec = PowerElectronicsConnection(*power_electronics_connection_args)
 

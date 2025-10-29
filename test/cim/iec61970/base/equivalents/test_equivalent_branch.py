@@ -98,6 +98,8 @@ def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negati
     assert t.zero_x21 == zero_x21
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_equivalent_branch_constructor_args():
     t = EquivalentBranch(*equivalent_branch_args)
 

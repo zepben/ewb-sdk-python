@@ -28,9 +28,12 @@ __all__ = [
     "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver", "acls_to_cut_resolver", "cut_to_acls_resolver", "acls_to_clamp_resolver",
     "clamp_to_acls_resolver", "asset_to_psr_resolver", "psr_to_asset_resolver"]
 
+from dataclasses import dataclass
 from typing import Callable, Optional
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
@@ -137,7 +140,7 @@ class ReferenceResolver(object):
 class BoundReferenceResolver(object):
     from_obj: IdentifiedObject
     resolver: ReferenceResolver
-    reverse_resolver: Optional[ReferenceResolver]
+    reverse_resolver: ReferenceResolver | None
 
     def __eq__(self, other):
         """ We only do a reference check for `from_obj` to avoid expensive equality checks on `IdentifiedObjects`. """
@@ -169,7 +172,7 @@ class UnresolvedReference(object):
     from_ref: IdentifiedObject
     to_mrid: str
     resolver: ReferenceResolver
-    reverse_resolver: Optional[ReferenceResolver] = None
+    reverse_resolver: ReferenceResolver | None = None
 
     def __eq__(self, other: UnresolvedReference):
         # we don't check reverse resolver for equality, as it doesn't make sense to have a reverse resolver that is not the reverse of resolver

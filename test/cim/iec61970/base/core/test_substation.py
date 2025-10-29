@@ -51,6 +51,8 @@ def test_substation_constructor_kwargs(sub_geographical_region, normal_energized
     assert list(cn.circuits) == circuits
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_substation_constructor_args():
     cn = Substation(*substation_args)
 

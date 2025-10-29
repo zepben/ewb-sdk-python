@@ -8,30 +8,33 @@ from __future__ import annotations
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
 from abc import abstractmethod
-from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
+from dataclasses import field, dataclass
+from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator, List
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
 from zepben.ewb import BaseService, IdentifiedObject, UnsupportedOperationException, ServiceInfo
-from zepben.ewb.dataclassy import dataclass
+
 from zepben.ewb.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.ewb.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 T = TypeVar('T', bound=IdentifiedObject)
 
 
-@dataclass()
+@dataclass
 class MultiObjectResult(object):
-    objects: Dict[str, T] = dict()
-    failed: Set[str] = set()
+    objects: Dict[str, T] | None = field(default_factory=dict)
+    failed: Set[str] = field(default_factory=set)
 
 
 ServiceType = TypeVar('ServiceType', bound=BaseService)
 PBIdentifiedObject = TypeVar('PBIdentifiedObject')
 GrpcRequest = TypeVar('GrpcRequest')
 
-
+@dataclass
 class CimConsumerClient(GrpcClient, Generic[ServiceType]):
     """
     Base class that defines some helpful functions when producer clients are sending to the server.
@@ -46,11 +49,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         T: The base service to send objects from.
     """
 
-    __service_info: Optional[ServiceInfo]
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.__service_info = None
+    __service_info: ServiceInfo | None = None
 
     @property
     @abstractmethod
@@ -90,7 +89,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         """
         return await self._get_identified_objects(mrids)
 
-    async def _get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    async def _get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
         async def rpc():
             async for io, _ in self._process_identified_objects([mrid]):
                 return io
@@ -106,7 +105,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         return await self.try_rpc(rpc)
 
     @abstractmethod
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         #
         # NOTE: this is a stupid test that is meant to fail to make sure we never yield, but we need to have the yield to make it return the generator.
         #
@@ -120,7 +119,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
                                    desc: str,
                                    pb_io: PBIdentifiedObject,
                                    pb_type_to_cim: Dict[str, Type[CIM_TYPE]],
-                                   check_presence: bool = True) -> Tuple[Optional[IdentifiedObject], str]:
+                                   check_presence: bool = True) -> Tuple[IdentifiedObject | None, str]:
         """
         Add a :class:`CustomerIdentifiedObject` to the service. Will convert from protobuf to CIM type.
 
@@ -152,8 +151,8 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
             raise UnsupportedOperationException(f"Received a {desc} identified object where no field was set")
 
     @staticmethod
-    async def _process_extract_results(mrids: Optional[Iterable[str]],
-                                       extracted: AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]) -> MultiObjectResult:
+    async def _process_extract_results(mrids: Iterable[str] | None,
+                                       extracted: AsyncGenerator[Tuple[IdentifiedObject | None, str], None]) -> MultiObjectResult:
         results = {}
         if mrids is None:
             failed = set()

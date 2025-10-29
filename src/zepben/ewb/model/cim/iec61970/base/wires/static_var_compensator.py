@@ -7,10 +7,13 @@ __all__ = ["StaticVarCompensator"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 
+@dataslot
 class StaticVarCompensator(RegulatingCondEq):
     """
     A facility for providing variable and controllable shunt reactive power.The SVC typically consists of a step-down transformer, filter, thyristor-controlled reactor,
@@ -18,13 +21,13 @@ class StaticVarCompensator(RegulatingCondEq):
     the SVC will be proportional to the deviation of voltage at the controlled bus from the voltage set-point. The SVC characteristic slope defines the proportion.
     If the voltage at the controlled bus is equal to the voltage set-point, the SVC MVar output is zero.
     """
-    capacitive_rating: Optional[float] = None
+    capacitive_rating: float | None = None
     """Capacitive reactance in Ohms at maximum capacitive reactive power. Shall always be positive."""
 
-    inductive_rating: Optional[float] = None
+    inductive_rating: float | None = None
     """Inductive reactance in Ohms at maximum inductive reactive power. Shall always be negative."""
 
-    q: Optional[float] = None
+    q: float | None = None
     """
     Reactive power injection in VAr. Load sign convention is used, i.e. positive sign means flow out from a node. 
     Starting value for a steady state solution.
@@ -33,7 +36,7 @@ class StaticVarCompensator(RegulatingCondEq):
     svc_control_mode: SVCControlMode = SVCControlMode.UNKNOWN
     """SVC control mode."""
 
-    voltage_set_point: Optional[int] = None
+    voltage_set_point: int | None = None
     """
     The reactive power output of the SVC is proportional to the difference between the voltage at the regulated bus and the voltage set-point.
     When the regulated bus voltage is equal to the voltage set-point, the reactive power output is zero. Must be in volts.

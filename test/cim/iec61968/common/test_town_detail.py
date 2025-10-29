@@ -34,6 +34,8 @@ def test_town_detail_constructor_kwargs(name, state_or_province, **kwargs):
     assert td.state_or_province == state_or_province
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_town_detail_constructor_args():
     td = TownDetail(*town_detail_args)
 

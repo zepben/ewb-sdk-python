@@ -8,6 +8,8 @@ __all__ = ["TransformerEndInfo"]
 import math
 from typing import Optional, TYPE_CHECKING, Tuple
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
@@ -20,36 +22,37 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
+@dataslot
 class TransformerEndInfo(AssetInfo):
     """Transformer end data."""
 
     connection_kind: WindingConnection = WindingConnection.UNKNOWN
     """Kind of connection."""
 
-    emergency_s: Optional[int] = None
+    emergency_s: int | None = None
     """Apparent power that the winding can carry under emergency conditions (also called long-term emergency power). Unit: VA"""
 
     end_number: int = 0
     """Number for this transformer end, corresponding to the end's order in the PowerTransformer.vectorGroup attribute. Highest voltage winding
          should be 1."""
 
-    insulation_u: Optional[int] = None
+    insulation_u: int | None = None
     """Basic insulation level voltage rating. Unit: Volts"""
 
-    phase_angle_clock: Optional[int] = None
+    phase_angle_clock: int | None = None
     """Winding phase angle where 360 degrees are represented with clock hours, so the valid values are {0, ..., 11}. For example,
          to express the second winding in code 'Dyn11', set attributes as follows: 'endNumber'=2, 'connectionKind' = Yn and 'phaseAngleClock' = 11."""
 
-    r: Optional[float] = None
+    r: float | None = None
     """DC resistance. Unit: Ohms"""
 
-    rated_s: Optional[int] = None
+    rated_s: int | None = None
     """Normal apparent power rating. Unit: VA"""
 
-    rated_u: Optional[int] = None
+    rated_u: int | None = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. Unit: Volts"""
 
-    short_term_s: Optional[int] = None
+    short_term_s: int | None = None
     """Apparent power that this winding can carry for a short period of time (in emergency). Unit: VA"""
 
     transformer_tank_info: Optional['TransformerTankInfo'] = None
@@ -83,7 +86,7 @@ class TransformerEndInfo(AssetInfo):
     All open-circuit test measurements in which this transformer end was excited.
     """
 
-    def resistance_reactance(self) -> Optional[ResistanceReactance]:
+    def resistance_reactance(self) -> ResistanceReactance | None:
         """
         Get the `ResistanceReactance` for this `TransformerEndInfo` from either the pre-calculated `transformer_star_impedance` or
         calculated from the associated test data.
@@ -95,7 +98,7 @@ class TransformerEndInfo(AssetInfo):
         else:
             return self.calculate_resistance_reactance_from_tests()
 
-    def calculate_resistance_reactance_from_tests(self) -> Optional[ResistanceReactance]:
+    def calculate_resistance_reactance_from_tests(self) -> ResistanceReactance | None:
         """
         Get the `ResistanceReactance` for this `TransformerEndInfo` calculated from the associated test data.
 
@@ -107,13 +110,13 @@ class TransformerEndInfo(AssetInfo):
         if not self.rated_u or not self.rated_s:
             return None
 
-        def calculate_x(voltage: float, r: float) -> Optional[float]:
+        def calculate_x(voltage: float, r: float) -> float | None:
             if voltage is None or r is None:
                 return None
 
             return round(math.sqrt((((voltage / 100) * (self.rated_u ** 2) / self.rated_s) ** 2) - (r ** 2)), 2)
 
-        def calculate_r_x_from_test(short_circuit_test: 'ShortCircuitTest') -> Optional[Tuple[float, float]]:
+        def calculate_r_x_from_test(short_circuit_test: 'ShortCircuitTest') -> Tuple[float, float] | None:
             if short_circuit_test is None:
                 return None
             elif short_circuit_test.voltage_ohmic_part is not None:

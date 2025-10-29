@@ -10,6 +10,8 @@ __all__ = ['ConductingEquipment']
 import sys
 from typing import List, Optional, Generator, TYPE_CHECKING, Union
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import get_by_mrid, require, ngen
 
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@dataslot
+@boilermaker
 class ConductingEquipment(Equipment):
     """
     Abstract class, should only be used through subclasses.
@@ -29,23 +33,18 @@ class ConductingEquipment(Equipment):
     _exactly one_ `ConnectivityNode`, and through that `ConnectivityNode` can be linked with many other `Terminals` and `ConductingEquipment`.
     """
 
-    base_voltage: Optional[BaseVoltage] = None
+    base_voltage: BaseVoltage | None = None
     """
     `BaseVoltage` of this `ConductingEquipment`. Use only when there is no voltage level container used and only one base voltage applies. For example, not
     used for transformers.
     """
 
-    _terminals: List[Terminal] = []
+    terminals: List[Terminal] | None = MRIDListAccessor()
     max_terminals = int(sys.maxsize)
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConductingEquipment, self).__init__(**kwargs)
-        if terminals:
-            for term in terminals:
-                if term.conducting_equipment is None:
-                    term.conducting_equipment = self
-                self.add_terminal(term)
-
+    def _retype(self):
+        self.terminals: MRIDListRouter = ...
+    
     # pylint: disable=unused-argument
     def get_base_voltage(self, terminal: Terminal = None):
         """
@@ -66,19 +65,9 @@ class ConductingEquipment(Equipment):
         """
         return self.base_voltage.nominal_voltage if self.base_voltage and self.base_voltage.nominal_voltage else 0
 
-    @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        """
-        `ConductingEquipment` have `Terminal`s that may be connected to other `ConductingEquipment`
-        `Terminal`s via `ConnectivityNode`s.
-        """
-        return ngen(self._terminals)
-
+    @deprecated("BOILERPLATE: Use len(terminals) instead")
     def num_terminals(self):
-        """
-        Get the number of `Terminal`s for this `ConductingEquipment`.
-        """
-        return len(self._terminals)
+        return len(self.terminals)
 
     def get_terminal(self, identifier: Union[int, str]):
         """
@@ -97,18 +86,11 @@ class ConductingEquipment(Equipment):
             return self.get_terminal_by_mrid(identifier)
         raise TypeError(f'`identifier` parameter not a recognised type: {type(identifier)}')
 
+    @deprecated("BOILERPLATE: Use terminals.get_by_mrid(mrid) instead")
     def get_terminal_by_mrid(self, mrid: str) -> Terminal:
-        """
-        Get the `Terminal` for this `ConductingEquipment` identified by `mrid`
+        return self.terminals.get_by_mrid(mrid)
 
-        :param mrid: the mRID of the required `Terminal`
-
-        :return: The `Terminal` with the specified `mrid` if it exists
-
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._terminals, mrid)
-
+    @custom_get(terminals)
     def get_terminal_by_sn(self, sequence_number: int):
         """
         Get the `Terminal` on this `ConductingEquipment` by its `sequence_number`.
@@ -119,7 +101,7 @@ class ConductingEquipment(Equipment):
 
         Raises IndexError if no `Terminal` was found with sequence_number `sequence_number`.
         """
-        for term in self._terminals:
+        for term in self.terminals:
             if term.sequence_number == sequence_number:
                 return term
         raise IndexError(f"No Terminal with sequence_number {sequence_number} was found in ConductingEquipment {str(self)}")
@@ -127,6 +109,7 @@ class ConductingEquipment(Equipment):
     def __getitem__(self, item: int):
         return self.get_terminal_by_sn(item)
 
+    @custom_add(terminals)
     def add_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
         Associate `terminal` with this `ConductingEquipment`. If `terminal.sequence_number` == 0, the terminal will be assigned a sequence_number of
@@ -146,11 +129,12 @@ class ConductingEquipment(Equipment):
         if terminal.sequence_number == 0:
             terminal.sequence_number = self.num_terminals() + 1
 
-        self._terminals.append(terminal)
-        self._terminals.sort(key=lambda t: t.sequence_number)
+        self.terminals.append_unchecked(terminal)
+        self.terminals.sort(key=lambda t: t.sequence_number)
 
         return self
 
+    @custom_remove(terminals)
     def remove_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
         Disassociate `terminal` from this `ConductingEquipment`
@@ -159,15 +143,16 @@ class ConductingEquipment(Equipment):
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConductingEquipment`.
         """
-        self._terminals.remove(terminal)
+        self.terminals.raw.remove(terminal)
         return self
 
+    @custom_clear(terminals)
     def clear_terminals(self) -> ConductingEquipment:
         """
         Clear all terminals.
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         """
-        self._terminals.clear()
+        self.terminals.raw.clear()
         return self
 
     def __repr__(self):
