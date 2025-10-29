@@ -7,20 +7,23 @@ __all__ = ["ShuntCompensatorInfo"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 
 
+@dataslot
 class ShuntCompensatorInfo(AssetInfo):
     """Properties of shunt capacitor, shunt reactor or switchable bank of shunt capacitor or reactor assets."""
 
-    max_power_loss: Optional[int] = None
+    max_power_loss: int | None = None
     """Maximum allowed apparent power loss in watts."""
 
-    rated_current: Optional[int] = None
+    rated_current: int | None = None
     """Rated current in amperes."""
 
-    rated_reactive_power: Optional[int] = None
+    rated_reactive_power: int | None = None
     """Rated reactive power in volt-amperes reactive."""
 
-    rated_voltage: Optional[int] = None
+    rated_voltage: int | None = None
     """Rated voltage in volts."""

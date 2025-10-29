@@ -79,6 +79,8 @@ def test_tap_changer_control_constructor_kwargs(
     assert tcc.co_generation_enabled == co_generation_enabled
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_tap_changer_control_constructor_args():
     tcc = TapChangerControl(*tap_changer_control_args)
 

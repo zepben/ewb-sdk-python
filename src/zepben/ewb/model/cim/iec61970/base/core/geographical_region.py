@@ -9,74 +9,41 @@ __all__ = ["GeographicalRegion"]
 
 from typing import Optional, List, Generator
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
 
+@dataslot
+@boilermaker
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
-    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
+    sub_geographical_regions: List[SubGeographicalRegion] | None = MRIDListAccessor()
 
-    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
-        super(GeographicalRegion, self).__init__(**kwargs)
-        if sub_geographical_regions:
-            for sgr in sub_geographical_regions:
-                self.add_sub_geographical_region(sgr)
-
+    def _retype(self):
+        self.sub_geographical_regions: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(sub_geographical_regions) instead")
     def num_sub_geographical_regions(self) -> int:
-        """
-        Returns The number of `SubGeographicalRegion`s associated with this `GeographicalRegion`
-        """
-        return nlen(self._sub_geographical_regions)
+        return len(self.sub_geographical_regions)
 
-    @property
-    def sub_geographical_regions(self) -> Generator[SubGeographicalRegion, None, None]:
-        """
-        The `SubGeographicalRegion`s of this `GeographicalRegion`.
-        """
-        return ngen(self._sub_geographical_regions)
-
+    @deprecated("BOILERPLATE: Use sub_geographical_regions.get_by_mrid(mrid) instead")
     def get_sub_geographical_region(self, mrid: str) -> SubGeographicalRegion:
-        """
-        Get the `SubGeographicalRegion` for this `GeographicalRegion` identified by `mrid`
+        return self.sub_geographical_regions.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `SubGeographicalRegion`
-        Returns The `SubGeographicalRegion` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._sub_geographical_regions, mrid)
-
+    @deprecated("BOILERPLATE: Use sub_geographical_regions.append(sub_geographical_region) instead")
     def add_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        """
-        Associate a `SubGeographicalRegion` with this `GeographicalRegion`
+        return self.sub_geographical_regions.append(sub_geographical_region)
 
-        `sub_geographical_region` The `SubGeographicalRegion` to associate with this `GeographicalRegion`.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`.
-        """
-        if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubGeographicalRegion"):
-            return self
-        self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
-        self._sub_geographical_regions.append(sub_geographical_region)
-        return self
-
+    @deprecated("BOILERPLATE: Use sub_geographical_regions.remove(sub_geographical_region) instead")
     def remove_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        """
-        Disassociate `sub_geographical_region` from this `GeographicalRegion`
-        `sub_geographical_region` The `SubGeographicalRegion` to disassociate from this `GeographicalRegion`.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        Raises `ValueError` if `sub_geographical_region` was not associated with this `GeographicalRegion`.
-        """
-        self._sub_geographical_regions = safe_remove(self._sub_geographical_regions, sub_geographical_region)
-        return self
+        return self.sub_geographical_regions.remove(sub_geographical_region)
 
+    @deprecated("BOILERPLATE: Use sub_geographical_regions.clear() instead")
     def clear_sub_geographical_regions(self) -> GeographicalRegion:
-        """
-        Clear all SubGeographicalRegions.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        """
-        self._sub_geographical_regions = None
+        return self.sub_geographical_regions.clear()
         return self

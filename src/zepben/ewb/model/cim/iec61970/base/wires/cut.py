@@ -7,12 +7,15 @@ __all__ = ["Cut"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@dataslot
 class Cut(Switch):
     """
     A cut separates a line segment into two parts. The cut appears as a switch inserted between these two parts and connects them together. As the cut is
@@ -25,7 +28,7 @@ class Cut(Switch):
 
     max_terminals = 2
 
-    length_from_terminal_1: Optional[float] = None
+    length_from_terminal_1: float | None = None
     """The length to the place where the cut is located starting from side one of the cut line segment, i.e. the line segment Terminal with sequenceNumber equal to 1."""
 
     ac_line_segment: Optional['AcLineSegment'] = None

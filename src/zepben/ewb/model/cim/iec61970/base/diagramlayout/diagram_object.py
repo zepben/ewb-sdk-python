@@ -9,6 +9,8 @@ __all__ = ["DiagramObject"]
 
 from typing import Optional, List, Generator, Callable, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.ewb.util import nlen, ngen, require, safe_remove
@@ -16,6 +18,8 @@ from zepben.ewb.util import nlen, ngen, require, safe_remove
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
+@dataslot
+@boilermaker
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything
@@ -23,52 +27,43 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    _diagram: Optional[Diagram] = None
+    diagram: Diagram | None = ValidatedDescriptor(None)
     """A diagram object is part of a diagram."""
 
-    identified_object_mrid: Optional[str] = None
+    identified_object_mrid: str | None = None
     """The domain object to which this diagram object is associated."""
 
-    style: Optional[str] = None
+    style: str | None = None
     """A diagram object has a style associated that provides a reference for the style used in the originating system."""
 
     rotation: float = 0.0
     """Sets the angle of rotation of the diagram object.  Zero degrees is pointing to the top of the diagram. Rotation is clockwise."""
 
-    _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
+    diagram_object_points: List[DiagramObjectPoint] | None = ListAccessor()
 
-    def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
-        super(DiagramObject, self).__init__(**kwargs)
-        if diagram:
-            self.diagram = diagram
-        if diagram_object_points:
-            for point in diagram_object_points:
-                self.add_point(point)
+    def _retype(self):
+        self.diagram_object_points: ListRouter = ...
+    
 
-    @property
-    def diagram(self):
-        return self._diagram
-
-    @diagram.setter
-    def diagram(self, diag):
+    @validate(diagram)
+    def _diagram_validate(self, diag):
         if self._diagram is None or self._diagram is diag:
-            self._diagram = diag
+            return diag
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
 
+    @deprecated("BOILERPLATE: Use len(diagram_object_points) instead")
     def num_points(self):
-        """
-        Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
-        """
-        return nlen(self._diagram_object_points)
+        return len(self.diagram_object_points)
 
     @property
     def points(self) -> Generator[DiagramObjectPoint, None, None]:
         """
         The `DiagramObjectPoint`s for this `DiagramObject`.
         """
-        return ngen(self._diagram_object_points)
+        return ngen(self.diagram_object_points)
 
+    @deprecated("BOILERPLATE: Use self.diagram_object_points[sequence_number] instead")
     def get_point(self, sequence_number: int) -> DiagramObjectPoint:
         """
         Get the `DiagramObjectPoint` for this `DiagramObject` represented by `sequence_number` .
@@ -79,10 +74,7 @@ class DiagramObject(IdentifiedObject):
         Returns The `DiagramObjectPoint` identified by `sequence_number`
         Raises IndexError if this `DiagramObject` didn't contain `sequence_number` points.
         """
-        if self._diagram_object_points is not None:
-            return self._diagram_object_points[sequence_number]
-        else:
-            raise IndexError(sequence_number)
+        return self.diagram_object_points[sequence_number]
 
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
@@ -96,6 +88,7 @@ class DiagramObject(IdentifiedObject):
         for index, point in enumerate(self.points):
             action(index, point)
 
+    @custom_add(diagram_object_points)
     def add_point(self, point: DiagramObjectPoint) -> DiagramObject:
         """
         Associate a `DiagramObjectPoint` with this `DiagramObject`, assigning it a sequence_number of `num_points`.
@@ -119,13 +112,13 @@ class DiagramObject(IdentifiedObject):
                 lambda: f"Unable to add DiagramObjectPoint to {str(self)}. Sequence number {sequence_number}"
                         f" is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
                         f"adding the items in order and there are no gaps in the numbering.")
-        self._diagram_object_points = list() if self._diagram_object_points is None else self._diagram_object_points
-        self._diagram_object_points.insert(sequence_number, point)
+        self.diagram_object_points.insert_raw(sequence_number, point)
         return self
 
     def __setitem__(self, key, value):
         self.insert_point(value, key)
 
+    @deprecated("BOILERPLATE: Use diagram_object_points.remove() instead")
     def remove_point(self, point: DiagramObjectPoint) -> DiagramObject:
         """
         Disassociate `point` from this `DiagramObject`
@@ -134,7 +127,7 @@ class DiagramObject(IdentifiedObject):
         Returns A reference to this `DiagramObject` to allow fluent use.
         Raises `ValueError` if `point` was not associated with this `DiagramObject`.
         """
-        self._diagram_object_points = safe_remove(self._diagram_object_points, point)
+        self.diagram_object_points.remove(point)
         return self
 
     def remove_point_by_sequence_number(self, sequence_number: int) -> DiagramObjectPoint:
@@ -148,13 +141,10 @@ class DiagramObject(IdentifiedObject):
         :raises IndexError: If no :class:`DiagramObjectPoint` with the specified `sequence_number` was not associated with this :class:`DiagramObject`.
         """
         point = self.get_point(sequence_number)
-        self._diagram_object_points = safe_remove(self._diagram_object_points, point)
+        self.diagram_object_points.raw.remove(point)
         return point
 
+    @deprecated("BOILERPLATE: Use diagram_object_points.clear() instead")
     def clear_points(self) -> DiagramObject:
-        """
-        Clear all points.
-        Returns A reference to this `DiagramObject` to allow fluent use.
-        """
-        self._diagram_object_points = None
+        return self.diagram_object_points.clear()
         return self

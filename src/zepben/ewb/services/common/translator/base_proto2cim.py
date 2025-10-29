@@ -11,11 +11,14 @@ __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim",
 import functools
 import inspect
 from abc import ABCMeta
+from dataclasses import dataclass
 from typing import Optional, Callable, TypeVar
 
 from google.protobuf.message import Message
 from typing_extensions import ParamSpec
 # noinspection PyPackageRequirements
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
@@ -24,13 +27,13 @@ from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNa
 from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
 
 from zepben.ewb import Document, IdentifiedObject, Organisation, OrganisationRole
-from zepben.ewb.dataclassy import dataclass
+
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common import resolver
 from zepben.ewb.services.common.base_service import BaseService
 
 
-TProtoToCimFunc = Callable[[Message, BaseService], Optional[IdentifiedObject]]
+TProtoToCimFunc = Callable[[Message, BaseService], IdentifiedObject | None]
 P = ParamSpec("P")
 R = TypeVar("R")
 
@@ -41,7 +44,7 @@ def add_to_network_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
     changes, any of the classes that get used in a `network.add(Class)`
     """
     @functools.wraps(func)
-    def wrapper(pb: Message, service: BaseService) -> Optional[IdentifiedObject]:
+    def wrapper(pb: Message, service: BaseService) -> IdentifiedObject | None:
         return cim if service.add(cim := func(pb, service)) else None
     return wrapper
 
@@ -56,7 +59,7 @@ def bind_to_cim(func: Callable[P, R]) -> Callable[P, R]:
 
 T = TypeVar("T")
 
-def get_nullable(pb: Message, field: str) -> Optional[T]:
+def get_nullable(pb: Message, field: str) -> T | None:
     return getattr(pb, f'{field}Set') if pb.HasField(f'{field}Set') else None
 
 
@@ -78,7 +81,7 @@ def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
 
 @bind_to_cim
 @add_to_network_or_none
-def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Optional[Organisation]:
+def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Organisation | None:
     cim = Organisation()
 
     identified_object_to_cim(pb.io, cim, service)
@@ -135,7 +138,7 @@ class BaseProtoToCim(object, metaclass=ABCMeta):
 
 
 # Extensions
-def _add_from_pb(service: BaseService, pb) -> Optional[IdentifiedObject]:
+def _add_from_pb(service: BaseService, pb) -> IdentifiedObject | None:
     """Must only be called by objects for which .to_cim() takes themselves and the network service."""
     try:
         return pb.to_cim(service)

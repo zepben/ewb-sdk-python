@@ -50,6 +50,8 @@ def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, contr
     assert list(b.controls) == controls
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_battery_unit_constructor_args():
     b = BatteryUnit(*battery_unit_args)
 

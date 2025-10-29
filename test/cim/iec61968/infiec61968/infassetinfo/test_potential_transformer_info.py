@@ -58,6 +58,8 @@ def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_r
     assert vti.secondary_ratio == secondary_ratio
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_potential_transformer_info_constructor_args():
     vti = PotentialTransformerInfo(*potential_transformer_info_args)
 

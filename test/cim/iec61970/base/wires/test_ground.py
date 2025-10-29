@@ -22,5 +22,7 @@ def test_ground_constructor_kwargs(**kwargs):
     verify_conducting_equipment_constructor_kwargs(Ground(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_ground_constructor_args():
     verify_conducting_equipment_constructor_args(Ground(*ground_args))

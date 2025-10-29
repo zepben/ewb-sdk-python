@@ -9,6 +9,8 @@ __all__ = ["PricingStructure"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
 
@@ -16,6 +18,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
 
 
+@dataslot
+@boilermaker
 class PricingStructure(Document):
     """
     Grouping of pricing components and prices used in the creation of customer charges and the eligibility
@@ -23,66 +27,28 @@ class PricingStructure(Document):
     customer classification, site characteristics, classification (i.e. fee price structure, deposit price
     structure, electric service price structure, etc.) and accounting requirements.
     """
-    _tariffs: Optional[List[Tariff]] = None
+    tariffs: List[Tariff] | None = MRIDListAccessor()
 
-    def __init__(self, tariffs: List[Tariff] = None, **kwargs):
-        super(PricingStructure, self).__init__(**kwargs)
-        if tariffs:
-            for tariff in tariffs:
-                self.add_tariff(tariff)
-
+    def _retype(self):
+        self.tariffs: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(tariffs) instead")
     def num_tariffs(self):
-        """
-        Returns The number of `Tariff`s associated with this `PricingStructure`
-        """
-        return nlen(self._tariffs)
+        return len(self.tariffs)
 
-    @property
-    def tariffs(self) -> Generator[Tariff, None, None]:
-        """
-        The `Tariff`s of this `PricingStructure`.
-        """
-        return ngen(self._tariffs)
-
+    @deprecated("BOILERPLATE: Use tariffs.get_by_mrid(mrid) instead")
     def get_tariff(self, mrid: str) -> Tariff:
-        """
-        Get the `Tariff` for this `PricingStructure` identified by `mrid`
+        return self.tariffs.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Tariff`
-        Returns The `Tariff` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._tariffs, mrid)
-
+    @deprecated("BOILERPLATE: Use tariffs.append(tariff) instead")
     def add_tariff(self, tariff: Tariff) -> PricingStructure:
-        """
-        Associate a `Tariff` with this `PricingStructure`.
+        return self.tariffs.append(tariff)
 
-        `tariff` the `Tariff` to associate with this `PricingStructure`.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        Raises `ValueError` if another `Tariff` with the same `mrid` already exists for this `PricingStructure`.
-        """
-        if self._validate_reference(tariff, self.get_tariff, "A Tariff"):
-            return self
-        self._tariffs = list() if self._tariffs is None else self._tariffs
-        self._tariffs.append(tariff)
-        return self
-
+    @deprecated("BOILERPLATE: Use tariffs.remove(tariff) instead")
     def remove_tariff(self, tariff: Tariff) -> PricingStructure:
-        """
-        Disassociate `tariff` from this `PricingStructure`.
+        return self.tariffs.remove(tariff)
 
-        `tariff` the `Tariff` to disassociate from this `PricingStructure`.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        Raises `ValueError` if `tariff` was not associated with this `PricingStructure`.
-        """
-        self._tariffs = safe_remove(self._tariffs, tariff)
-        return self
-
+    @deprecated("BOILERPLATE: Use tariffs.clear() instead")
     def clear_tariffs(self) -> PricingStructure:
-        """
-        Clear all tariffs.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        """
-        self._tariffs = None
+        return self.tariffs.clear()
         return self

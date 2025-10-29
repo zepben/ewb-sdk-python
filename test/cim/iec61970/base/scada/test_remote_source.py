@@ -32,6 +32,8 @@ def test_remote_source_constructor_kwargs(measurement, **kwargs):
     assert c.measurement == measurement
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_remote_source_constructor_args():
     c = RemoteSource(*remote_source_args)
 

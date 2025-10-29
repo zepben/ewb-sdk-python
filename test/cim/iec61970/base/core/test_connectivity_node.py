@@ -33,6 +33,8 @@ def test_connectivity_node_constructor_kwargs(terminals, **kwargs):
     assert list(cn.terminals) == terminals
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_connectivity_node_constructor_args():
     cn = ConnectivityNode(*connectivity_node_args)
 

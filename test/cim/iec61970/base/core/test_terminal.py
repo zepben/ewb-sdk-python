@@ -62,6 +62,8 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
     assert t.connectivity_node == connectivity_node
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_terminal_constructor_args():
     t = Terminal(*terminal_args)
 

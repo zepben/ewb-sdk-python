@@ -7,6 +7,8 @@ __all__ = ["ShuntCompensator"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
@@ -14,24 +16,25 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
 
 
+@dataslot
 class ShuntCompensator(RegulatingCondEq):
     """
     A shunt capacitor or reactor or switchable bank of shunt capacitors or reactors. A section of a shunt compensator
     is an individual capacitor or reactor.  A negative value for reactivePerSection indicates that the compensator is
     a reactor. ShuntCompensator is a single terminal device.  Ground is implied.
     """
-    grounded: Optional[bool] = None
+    grounded: bool | None = None
     """Used for Yn and Zn connections. True if the neutral is solidly grounded. nom_u : The voltage at which the nominal reactive power may be calculated. 
     This should normally be within 10% of the voltage at which the capacitor is connected to the network."""
 
-    nom_u: Optional[int] = None
+    nom_u: int | None = None
     """The voltage at which the nominal reactive power may be calculated. This should normally be within 10% of the voltage at which the capacitor is connected 
     to the network."""
 
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
     """The type of phase connection, such as wye or delta."""
 
-    sections: Optional[float] = None
+    sections: float | None = None
     """
     Shunt compensator sections in use. Starting value for steady state solution. Non integer values are allowed to support continuous variables. The 
     reasons for continuous value are to support study cases where no discrete shunt compensator's has yet been designed, a solutions where a narrow voltage 

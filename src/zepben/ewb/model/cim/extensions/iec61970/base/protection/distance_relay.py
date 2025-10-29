@@ -7,11 +7,14 @@ __all__ = ["DistanceRelay"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.ewb.model.cim.extensions.zbex import zbex
 
 
 @zbex
+@dataslot
 class DistanceRelay(ProtectionRelayFunction):
     """
     [ZBEX]
@@ -19,51 +22,51 @@ class DistanceRelay(ProtectionRelayFunction):
     circuit breaker tripping to isolate the faulty section and safeguard the power system.
     """
 
-    backward_blind: Optional[float] = None
+    backward_blind: float | None = None
     """
     [ZBEX] The reverse blind impedance (in ohms) that defines the area to be blinded in the opposite direction of the power flow.
     """
 
-    backward_reach: Optional[float] = None
+    backward_reach: float | None = None
     """
     [ZBEX] The reverse reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for 
     which the relay will provide protection.
     """
 
-    backward_reactance: Optional[float] = None
+    backward_reactance: float | None = None
     """
     [ZBEX] The reverse reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
     relay will provide protection.
     """
 
-    forward_blind: Optional[float] = None
+    forward_blind: float | None = None
     """
     [ZBEX] The forward blind impedance (in ohms) that defines the area to be blinded in the opposite direction of the power flow.
     """
 
-    forward_reach: Optional[float] = None
+    forward_reach: float | None = None
     """
     [ZBEX] The forward reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for 
     which the relay will provide protection.
     """
 
-    forward_reactance: Optional[float] = None
+    forward_reactance: float | None = None
     """
     [ZBEX] The forward reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
     relay will provide protection.
     """
 
-    operation_phase_angle1: Optional[float] = None
+    operation_phase_angle1: float | None = None
     """
     [ZBEX] The phase angle (in degrees) between voltage and current during normal operating conditions for zone 1 relay.
     """
 
-    operation_phase_angle2: Optional[float] = None
+    operation_phase_angle2: float | None = None
     """
     [ZBEX] The phase angle (in degrees) between voltage and current during normal operating conditions for zone 2 relay.
     """
 
-    operation_phase_angle3: Optional[float] = None
+    operation_phase_angle3: float | None = None
     """
     [ZBEX] The phase angle (in degrees) between voltage and current during normal operating conditions for zone 3 relay.
     """

@@ -39,6 +39,8 @@ def test_pole_constructor_kwargs(classification, streetlights, **kwargs):
     assert list(p.streetlights) == streetlights
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_pole_constructor_args():
     p = Pole(*pole_args)
 

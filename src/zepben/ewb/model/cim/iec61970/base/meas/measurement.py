@@ -7,6 +7,8 @@ __all__ = ["Measurement"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
@@ -15,6 +17,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 
 
+@dataslot
 class Measurement(IdentifiedObject):
     """
     A Measurement represents any measured, calculated or non-measured non-calculated quantity. Any piece of equipment
@@ -39,13 +42,13 @@ class Measurement(IdentifiedObject):
     association is never used alone.
     """
 
-    power_system_resource_mrid: Optional[str] = None
+    power_system_resource_mrid: str | None = None
     """The MRID of the power system resource that contains the measurement."""
 
     remote_source: Optional['RemoteSource'] = None
     """The `zepben.ewb.model.cim.iec61970.base.scada.remote_source.RemoteSource` taking the `Measurement`"""
 
-    terminal_mrid: Optional[str] = None
+    terminal_mrid: str | None = None
     """A measurement may be associated with a terminal in the network."""
 
     phases: PhaseCode = PhaseCode.ABC

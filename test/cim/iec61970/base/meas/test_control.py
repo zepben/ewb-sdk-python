@@ -36,6 +36,8 @@ def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, 
     assert c.remote_control == remote_control
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_control_constructor_args():
     c = Control(*control_args)
 

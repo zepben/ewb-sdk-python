@@ -7,6 +7,8 @@ __all__ = ["AcLineSegment"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
+@dataslot
+@boilermaker
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,
@@ -36,9 +40,13 @@ class AcLineSegment(Conductor):
     per_length_impedance: Optional['PerLengthImpedance'] = None
     """A `zepben.ewb.model.cim.iec61970.base.wires.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: Optional[List['Cut']] = None
-    _clamps: Optional[List['Clamp']] = None
+    cuts: List['Cut'] | None = MRIDListAccessor()
+    clamps: List['Clamp'] | None = MRIDListAccessor()
 
+    def _retype(self):
+        self.cuts: MRIDListRouter = ...
+        self.clamps: MRIDListRouter = ...
+    
     @property
     def per_length_sequence_impedance(self) -> Optional['PerLengthSequenceImpedance']:
         """
@@ -71,27 +79,15 @@ class AcLineSegment(Conductor):
     def per_length_phase_impedance(self, value: Optional['PerLengthPhaseImpedance']):
         self.per_length_impedance = value
 
-    @property
-    def cuts(self) -> Generator['Cut', None, None]:
-        """The `Cut`s for this `AcLineSegment`."""
-        return ngen(self._cuts)
-
+    @deprecated("BOILERPLATE: Use len(cuts) instead")
     def num_cuts(self):
-        """
-        Get the number of `Cut`s for this `AcLineSegment`.
-        """
-        return nlen(self._cuts)
+        return len(self.cuts)
 
+    @deprecated("BOILERPLATE: Use cuts.get_by_mrid(mrid) instead")
     def get_cut(self, mrid: str) -> 'Cut':
-        """
-        Get the `Cut` for this `AcLineSegment` identified by `mrid`
+        return self.cuts.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the required `Cut`
-        :return: The `Cut` with the specified `mrid` if it exists
-        :raise KeyError: If the `mrid` wasn't present.
-        """
-        return get_by_mrid(self._cuts, mrid)
-
+    @custom_add(cuts)
     def add_cut(self, cut: 'Cut') -> 'AcLineSegment':
         """
         Associate a `Cut` with this `AcLineSegment`.
@@ -103,48 +99,31 @@ class AcLineSegment(Conductor):
         if self._validate_cut(cut):
             return self
 
-        self._cuts = list() if self._cuts is None else self._cuts
-        self._cuts.append(cut)
+        self.cuts.append_unchecked(cut)
         return self
 
+    @deprecated("BOILERPLATE: Use cuts.remove(cut) instead")
     def remove_cut(self, cut: 'Cut') -> 'AcLineSegment':
-        """
-        :param cut: The `Cut` to disassociate from this `AcLineSegment`.
-        :raise ValueError: If `cut` was not associated with this `AcLineSegment`.
-        :return: A reference to this `AcLineSegment` to allow fluent use.
-        """
-        self._cuts = safe_remove(self._cuts, cut)
-        return self
+        return self.cuts.remove(cut)
 
+    @custom_clear(cuts)
     def clear_cuts(self) -> 'AcLineSegment':
         """
         Clear all `Cut`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._cuts.clear()
+        self.cuts.raw.clear()
         return self
 
-    @property
-    def clamps(self) -> Generator['Clamp', None, None]:
-        """The `Clamp`s for this `AcLineSegment`."""
-        return ngen(self._clamps)
-
+    @deprecated("BOILERPLATE: Use len(clamps) instead")
     def num_clamps(self):
-        """
-        Get the number of `Clamp`s for this `AcLineSegment`.
-        """
-        return nlen(self._clamps)
+        return len(self.clamps)
 
+    @deprecated("BOILERPLATE: Use clamps.get_by_mrid(mrid) instead")
     def get_clamp(self, mrid: str) -> 'Clamp':
-        """
-        Get the `Clamp` for this `AcLineSegment` identified by `mrid`
+        return self.clamps.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the required `Clamp`
-        :return: The `Clamp` with the specified `mrid` if it exists
-        :raise KeyError: If the `mrid` wasn't present.
-        """
-        return get_by_mrid(self._clamps, mrid)
-
+    @custom_add(clamps)
     def add_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
         """
         Associate a `Clamp` with this `AcLineSegment`.
@@ -156,25 +135,20 @@ class AcLineSegment(Conductor):
         if self._validate_clamp(clamp):
             return self
 
-        self._clamps = list() if self._clamps is None else self._clamps
-        self._clamps.append(clamp)
+        self.clamps.append_unchecked(clamp)
         return self
 
+    @deprecated("BOILERPLATE: Use clamps.remove(clamp) instead")
     def remove_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
-        """
-        :param clamp: The `Clamp` to disassociate from this `AcLineSegment`.
-        :raise ValueError: If `clamp` was not associated with this `AcLineSegment`.
-        :return: A reference to this `AcLineSegment` to allow fluent use.
-        """
-        self._clamps = safe_remove(self._clamps, clamp)
-        return self
+        return self.clamps.remove(clamp)
 
+    @custom_clear(clamps)
     def clear_clamps(self) -> 'AcLineSegment':
         """
         Clear all `Clamp`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self._clamps.clear()
+        self.clamps.raw.clear()
         return self
 
     def _validate_cut(self, cut: 'Cut') -> bool:

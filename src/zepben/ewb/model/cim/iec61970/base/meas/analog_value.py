@@ -7,14 +7,17 @@ __all__ = ["AnalogValue"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 
+@dataslot
 class AnalogValue(MeasurementValue):
     """`AnalogValue` represents an analog `MeasurementValue`."""
 
     value: float = 0.0
     """The value to supervise"""
 
-    analog_mrid: Optional[str] = None
+    analog_mrid: str | None = None
     """The `zepben.ewb.model.cim.iec61970.base.meas.measurement.Analog` mRID of this `AnalogValue`"""

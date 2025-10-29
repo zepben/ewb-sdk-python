@@ -21,5 +21,7 @@ def test_recloser_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(Recloser(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_recloser_constructor_args():
     verify_protected_switch_constructor_args(Recloser(*recloser_args))

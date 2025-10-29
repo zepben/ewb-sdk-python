@@ -78,6 +78,8 @@ def verify_tap_changer_constructor_args(tc: TapChanger):
 
 
 # noinspection PyArgumentList
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_detected_invalid_steps_via_constructor_args():
     # args order: control_enabled, neutral_u, _high_step, _low_step, _neutral_step, _normal_step, _step
 

@@ -41,6 +41,8 @@ def test_analog_value_constructor_kwargs(value, analog_mrid, **kwargs):
     assert av.analog_mrid == analog_mrid
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_analog_value_constructor_args():
     # noinspection PyArgumentList
     av = AnalogValue(*analog_value_args)

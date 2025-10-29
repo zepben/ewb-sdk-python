@@ -7,37 +7,28 @@ __all__ = ["Curve"]
 
 from typing import Optional, List, Generator
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require, ngen, nlen, safe_remove
 
 
+@dataslot
+@boilermaker
 class Curve(IdentifiedObject):
     """
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.
     """
 
-    _data: Optional[List[CurveData]] = None
+    data: List[CurveData] | None = ListAccessor()
 
-    def __init__(self, data: List[CurveData] = None, **kwargs):
-        """
-        `data` A list of `CurveData`s to associate with this `Curve`.
-        """
-        super(Curve, self).__init__(**kwargs)
-        if data:
-            for curve_data in data:
-                self.add_curve_data(curve_data)
-
-    @property
-    def data(self) -> Generator[CurveData, None, None]:
-        """
-        The point data values that define this curve, sorted by `x_value` in ascending order.
-        """
-        return ngen(self._data)
-
+    def _retype(self):
+        self.data: ListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(data) instead")
     def num_data(self):
-        """Return the number of :class:`CurveData` associated with this :class:`Curve`."""
-        return nlen(self._data)
+        return len(self.data)
 
     def get_data(self, x: float) -> CurveData:
         """
@@ -47,8 +38,8 @@ class Curve(IdentifiedObject):
         :returns: The :class:`CurveData` with the specified `x` if it exists.
         :raises KeyError: When no `CurveData` was found with `x`.
         """
-        if self._data:
-            curve_data = next((it for it in self._data if it.x_value == x), None)
+        if self.data:
+            curve_data = next((it for it in self.data if it.x_value == x), None)
             if curve_data:
                 return curve_data
         raise KeyError(x)
@@ -63,7 +54,7 @@ class Curve(IdentifiedObject):
         """
         return self.get_data(x)
 
-    def add_data(self, x: float, y1: float, y2: Optional[float], y3: Optional[float]) -> 'Curve':
+    def add_data(self, x: float, y1: float, y2: float | None, y3: float | None) -> 'Curve':
         """
         Add a data point to this :class:`Curve`.
 
@@ -73,16 +64,10 @@ class Curve(IdentifiedObject):
         :param y3: The data value of the third Y-axis variable (if present), depending on the Y-axis units.
         :raises ValueError: if a :class:`CurveData` for the provided `x` value already exists for this :class:`Curve`.
         """
-        require(all([it.x_value != x for it in self.data]),
-                lambda: f"Unable to add datapoint to {self}. x_value {x} is invalid, as data with same x_value already exist in this Curve.")
-
-        if self._data is None:
-            self._data = []
-        self._data.append(CurveData(x, y1, y2, y3))
-        self._data.sort(key=lambda it: it.x_value)
-
+        self.add_curve_data(CurveData(x, y1, y2, y3))
         return self
 
+    @custom_add(data)
     def add_curve_data(self, curve_data: CurveData) -> 'Curve':
         """
         Associate a :class:`CurveData` with this :class:`Curve`.
@@ -91,8 +76,15 @@ class Curve(IdentifiedObject):
         :returns: A reference to this :class:`Curve` to allow fluent use.
         :raises ValueError: If another :class:`CurveData` with the same `x_value` already exists for this :class:`Curve`.
         """
-        return self.add_data(curve_data.x_value, curve_data.y1_value, curve_data.y2_value, curve_data.y3_value)
+        x = curve_data.x_value
+        require(all([it.x_value != x for it in self.data]),
+                lambda: f"Unable to add datapoint to {self}. x_value {x} is invalid, as data with same x_value already exist in this Curve.")
+        self.data.append_unchecked(curve_data)
+        self.data.sort(key=lambda it: it.x_value)
 
+        return self
+
+    @deprecated("BOILERPLATE: Use data.remove() instead")
     def remove_data(self, curve_data: CurveData) -> 'Curve':
         """
         Disassociate a :class:`CurveData` from this :class:`Curve`.
@@ -101,7 +93,7 @@ class Curve(IdentifiedObject):
         :returns: A reference to this :class:`Curve` to allow fluent use.
         :raises ValueError: If `curve_data` was not associated with this :class:`Curve`.
         """
-        self._data = safe_remove(self._data, curve_data)
+        self.data.remove(curve_data)
         return self
 
     def remove_data_at(self, x: float) -> CurveData:
@@ -113,13 +105,10 @@ class Curve(IdentifiedObject):
         :raises IndexError: If no :class:`CurveData` with a value of `x` was not associated with this :class:`Curve`.
         """
         data = self.get_data(x)
-        self._data = safe_remove(self._data, data)
+        self.data.raw.remove(data)
         return data
 
+    @deprecated("BOILERPLATE: Use data.clear() instead")
     def clear_data(self) -> 'Curve':
-        """
-        Clear all :class:`CurveData` associated with this :class:`Curve`.
-        :returns: A reference to this :class:`Curve` to allow fluent use.
-        """
-        self._data = None
+        return self.data.clear()
         return self

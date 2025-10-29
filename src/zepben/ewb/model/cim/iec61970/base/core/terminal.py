@@ -9,6 +9,8 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -24,12 +26,13 @@ if TYPE_CHECKING:
 __all__ = ["Terminal"]
 
 
+@dataslot
 class Terminal(AcDcTerminal):
     """
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    _conducting_equipment: Optional[ConductingEquipment] = None
+    conducting_equipment: ConductingEquipment | None = ValidatedDescriptor(None)
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
@@ -52,20 +55,9 @@ class Terminal(AcDcTerminal):
     """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
     """
 
-    _cn: Optional[ReferenceType] = None
+    connectivity_node: ConnectivityNode | None = WeakrefDescriptor()
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
-
-    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
-        super(Terminal, self).__init__(**kwargs)
-        if conducting_equipment:
-            self.conducting_equipment = conducting_equipment
-
-        # We set the connectivity node to itself if the name parameter is not used to make sure the positional argument is wrapped in a reference.
-        if connectivity_node:
-            self.connectivity_node = connectivity_node
-        else:
-            self.connectivity_node = self._cn
 
     @property
     def normal_phases(self) -> PhaseStatus:
@@ -77,34 +69,12 @@ class Terminal(AcDcTerminal):
         """ Convenience method for accessing the current phases"""
         return CurrentPhases(self)
 
-    @property
-    def conducting_equipment(self):
-        """
-        The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
-        connectivity nodes.
-        """
-        return self._conducting_equipment
-
-    @conducting_equipment.setter
-    def conducting_equipment(self, ce):
+    @validate(conducting_equipment)
+    def _conducting_equipment_validate(self, ce):
         if self._conducting_equipment is None or self._conducting_equipment is ce:
-            self._conducting_equipment = ce
+            return ce
         else:
             raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self._conducting_equipment}, cannot reset this field to {ce}")
-
-    @property
-    def connectivity_node(self) -> Optional[ConnectivityNode]:
-        if self._cn:
-            return self._cn()
-        else:
-            return None
-
-    @connectivity_node.setter
-    def connectivity_node(self, cn: Optional[ConnectivityNode]):
-        if cn:
-            self._cn = ref(cn)
-        else:
-            self._cn = None
 
     @property
     def connected(self) -> bool:

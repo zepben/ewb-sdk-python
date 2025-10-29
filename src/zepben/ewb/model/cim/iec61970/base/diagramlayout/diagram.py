@@ -9,6 +9,8 @@ __all__ = ["Diagram"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
+@dataslot
+@boilermaker
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation
@@ -30,27 +34,16 @@ class Diagram(IdentifiedObject):
     orientation_kind: OrientationKind = OrientationKind.POSITIVE
     """Coordinate system orientation of the diagram."""
 
-    _diagram_objects: Optional[Dict[str, DiagramObject]] = None
+    diagram_objects: List[DiagramObject] | None = MRIDDictAccessor()
 
-    def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
-        super(Diagram, self).__init__(**kwargs)
-        if diagram_objects:
-            for obj in diagram_objects:
-                self.add_diagram_object(obj)
-
+    def _retype(self):
+        self.diagram_objects: MRIDDictRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(diagram_objects) instead")
     def num_diagram_objects(self):
-        """
-        Returns The number of `DiagramObject`s associated with this `Diagram`
-        """
-        return nlen(self._diagram_objects)
+        return len(self.diagram_objects)
 
-    @property
-    def diagram_objects(self) -> Generator[DiagramObject, None, None]:
-        """
-        The diagram objects belonging to this diagram.
-        """
-        return ngen(self._diagram_objects.values() if self._diagram_objects is not None else None)
-
+    @deprecated("BOILERPLATE: Use diagram_objects.get_by_mrid(mrid) instead")
     def get_diagram_object(self, mrid: str) -> DiagramObject:
         """
         Get the `DiagramObject` for this `Diagram` identified by `mrid`
@@ -59,13 +52,9 @@ class Diagram(IdentifiedObject):
         Returns The `DiagramObject` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self._diagram_objects:
-            raise KeyError(mrid)
-        try:
-            return self._diagram_objects[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.diagram_objects.get_by_mrid(mrid)
 
+    @custom_add(diagram_objects)
     def add_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
         """
         Associate a `DiagramObject` with this `Diagram`.
@@ -84,26 +73,15 @@ class Diagram(IdentifiedObject):
         if self._validate_reference(diagram_object, self.get_diagram_object, "A DiagramObject"):
             return self
 
-        self._diagram_objects = dict() if self._diagram_objects is None else self._diagram_objects
-        self._diagram_objects[diagram_object.mrid] = diagram_object
+        self.diagram_objects.append_unchecked(diagram_object)
 
         return self
 
+    @deprecated("BOILERPLATE: Use diagram_objects.remove(diagram_object) instead")
     def remove_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
-        """
-        Disassociate `diagram_object` from this `Diagram`
+        return self.diagram_objects.remove(diagram_object)
 
-        `diagram_object` the `DiagramObject` to disassociate with this `Diagram`.
-        Returns A reference to this `Diagram` to allow fluent use.
-        Raises `KeyError` if `diagram_object` was not associated with this `Diagram`.
-        """
-        self._diagram_objects = safe_remove_by_id(self._diagram_objects, diagram_object)
-        return self
-
+    @deprecated("BOILERPLATE: Use diagram_objects.clear() instead")
     def clear_diagram_objects(self) -> Diagram:
-        """
-        Clear all `DiagramObject`s.
-        Returns A reference to this `Diagram` to allow fluent use.
-        """
-        self._diagram_objects = None
+        return self.diagram_objects.clear()
         return self

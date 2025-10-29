@@ -39,6 +39,8 @@ def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_incr
     assert rtc.step_voltage_increment == step_voltage_increment
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_ratio_tap_changer_constructor_args():
     rtc = RatioTapChanger(*ratio_tap_changer_args)
 

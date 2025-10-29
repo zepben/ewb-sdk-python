@@ -5,9 +5,12 @@
 
 __all__ = ["PowerElectronicsWindUnit"]
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
 
 
+@dataslot
 class PowerElectronicsWindUnit(PowerElectronicsUnit):
     """A wind generating unit that connects to the AC network with power electronics rather than rotating machines or an aggregation of such units."""
     pass

@@ -9,6 +9,8 @@ __all__ = ["Pole"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.structure import Structure
 from zepben.ewb.util import get_by_mrid, ngen, nlen, safe_remove
 
@@ -16,72 +18,36 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.streetlight import Streetlight
 
 
+@dataslot
+@boilermaker
 class Pole(Structure):
     """A Pole Asset"""
 
-    classification: Optional[str] = None
+    classification: str | None = None
     """Pole class: 1, 2, 3, 4, 5, 6, 7, H1, H2, Other, Unknown."""
 
-    _streetlights: Optional[List[Streetlight]] = None
+    streetlights: List[Streetlight] | None = MRIDListAccessor()
 
-    def __init__(self, streetlights: List[Streetlight] = None, **kwargs):
-        super(Pole, self).__init__(**kwargs)
-        if streetlights:
-            for light in streetlights:
-                self.add_streetlight(light)
-
+    def _retype(self):
+        self.streetlights: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(streetlights) instead")
     def num_streetlights(self) -> int:
-        """
-        Get the number of `Streetlight`s associated with this `Pole`.
-        """
-        return nlen(self._streetlights)
+        return len(self.streetlights)
 
-    @property
-    def streetlights(self) -> Generator[Streetlight, None, None]:
-        """
-        The `Streetlight`s of this `Pole`.
-        """
-        return ngen(self._streetlights)
-
+    @deprecated("BOILERPLATE: Use streetlights.get_by_mrid(mrid) instead")
     def get_streetlight(self, mrid: str) -> Streetlight:
-        """
-        Get the `Streetlight` for this asset identified by `mrid`.
+        return self.streetlights.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Streetlight`
-        Returns The `Streetlight` with the specified `mrid`.
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._streetlights, mrid)
-
+    @deprecated("BOILERPLATE: Use streetlights.append(streetlight) instead")
     def add_streetlight(self, streetlight: Streetlight) -> Pole:
-        """
-        Associate a `Streetlight` with this `Pole`
+        return self.streetlights.append(streetlight)
 
-        `streetlight` the `Streetlight` to associate with this `Pole`.
-        Returns A reference to this `Pole` to allow fluent use.
-        Raises `ValueError` if another `Streetlight` with the same `mrid` already exists in this `Pole`
-        """
-        if self._validate_reference(streetlight, self.get_streetlight, "A Streetlight"):
-            return self
-
-        self._streetlights = list() if self._streetlights is None else self._streetlights
-        self._streetlights.append(streetlight)
-        return self
-
+    @deprecated("BOILERPLATE: Use streetlights.remove(streetlight) instead")
     def remove_streetlight(self, streetlight: Streetlight) -> Pole:
-        """
-        Disassociate `streetlight` from this `Pole`
-        `streetlight` the `Streetlight` to disassociate from this `Pole`.
-        Raises `ValueError` if `streetlight` was not associated with this `Pole`.
-        Returns A reference to this `Pole` to allow fluent use.
-        """
-        self._streetlights = safe_remove(self._streetlights, streetlight)
-        return self
+        return self.streetlights.remove(streetlight)
 
+    @deprecated("BOILERPLATE: Use streetlights.clear() instead")
     def clear_streetlights(self) -> Pole:
-        """
-        Clear all Streetlights.
-        Returns self
-        """
-        self._streetlights = None
+        return self.streetlights.clear()
         return self

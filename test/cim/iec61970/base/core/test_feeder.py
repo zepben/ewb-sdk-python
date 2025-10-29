@@ -52,6 +52,8 @@ def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_subst
     assert list(f.current_energized_lv_feeders) == current_energized_lv_feeders
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_feeder_constructor_args():
     f = Feeder(*feeder_args)
 

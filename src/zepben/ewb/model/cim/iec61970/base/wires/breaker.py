@@ -7,9 +7,12 @@ __all__ = ["Breaker"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 
 
+@dataslot
 class Breaker(ProtectedSwitch):
     """
     A mechanical switching device capable of making, carrying, and breaking currents under normal circuit conditions
@@ -17,7 +20,7 @@ class Breaker(ProtectedSwitch):
     e.g. those of short circuit.
     """
 
-    in_transit_time: Optional[float] = None
+    in_transit_time: float | None = None
     """The transition time from open to close in seconds."""
 
     @property

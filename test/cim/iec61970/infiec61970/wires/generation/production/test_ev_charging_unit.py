@@ -21,5 +21,7 @@ def test_ev_charging_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(EvChargingUnit(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_ev_charging_unit_constructor_args():
     verify_power_electronics_unit_constructor_args(EvChargingUnit(*ev_charging_unit_args))

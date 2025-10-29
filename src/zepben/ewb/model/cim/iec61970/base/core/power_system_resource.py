@@ -9,6 +9,8 @@ __all__ = ['PowerSystemResource']
 
 from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
 
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
 
 
+@dataslot
+@boilermaker
 class PowerSystemResource(IdentifiedObject):
     """
     Abstract class, should only be used through subclasses.
@@ -26,23 +30,20 @@ class PowerSystemResource(IdentifiedObject):
     can have measurements associated.
     """
 
-    location: Optional[Location] = None
+    location: Location | None = None
     """A `zepben.ewb.model.cim.iec61968.common.location.Location` for this resource."""
 
-    asset_info: Optional[AssetInfo] = None
+    asset_info: AssetInfo | None = None
     """A subclass of `zepben.ewb.model.cim.iec61968.assets.asset_info.AssetInfo` providing information about the asset associated with this PowerSystemResource."""
 
-    num_controls: Optional[int] = None
+    num_controls: int | None = None
     """Number of Control's known to associate with this [PowerSystemResource]"""
 
-    _assets: Optional[List[Asset]] = None
+    assets: List[Asset] | None = MRIDListAccessor()
 
-    def __init__(self, assets: Iterable[Asset] = None, **kwargs):
-        super(PowerSystemResource, self).__init__(**kwargs)
-        if assets:
-            for asset in assets:
-                self.add_asset(asset)
-
+    def _retype(self):
+        self.assets: MRIDListRouter = ...
+    
     @property
     def has_controls(self) -> bool:
         """
@@ -50,57 +51,23 @@ class PowerSystemResource(IdentifiedObject):
         """
         return nlen(self.num_controls) > 0
 
+    @deprecated("BOILERPLATE: Use len(assets) instead")
     def num_assets(self) -> int:
-        """
-        Get the number of `Asset`s associated with this `PowerSystemResource`.
-        """
-        return nlen(self._assets)
+        return len(self.assets)
 
-    @property
-    def assets(self) -> Generator[Asset, None, None]:
-        """
-        The `Asset`s of this `PowerSystemResource`.
-        """
-        return ngen(self._assets)
-
+    @deprecated("BOILERPLATE: Use assets.get_by_mrid(mrid) instead")
     def get_asset(self, mrid: str) -> Asset:
-        """
-        Get the `Asset` associated with this `PowerSystemResource` identified by `mrid`.
+        return self.assets.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Asset`
-        Returns The `Asset` with the specified `mrid`.
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._assets, mrid)
-
+    @deprecated("BOILERPLATE: Use assets.append(asset) instead")
     def add_asset(self, asset: Asset) -> PowerSystemResource:
-        """
-        `asset` The `Asset` to associate with this `PowerSystemResource`.
-        Returns A reference to this `PowerSystemResource` to allow fluent use.
-        Raises `ValueError` if another `Asset` with the same `mrid` already exists in this `PowerSystemResource`
-        """
-        if self._validate_reference(asset, self.get_asset, "An Asset"):
-            return self
+        return self.assets.append(asset)
 
-        self._assets = list() if self._assets is None else self._assets
-        self._assets.append(asset)
-        return self
-
+    @deprecated("BOILERPLATE: Use assets.remove(asset) instead")
     def remove_asset(self, asset: Asset) -> PowerSystemResource:
-        """
-        Disassociate an `Asset` from this `PowerSystemResource`.
+        return self.assets.remove(asset)
 
-        `asset` the `Asset` to disassociate from this `PowerSystemResource`.
-        Raises `ValueError` if `asset` was not associated with this `PowerSystemResource`.
-        Returns A reference to this `PowerSystemResource` to allow fluent use.
-        """
-        self._assets = safe_remove(self._assets, asset)
-        return self
-
+    @deprecated("BOILERPLATE: Use assets.clear() instead")
     def clear_assets(self) -> PowerSystemResource:
-        """
-        Clear all assets.
-        Returns self
-        """
-        self._assets = None
+        return self.assets.clear()
         return self

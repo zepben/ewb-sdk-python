@@ -7,6 +7,8 @@ __all__ = ["PowerElectronicsConnectionPhase"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -14,13 +16,14 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 
 
+@dataslot
 class PowerElectronicsConnectionPhase(PowerSystemResource):
     """A single phase of a power electronics connection."""
 
     power_electronics_connection: Optional['PowerElectronicsConnection'] = None
     """The power electronics connection to which the phase belongs."""
 
-    p: Optional[float] = None
+    p: float | None = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
     phase: SinglePhaseKind = SinglePhaseKind.X
@@ -30,5 +33,5 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     logical non-neutral phase.
     """
 
-    q: Optional[float] = None
+    q: float | None = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""

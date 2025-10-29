@@ -5,9 +5,12 @@
 
 __all__ = ["AssetOwner"]
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
 
 
+@dataslot
 class AssetOwner(AssetOrganisationRole):
     """ Owner of the Asset """
     pass

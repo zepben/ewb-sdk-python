@@ -7,10 +7,12 @@ import uuid
 from typing import Union, List
 
 import pytest
-from zepben.ewb.dataclassy import dataclass
+
 from hypothesis import settings, Verbosity
 from pytest import fixture
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb import Terminal, ConnectivityNode, IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
@@ -61,7 +63,7 @@ def gen_tap_changer(**kwargs):
     return RatioTapChanger(**kwargs)
 
 
-@dataclass()
+@dataslot
 class AddResult:
     io: IdentifiedObject
     node: Union[ConnectivityNode, List[ConnectivityNode]] = None

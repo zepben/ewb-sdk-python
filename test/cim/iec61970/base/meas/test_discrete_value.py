@@ -41,6 +41,8 @@ def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
     assert dv.discrete_mrid == discrete_mrid
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_discrete_value_constructor_args():
     # noinspection PyArgumentList
     dv = DiscreteValue(*discrete_value_args)

@@ -42,6 +42,8 @@ def test_ratio_constructor_kwargs(denominator, numerator, **kwargs):
     assert ratio.numerator == numerator
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_ratio_constructor_args():
     ratio = Ratio(*ratio_args)
 

@@ -7,61 +7,64 @@ __all__ = ["ShortCircuitTest"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
 
 
+@dataslot
 class ShortCircuitTest(TransformerTest):
     """
     Short-circuit test results determine mesh impedance parameters. They include load losses and leakage impedances. For three-phase windings, the excitation
     can be a positive sequence (the default) or a zero sequence. There shall be at least one grounded winding.
     """
 
-    current: Optional[float] = None
+    current: float | None = None
     """
     Short circuit current in amps.
     """
 
-    energised_end_step: Optional[int] = None
+    energised_end_step: int | None = None
     """
     Tap step number for the energised end of the test pair.
     """
 
-    grounded_end_step: Optional[int] = None
+    grounded_end_step: int | None = None
     """
     Tap step number for the grounded end of the test pair.
     """
 
-    leakage_impedance: Optional[float] = None
+    leakage_impedance: float | None = None
     """
     Leakage impedance measured from a positive-sequence or single-phase short-circuit test in ohms.
     """
 
-    leakage_impedance_zero: Optional[float] = None
+    leakage_impedance_zero: float | None = None
     """
     Leakage impedance measured from a zero-sequence short-circuit test in ohms.
     """
 
-    loss: Optional[int] = None
+    loss: int | None = None
     """
     Load losses from a positive-sequence or single-phase short-circuit test in watts.
     """
 
-    loss_zero: Optional[int] = None
+    loss_zero: int | None = None
     """
     Load losses from a zero-sequence short-circuit test in watts.
     """
 
-    power: Optional[int] = None
+    power: int | None = None
     """
     Short circuit apparent power in VA.
     """
 
-    voltage: Optional[float] = None
+    voltage: float | None = None
     """
     Short circuit voltage as a percentage.
     """
 
-    voltage_ohmic_part: Optional[float] = None
+    voltage_ohmic_part: float | None = None
     """
     Short Circuit Voltage – Ohmic Part as a percentage.
     """

@@ -9,6 +9,8 @@ __all__ = ["Loop"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import safe_remove, ngen, nlen, get_by_mrid
@@ -19,6 +21,8 @@ if TYPE_CHECKING:
 
 
 @zbex
+@dataslot
+@boilermaker
 class Loop(IdentifiedObject):
     """
     [ZBEX]
@@ -26,182 +30,79 @@ class Loop(IdentifiedObject):
     to many customers for more than a short time.
     """
 
-    _circuits: Optional[List[Circuit]] = None
-    _substations: Optional[List[Substation]] = None
-    _energizing_substations: Optional[List[Substation]] = None
+    circuits: List[Circuit] | None = MRIDListAccessor()
+    substations: List[Substation] | None = MRIDListAccessor()
+    energizing_substations: List[Substation] | None = MRIDListAccessor()
 
-    def __init__(self, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None, **kwargs):
-        super(Loop, self).__init__(**kwargs)
-        if circuits:
-            for term in circuits:
-                self.add_circuit(term)
-
-        if substations:
-            for sub in substations:
-                self.add_substation(sub)
-
-        if energizing_substations:
-            for sub in energizing_substations:
-                self.add_energizing_substation(sub)
-
-    @property
-    def circuits(self) -> Generator[Circuit, None, None]:
-        """
-        [ZBEX] Sub-transmission `Circuit`s that form part of this loop.
-        """
-        return ngen(self._circuits)
-
+    def _retype(self):
+        self.circuits: MRIDListRouter = ...
+        self.substations: MRIDListRouter = ...
+        self.energizing_substations: MRIDListRouter = ...
+    
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         [ZBEX] The `Substation`s that are powered by this `Loop`.
         """
-        return ngen(self._substations)
+        return ngen(self.substations)
 
-    @property
-    def energizing_substations(self) -> Generator[Substation, None, None]:
-        """
-        [ZBEX] The `Substation`s that normally energize this `Loop`.
-        """
-        return ngen(self._energizing_substations)
-
+    @deprecated("BOILERPLATE: Use len(circuits) instead")
     def num_circuits(self):
-        """Return the number of end `Circuit`s associated with this `Loop`"""
-        return nlen(self._circuits)
+        return len(self.circuits)
 
+    @deprecated("BOILERPLATE: Use circuits.get_by_mrid(mrid) instead")
     def get_circuit(self, mrid: str) -> Circuit:
-        """
-        Get the `Circuit` for this `Loop` identified by `mrid`
+        return self.circuits.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Circuit`
-        Returns The `Circuit` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._circuits, mrid)
-
+    @deprecated("BOILERPLATE: Use circuits.append(circuit) instead")
     def add_circuit(self, circuit: Circuit) -> Loop:
-        """
-        Associate an `Circuit` with this `Loop`
+        return self.circuits.append(circuit)
 
-        `circuit` the `Circuit` to associate with this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Loop`.
-        """
-        if self._validate_reference(circuit, self.get_circuit, "An Circuit"):
-            return self
-        self._circuits = list() if self._circuits is None else self._circuits
-        self._circuits.append(circuit)
-        return self
-
+    @deprecated("BOILERPLATE: Use circuits.remove(circuit) instead")
     def remove_circuit(self, circuit: Circuit) -> Loop:
-        """
-        Disassociate `circuit` from this `Loop`
+        return self.circuits.remove(circuit)
 
-        `circuit` the `Circuit` to disassociate from this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if `circuit` was not associated with this `Loop`.
-        """
-        self._circuits = safe_remove(self._circuits, circuit)
-        return self
-
+    @deprecated("BOILERPLATE: Use circuits.clear() instead")
     def clear_circuits(self) -> Loop:
-        """
-        Clear all end circuits.
-        Returns A reference to this `Loop` to allow fluent use.
-        """
-        self._circuits = None
-        return self
+        return self.circuits.clear()
 
+    @deprecated("BOILERPLATE: Use len(substations) instead")
     def num_substations(self):
-        """Return the number of end `Substation`s associated with this `Loop`"""
-        return nlen(self._substations)
+        return len(self.substations)
 
+    @deprecated("BOILERPLATE: Use substations.get_by_mrid(mrid) instead")
     def get_substation(self, mrid: str) -> Substation:
-        """
-        Get the `Substation` for this `Loop` identified by `mrid`
+        return self.substations.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Substation`
-        Returns The `Substation` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._substations, mrid)
-
+    @deprecated("BOILERPLATE: Use substations.append(substation) instead")
     def add_substation(self, substation: Substation) -> Loop:
-        """
-        Associate an `Substation` with this `Loop`
+        return self.substations.append(substation)
 
-        `substation` the `Substation` to associate with this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Loop`.
-        """
-        if self._validate_reference(substation, self.get_substation, "An Substation"):
-            return self
-        self._substations = list() if self._substations is None else self._substations
-        self._substations.append(substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use substations.remove(substation) instead")
     def remove_substation(self, substation: Substation) -> Loop:
-        """
-        Disassociate `substation` from this `Loop`
+        return self.substations.remove(substation)
 
-        `substation` the `Substation` to disassociate from this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if `substation` was not associated with this `Loop`.
-        """
-        self._substations = safe_remove(self._substations, substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use substations.clear() instead")
     def clear_substations(self) -> Loop:
-        """
-        Clear all end substations.
-        Returns A reference to this `Loop` to allow fluent use.
-        """
-        self._substations = None
-        return self
+        return self.substations.clear()
 
+    @deprecated("BOILERPLATE: Use len(energizing_substations) instead")
     def num_energizing_substations(self):
-        """Return the number of end `Substation`s associated with this `Loop`"""
-        return nlen(self._energizing_substations)
+        return len(self.energizing_substations)
 
+    @deprecated("BOILERPLATE: Use energizing_substations.get_by_mrid(mrid) instead")
     def get_energizing_substation(self, mrid: str) -> Substation:
-        """
-        Get the `Substation` for this `Loop` identified by `mrid`
+        return self.energizing_substations.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Substation`
-        Returns The `Substation` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._energizing_substations, mrid)
-
+    @deprecated("BOILERPLATE: Use energizing_substations.append(substation) instead")
     def add_energizing_substation(self, substation: Substation) -> Loop:
-        """
-        Associate an `Substation` with this `Loop`
+        return self.energizing_substations.append(substation)
 
-        `substation` the `Substation` to associate with this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Loop`.
-        """
-        if self._validate_reference(substation, self.get_energizing_substation, "An Substation"):
-            return self
-        self._energizing_substations = list() if self._energizing_substations is None else self._energizing_substations
-        self._energizing_substations.append(substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use energizing_substations.remove(substation) instead")
     def remove_energizing_substation(self, substation: Substation) -> Loop:
-        """
-        Disassociate `substation` from this `Loop`
+        return self.energizing_substations.remove(substation)
 
-        `substation` the `Substation` to disassociate from this `Loop`.
-        Returns A reference to this `Loop` to allow fluent use.
-        Raises `ValueError` if `substation` was not associated with this `Loop`.
-        """
-        self._energizing_substations = safe_remove(self._energizing_substations, substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use energizing_substations.clear() instead")
     def clear_energizing_substations(self) -> Loop:
-        """
-        Clear all end energizing_substations.
-        Returns A reference to this `Loop` to allow fluent use.
-        """
-        self._energizing_substations = None
+        return self.energizing_substations.clear()
         return self

@@ -9,6 +9,8 @@ __all__ = ["Circuit"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.wires.line import Line
 from zepben.ewb.util import ngen, get_by_mrid, safe_remove, nlen
 
@@ -18,127 +20,63 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@dataslot
+@boilermaker
 class Circuit(Line):
     """Missing description"""
 
-    loop: Optional[Loop] = None
-    _end_terminals: Optional[List[Terminal]] = None
-    _end_substations: Optional[List[Substation]] = None
+    loop: Loop | None = None
+    end_terminals: List[Terminal] | None = MRIDListAccessor()
+    end_substations: List[Substation] | None = MRIDListAccessor()
 
-    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
-        super(Circuit, self).__init__(**kwargs)
-        if end_terminals:
-            for term in end_terminals:
-                self.add_end_terminal(term)
-
-        if end_substations:
-            for sub in end_substations:
-                self.add_end_substation(sub)
-
-    @property
-    def end_terminals(self) -> Generator[Terminal, None, None]:
-        """
-        The `Terminal`s representing the ends for this `Circuit`.
-        """
-        return ngen(self._end_terminals)
-
+    def _retype(self):
+        self.end_terminals: MRIDListRouter = ...
+        self.end_substations: MRIDListRouter = ...
+    
     @property
     def end_substations(self) -> Generator[Substation, None, None]:
         """
         The `Substations`s representing the ends for this `Circuit`.
         """
-        return ngen(self._end_substations)
+        return ngen(self.end_substations)
 
+    @deprecated("BOILERPLATE: Use len(end_terminals) instead")
     def num_end_terminals(self):
-        """Return the number of end `Terminal`s associated with this `Circuit`"""
-        return nlen(self._end_terminals)
+        return len(self.end_terminals)
 
+    @deprecated("BOILERPLATE: Use end_terminals.get_by_mrid(mrid) instead")
     def get_end_terminal(self, mrid: str) -> Terminal:
-        """
-        Get the `Terminal` for this `Circuit` identified by `mrid`
+        return self.end_terminals.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Terminal`
-        Returns The `Terminal` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._end_terminals, mrid)
-
+    @deprecated("BOILERPLATE: Use end_terminals.append(terminal) instead")
     def add_end_terminal(self, terminal: Terminal) -> Circuit:
-        """
-        Associate an `Terminal` with this `Circuit`
+        return self.end_terminals.append(terminal)
 
-        `terminal` the `Terminal` to associate with this `Circuit`.
-        Returns A reference to this `Circuit` to allow fluent use.
-        Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `Circuit`.
-        """
-        if self._validate_reference(terminal, self.get_end_terminal, "An Terminal"):
-            return self
-        self._end_terminals = list() if self._end_terminals is None else self._end_terminals
-        self._end_terminals.append(terminal)
-        return self
-
+    @deprecated("BOILERPLATE: Use end_terminals.remove(terminal) instead")
     def remove_end_terminal(self, terminal: Terminal) -> Circuit:
-        """
-        Disassociate `terminal` from this `Circuit`
+        return self.end_terminals.remove(terminal)
 
-        `terminal` the `Terminal` to disassociate from this `Circuit`.
-        Returns A reference to this `Circuit` to allow fluent use.
-        Raises `ValueError` if `terminal` was not associated with this `Circuit`.
-        """
-        self._end_terminals = safe_remove(self._end_terminals, terminal)
-        return self
-
+    @deprecated("BOILERPLATE: Use end_terminals.clear() instead")
     def clear_end_terminals(self) -> Circuit:
-        """
-        Clear all end terminals.
-        Returns A reference to this `Circuit` to allow fluent use.
-        """
-        self._end_terminals = None
-        return self
+        return self.end_terminals.clear()
 
+    @deprecated("BOILERPLATE: Use len(end_substations) instead")
     def num_end_substations(self):
-        """Return the number of end `Substation`s associated with this `Circuit`"""
-        return nlen(self._end_substations)
+        return len(self.end_substations)
 
+    @deprecated("BOILERPLATE: Use end_substations.get_by_mrid(mrid) instead")
     def get_end_substation(self, mrid: str) -> Substation:
-        """
-        Get the `Substation` for this `Circuit` identified by `mrid`
+        return self.end_substations.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Substation`
-        Returns The `Substation` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._end_substations, mrid)
-
+    @deprecated("BOILERPLATE: Use end_substations.append(substation) instead")
     def add_end_substation(self, substation: Substation) -> Circuit:
-        """
-        Associate an `Substation` with this `Circuit`
+        return self.end_substations.append(substation)
 
-        `substation` the `Substation` to associate with this `Circuit`.
-        Returns A reference to this `Circuit` to allow fluent use.
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Circuit`.
-        """
-        if self._validate_reference(substation, self.get_end_substation, "An Substation"):
-            return self
-        self._end_substations = list() if self._end_substations is None else self._end_substations
-        self._end_substations.append(substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use end_substations.remove(substation) instead")
     def remove_end_substation(self, substation: Substation) -> Circuit:
-        """
-        Disassociate `substation` from this `Circuit`
+        return self.end_substations.remove(substation)
 
-        `substation` the `Substation` to disassociate from this `Circuit`.
-        Returns A reference to this `Circuit` to allow fluent use.
-        Raises `ValueError` if `substation` was not associated with this `Circuit`.
-        """
-        self._end_substations = safe_remove(self._end_substations, substation)
-        return self
-
+    @deprecated("BOILERPLATE: Use end_substations.clear() instead")
     def clear_end_substations(self) -> Circuit:
-        """
-        Clear all end substations.
-        Returns A reference to this `Circuit` to allow fluent use.
-        """
-        self._end_substations = None
+        return self.end_substations.clear()
         return self

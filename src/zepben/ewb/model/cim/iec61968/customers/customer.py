@@ -9,6 +9,8 @@ __all__ = ["Customer"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
@@ -17,6 +19,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 
 
+@dataslot
+@boilermaker
 class Customer(OrganisationRole):
     """
     Organisation receiving services from service supplier.
@@ -25,69 +29,38 @@ class Customer(OrganisationRole):
     kind: CustomerKind = CustomerKind.UNKNOWN
     """Kind of customer"""
 
-    special_need: Optional[str] = None
+    special_need: str | None = None
     """A special service need such as life support, hospitals, etc."""
 
-    _customer_agreements: Optional[List[CustomerAgreement]] = None
+    customer_agreements: List[CustomerAgreement] | None = MRIDListAccessor()
 
-    def __init__(self, customer_agreements: List[CustomerAgreement] = None, **kwargs):
-        super(Customer, self).__init__(**kwargs)
-        if customer_agreements:
-            for agreement in customer_agreements:
-                self.add_agreement(agreement)
-
+    def _retype(self):
+        self.customer_agreements: MRIDListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(customer_agreements) instead")
     def num_agreements(self) -> int:
-        """
-        Get the number of `CustomerAgreement`s associated with this `Customer`.
-        """
-        return nlen(self._customer_agreements)
+        return len(self.customer_agreements)
 
     @property
     def agreements(self) -> Generator[CustomerAgreement, None, None]:
         """
         The `CustomerAgreement`s for this `Customer`.
         """
-        return ngen(self._customer_agreements)
+        return ngen(self.customer_agreements)
 
+    @deprecated("BOILERPLATE: Use customer_agreements.get_by_mrid(mrid) instead")
     def get_agreement(self, mrid: str) -> CustomerAgreement:
-        """
-        Get the `CustomerAgreement` for this `Customer` identified by `mrid`.
+        return self.customer_agreements.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `customer_agreement.CustomerAgreement`
-        Returns the `CustomerAgreement` with the specified `mrid`.
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._customer_agreements, mrid)
-
+    @deprecated("BOILERPLATE: Use customer_agreements.append(customer_agreement) instead")
     def add_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        """
-        Associate a `CustomerAgreement` with this `Customer`.
-        `customer_agreement` The `customer_agreement.CustomerAgreement` to associate with this `Customer`.
-        Returns A reference to this `Customer` to allow fluent use.
-        Raises `ValueError` if another `CustomerAgreement` with the same `mrid` already exists for this `Customer`
-        """
-        if self._validate_reference(customer_agreement, self.get_agreement, "A CustomerAgreement"):
-            return self
+        return self.customer_agreements.append(customer_agreement)
 
-        self._customer_agreements = list() if self._customer_agreements is None else self._customer_agreements
-        self._customer_agreements.append(customer_agreement)
-        return self
-
+    @deprecated("BOILERPLATE: Use customer_agreements.remove(customer_agreement) instead")
     def remove_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        """
-        Disassociate `customer_agreement` from this `Customer`.
+        return self.customer_agreements.remove(customer_agreement)
 
-        `customer_agreement` the `customer_agreement.CustomerAgreement` to disassociate with this `Customer`.
-        Returns A reference to this `Customer` to allow fluent use.
-        Raises `ValueError` if `customer_agreement` was not associated with this `Customer`.
-        """
-        self._customer_agreements = safe_remove(self._customer_agreements, customer_agreement)
-        return self
-
+    @deprecated("BOILERPLATE: Use customer_agreements.clear() instead")
     def clear_agreements(self) -> Customer:
-        """
-        Clear all customer agreements.
-        Returns self
-        """
-        self._customer_agreements = None
+        return self.customer_agreements.clear()
         return self

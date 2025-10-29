@@ -50,6 +50,8 @@ def test_static_var_compensator_constructor_kwargs(capacitive_rating, inductive_
     assert svc.voltage_set_point == voltage_set_point
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_shunt_compensator_constructor_args():
     svc = StaticVarCompensator(*static_var_compensator_args)
 

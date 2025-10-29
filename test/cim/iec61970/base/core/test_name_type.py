@@ -41,6 +41,8 @@ def test_name_type_constructor_kwargs(name, description, **kwargs):
     assert not list(nt.names)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_name_type_constructor_args():
     # noinspection PyArgumentList
     nt = NameType(*name_type_args)

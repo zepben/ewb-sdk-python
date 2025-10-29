@@ -23,7 +23,9 @@ def three_common_lines_network() -> NetworkService:
     network.add(plsi1)
 
     # Junction 1
+    print('beep')
     j1 = Junction(mrid="j1")
+    print('boop')
     network.add(j1)
     j1_t = create_terminal(network, j1)
 

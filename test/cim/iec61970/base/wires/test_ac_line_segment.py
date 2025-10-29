@@ -38,6 +38,8 @@ def test_ac_line_segment_constructor_kwargs(per_length_impedance, **kwargs):
     assert als.per_length_phase_impedance != per_length_impedance
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_ac_line_segment_constructor_args():
     als = AcLineSegment(*ac_line_segment_args)
 

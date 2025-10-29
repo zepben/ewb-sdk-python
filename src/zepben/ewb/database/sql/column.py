@@ -5,9 +5,12 @@
 
 __all__ = ["Nullable", "Column"]
 
+from dataclasses import dataclass
 from enum import Enum
 
-from zepben.ewb.dataclassy import dataclass
+
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.util import require
 
 
@@ -27,11 +30,6 @@ class Column:
     name: str
     type: str
     nullable: Nullable = Nullable.NONE
-
-    def __init__(self):
-        require(self.query_index >= 0, lambda: "You cannot use a negative query index.")
-        require(not self.name.isspace() and self.name, lambda: "Column Name cannot be blank.")
-        require(not self.type.isspace() and self.type, lambda: "Column Type cannot be blank.")
 
     def __str__(self):
         return f"{self.name} {self.type} {self.nullable.sql}".rstrip()

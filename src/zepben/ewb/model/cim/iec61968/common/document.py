@@ -8,29 +8,32 @@ __all__ = ["Document"]
 from datetime import datetime
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
+@dataslot
 class Document(IdentifiedObject):
     """
     Parent class for different groupings of information collected and managed as a part of a business process.
     It will frequently contain references to other objects, such as assets, people and power system resources.
     """
-    title: Optional[str] = None
+    title: str | None = None
     """Document title."""
 
-    created_date_time: Optional[datetime] = None
+    created_date_time: datetime | None = None
     """Date and time that this document was created."""
 
-    author_name: Optional[str] = None
+    author_name: str | None = None
     """Name of the author of this document."""
 
-    type: Optional[str] = None
+    type: str | None = None
     """Utility-specific classification of this document, according to its corporate standards, practices, 
     and existing IT systems (e.g., for management of assets, maintenance, work, outage, customers, etc.)."""
 
-    status: Optional[str] = None
+    status: str | None = None
     """Status of subject matter (e.g., Agreement, Work) this document represents."""
 
-    comment: Optional[str] = None
+    comment: str | None = None
     """Free text comment"""

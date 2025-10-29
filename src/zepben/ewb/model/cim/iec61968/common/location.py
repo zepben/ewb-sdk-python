@@ -9,45 +9,42 @@ __all__ = ["Location"]
 
 from typing import List, Optional, Generator, Callable
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require, nlen, ngen, safe_remove
 
 
+@dataslot
+@boilermaker
 class Location(IdentifiedObject):
     """
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.
     It can be defined with one or more `PositionPoint`'s.
     """
-    main_address: Optional[StreetAddress] = None
+    main_address: StreetAddress | None = None
     """Main address of the location."""
 
-    _position_points: Optional[List[PositionPoint]] = None
+    position_points: List[PositionPoint] | None = ListAccessor()
 
-    def __init__(self, position_points: List[PositionPoint] = None, **kwargs):
-        """
-        `position_points` A list of `PositionPoint`s to associate with this `Location`.
-        """
-        super(Location, self).__init__(**kwargs)
-        if position_points:
-            for point in position_points:
-                self.add_point(point)
-
+    def _retype(self):
+        self.position_points: ListRouter = ...
+    
+    @deprecated("BOILERPLATE: Use len(position_points) instead")
     def num_points(self):
-        """
-        Returns The number of `PositionPoint`s in this `Location`
-        """
-        return nlen(self._position_points)
+        return len(self.position_points)
 
     @property
     def points(self) -> Generator[PositionPoint, None, None]:
         """
         Returns Generator over the `PositionPoint`s of this `Location`.
         """
-        for point in ngen(self._position_points):
+        for point in ngen(self.position_points):
             yield point
 
+    @custom_get(position_points)
     def get_point(self, sequence_number: int) -> PositionPoint:
         """
         Get the `sequence_number` `PositionPoint` for this `Location`.
@@ -56,7 +53,7 @@ class Location(IdentifiedObject):
         Returns The `PositionPoint` identified by `sequence_number`
         Raises IndexError if this `Location` didn't contain `sequence_number` points.
         """
-        return self._position_points[sequence_number]
+        return self.position_points.raw[sequence_number]
 
     def __getitem__(self, item):
         return self.get_point(item)
@@ -93,13 +90,13 @@ class Location(IdentifiedObject):
                 lambda: f"Unable to add PositionPoint to {str(self)}. Sequence number {sequence_number} "
                         f"is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
                         f"adding the items in order and there are no gaps in the numbering.")
-        self._position_points = list() if self._position_points is None else self._position_points
-        self._position_points.insert(sequence_number, point)
+        self.position_points.insert_raw(sequence_number, point)
         return self
 
     def __setitem__(self, key, value):
         return self.insert_point(value, key)
 
+    @deprecated("BOILERPLATE: Use position_points.remove() instead")
     def remove_point(self, point: PositionPoint) -> Location:
         """
         Remove a `PositionPoint` from this `Location`
@@ -107,7 +104,7 @@ class Location(IdentifiedObject):
         Raises `ValueError` if `point` was not part of this `Location`
         Returns A reference to this `Location` to allow fluent use.
         """
-        self._position_points = safe_remove(self._position_points, point)
+        self.position_points.remove(point)
         return self
 
     def remove_point_by_sequence_number(self, sequence_number: int) -> PositionPoint:
@@ -121,9 +118,10 @@ class Location(IdentifiedObject):
         :raises IndexError: If no :class:`PositionPoint` with the specified `sequence_number` was not associated with this :class:`Location`.
         """
         point = self.get_point(sequence_number)
-        self._position_points = safe_remove(self._position_points, point)
+        self.position_points.raw.remove(point)
         return point
 
+    @deprecated("BOILERPLATE: Use position_points.clear() instead")
     def clear_points(self) -> Location:
-        self._position_points = None
+        return self.position_points.clear()
         return self

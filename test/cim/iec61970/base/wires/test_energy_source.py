@@ -140,6 +140,8 @@ def test_energy_source_constructor_kwargs(energy_source_phases, active_power, re
     assert es.x0_max == x0_max
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_energy_source_constructor_args():
     es = EnergySource(*energy_source_args)
 

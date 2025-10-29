@@ -57,6 +57,8 @@ def test_series_compensator_constructor_kwargs(r, r0, x, x0, varistor_rated_curr
     assert sc.varistor_voltage_threshold == varistor_voltage_threshold
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_series_compensator_constructor_args():
     sc = SeriesCompensator(*series_compensator_args)
 

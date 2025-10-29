@@ -7,19 +7,22 @@ __all__ = ["Clamp"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@dataslot
 class Clamp(ConductingEquipment):
     """
     A Clamp is a galvanic connection at a line segment where other equipment is connected. A Clamp does not cut the line segment. A Clamp is ConductingEquipment
     and has one Terminal with an associated ConnectivityNode. Any other ConductingEquipment can be connected to the Clamp ConnectivityNode.
     """
 
-    length_from_terminal_1: Optional[float] = None
+    length_from_terminal_1: float | None = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
     ac_line_segment: Optional['AcLineSegment'] = None

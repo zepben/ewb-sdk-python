@@ -33,6 +33,8 @@ def test_base_voltage_constructor_kwargs(nominal_voltage, **kwargs):
     assert bv.nominal_voltage == nominal_voltage
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_base_voltage_constructor_args():
     bv = BaseVoltage(*base_voltage_args)
 

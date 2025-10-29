@@ -10,6 +10,8 @@ __all__ = ['Equipment']
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
@@ -25,6 +27,8 @@ if TYPE_CHECKING:
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 
+@dataslot
+@boilermaker
 class Equipment(PowerSystemResource):
     """
     Abstract class, should only be used through subclasses.
@@ -35,36 +39,26 @@ class Equipment(PowerSystemResource):
     """If True, the equipment is in service."""
     normally_in_service: bool = True
     """If True, the equipment is _normally_ in service."""
-    commissioned_date: Optional[datetime.datetime] = None
+    commissioned_date: datetime.datetime | None = None
     """The date this equipment was commissioned into service."""
 
-    _usage_points: Optional[List[UsagePoint]] = None
-    _equipment_containers: Optional[List[EquipmentContainer]] = None
-    _operational_restrictions: Optional[List[OperationalRestriction]] = None
-    _current_containers: Optional[List[EquipmentContainer]] = None
+    usage_points: List[UsagePoint] | None = MRIDListAccessor()
+    equipment_containers: List[EquipmentContainer] | None = MRIDListAccessor()
+    operational_restrictions: List[OperationalRestriction] | None = MRIDListAccessor()
+    current_containers: List[EquipmentContainer] | None = MRIDListAccessor()
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
-        super(Equipment, self).__init__(**kwargs)
-        if usage_points:
-            for up in usage_points:
-                self.add_usage_point(up)
-        if equipment_containers:
-            for container in equipment_containers:
-                self.add_container(container)
-        if operational_restrictions:
-            for restriction in operational_restrictions:
-                self.add_operational_restriction(restriction)
-        if current_containers:
-            for cf in current_containers:
-                self.add_current_container(cf)
-
+    def _retype(self):
+        self.usage_points: MRIDListRouter = ...
+        self.equipment_containers: MRIDListRouter = ...
+        self.operational_restrictions: MRIDListRouter = ...
+        self.current_containers: MRIDListRouter = ...
+    
     @property
     def sites(self) -> Generator[Site, None, None]:
         """
         The `Site`s this equipment belongs to.
         """
-        return ngen(_of_type(self._equipment_containers, Site))
+        return ngen(_of_type(self.equipment_containers, Site))
 
     def feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[Feeder, None, None]:
         """
@@ -80,7 +74,7 @@ class Equipment(PowerSystemResource):
         """
         The normal `Feeder`s this equipment belongs to.
         """
-        return ngen(_of_type(self._equipment_containers, Feeder))
+        return ngen(_of_type(self.equipment_containers, Feeder))
 
     def lv_feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[LvFeeder, None, None]:
         """
@@ -96,271 +90,135 @@ class Equipment(PowerSystemResource):
         """
         The normal `LvFeeder`s this equipment belongs to.
         """
-        return ngen(_of_type(self._equipment_containers, LvFeeder))
+        return ngen(_of_type(self.equipment_containers, LvFeeder))
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         The `Substation`s this equipment belongs to.
         """
-        return ngen(_of_type(self._equipment_containers, Substation))
+        return ngen(_of_type(self.equipment_containers, Substation))
 
     @property
     def current_feeders(self) -> Generator[Feeder, None, None]:
         """
         The current `Feeder`s this equipment belongs to.
         """
-        return ngen(_of_type(self._current_containers, Feeder))
+        return ngen(_of_type(self.current_containers, Feeder))
 
     @property
     def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
         The current `LvFeeder`s this equipment belongs to.
         """
-        return ngen(_of_type(self._current_containers, LvFeeder))
+        return ngen(_of_type(self.current_containers, LvFeeder))
 
     @property
     def containers(self) -> Generator[EquipmentContainer, None, None]:
         """
         The `EquipmentContainer`s this equipment belongs to.
         """
-        return ngen(self._equipment_containers)
+        return ngen(self.equipment_containers)
 
     def num_containers(self) -> int:
         """
         Returns The number of `EquipmentContainer`s associated with this `Equipment`
         """
-        return nlen(self._equipment_containers)
+        return nlen(self.equipment_containers)
 
     def num_substations(self) -> int:
         """
         Returns The number of `zepben.ewb.model.cim.iec61970.base.core.substation.Substation`s associated with this `Equipment`
         """
-        return len(list(_of_type(self._equipment_containers, Substation)))
+        return len(list(_of_type(self.equipment_containers, Substation)))
 
     def num_sites(self) -> int:
         """
         Returns The number of `Site`s associated with this `Equipment`
         """
-        return len(list(_of_type(self._equipment_containers, Site)))
+        return len(list(_of_type(self.equipment_containers, Site)))
 
     def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `Feeder`s associated with this `Equipment`
         """
-        return len(list(_of_type(self._equipment_containers, Feeder)))
+        return len(list(_of_type(self.equipment_containers, Feeder)))
 
+    @deprecated("BOILERPLATE: Use len(usage_points) instead")
     def num_usage_points(self) -> int:
-        """
-        Returns The number of `UsagePoint`s associated with this `Equipment`
-        """
-        return nlen(self._usage_points)
+        return len(self.usage_points)
 
+    @deprecated("BOILERPLATE: Use len(current_containers) instead")
     def num_current_containers(self) -> int:
-        """
-        Returns The number of `EquipmentContainer`s associated with this `Equipment`
-        """
-        return nlen(self._current_containers)
+        return len(self.current_containers)
 
+    @deprecated("BOILERPLATE: Use len(operational_restrictions) instead")
     def num_operational_restrictions(self) -> int:
-        """
-        Returns The number of `OperationalRestriction`s associated with this `Equipment`
-        """
-        return nlen(self._operational_restrictions)
+        return len(self.operational_restrictions)
 
+    @deprecated("BOILERPLATE: Use equipment_containers.get_by_mrid(mrid) instead")
     def get_container(self, mrid: str) -> EquipmentContainer:
-        """
-        Get the `EquipmentContainer` for this `Equipment` identified by `mrid`
+        return self.equipment_containers.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `EquipmentContainer`
-        Returns The `EquipmentContainer` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._equipment_containers, mrid)
-
+    @deprecated("BOILERPLATE: Use equipment_containers.append(ec) instead")
     def add_container(self, ec: EquipmentContainer) -> Equipment:
-        """
-        Associate an `EquipmentContainer` with this `Equipment`
+        return self.equipment_containers.append(ec)
 
-        `ec` The `EquipmentContainer` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(ec, self.get_container, "An EquipmentContainer"):
-            return self
-        self._equipment_containers = list() if self._equipment_containers is None else self._equipment_containers
-        self._equipment_containers.append(ec)
-        return self
-
+    @deprecated("BOILERPLATE: Use equipment_containers.remove(ec) instead")
     def remove_container(self, ec: EquipmentContainer) -> Equipment:
-        """
-        Disassociate `ec` from this `Equipment`.
+        return self.equipment_containers.remove(ec)
 
-        `ec` The `EquipmentContainer` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `ec` was not associated with this `Equipment`.
-        """
-        self._equipment_containers = safe_remove(self._equipment_containers, ec)
-        return self
-
+    @deprecated("BOILERPLATE: Use equipment_containers.clear() instead")
     def clear_containers(self) -> Equipment:
-        """
-        Clear all equipment.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self._equipment_containers = None
-        return self
+        return self.equipment_containers.clear()
 
-    @property
-    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
-        """
-        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
-        """
-        return ngen(self._current_containers)
-
+    @deprecated("BOILERPLATE: Use current_containers.get_by_mrid(mrid) instead")
     def get_current_container(self, mrid: str) -> EquipmentContainer:
-        """
-        Get the `EquipmentContainer` for this `Equipment` in the current state of the network, identified by `mrid`
+        return self.current_containers.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `EquipmentContainer`
-        Returns The `EquipmentContainer` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._current_containers, mrid)
-
+    @deprecated("BOILERPLATE: Use current_containers.append(equipment_container) instead")
     def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        """
-        Associate `equipment_container` with this `Equipment` in the current state of the network.
+        return self.current_containers.append(equipment_container)
 
-        `equipment_container` The `EquipmentContainer` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(equipment_container, self.get_current_container, "A current EquipmentContainer"):
-            return self
-        self._current_containers = list() if self._current_containers is None else self._current_containers
-        self._current_containers.append(equipment_container)
-        return self
-
+    @deprecated("BOILERPLATE: Use current_containers.remove(equipment_container) instead")
     def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        """
-        Disassociate `equipment_container` from this `Equipment` in the current state of the network.
+        return self.current_containers.remove(equipment_container)
 
-        `equipment_container` The `EquipmentContainer` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `equipment_container` was not associated with this `Equipment`.
-        """
-        self._current_containers = safe_remove(self._current_containers, equipment_container)
-        return self
-
+    @deprecated("BOILERPLATE: Use current_containers.clear() instead")
     def clear_current_containers(self) -> Equipment:
-        """
-        Clear all current `EquipmentContainer`s in the current state of the network.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self._current_containers = None
-        return self
+        return self.current_containers.clear()
 
-    @property
-    def usage_points(self) -> Generator[UsagePoint, None, None]:
-        """
-        The `UsagePoint`s for this equipment.
-        """
-        return ngen(self._usage_points)
-
+    @deprecated("BOILERPLATE: Use usage_points.get_by_mrid(mrid) instead")
     def get_usage_point(self, mrid: str) -> UsagePoint:
-        """
-        Get the `UsagePoint` for this `Equipment` identified by `mrid`
+        return self.usage_points.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `UsagePoint`
-        Returns The `UsagePoint` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._usage_points, mrid)
-
+    @deprecated("BOILERPLATE: Use usage_points.append(up) instead")
     def add_usage_point(self, up: UsagePoint) -> Equipment:
-        """
-        Associate `up` with this `Equipment`.
+        return self.usage_points.append(up)
 
-        `up` the `UsagePoint` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `UsagePoint` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(up, self.get_usage_point, "A UsagePoint"):
-            return self
-        self._usage_points = list() if self._usage_points is None else self._usage_points
-        self._usage_points.append(up)
-        return self
-
+    @deprecated("BOILERPLATE: Use usage_points.remove(up) instead")
     def remove_usage_point(self, up: UsagePoint) -> Equipment:
-        """
-        Disassociate `up` from this `Equipment`.
+        return self.usage_points.remove(up)
 
-        `up` The `UsagePoint` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `up` was not associated with this `Equipment`.
-        """
-        self._usage_points = safe_remove(self._usage_points, up)
-        return self
-
+    @deprecated("BOILERPLATE: Use usage_points.clear() instead")
     def clear_usage_points(self) -> Equipment:
-        """
-        Clear all usage_points.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self._usage_points = None
-        return self
+        return self.usage_points.clear()
 
-    @property
-    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
-        """
-        The `OperationalRestriction`s that this equipment is associated with.
-        """
-        return ngen(self._operational_restrictions)
-
+    @deprecated("BOILERPLATE: Use operational_restrictions.get_by_mrid(mrid) instead")
     def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
-        """
-        Get the `OperationalRestriction` for this `Equipment` identified by `mrid`
+        return self.operational_restrictions.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `OperationalRestriction`
-        Returns The `OperationalRestriction` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._operational_restrictions, mrid)
-
+    @deprecated("BOILERPLATE: Use operational_restrictions.append(op) instead")
     def add_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        """
-        Associate `op` with this `Equipment`.
+        return self.operational_restrictions.append(op)
 
-        `op` The `OperationalRestriction` to associate with this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `OperationalRestriction` with the same `mrid` already exists for this `Equipment`.
-        """
-        if self._validate_reference(op, self.get_operational_restriction, "An OperationalRestriction"):
-            return self
-        self._operational_restrictions = list() if self._operational_restrictions is None else self._operational_restrictions
-        self._operational_restrictions.append(op)
-        return self
-
+    @deprecated("BOILERPLATE: Use operational_restrictions.remove(op) instead")
     def remove_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        """
-        Disassociate `up` from this `Equipment`.
+        return self.operational_restrictions.remove(op)
 
-        `op` The `OperationalRestriction` to disassociate from this `Equipment`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `op` was not associated with this `Equipment`.
-        """
-        self._operational_restrictions = safe_remove(self._operational_restrictions, op)
-        return self
-
+    @deprecated("BOILERPLATE: Use operational_restrictions.clear() instead")
     def clear_operational_restrictions(self) -> Equipment:
-        """
-        Clear all `OperationalRestrictions`.
-        Returns A reference to this `Equipment` to allow fluent use.
-        """
-        self._operational_restrictions = None
-        return self
+        return self.operational_restrictions.clear()
 
-
-def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
+def _of_type(containers: List[EquipmentContainer] | None, ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
     yield from (ec for ec in containers if isinstance(ec, ectype)) if containers is not None else {}

@@ -7,9 +7,12 @@ __all__ = ["EarthFaultCompensator"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@dataslot
 class EarthFaultCompensator(ConductingEquipment):
     """
     A conducting equipment used to represent a connection to ground which is typically used to compensate earth faults. An earth fault compensator device
@@ -17,5 +20,5 @@ class EarthFaultCompensator(ConductingEquipment):
     normal connection rules apply.
     """
 
-    r: Optional[float] = None
+    r: float | None = None
     """Nominal resistance of device in ohms."""

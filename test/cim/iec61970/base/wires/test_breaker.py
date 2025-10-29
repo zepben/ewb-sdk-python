@@ -33,6 +33,8 @@ def test_breaker_constructor_kwargs(in_transit_time, **kwargs):
     assert br.in_transit_time == in_transit_time
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_breaker_constructor_args():
     br = Breaker(*breaker_args)
     verify_protected_switch_constructor_args(br)

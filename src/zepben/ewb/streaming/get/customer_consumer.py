@@ -8,8 +8,11 @@ from __future__ import annotations
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
 from asyncio import get_event_loop
+from dataclasses import dataclass
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
@@ -20,6 +23,7 @@ from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResu
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
 
+@dataclass
 class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     """
     Consumer client for a :class:`CustomerService`.
@@ -31,24 +35,13 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
         check for mRIDs that were not found or retrieved but not added to service (this should not be the case unless you are processing things concurrently).
     """
 
-    __service: CustomerService
+    __service: CustomerService = None
 
     @property
     def service(self) -> CustomerService:
         return self.__service
 
     _stub: CustomerConsumerStub = None
-
-    def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
-        if stub is not None:
-            self._stub = stub
-        else:
-            self._stub = CustomerConsumerStub(channel)
-
-        self.__service = CustomerService()
 
     async def get_customers_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
         return await self._get_customers_for_containers({mrid})
@@ -65,7 +58,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -74,7 +67,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
             for cio in response.identifiedObjects:
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -84,9 +77,10 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
 
+@dataclass
 class SyncCustomerConsumerClient(CustomerConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:

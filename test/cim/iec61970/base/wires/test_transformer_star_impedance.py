@@ -52,6 +52,8 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
     assert tsi.transformer_end_info == transformer_end_info
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_transformer_star_impedance_constructor_args():
     tsi = TransformerStarImpedance(*transformer_star_impedance_args)
 

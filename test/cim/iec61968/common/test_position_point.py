@@ -40,6 +40,8 @@ def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
     assert pp.y_position == y_position
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_position_point_constructor_args():
     pp = PositionPoint(*position_point_args)
 

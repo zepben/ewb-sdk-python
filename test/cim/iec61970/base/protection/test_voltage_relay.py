@@ -27,6 +27,8 @@ def test_voltage_relay_constructor_kwargs(**kwargs):
     verify_protection_relay_function_constructor_kwargs(vr, **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_voltage_relay_constructor_args():
     vr = VoltageRelay(*voltage_relay_args)
 

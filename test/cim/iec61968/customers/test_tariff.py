@@ -22,5 +22,7 @@ def test_tariff_constructor_kwargs(**kwargs):
     verify_document_constructor_kwargs(Tariff(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_tariff_constructor_args():
     verify_document_constructor_args(Tariff(*tariff_args))

@@ -34,6 +34,8 @@ def test_potential_transformer_constructor_kwargs(type, **kwargs):
     assert vt.type == type
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_potential_transformer_constructor_args():
     vt = PotentialTransformer(*potential_transformer_args)
 

@@ -50,6 +50,8 @@ def simple_node_breaker_network() -> NetworkService:
 
     network.connect_terminals(tx_terminals[0], es_t)
 
+    print('\n\n>>>', tx_terminals[0].connectivity_node)
+
     # Line
     line = AcLineSegment(mrid="line", name="Line", length=100.0, per_length_impedance=plsi)
     line.asset_info = wire_info

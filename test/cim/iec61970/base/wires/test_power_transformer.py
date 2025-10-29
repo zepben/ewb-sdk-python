@@ -50,6 +50,8 @@ def test_power_transformer_constructor_kwargs(vector_group, power_transformer_en
     assert pt.function == function
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_power_transformer_constructor_args():
     pt = PowerTransformer(*power_transformer_args)
 

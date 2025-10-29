@@ -7,6 +7,8 @@ __all__ = ["BatteryUnit"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
@@ -16,25 +18,20 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 
+@dataslot
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
-
-    def __init__(self, controls: List['BatteryControl'] = None, **kwargs):
-        super(BatteryUnit, self).__init__(**kwargs)
-        if controls:
-            for bc in controls:
-                self.add_control(bc)
 
     battery_state: BatteryStateKind = BatteryStateKind.UNKNOWN
     """The current state of the battery (charging, full, etc.)."""
 
-    rated_e: Optional[int] = None
+    rated_e: int | None = None
     """Full energy storage capacity of the battery in watt hours (Wh). The attribute shall be a positive value."""
 
-    stored_e: Optional[int] = None
+    stored_e: int | None = None
     """Amount of energy currently stored in watt hours (Wh). The attribute shall be a positive value or zero and lower than `rated_e`."""
 
-    _controls: Optional[List['BatteryControl']] = None
+    _controls: List['BatteryControl'] | None = None
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
     def num_battery_controls(self):

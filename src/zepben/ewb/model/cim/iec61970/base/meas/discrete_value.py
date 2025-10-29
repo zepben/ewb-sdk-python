@@ -7,14 +7,17 @@ __all__ = ["DiscreteValue"]
 
 from typing import Optional
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 
+@dataslot
 class DiscreteValue(MeasurementValue):
     """`DiscreteValue` represents a discrete `MeasurementValue`."""
 
     value: int = 0
     """The value to supervise"""
 
-    discrete_mrid: Optional[str] = None
+    discrete_mrid: str | None = None
     """The `zepben.ewb.model.cim.iec61970.base.meas.measurement.Discrete` mRID of this `DiscreteValue`"""

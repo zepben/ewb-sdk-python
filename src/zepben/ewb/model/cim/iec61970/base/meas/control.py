@@ -7,19 +7,22 @@ __all__ = ["Control"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.meas.iopoint import IoPoint
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 
 
+@dataslot
 class Control(IoPoint):
     """
     Control is used for supervisory/device control. It represents control outputs that are used to change the state in a
     process, e.g. close or open breaker, a set point value or a raise lower command.
     """
 
-    power_system_resource_mrid: Optional[str] = None
+    power_system_resource_mrid: str | None = None
     """AnalogValue represents an analog MeasurementValue."""
 
     remote_control: Optional['RemoteControl'] = None

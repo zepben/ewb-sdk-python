@@ -8,8 +8,11 @@ from __future__ import annotations
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
 from asyncio import get_event_loop
+from dataclasses import dataclass
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
@@ -21,7 +24,7 @@ from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import Diag
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
-
+@dataclass
 class DiagramConsumerClient(CimConsumerClient[DiagramService]):
     """
     Consumer client for a :class:`DiagramService`.
@@ -33,24 +36,13 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
         check for mRIDs that were not found or retrieved but not added to service (this should not be the case unless you are processing things concurrently).
     """
 
-    __service: DiagramService
+    __service: DiagramService = None
 
     @property
     def service(self) -> DiagramService:
         return self.__service
 
     _stub: DiagramConsumerStub = None
-
-    def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
-        if stub is not None:
-            self._stub = stub
-        else:
-            self._stub = DiagramConsumerStub(channel)
-
-        self.__service = DiagramService()
 
     async def get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return await self._get_diagram_objects(mrids)
@@ -67,7 +59,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -76,7 +68,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
             for dio in response.identifiedObjects:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -86,9 +78,10 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
 
+@dataclass
 class SyncDiagramConsumerClient(DiagramConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:

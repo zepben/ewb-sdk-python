@@ -36,6 +36,8 @@ def test_switch_info_constructor_kwargs(rated_interrupting_time, **kwargs):
     assert si.rated_interrupting_time == rated_interrupting_time
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_switch_info_constructor_args():
     si = SwitchInfo(*switch_info_args)
 

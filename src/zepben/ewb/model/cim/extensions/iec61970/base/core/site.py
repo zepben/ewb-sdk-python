@@ -7,6 +7,8 @@ __all__ = ["Site"]
 
 from typing import Iterable, Type, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 @zbex
+@dataslot
 class Site(EquipmentContainer):
     """
     [ZBEX]

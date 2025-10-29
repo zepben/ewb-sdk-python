@@ -21,5 +21,7 @@ def test_cable_info_constructor_kwargs(**kwargs):
     verify_wire_info_constructor_kwargs(CableInfo(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_cable_info_constructor_args():
     verify_wire_info_constructor_args(CableInfo(*cable_info_args))

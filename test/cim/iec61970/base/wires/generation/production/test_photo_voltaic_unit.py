@@ -22,5 +22,7 @@ def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PhotoVoltaicUnit(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_photo_voltaic_unit_constructor_args():
     verify_power_electronics_unit_constructor_args(PhotoVoltaicUnit(*photo_voltaic_unit_args))

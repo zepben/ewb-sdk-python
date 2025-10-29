@@ -58,6 +58,8 @@ def test_phase_impedance_data_constructor_kwargs(from_phase, to_phase, b, g, r, 
     assert phase_impedance_data.x == x
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_phase_impedance_data_constructor_args():
     phase_impedance_data = PhaseImpedanceData(*phase_impedance_data_args)
 

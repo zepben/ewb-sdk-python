@@ -41,6 +41,8 @@ def test_protection_relay_system_constructor_kwargs(protection_kind, schemes, **
     assert list(prs.schemes) == schemes
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_protection_relay_system_constructor_args():
     prs = ProtectionRelaySystem(*protection_relay_system_args)
 

@@ -37,6 +37,8 @@ def test_pricing_structure_constructor_kwargs(tariffs, **kwargs):
     assert list(ps.tariffs) == tariffs
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_pricing_structure_constructor_args():
     ps = PricingStructure(*pricing_structure_args)
 

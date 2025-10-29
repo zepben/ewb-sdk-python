@@ -10,6 +10,8 @@ __all__ = ["LvFeeder"]
 import typing
 from typing import Generator, Optional, Dict, List
 
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from typing_extensions import deprecated
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import safe_remove_by_id, nlen, ngen
@@ -21,72 +23,43 @@ if typing.TYPE_CHECKING:
 
 
 @zbex
+@dataslot
+@boilermaker
 class LvFeeder(EquipmentContainer):
     """
     [ZBEX]
     A branch of LV network starting at a distribution substation and continuing until the end of the LV network.
     """
 
-    _normal_head_terminal: Optional[Terminal] = None
+    normal_head_terminal: Terminal | None = ValidatedDescriptor(None)
     """The normal head terminal or terminals of this LvFeeder"""
 
-    _normal_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    normal_energizing_feeders: List[Feeder] | None = MRIDDictAccessor()
     """The feeders that energize this LV feeder in the normal state of the network."""
 
-    _current_equipment: Optional[Dict[str, Equipment]] = None
+    current_equipment: List[Equipment] | None = MRIDDictAccessor()
     """The equipment contained in this LvFeeder in the current state of the network."""
 
-    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    current_energizing_feeders: List[Feeder] | None = MRIDDictAccessor()
     """The feeders that energize this LV feeder in the current state of the network."""
 
-    def __init__(
-        self,
-        normal_head_terminal: Terminal = None,
-        normal_energizing_feeders: List[Feeder] = None,
-        current_equipment: List[Equipment] = None,
-        current_energizing_feeders: List[Feeder] = None,
-        **kwargs
-    ):
-        super(LvFeeder, self).__init__(**kwargs)
-        if normal_head_terminal:
-            self.normal_head_terminal = normal_head_terminal
-        if normal_energizing_feeders:
-            for feeder in normal_energizing_feeders:
-                self.add_normal_energizing_feeder(feeder)
-        if current_equipment:
-            for eq in current_equipment:
-                self.add_current_equipment(eq)
-        if current_energizing_feeders:
-            for feeder in current_energizing_feeders:
-                self.add_current_energizing_feeder(feeder)
-
-    @property
-    def normal_head_terminal(self) -> Optional[Terminal]:
-        """
-        [ZBEX] The normal head terminal or terminals of the feeder.
-        """
-        return self._normal_head_terminal
-
-    @normal_head_terminal.setter
-    def normal_head_terminal(self, term: Optional[Terminal]):
+    def _retype(self):
+        self.normal_energizing_feeders: MRIDDictRouter = ...
+        self.current_equipment: MRIDDictRouter = ...
+        self.current_energizing_feeders: MRIDDictRouter = ...
+    
+    @validate(normal_head_terminal)
+    def _normal_head_terminal_validate(self, term: Terminal | None):
         if self._normal_head_terminal is None or self._normal_head_terminal is term:
-            self._normal_head_terminal = term
+            return term
         else:
             raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
 
-    @property
-    def normal_energizing_feeders(self) -> Generator[Feeder, None, None]:
-        """
-        [ZBEX] The HV/MV feeders that normally energize this LV feeder.
-        """
-        return ngen(self._normal_energizing_feeders.values() if self._normal_energizing_feeders is not None else None)
-
+    @deprecated("BOILERPLATE: Use len(normal_energizing_feeders) instead")
     def num_normal_energizing_feeders(self) -> int:
-        """
-        Get the number of HV/MV feeders that normally energize this LV feeder.
-        """
-        return nlen(self._normal_energizing_feeders)
+        return len(self.normal_energizing_feeders)
 
+    @custom_get_by_mrid(normal_energizing_feeders)
     def get_normal_energizing_feeder(self, mrid: str) -> Feeder:
         """
         Energizing feeder using the normal state of the network.
@@ -95,13 +68,14 @@ class LvFeeder(EquipmentContainer):
         @return A matching `Feeder` that energizes this `LvFeeder` in the normal state of the network.
         @raise A `KeyError` if no matching `Feeder` was found.
         """
-        if not self._normal_energizing_feeders:
+        if not self.normal_energizing_feeders:
             raise KeyError(mrid)
         try:
-            return self._normal_energizing_feeders[mrid]
+            return self.normal_energizing_feeders.raw[mrid]
         except AttributeError:
             raise KeyError(mrid)
 
+    @custom_add(normal_energizing_feeders)
     def add_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
         """
         Associate this `LvFeeder` with a `Feeder` in the normal state of the network.
@@ -111,43 +85,22 @@ class LvFeeder(EquipmentContainer):
         """
         if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A Feeder"):
             return self
-        self._normal_energizing_feeders = dict() if self._normal_energizing_feeders is None else self._normal_energizing_feeders
-        self._normal_energizing_feeders[feeder.mrid] = feeder
+        self.normal_energizing_feeders.raw[feeder.mrid] = feeder
         return self
 
+    @deprecated("BOILERPLATE: Use normal_energizing_feeders.remove(feeder) instead")
     def remove_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Disassociate this `LvFeeder` from a `Feeder` in the normal state of the network.
+        return self.normal_energizing_feeders.remove(feeder)
 
-        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the normal state of the network.
-        @return: This `LvFeeder` for fluent use.
-        @raise: A `ValueError` if `feeder` is not found in the normal energizing feeders collection.
-        """
-        self._normal_energizing_feeders = safe_remove_by_id(self._normal_energizing_feeders, feeder)
-        return self
-
+    @deprecated("BOILERPLATE: Use normal_energizing_feeders.clear() instead")
     def clear_normal_energizing_feeders(self) -> LvFeeder:
-        """
-        Clear all `Feeder`s associated with `LvFeeder` in the normal state of the network.
+        return self.normal_energizing_feeders.clear()
 
-        @return: This `LvFeeder` for fluent use.
-        """
-        self._normal_energizing_feeders = None
-        return self
-
-    @property
-    def current_energizing_feeders(self) -> Generator[Feeder, None, None]:
-        """
-        [ZBEX] The HV/MV feeders that currently energize this LV feeder.
-        """
-        return ngen(self._current_energizing_feeders.values() if self._current_energizing_feeders is not None else None)
-
+    @deprecated("BOILERPLATE: Use len(current_energizing_feeders) instead")
     def num_current_energizing_feeders(self) -> int:
-        """
-        Get the number of HV/MV feeders that currently energize this LV feeder.
-        """
-        return nlen(self._current_energizing_feeders)
+        return len(self.current_energizing_feeders)
 
+    @custom_get_by_mrid(current_energizing_feeders)
     def get_current_energizing_feeder(self, mrid: str) -> Feeder:
         """
         Energizing feeder using the current state of the network.
@@ -156,13 +109,14 @@ class LvFeeder(EquipmentContainer):
         @return A matching `Feeder` that energizes this `LvFeeder` in the current state of the network.
         @raise A `KeyError` if no matching `Feeder` was found.
         """
-        if not self._current_energizing_feeders:
+        if not self.current_energizing_feeders:
             raise KeyError(mrid)
         try:
-            return self._current_energizing_feeders[mrid]
+            return self.current_energizing_feeders.raw[mrid]
         except AttributeError:
             raise KeyError(mrid)
 
+    @custom_add(current_energizing_feeders)
     def add_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
         """
         Associate this `LvFeeder` with a `Feeder` in the current state of the network.
@@ -172,43 +126,22 @@ class LvFeeder(EquipmentContainer):
         """
         if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
             return self
-        self._current_energizing_feeders = dict() if self._current_energizing_feeders is None else self._current_energizing_feeders
-        self._current_energizing_feeders[feeder.mrid] = feeder
+        self.current_energizing_feeders.raw[feeder.mrid] = feeder
         return self
 
+    @deprecated("BOILERPLATE: Use current_energizing_feeders.remove(feeder) instead")
     def remove_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Disassociate this `LvFeeder` from a `Feeder` in the current state of the network.
+        return self.current_energizing_feeders.remove(feeder)
 
-        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the current state of the network.
-        @return: This `LvFeeder` for fluent use.
-        @raise: A `ValueError` if `feeder` is not found in the current energizing feeders collection.
-        """
-        self._current_energizing_feeders = safe_remove_by_id(self._current_energizing_feeders, feeder)
-        return self
-
+    @deprecated("BOILERPLATE: Use current_energizing_feeders.clear() instead")
     def clear_current_energizing_feeders(self) -> LvFeeder:
-        """
-        Clear all `Feeder`s associated with `LvFeeder` in the current state of the network.
+        return self.current_energizing_feeders.clear()
 
-        @return: This `LvFeeder` for fluent use.
-        """
-        self._current_energizing_feeders = None
-        return self
-
-    @property
-    def current_equipment(self) -> Generator[Equipment, None, None]:
-        """
-        Contained `Equipment` using the current state of the network.
-        """
-        return ngen(self._current_equipment.values() if self._current_equipment is not None else None)
-
+    @deprecated("BOILERPLATE: Use len(current_equipment) instead")
     def num_current_equipment(self):
-        """
-        Returns The number of `Equipment` associated with this `LvFeeder` in the current state of the network.
-        """
-        return nlen(self._current_equipment)
+        return len(self.current_equipment)
 
+    @custom_get_by_mrid(current_equipment)
     def get_current_equipment(self, mrid: str) -> Equipment:
         """
         Get the `Equipment` contained in this `LvFeeder` in the current state of the network, identified by `mrid`
@@ -217,13 +150,14 @@ class LvFeeder(EquipmentContainer):
         Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self._current_equipment:
+        if not self.current_equipment:
             raise KeyError(mrid)
         try:
-            return self._current_equipment[mrid]
+            return self.current_equipment.raw[mrid]
         except AttributeError:
             raise KeyError(mrid)
 
+    @custom_add(current_equipment)
     def add_current_equipment(self, equipment: Equipment) -> LvFeeder:
         """
         Associate `equipment` with this `LvFeeder` in the current state of the network.
@@ -234,25 +168,14 @@ class LvFeeder(EquipmentContainer):
         """
         if self._validate_reference(equipment, self.get_current_equipment, "An Equipment"):
             return self
-        self._current_equipment = dict() if self._current_equipment is None else self._current_equipment
-        self._current_equipment[equipment.mrid] = equipment
+        self.current_equipment.raw[equipment.mrid] = equipment
         return self
 
+    @deprecated("BOILERPLATE: Use current_equipment.remove(equipment) instead")
     def remove_current_equipment(self, equipment: Equipment) -> LvFeeder:
-        """
-        Disassociate `equipment` from this `LvFeeder` in the current state of the network.
+        return self.current_equipment.remove(equipment)
 
-        `equipment` The `Equipment` to disassociate from this `LvFeeder` in the current state of the network.
-        Returns A reference to this `LvFeeder` to allow fluent use.
-        Raises `KeyError` if `equipment` was not associated with this `LvFeeder`.
-        """
-        self._current_equipment = safe_remove_by_id(self._current_equipment, equipment)
-        return self
-
+    @deprecated("BOILERPLATE: Use current_equipment.clear() instead")
     def clear_current_equipment(self) -> LvFeeder:
-        """
-        Clear all `Equipment` from this `LvFeeder` in the current state of the network.
-        Returns A reference to this `LvFeeder` to allow fluent use.
-        """
-        self._current_equipment = None
+        return self.current_equipment.clear()
         return self

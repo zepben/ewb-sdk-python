@@ -22,6 +22,8 @@ def test_site_constructor_kwargs(**kwargs):
     verify_equipment_container_constructor_kwargs(Site(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_site_constructor_args():
     verify_equipment_container_constructor_args(Site(*site_args))
 

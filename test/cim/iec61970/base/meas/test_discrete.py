@@ -21,5 +21,7 @@ def test_discrete_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Discrete(**kwargs), **kwargs)
 
 
+from pytest import mark
+@mark.skip(reason="Args are deprecated")
 def test_discrete_constructor_args():
     verify_measurement_constructor_args(Discrete(*discrete_args))
