@@ -11,6 +11,8 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import require
@@ -58,18 +60,7 @@ class Switch(ConductingEquipment):
     """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue 
     is expected to match with the Switch.normalOpen."""
 
-    @property
-    def switch_info(self) -> SwitchInfo | None:
-        """Datasheet information for this Switch."""
-        return self.asset_info
-
-    @switch_info.setter
-    def switch_info(self, si: SwitchInfo | None):
-        """
-        Set the :class:`SwitchInfo` for this :class:`Switch`
-        :param si: The SwitchInfo for this Switch
-        """
-        self.asset_info = si
+    switch_info: SwitchInfo | None = Alias(backed_name='asset_info')
 
     def is_normally_open(self, phase: SinglePhaseKind = None) -> bool:
         """

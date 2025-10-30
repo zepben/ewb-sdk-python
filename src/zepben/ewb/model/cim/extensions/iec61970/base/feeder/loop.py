@@ -38,13 +38,6 @@ class Loop(IdentifiedObject):
         self.circuits: MRIDListRouter = ...
         self.substations: MRIDListRouter = ...
         self.energizing_substations: MRIDListRouter = ...
-    
-    @property
-    def substations(self) -> Generator[Substation, None, None]:
-        """
-        [ZBEX] The `Substation`s that are powered by this `Loop`.
-        """
-        return ngen(self.substations)
 
     @deprecated("BOILERPLATE: Use len(circuits) instead")
     def num_circuits(self):

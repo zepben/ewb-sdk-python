@@ -9,6 +9,8 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
@@ -48,15 +50,4 @@ class ShuntCompensator(RegulatingCondEq):
     NonlinearShuntCompensatorPoint-s.
     """
 
-    @property
-    def shunt_compensator_info(self) -> Optional['ShuntCompensatorInfo']:
-        """The `ShuntCompensatorInfo` for this `ShuntCompensator`"""
-        return self.asset_info
-
-    @shunt_compensator_info.setter
-    def shunt_compensator_info(self, sci: Optional['ShuntCompensatorInfo']):
-        """
-        Set the `ShuntCompensatorInfo` for this `ShuntCompensator`
-        `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`
-        """
-        self.asset_info = sci
+    shunt_compensator_info: Optional['ShuntCompensatorInfo'] = Alias(backed_name='asset_info')

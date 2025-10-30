@@ -11,6 +11,8 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -82,6 +84,8 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
+    power_transformer_info: PowerTransformerInfo | None = Alias(backed_name='asset_info')
+
     def _retype(self):
         self.power_transformer_ends: MRIDListRouter = ...
     
@@ -93,19 +97,6 @@ class PowerTransformer(ConductingEquipment):
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
         return ngen(self.power_transformer_ends)
-
-    @property
-    def power_transformer_info(self) -> PowerTransformerInfo | None:
-        """The `PowerTransformerInfo` for this `PowerTransformer`"""
-        return self.asset_info
-
-    @power_transformer_info.setter
-    def power_transformer_info(self, pti: PowerTransformerInfo | None):
-        """
-        Set the `PowerTransformerInfo` for this `PowerTransformer`
-        `pti` The `PowerTransformerInfo` to associate with this `PowerTransformer`
-        """
-        self.asset_info = pti
 
     def get_base_voltage(self, terminal: Terminal = None):
         if terminal is None:

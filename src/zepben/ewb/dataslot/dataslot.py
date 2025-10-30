@@ -242,13 +242,14 @@ def _addressor(var: object | ValidatedDescriptor, _type: _Addressor):
 
 def validate(var: object | ValidatedDescriptor):
     return _addressor(var, _Addressor.Validator)
-def getter(var: object | ValidatedDescriptor):
+def getter(var: object | CustomDescriptor):
     return _addressor(var, _Addressor.Getter)
-def setter(var: object | ValidatedDescriptor):
+def setter(var: object | CustomDescriptor):
     return _addressor(var, _Addressor.Setter)
 
 
 DEBUG_LOG = True
+BAN_KWARGS = True
 
 
 def _spew(cls):
@@ -287,8 +288,6 @@ def amend_init(obj: type, cls: type):
     Call the original init to allow the dataclass to handle fields.
     """
     init_signature = inspect.signature(obj.__init__)
-    # dc_kwargs = {}
-    # descriptor_values = {}
 
     # Make dictionaries for easy access
     descriptors = _get_descriptors_inherited(cls, Descriptor)
@@ -307,14 +306,15 @@ def amend_init(obj: type, cls: type):
         else:
             dc_kwargs[attr] = val
 
-    if hasattr(cls, 'mrid'):
+    if hasattr(cls, 'mrid') and BAN_KWARGS:
         def __init__(self, mrid=None, *args, **kwargs):
             dc_kwargs = {}
             descriptor_values = {}
             it = iter(init_signature.parameters)
             it.__next__()
             if args:
-                raise ValueError('AAAAAAAAAAAAAAAA')
+                raise ValueError('Objects derived from IdentifiedObject take at most 1 positional' +
+                                 'argument - mrid; Use kwargs for object instantiation!')
             if mrid is not None and isinstance(mrid, str):
                 dc_kwargs['mrid'] = mrid
             for attr, val in kwargs.items():
@@ -397,28 +397,37 @@ def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
     new_annotations = cls.__annotations__.copy()
     if DEBUG_LOG: _spew(cls)
 
+    no_kwargs = BAN_KWARGS and hasattr(cls, 'mrid')
+
     for attr, _type in cls.__annotations__.items():
         val = cls.__dict__.get(attr, None)
         del new_annotations[attr]
         if isinstance(val, Descriptor):
+            _attr = None
             if isinstance(val, BackedDescriptor):
                 _attr = val.private_name
-                new_annotations[_attr] = _type
+                if not isinstance(val, Alias):
+                    new_annotations[_attr] = _type
             elif isinstance(val, CustomDescriptor):
-                _attr = f'_init_placeholder_for_{attr}_'
-                new_annotations[_attr] = bool
-            else:
-                raise NotImplementedError()
-            if not isinstance(val, Alias):
+                if not no_kwargs:
+                    _attr = f'_init_placeholder_for_{attr}_'
+                    new_annotations[_attr] = bool
+                else:
+                    new_annotations[attr] = ClassVar[_type]
+                    continue
+            if _attr and not isinstance(val, Alias):
                 _validate_backed_name(cls, attr, _attr)
 
             val.set_type(_type)
             new_annotations[attr] = ClassVar[_type]
-            setattr(cls, _attr, val.default)
+            if _attr and not isinstance(val, Alias):
+                setattr(cls, _attr, val.default)
+
         else:
             new_annotations[attr] = _type
 
     _attach_accessors(cls)
+
 
     cls.__annotations__ = new_annotations
 
@@ -545,7 +554,7 @@ if __name__ == '__main__':
 
     @dataslot(weakref=True)
     class CN:
-        mrid: str = NoResetDescriptor()
+        mrid: str = None
         x: int = 42
 
     @dataslot
@@ -584,9 +593,9 @@ if __name__ == '__main__':
     a = A([1, 2], y='abc')
 
     l = [42, 24, 4]
-    a = B([1], y='abc', x=24)
+    a = B(l=[1], y='abc', x=24)
 
-    b = B([2], y='de')
+    b = B(l=[2], y='de')
     print('!!!', a.y, a.x, b.y, b.x)
     print(b.d)
 
@@ -659,3 +668,22 @@ if __name__ == '__main__':
     h2 = H2(s)
     print(h2)
     print(h2.__hash__())
+
+    @dataslot
+    class ABM:
+        _mask: int = private(None)
+        a: List[bool] = CustomDescriptor()
+        a_s: List[bool] = Alias(backed_name='a')
+
+        @getter(a)
+        def _g(self):
+            return [42] if self._mask else [24]
+
+        @setter(a)
+        def _s(self, val):
+            self._mask = 1 if val else 0
+
+    abm = ABM(a_s=[])
+    print(abm.a)
+    abm.a = [True]
+    print(abm.a)

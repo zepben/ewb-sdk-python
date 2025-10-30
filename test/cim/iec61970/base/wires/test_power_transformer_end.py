@@ -181,6 +181,8 @@ def test_power_transformer_rated_s_backwards_compatibility():
     assert pte.rated_s == 4
 
 
+from pytest import mark
+@mark.skip(reason="s ratings are now front facing")
 def test_power_transformer_s_ratings_backing_field_cant_through_the_constructor():
     with raises(ValueError, match="Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected."):
         PowerTransformerEnd(_s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 4)])

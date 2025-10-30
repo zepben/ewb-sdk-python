@@ -9,6 +9,8 @@ from typing import Optional, List, Union
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import Alias, private, CustomDescriptor, getter, setter
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.metering.controlled_appliance import ControlledAppliance, Appliance
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
@@ -16,7 +18,7 @@ from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndD
 from zepben.ewb.util import require
 
 
-@zbex
+# @zbex
 @dataslot
 class PanDemandResponseFunction(EndDeviceFunction):
     """
@@ -26,20 +28,34 @@ class PanDemandResponseFunction(EndDeviceFunction):
     kind: EndDeviceFunctionKind = EndDeviceFunctionKind.UNKNOWN
     """[ZBEX] `zepben.ewb.model.cim.iec61968.metering.metering.EndDeviceFunctionKind` of this `PanDemandResponseFunction`"""
 
-    appliance: int | None = ValidatedDescriptor(None)
+    _appliance_bitmask: int | None = private(None)
 
-    @validate(appliance)
-    def _appliance_validate(self, appliance: Union[int, ControlledAppliance] | None):
-        if isinstance(appliance, int):
-            return appliance
-        elif isinstance(appliance, ControlledAppliance):
-            if appliance:
-                return appliance.bitmask
+    appliance: int | ControlledAppliance | None = CustomDescriptor(None)
+    """[ZBEX] The `ControlledAppliance`s being controlled by this `PanDemandResponseFunction`."""
+
+    appliances: int | ControlledAppliance | None = Alias(backed_name='appliance')
+    """[ZBEX] DEPRECATED: Alias for `PanDemandResponseFunction.appliance`; Use that instead."""
+
+    @getter(appliance)
+    def _appliance_getter(self):
+        print('!!!', self._appliance_bitmask)
+        if self._appliance_bitmask is None:
+            return None
         else:
-            if appliance:
-                raise ValueError(f"Unsupported type for appliance: {appliance}. Must be either an int or ControlledAppliance")
+            return ControlledAppliance(self._appliance_bitmask)
+
+    @setter(appliance)
+    def _appliance_setter(self, appliance_in: Optional[Union[int, ControlledAppliance]]):
+        if isinstance(appliance_in, int):
+            self._appliance_bitmask = appliance_in
+        elif isinstance(appliance_in, ControlledAppliance):
+            if appliance_in:
+                self._appliance_bitmask = appliance_in.bitmask
+        else:
+            if appliance_in:
+                raise ValueError(f"Unsupported type for appliance: {appliance_in}. Must be either an int or ControlledAppliance")
             else:
-                return None
+                self._appliance_bitmask = None
 
     def add_appliance(self, appliance: Appliance) -> bool:
         """
