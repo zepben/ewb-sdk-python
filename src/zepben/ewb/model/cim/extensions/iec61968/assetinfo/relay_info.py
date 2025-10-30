@@ -37,7 +37,7 @@ class RelayInfo(AssetInfo):
     def num_delays(self) -> int:
         return len(self.reclose_delays)
 
-    @custom_get(reclose_delays)
+    @deprecated("BOILERPLATE: Use reclose_delays[index] instead")
     def get_delay(self, index: int) -> float:
         """
         Get the reclose delay at the specified index, if it exists. Otherwise, this returns
@@ -45,10 +45,7 @@ class RelayInfo(AssetInfo):
         :param index: The index of the delay to retrieve.
         :return: The reclose delay at `index` if it exists, otherwise None.
         """
-        if self.reclose_delays:
-            return self.reclose_delays.raw[index]
-        else:
-            raise IndexError(index)
+        return self.reclose_delays[index]
 
     def for_each_delay(self, action: Callable[[int, float], None]):
         """
