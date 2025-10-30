@@ -33,5 +33,5 @@ class Name:
     type: NameType
     """Type of this name."""
 
-    identified_object: Optional[IdentifiedObject] = field(default=None, hash=False, compare=False)
+    identified_object: Optional[IdentifiedObject] = field(default=None, hash=False)
     """Identified object that this name designates."""
