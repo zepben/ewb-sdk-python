@@ -83,8 +83,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                     if name_.type.name == name_type and name_.name == name:
                         return True
                 elif isinstance(name_type, NameType):
-                    if name_.type == name_type and name_.name == name:
-                        return True
+                    if name_.type == name_type:
+                        if name_.name == name:
+                            return True
         return False
 
     def get_name(self, name_type: NameType | str, name):

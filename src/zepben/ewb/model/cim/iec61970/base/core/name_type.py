@@ -36,8 +36,8 @@ class NameType:
     description: Optional[str] = None
     """Description of the name type."""
 
-    _names_index: Dict[str, Name] = field(default_factory=dict, hash=False)
-    _names_multi_index: Dict[str, List[Name]] = field(default_factory=dict, hash=False)
+    _names_index: Dict[str, Name] = field(default_factory=dict, hash=False, compare=False)
+    _names_multi_index: Dict[str, List[Name]] = field(default_factory=dict, hash=False, compare=False)
 
     def __str__(self):
         return f"NameType(name='{self.name}', description='{self.description}')"

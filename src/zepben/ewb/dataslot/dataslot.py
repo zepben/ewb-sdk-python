@@ -87,6 +87,8 @@ class CustomDescriptor(Descriptor):
         self.getter = getter
 
     def __get__(self, instance, owner):
+        if instance is None:
+            return self
         if self.getter is None:
             raise AttributeError(f"Descriptor {self.public_name} of " +
                                  f"{self.owner.__name__} is missing a getter!")
@@ -153,15 +155,6 @@ class NoResetDescriptor(ValidatedDescriptor):
                          f' cannot reset this field to {value}')
 
 
-class _WeakRefLink:
-    __slots__ = '__weakref__', '_obj'
-
-    def __init__(self, obj: object):
-        self._obj = obj
-
-    def unwrap(self):
-        return self._obj
-
 
 class WeakrefDescriptor(BackedDescriptor):
 
@@ -184,23 +177,6 @@ class WeakrefDescriptor(BackedDescriptor):
         if value:
             value = ref(value)
         setattr(obj, self.private_name, value)
-
-    # def __get__(self, obj, *_):
-    #     value = getattr(obj, self.private_name)
-    #     if value is self:
-    #         self._set_default(obj)
-    #         value = self.default
-    #     if value is not None:
-    #         if value() is None:
-    #             return None
-    #         value = value().unwrap()
-    #     return value
-    #
-    # def __set__(self, obj, value, direct: bool=False):
-    #     if value:
-    #         wrapper = _WeakRefLink(value)
-    #         value = ref(wrapper)
-    #     setattr(obj, self.private_name, value)
 
 
 class TypeRestrictedDescriptor(BackedDescriptor):
