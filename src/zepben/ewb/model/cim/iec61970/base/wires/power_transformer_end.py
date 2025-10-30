@@ -46,7 +46,6 @@ class PowerTransformerEnd(TransformerEnd):
 
     power_transformer: PowerTransformer | None = ValidatedDescriptor(None)
     """The power transformer of this power transformer end."""
-    _rated_s: int | None = None
 
     rated_u: int | None = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
@@ -97,10 +96,10 @@ class PowerTransformerEnd(TransformerEnd):
     
     @validate(power_transformer)
     def _power_transformer_validate(self, pt):
-        if self._power_transformer is None or self._power_transformer is pt:
+        if self.power_transformer is None or self.power_transformer is pt:
             return pt
         else:
-            raise ValueError(f"power_transformer for {str(self)} has already been set to {self._power_transformer}, cannot reset this field to {pt}")
+            raise ValueError(f"power_transformer for {str(self)} has already been set to {self.power_transformer}, cannot reset this field to {pt}")
 
     @property
     def nominal_voltage(self):
@@ -112,8 +111,8 @@ class PowerTransformerEnd(TransformerEnd):
         Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
         shall be identical.
         """
-        if self._s_ratings:
-            return self._s_ratings[0].rated_s if len(self._s_ratings) > 0 else None
+        if self.s_ratings:
+            return None if len(self.s_ratings) == 0 else self.s_ratings[0].rated_s
         return None
 
     @setter(rated_s)
@@ -131,7 +130,6 @@ class PowerTransformerEnd(TransformerEnd):
     def num_ratings(self) -> int:
         return len(self.s_ratings)
 
-    @custom_get(s_ratings)
     def get_rating(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
         if self.s_ratings:
             for s_rating in self.s_ratings:
@@ -139,7 +137,6 @@ class PowerTransformerEnd(TransformerEnd):
                     return s_rating
         raise KeyError(cooling_type)
 
-    @custom_add(s_ratings)
     def add_rating(self, rated_s: int, cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN) -> PowerTransformerEnd:
 
         for s_rating in self.s_ratings:
@@ -155,14 +152,15 @@ class PowerTransformerEnd(TransformerEnd):
 
         return self
 
+    @custom_add(s_ratings)
     def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
         return self.add_rating(transformer_end_rated_s.rated_s, transformer_end_rated_s.cooling_type)
 
+    @deprecated("BOILERPLATE: Use s_ratings.remove(transformer_end_rated_s) instead")
     def remove_rating(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
-        self.s_ratings = safe_remove(self.s_ratings, transformer_end_rated_s)
+        self.s_ratings.remove(transformer_end_rated_s)
         return self
 
-    @custom_remove(s_ratings)
     def remove_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
         if self.s_ratings:
             for transformer_end_rated_s in self.s_ratings:

@@ -59,7 +59,7 @@ class LvFeeder(EquipmentContainer):
     def num_normal_energizing_feeders(self) -> int:
         return len(self.normal_energizing_feeders)
 
-    @custom_get_by_mrid(normal_energizing_feeders)
+    @deprecated("BOILERPLATE: Use normal_energizing_feeders.get_by_mrid(mrid) instead")
     def get_normal_energizing_feeder(self, mrid: str) -> Feeder:
         """
         Energizing feeder using the normal state of the network.
@@ -68,14 +68,9 @@ class LvFeeder(EquipmentContainer):
         @return A matching `Feeder` that energizes this `LvFeeder` in the normal state of the network.
         @raise A `KeyError` if no matching `Feeder` was found.
         """
-        if not self.normal_energizing_feeders:
-            raise KeyError(mrid)
-        try:
-            return self.normal_energizing_feeders.raw[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.normal_energizing_feeders.get_by_mrid(mrid)
 
-    @custom_add(normal_energizing_feeders)
+    @deprecated("BOILERPLATE: Use normal_energizing_feeders.append(feeder) instead")
     def add_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
         """
         Associate this `LvFeeder` with a `Feeder` in the normal state of the network.
@@ -83,9 +78,7 @@ class LvFeeder(EquipmentContainer):
         @param feeder: the HV/MV feeder to associate with this LV feeder in the normal state of the network.
         @return: This `LvFeeder` for fluent use.
         """
-        if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A Feeder"):
-            return self
-        self.normal_energizing_feeders.raw[feeder.mrid] = feeder
+        self.normal_energizing_feeders.append(feeder)
         return self
 
     @deprecated("BOILERPLATE: Use normal_energizing_feeders.remove(feeder) instead")
@@ -100,7 +93,7 @@ class LvFeeder(EquipmentContainer):
     def num_current_energizing_feeders(self) -> int:
         return len(self.current_energizing_feeders)
 
-    @custom_get_by_mrid(current_energizing_feeders)
+    @deprecated("BOILERPLATE: Use current_energizing_feeders.get_by_mrid(mrid) instead")
     def get_current_energizing_feeder(self, mrid: str) -> Feeder:
         """
         Energizing feeder using the current state of the network.
@@ -109,14 +102,9 @@ class LvFeeder(EquipmentContainer):
         @return A matching `Feeder` that energizes this `LvFeeder` in the current state of the network.
         @raise A `KeyError` if no matching `Feeder` was found.
         """
-        if not self.current_energizing_feeders:
-            raise KeyError(mrid)
-        try:
-            return self.current_energizing_feeders.raw[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.current_energizing_feeders.get_by_mrid(mrid)
 
-    @custom_add(current_energizing_feeders)
+    @deprecated("BOILERPLATE: Use current_energizing_feeders.append(feeder) instead")
     def add_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
         """
         Associate this `LvFeeder` with a `Feeder` in the current state of the network.
@@ -124,9 +112,7 @@ class LvFeeder(EquipmentContainer):
         @param feeder: the HV/MV feeder to associate with this LV feeder in the current state of the network.
         @return: This `LvFeeder` for fluent use.
         """
-        if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
-            return self
-        self.current_energizing_feeders.raw[feeder.mrid] = feeder
+        self.current_energizing_feeders.append(feeder)
         return self
 
     @deprecated("BOILERPLATE: Use current_energizing_feeders.remove(feeder) instead")
@@ -141,7 +127,7 @@ class LvFeeder(EquipmentContainer):
     def num_current_equipment(self):
         return len(self.current_equipment)
 
-    @custom_get_by_mrid(current_equipment)
+    @deprecated("BOILERPLATE: Use current_equipment.get_by_mrid(mrid) instead")
     def get_current_equipment(self, mrid: str) -> Equipment:
         """
         Get the `Equipment` contained in this `LvFeeder` in the current state of the network, identified by `mrid`
@@ -150,14 +136,9 @@ class LvFeeder(EquipmentContainer):
         Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self.current_equipment:
-            raise KeyError(mrid)
-        try:
-            return self.current_equipment.raw[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.current_equipment.get_by_mrid(mrid)
 
-    @custom_add(current_equipment)
+    @deprecated("BOILERPLATE: Use current_equipment.append(equipment) instead")
     def add_current_equipment(self, equipment: Equipment) -> LvFeeder:
         """
         Associate `equipment` with this `LvFeeder` in the current state of the network.
@@ -166,9 +147,7 @@ class LvFeeder(EquipmentContainer):
         Returns A reference to this `LvFeeder` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `LvFeeder`.
         """
-        if self._validate_reference(equipment, self.get_current_equipment, "An Equipment"):
-            return self
-        self.current_equipment.raw[equipment.mrid] = equipment
+        self.current_equipment.append(equipment)
         return self
 
     @deprecated("BOILERPLATE: Use current_equipment.remove(equipment) instead")

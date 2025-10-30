@@ -32,13 +32,6 @@ class Circuit(Line):
     def _retype(self):
         self.end_terminals: MRIDListRouter = ...
         self.end_substations: MRIDListRouter = ...
-    
-    @property
-    def end_substations(self) -> Generator[Substation, None, None]:
-        """
-        The `Substations`s representing the ends for this `Circuit`.
-        """
-        return ngen(self.end_substations)
 
     @deprecated("BOILERPLATE: Use len(end_terminals) instead")
     def num_end_terminals(self):

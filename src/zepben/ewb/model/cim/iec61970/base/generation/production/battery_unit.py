@@ -31,22 +31,20 @@ class BatteryUnit(PowerElectronicsUnit):
     stored_e: int | None = None
     """Amount of energy currently stored in watt hours (Wh). The attribute shall be a positive value or zero and lower than `rated_e`."""
 
-    _controls: List['BatteryControl'] | None = None
+    controls: List['BatteryControl'] | None = MRIDListAccessor()
+
+    def _retype(self):
+        self.controls: MRIDListRouter = ...
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
+    @deprecated("BOILERPLATE: Use len(controls) instead")
     def num_battery_controls(self):
         """
         Returns The number of `BatteryControl`s associated with this `BatteryUnit`
         """
-        return nlen(self._controls)
+        return len(self.controls)
 
-    @property
-    def controls(self) -> Generator['BatteryControl', None, None]:
-        """
-        [ZBEX] The `BatteryControl`s associated with this `BatteryUnit`
-        """
-        return ngen(self._controls)
-
+    @deprecated("BOILERPLATE: Use controls.get_by_mrid(mrid) instead")
     def get_control(self, mrid: str) -> 'BatteryControl':
         """
         Get the `BatteryControl` for this `BatteryUnit` identified by `mrid`
@@ -55,7 +53,7 @@ class BatteryUnit(PowerElectronicsUnit):
         Returns The `BatteryControl` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._controls, mrid)
+        return self.controls.get_by_mrid(mrid)
 
     def get_control_by_mode(self, control_mode: BatteryControlMode) -> 'BatteryControl':
         """
@@ -65,12 +63,12 @@ class BatteryUnit(PowerElectronicsUnit):
         Returns The `BatteryControl` with the specified `control_mode` if it exists
         Raises `KeyError` if a `BatteryControl` with `control_mode` wasn't present.
         """
-        if self._controls:
-            for control in self._controls:
-                if control.control_mode == control_mode:
-                    return control
+        for control in self.controls:
+            if control.control_mode == control_mode:
+                return control
         raise IndexError(f"No BatteryControl with a control_mode of {control_mode} was found in BatteryUnit {str(self)}")
 
+    @deprecated("BOILERPLATE: Use controls.append(bc) instead")
     def add_control(self, bc: 'BatteryControl') -> 'BatteryUnit':
         """
         Associate `bc` to this `BatteryUnit`.
@@ -79,12 +77,10 @@ class BatteryUnit(PowerElectronicsUnit):
         Returns A reference to this `BatteryUnit` to allow fluent use.
         Raises `ValueError` if another `BatteryControl` with the same `mrid` already exists for this `BatteryUnit`.
         """
-        if self._validate_reference(bc, self.get_control, "A BatteryControl"):
-            return self
-        self._controls = list() if self._controls is None else self._controls
-        self._controls.append(bc)
+        self.controls.append(bc)
         return self
 
+    @deprecated("BOILERPLATE: Use controls.remove(bc) instead")
     def remove_control(self, bc: 'BatteryControl') -> 'BatteryUnit':
         """
         Disassociate `bc` from this `BatteryUnit`
@@ -93,13 +89,14 @@ class BatteryUnit(PowerElectronicsUnit):
         Returns A reference to this `BatteryUnit` to allow fluent use.
         Raises `ValueError` if `up` was not associated with this `BatteryUnit`.
         """
-        self._controls = safe_remove(self._controls, bc)
+        self.controls.remove(bc)
         return self
 
+    @deprecated("BOILERPLATE: Use controls.clear() instead")
     def clear_controls(self) -> 'BatteryUnit':
         """
         Clear all battery_controls.
         Returns A reference to this `BatteryUnit` to allow fluent use.
         """
-        self._controls = None
+        self.controls.clear()
         return self
