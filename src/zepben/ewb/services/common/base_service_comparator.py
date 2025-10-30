@@ -214,6 +214,19 @@ class BaseServiceComparator:
         return diff
 
     @staticmethod
+    def _get_property_values(prop: property | object, diff: ObjectDifference):
+        if isinstance(prop, property):
+            prop = prop.fget
+        source_value = getattr(diff.source, prop.__name__) if diff.source else None
+        target_value = getattr(diff.target, prop.__name__) if diff.target else None
+        return source_value, target_value
+
+    @staticmethod
+    def _get_property_lists(prop: property | object, diff: ObjectDifference):
+        s, t = BaseServiceComparator._get_property_values(prop, diff)
+        return list(s), list(t)
+
+    @staticmethod
     def _add_if_different(diff: ObjectDifference, name: str, difference: Optional[Difference]):
         if difference:
             diff.differences[name] = difference
@@ -291,8 +304,12 @@ class BaseServiceComparator:
 
     def _calculate_id_reference_collection_diff(self, prop: property, diff: ObjectDifference) -> Optional[CollectionDifference]:
         differences = CollectionDifference()
-        source_collection = list(getattr(diff.source, prop.fget.__name__))
-        target_collection = list(getattr(diff.target, prop.fget.__name__))
+        if isinstance(prop, property):
+            source_collection = list(getattr(diff.source, prop.fget.__name__)) if diff.source else None
+            target_collection = list(getattr(diff.target, prop.fget.__name__)) if diff.target else None
+        else:
+            source_collection = list(getattr(diff.source, prop.__name__)) if diff.source else None
+            target_collection = list(getattr(diff.target, prop.__name__)) if diff.target else None
 
         source_mrids = set()
         for s_obj in source_collection:
@@ -309,8 +326,7 @@ class BaseServiceComparator:
 
     def _calculate_indexed_id_reference_collection_diff(self, prop: property, diff: ObjectDifference) -> Optional[CollectionDifference]:
         differences = CollectionDifference()
-        source_list = list(getattr(diff.source, prop.fget.__name__))
-        target_list = list(getattr(diff.target, prop.fget.__name__))
+        source_list, target_list = BaseServiceComparator._get_property_lists(prop, diff)
 
         for index, s_obj in enumerate(source_list):
             try:
@@ -330,8 +346,7 @@ class BaseServiceComparator:
 
     def _calculate_indexed_value_collection_diff(self, prop: property, diff: ObjectDifference) -> Optional[CollectionDifference]:
         differences = CollectionDifference()
-        source_list = list(getattr(diff.source, prop.fget.__name__))
-        target_list = list(getattr(diff.target, prop.fget.__name__))
+        source_list, target_list = BaseServiceComparator._get_property_lists(prop, diff)
 
         for index, source_value in enumerate(source_list):
             try:
@@ -351,8 +366,9 @@ class BaseServiceComparator:
 
     def _calculate_unordered_value_collection_diff(self, prop: property, key_selector: Callable[[R], K], diff: ObjectDifference) -> Optional[CollectionDifference]:
         differences = CollectionDifference()
-        source_list = sorted(list(getattr(diff.source, prop.fget.__name__)), key=key_selector)
-        target_list = sorted(list(getattr(diff.target, prop.fget.__name__)), key=key_selector)
+        source_list, target_list = BaseServiceComparator._get_property_lists(prop, diff)
+        source_list = sorted(source_list, key=key_selector)
+        target_list = sorted(target_list, key=key_selector)
 
         source_index = 0
         target_index = 0

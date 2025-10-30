@@ -443,6 +443,7 @@ class _Router(Iterable):
         self._la: _ListAccessorBase = accessor
         self._attr: str = attr
         self._name: str = name
+        self.__name__ = self._name
 
         self._options = options if options else NamingOptions()
 

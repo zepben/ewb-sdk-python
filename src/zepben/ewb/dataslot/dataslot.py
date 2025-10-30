@@ -38,12 +38,11 @@ class Descriptor(metaclass=ABCMeta):
         self.default = default
         self.typed = None
 
-
     def __set_name__(self, owner, name):
         self.owner = owner
         self.__name__ = self.public_name = name
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, *_):
         raise NotImplementedError()
 
     def __set__(self, instance, value, direct: bool=False):
@@ -54,6 +53,10 @@ class Descriptor(metaclass=ABCMeta):
 
     def set_type(self, typed: type):
         self.typed = typed
+
+    def fget(self, it):
+        return self.__get__(it)
+
 
 Getter = Callable[[Any], Any]
 Setter = Callable[[Any, Any], Any]
@@ -96,8 +99,6 @@ class CustomDescriptor(Descriptor):
                                      f"{self.owner.__name__} is missing a getter!")
             self.setter(obj, value)
 
-
-
 class BackedDescriptor(Descriptor):
 
     def __init__(self, default=None, backed_name=None):
@@ -122,8 +123,6 @@ class BackedDescriptor(Descriptor):
     def __set__(self, obj, value, direct: bool=False):
         setattr(obj, self.private_name, value)
 
-    def fget(self, it):
-        return self.__get__(it)
 
 
 class ValidatedDescriptor(BackedDescriptor):
@@ -171,6 +170,8 @@ class WeakrefDescriptor(BackedDescriptor):
 
 
     def __get__(self, obj, *_):
+        if obj is None:
+            return self
         value = getattr(obj, self.private_name)
         if value is self:
             self._set_default(obj)

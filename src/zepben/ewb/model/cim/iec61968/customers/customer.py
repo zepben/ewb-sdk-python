@@ -46,7 +46,7 @@ class Customer(OrganisationRole):
         """
         The `CustomerAgreement`s for this `Customer`.
         """
-        return ngen(self.customer_agreements)
+        return self.customer_agreements
 
     @deprecated("BOILERPLATE: Use customer_agreements.get_by_mrid(mrid) instead")
     def get_agreement(self, mrid: str) -> CustomerAgreement:
