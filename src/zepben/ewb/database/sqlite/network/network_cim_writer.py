@@ -5,8 +5,10 @@
 
 __all__ = ["NetworkCimWriter"]
 
-from typing import Optional
+from typing import Optional, Callable, Type, TypeVar
 
+from zepben.ewb import IdentifiedObject
+from zepben.ewb.database.sql.sql_table import SqlTable
 from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.ewb.database.sqlite.network.network_database_tables import NetworkDatabaseTables
@@ -30,11 +32,16 @@ from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_r
 from zepben.ewb.database.sqlite.tables.associations.table_usage_points_end_devices import TableUsagePointsEndDevices
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_reclose_delays import TableRecloseDelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_relay_info import TableRelayInfo
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details import TableContactDetails
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_electronic_addresses import TableContactDetailsElectronicAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import TableSites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import TableEvChargingUnits
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelay
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import TableDistanceRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import \
     TableProtectionRelayFunctionThresholds
@@ -66,11 +73,13 @@ from zepben.ewb.database.sqlite.tables.iec61968.assets.table_asset_owners import
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_assets import TableAssets
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_streetlights import TableStreetlights
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_structures import TableStructures
+from zepben.ewb.database.sqlite.tables.iec61968.common.table_electronic_addresses import TableElectronicAddresses
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_location_street_address_field import TableLocationStreetAddressField
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_location_street_addresses import TableLocationStreetAddresses
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_locations import TableLocations
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_position_points import TablePositionPoints
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_street_addresses import TableStreetAddresses
+from zepben.ewb.database.sqlite.tables.iec61968.common.table_telephone_numbers import TableTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_town_details import TableTownDetails
 from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_current_transformer_info import TableCurrentTransformerInfo
 from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_potential_transformer_info import TablePotentialTransformerInfo
@@ -79,6 +88,7 @@ from zepben.ewb.database.sqlite.tables.iec61968.metering.table_end_device_functi
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_end_devices import TableEndDevices
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_meters import TableMeters
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points import TableUsagePoints
+from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.database.sqlite.tables.iec61968.operations.table_operational_restrictions import TableOperationalRestrictions
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_auxiliary_equipment import TableAuxiliaryEquipment
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_current_transformers import TableCurrentTransformers
@@ -167,11 +177,13 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_transformer_end
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import TableTransformerStarImpedances
 from zepben.ewb.database.sqlite.tables.iec61970.infiec61970.feeder.table_circuits import TableCircuits
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
@@ -199,10 +211,12 @@ from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import AssetOr
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
 from zepben.ewb.model.cim.iec61968.assets.streetlight import Streetlight
 from zepben.ewb.model.cim.iec61968.assets.structure import Structure
+from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
 from zepben.ewb.model.cim.iec61968.common.location import Location
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
+from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
@@ -299,6 +313,15 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import Transformer
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
+TSqlTable = TypeVar('TSqlTable', bound=SqlTable)
+def db_wrapper(table: Type[TSqlTable]):
+    def wrapper(func):
+        def _inner(self, io: IdentifiedObject, *args, **kwargs):
+            _table: TSqlTable = self._database_tables.get_table(table)
+            _insert = self._database_tables.get_insert(table)
+            return func(self, io, *args, table=_table, insert=_insert, **kwargs)
+        return _inner
+    return wrapper
 
 class NetworkCimWriter(BaseCimWriter):
     """
@@ -314,7 +337,8 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61968 Asset Info #
     #################################
 
-    def save_relay_info(self, relay_info: RelayInfo) -> bool:
+    @db_wrapper(TableRelayInfo)
+    def save_relay_info(self, relay_info: RelayInfo, table, insert) -> bool:
         """
         Save the :class:`RelayInfo` fields to :class:`TableRelayInfo`.
 
@@ -322,8 +346,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`RelayInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableRelayInfo)
-        insert = self._database_tables.get_insert(TableRelayInfo)
 
         reclose_delay_table = self._database_tables.get_table(TableRecloseDelays)
         reclose_delay_insert = self._database_tables.get_insert(TableRecloseDelays)
@@ -338,11 +360,51 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_info(table, insert, relay_info, "relay info")
 
+    #############################
+    # Extension IEC61968 Common #
+    #############################
+
+    def _save_contact_details(self, table: TableContactDetails, insert: PreparedStatement, contact_details: ContactDetails, description: str) -> bool:
+        insert.add_value(table.id.query_index, contact_details.id)
+        insert.add_value(table.contact_type.query_index, contact_details.contact_type)
+        insert.add_value(table.first_name.query_index, contact_details.first_name)
+        insert.add_value(table.last_name.query_index, contact_details.last_name)
+        insert.add_value(table.preferred_contact_method.query_index, contact_details.preferred_contact_method.name)
+        insert.add_value(table.is_primary.query_index, contact_details.is_primary)
+        insert.add_value(table.business_name.query_index, contact_details.business_name)
+
+        status = self._save_contact_details_street_address(contact_details, contact_details.contact_address)
+        for it in contact_details.phone_numbers: status = status and self._save_contact_details_telephone_number(contact_details, it)
+        for it in contact_details.electronic_addresses: status = status and self._save_contact_details_electronic_address(contact_details, it)
+
+        return status and self._try_execute_single_update(insert, description)
+
+    @db_wrapper(TableContactDetailsElectronicAddresses)
+    def _save_contact_details_electronic_address(self, contact_details: ContactDetails, electronic_address: ElectronicAddress, table, insert) -> bool:
+        insert.add_value(table.contact_details_id.query_index, contact_details.id)
+        return self._save_electronic_address(table, insert, electronic_address, f"electronic address for contact {contact_details.id}")
+
+    @db_wrapper(TableContactDetailsStreetAddresses)
+    def _save_contact_details_street_address(self, contact_details: ContactDetails, street_address: StreetAddress | None, table, insert) -> bool:
+        if street_address is None:
+            return True
+
+        insert.add_value(table.contact_details_id.query_index, contact_details.id)
+        return self._save_street_address(table, insert, street_address, f"street address for contact {contact_details.id}")
+
+    @db_wrapper(TableContactDetailsTelephoneNumbers)
+    def _save_contact_details_telephone_number(self, contact_details: ContactDetails, phone_number: TelephoneNumber, table, insert) -> bool:
+
+        insert.add_value(table.contact_details_id.query_index, contact_details.id)
+
+        return
+
     ###############################
     # Extension IEC61968 Metering #
     ###############################
 
-    def save_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction) -> bool:
+    @db_wrapper(TablePanDemandResponseFunctions)
+    def save_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction, table, insert) -> bool:
         """
         Save the :class:`PanDemandResponseFunction` fields to :class:`TablePanDemandResponseFunctions`.
 
@@ -350,8 +412,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PanDemandResponseFunction` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePanDemandResponseFunctions)
-        insert = self._database_tables.get_insert(TablePanDemandResponseFunctions)
 
         insert.add_value(table.kind.query_index, pan_demand_response_function.kind.short_name)
         insert.add_value(table.appliance.query_index, pan_demand_response_function._appliance_bitmask)
@@ -433,6 +493,27 @@ class NetworkCimWriter(BaseCimWriter):
     ######################################
     # Extension IEC61970 Base Protection #
     ######################################
+
+    @db_wrapper(TableDirectionalCurrentRelay)
+    def save_directional_current_relay(self, directional_current_relay: DirectionalCurrentRelay, table, insert) -> bool:
+        """
+        Write the :class:`DirectionalCurrentRelay` fields to :class:`TableDirectionalCurrentRelays`.
+
+        :param directional_current_relay: The :class:`DirectionalCurrentRelay` instance to write to the database.
+
+        :return: True if the :class:`DirectionalCurrentRelay` was successfully written to the database, otherwise false.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+
+        insert.add_value(table.directional_characteristic_angle.query_index, directional_current_relay.directional_characteristic_angle)
+        insert.add_value(table.polarizing_quantity_type.query_index, directional_current_relay.polarizing_quantity_type.name)
+        insert.add_value(table.relay_element_phase.query_index, directional_current_relay.relay_element_phase.name)
+        insert.add_value(table.minimum_pickup_current.query_index, directional_current_relay.minimum_pickup_current)
+        insert.add_value(table.current_limit_1.query_index, directional_current_relay.current_limit_1)
+        insert.add_value(table.inverse_time_flag.query_index, directional_current_relay.inverse_time_flag)
+        insert.add_value(table.time_delay_1.query_index, directional_current_relay.time_delay_1)
+
+        return self._save_protection_relay_function(table, insert, directional_current_relay, "directional current relay")
 
     def save_distance_relay(self, distance_relay: DistanceRelay) -> bool:
         """
@@ -843,6 +924,19 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61968 Common #
     ###################
 
+    def _save_electronic_address(
+        self,
+        table: TableElectronicAddresses,
+        insert: PreparedStatement,
+        electronic_address: ElectronicAddress,
+        description: str
+    ) -> bool:
+        insert.add_value(table.email_1.query_index, electronic_address.email1)
+        insert.add_value(table.is_primary.query_index, electronic_address.is_primary)
+        insert.add_value(table.description.query_index, electronic_address.description)
+
+        return self._try_execute_single_update(insert, description)
+
     def save_location(self, location: Location) -> bool:
         """
         Save the :class:`Location` fields to :class:`TableLocations`.
@@ -913,11 +1007,25 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.suite_number.query_index, street_detail.suite_number if street_detail else None)
         insert.add_value(table.type.query_index, street_detail.type if street_detail else None)
         insert.add_value(table.display_address.query_index, street_detail.display_address if street_detail else None)
+        insert.add_value(table.building_number.query_index, street_detail.building_number if street_detail else None)
+
+    def _save_telephone_number(self, table: TableTelephoneNumbers, insert: PreparedStatement, telephone_number: TelephoneNumber, description: str):
+        insert.add_value(table.area_code.query_index, telephone_number.area_code)
+        insert.add_value(table.city_code.query_index, telephone_number.city_code)
+        insert.add_value(table.country_code.query_index, telephone_number.country_code)
+        insert.add_value(table.dial_out.query_index, telephone_number.dial_out)
+        insert.add_value(table.extension.query_index, telephone_number.extension)
+        insert.add_value(table.local_number.query_index, telephone_number.local_number)
+        insert.add_value(table.is_primary.query_index, telephone_number.is_primary)
+        insert.add_value(table.description.query_index, telephone_number.description)
+
+        return self._try_execute_single_update(insert, description)
 
     @staticmethod
     def _insert_town_detail(table: TableTownDetails, insert: PreparedStatement, town_detail: Optional[TownDetail]):
         insert.add_value(table.town_name.query_index, town_detail.name if town_detail else None)
         insert.add_value(table.state_or_province.query_index, town_detail.state_or_province if town_detail else None)
+        insert.add_value(table.country.query_index, town_detail.country if town_detail else None)
 
     #####################################
     # IEC61968 InfIEC61968 InfAssetInfo #
@@ -1046,6 +1154,12 @@ class NetworkCimWriter(BaseCimWriter):
             status = status and self._save_equipment_to_usage_point_association(it, usage_point)
 
         return status and self._save_identified_object(table, insert, usage_point, "usage point")
+
+    @db_wrapper(TableUsagePointsContactDetails)
+    def save_usage_point_contact_details(self, usage_point: UsagePoint, contact_details: ContactDetails, table, insert) -> bool:
+        insert.add_value(table.usage_point_mrid.query_index, usage_point.mrid)
+
+        return self._save_contact_details(table, insert, contact_details, f"contact details [{contact_details.id}] for usage point {usage_point.mrid}")
 
     #######################
     # IEC61968 Operations #

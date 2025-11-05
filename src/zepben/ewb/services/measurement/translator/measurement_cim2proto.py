@@ -16,6 +16,7 @@ from zepben.ewb.model.cim.iec61970.base.meas.accumulator_value import Accumulato
 from zepben.ewb.model.cim.iec61970.base.meas.analog_value import AnalogValue
 from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
+from zepben.ewb.services.common.translator.base_cim2proto import set_or_null
 
 
 def analog_value_to_pb(cim: AnalogValue) -> PBAnalogValue:
@@ -33,7 +34,7 @@ def discrete_value_to_pb(cim: DiscreteValue) -> PBDiscreteValue:
 def measurement_value_to_pb(cim: MeasurementValue) -> PBMeasurementValue:
     ts = Timestamp()
     ts.FromDatetime(cim.time_stamp)
-    return PBMeasurementValue(timeStamp=ts)
+    return PBMeasurementValue(**set_or_null(timeStamp=ts))
 
 
 AnalogValue.to_pb = analog_value_to_pb

@@ -38,6 +38,8 @@ class CustomerCimWriter(BaseCimWriter):
     ###################
 
     def _save_agreement(self, table: TableAgreements, insert: PreparedStatement, agreement: Agreement, description: str) -> bool:
+        insert.add_value(table.validity_interval_start.query_index, getattr(agreement.validity_interval, 'start', None))
+        insert.add_value(table.validity_interval_end.query_index, getattr(agreement.validity_interval, 'end', None))
         return self._save_document(table, insert, agreement, description)
 
     ######################

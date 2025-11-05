@@ -32,6 +32,7 @@ from zepben.ewb import NetworkService, IdentifiedObject, Organisation, Location,
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
@@ -702,6 +703,7 @@ _nio_type_to_cim = {
     # Extensions IEC61970 Base Protection #
     #######################################
 
+    "directionalCurrentRelay": DirectionalCurrentRelay,
     "distanceRelay": DistanceRelay,
     "protectionRelayScheme": ProtectionRelayScheme,
     "protectionRelaySystem": ProtectionRelaySystem,

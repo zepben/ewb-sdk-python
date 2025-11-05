@@ -22,6 +22,7 @@ from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerA
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
+from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
 from zepben.ewb.services.customer.customers import CustomerService
 
 class CustomerCimReader(BaseCimReader):
@@ -40,6 +41,12 @@ class CustomerCimReader(BaseCimReader):
     ###################
 
     def _load_agreement(self, agreement: Agreement, table: TableAgreements, result_set: ResultSet) -> bool:
+        start = result_set.get_instant(table.validity_interval_start.query_index, on_none=None)
+        end = result_set.get_instant(table.validity_interval_end.query_index, on_none=None)
+
+        if start is not None or end is not None:
+            agreement.validity_interval = DateTimeInterval(start=start, end=end)
+
         return self._load_document(agreement, table, result_set)
 
     ######################
