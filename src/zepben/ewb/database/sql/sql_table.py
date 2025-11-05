@@ -8,7 +8,8 @@ __all__ = ["SqlTable"]
 
 from abc import abstractmethod, ABCMeta
 from operator import attrgetter
-from typing import List, Optional, Type, Any, Generator
+from typing import List, Optional, Any, Generator
+from zepben.ewb.database.sql.column import Type
 
 from zepben.ewb.database.sql.column import Column, Nullable
 
@@ -136,7 +137,7 @@ class SqlTable(metaclass=ABCMeta):
 
         yield from sorted(cols, key=attrgetter('query_index'))
 
-    def _create_column(self, name: str, type_: str, nullable: Nullable = Nullable.NONE) -> Column:
+    def _create_column(self, name: str, type_: str | Type, nullable: Nullable = Nullable.NONE) -> Column:
         self.column_index += 1
         # noinspection PyArgumentList
         return Column(self.column_index, name, type_, nullable)

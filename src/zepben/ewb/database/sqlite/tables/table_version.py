@@ -14,7 +14,7 @@ from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
 class TableVersion(SqliteTable):
-    SUPPORTED_VERSION = 59
+    SUPPORTED_VERSION = 63
 
     def __init__(self):
         super().__init__()

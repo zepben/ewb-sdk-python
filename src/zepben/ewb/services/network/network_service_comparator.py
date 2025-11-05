@@ -7,10 +7,12 @@ from typing import Callable, Optional, Any
 
 from zepben.ewb import BatteryControl, PanDemandResponseFunction, StaticVarCompensator
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
@@ -211,6 +213,22 @@ class NetworkServiceComparator(BaseServiceComparator):
     #######################################
     # Extensions IEC61970 Base Protection #
     #######################################
+
+    def _compare_directional_current_relay(self, source: DirectionalCurrentRelay, target: DirectionalCurrentRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_values(
+            diff,
+            DirectionalCurrentRelay.directional_characteristic_angle,
+            DirectionalCurrentRelay.polarizing_quantity_type,
+            DirectionalCurrentRelay.relay_element_phase,
+            DirectionalCurrentRelay.minimum_pickup_current,
+            DirectionalCurrentRelay.current_limit_1,
+            DirectionalCurrentRelay.inverse_time_flag,
+            DirectionalCurrentRelay.time_delay_1,
+        )
+
+        return self._compare_protection_relay_function(diff)
+
 
     def _compare_distance_relay(self, source: DistanceRelay, target: DistanceRelay) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -553,6 +571,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             UsagePoint.approved_inverter_capacity,
             UsagePoint.phase_code
         )
+        self._compare_unordered_value_collection(diff, lambda it: it.contacts, ContactDetails.id)
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)
             self._compare_id_reference_collections(diff, UsagePoint.end_devices)
