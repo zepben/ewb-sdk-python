@@ -16,13 +16,19 @@ from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 class StreetAddress(object):
     """
     General purpose street and postal address information.
+
+    :var postal_code: Postal code for the address.
+    :var town_detail: Optional :class:`TownDetail` for this address.
+    :var po_box: Post office box for the address.
+    :var street_detail: Optional :class:`StreetDetail` for this address.
     """
 
     postal_code: Optional[str] = None
-    """Postal code for the address."""
     town_detail: Optional[TownDetail] = None
-    """Optional `TownDetail` for this address."""
     po_box: Optional[str] = None
-    """Post office box for the address."""
     street_detail: Optional[StreetDetail] = None
-    """Optional `StreetDetail` for this address."""
+    def __init__(self, postal_code=None, town_detail=None, po_box=None, street_detail=None):
+        self.postal_code = str(postal_code) if postal_code is not None else None
+        self.town_detail = town_detail
+        self.po_box = str(po_box) if po_box is not None else None
+        self.street_detail = street_detail

@@ -18,6 +18,10 @@ from zepben.ewb.util import require, nlen, ngen, safe_remove
 
 logger = logging.getLogger(__name__)
 
+TIdentifiedObject = TypeVar("TIdentifiedObject", bound="IdentifiedObject")
+"""
+Generic type of IdentifiedObject which can be used for type hinting generics.
+"""
 
 @dataclass(slots=True)
 class IdentifiedObject(object, metaclass=ABCMeta):
@@ -199,19 +203,35 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
         return self
 
-    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
+
+    @overload
+    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject | None], type_description: str) -> bool: ...
+
+    @overload
+    def _validate_reference(self, other: T, get_identifier: Callable[[Callable], str], getter: Callable[[str], T | None], type_description: Callable[[], str]) -> bool: ...
+
+    # FIXME: in python 3.11, the IdentifiedObject type hint can be replaced with Self, and this can all be moved into the class def.
+    #  @singledispatchmethod
+    def _validate_reference(self, other: IdentifiedObject | T, getter: Callable[[str], IdentifiedObject | T], type_description: Callable[[], str], get_identifier: Callable[[...], str]=None) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function.
 
         :param other: The object to look up with the getter using its mRID.
         :param getter: A function that takes an mRID and returns an `IdentifiedObject`, and throws a `KeyError` if it couldn't be found.
-        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :param describe_other: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
         :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
         :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
+        if isinstance(other, IdentifiedObject):
+            get_identifier = lambda _other: _other.mrid
+            describe_other = f"{type_description} with mRID {other.mrid}"
+        else:
+            require(get_identifier is not None, lambda: "foo")
+            describe_other = type_description
+
         try:
-            get_result = getter(other.mrid)
-            require(get_result is other, lambda: f"{type_descr} with mRID {other.mrid} already exists in {str(self)}")
+            get_result = getter(get_identifier(other))
+            require(get_result is other, lambda: f"{describe_other} already exists in {str(self)}")
             return True
         except (KeyError, AttributeError):
             return False
@@ -236,7 +256,5 @@ class IdentifiedObject(object, metaclass=ABCMeta):
             return False
 
 
-TIdentifiedObject = TypeVar("TIdentifiedObject", bound=IdentifiedObject)
-"""
-Generic type of IdentifiedObject which can be used for type hinting generics.
-"""
+T = TypeVar('T', )
+

@@ -9,6 +9,7 @@ __all__ = ["UsagePoint"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
@@ -53,8 +54,9 @@ class UsagePoint(IdentifiedObject):
     four-wire, s12n (splitSecondary12N) is single-phase, three-wire, and s1n and s2n are single-phase, two-wire.
     """
 
-    _equipment: Optional[List[Equipment]] = None
-    _end_devices: Optional[List[EndDevice]] = None
+    _equipment: list[Equipment] | None = None
+    _end_devices: list[EndDevice] | None = None
+    _contacts: list[ContactDetails] | None = None
 
     def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, **kwargs):
         super(UsagePoint, self).__init__(**kwargs)
@@ -184,3 +186,26 @@ class UsagePoint(IdentifiedObject):
         Returns True if this `UsagePoint` has an `EndDevice`, False otherwise.
         """
         return nlen(self._end_devices) > 0
+
+    @property
+    def contacts(self) -> Generator[ContactDetails, None, None]:
+        """[ZBEX] All contact details for this `UsagePoint`"""
+        return ngen(self._contacts)
+
+    def num_contacts(self):
+        """Get the number of entries in the `ContactDetails` collection"""
+        return nlen(self._contacts)
+
+    def get_contact(self, id: str) -> ContactDetails | None:
+        """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
+        return get_by_mrid(self._contacts, id)
+
+    def add_contact(self, contact: ContactDetails) -> UsagePoint:
+        """Add a `ContactDetails` to this `UsagePoint`"""
+        if self._validate_reference(contact, self.get_equipment, f"A ContactDetails with ID {contact.id}"):
+            return self
+        if self._contacts is None:
+            self._contacts = list()
+        self._contacts.append(contact)
+        return self
+

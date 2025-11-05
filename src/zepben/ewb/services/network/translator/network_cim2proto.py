@@ -33,12 +33,14 @@ from typing import Any, Optional
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
+from zepben.protobuf.cim.extensions.iec61968.common.ContactDetails_pb2 import ContactDetails as PBContactDetails
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
 from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.extensions.iec61970.base.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay as PBDistanceRelay
+from zepben.protobuf.cim.extensions.iec61970.base.protection.DirectionalCurrentRelay_pb2 import DirectionalCurrentRelay as PBDirectionalCurrentRelay
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelayFunction_pb2 import ProtectionRelayFunction as PBProtectionRelayFunction
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelayScheme_pb2 import ProtectionRelayScheme as PBProtectionRelayScheme
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelaySystem_pb2 import ProtectionRelaySystem as PBProtectionRelaySystem
@@ -66,10 +68,12 @@ from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBA
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
+from zepben.protobuf.cim.iec61968.common.ElectronicAddress_pb2 import ElectronicAddress as PBElectronicAddress
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocation
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
+from zepben.protobuf.cim.iec61968.common.TelephoneNumber_pb2 import TelephoneNumber as PBTelephoneNumber
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
@@ -168,7 +172,9 @@ from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import *
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
@@ -201,10 +207,12 @@ from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import *
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import *
 from zepben.ewb.model.cim.iec61968.assets.streetlight import *
 from zepben.ewb.model.cim.iec61968.assets.structure import *
+from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
 from zepben.ewb.model.cim.iec61968.common.location import *
 from zepben.ewb.model.cim.iec61968.common.position_point import *
 from zepben.ewb.model.cim.iec61968.common.street_address import *
 from zepben.ewb.model.cim.iec61968.common.street_detail import *
+from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61968.common.town_detail import *
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import *
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import *
@@ -302,14 +310,14 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import *
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.ewb.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb, bind_to_pb, set_or_null
-from zepben.ewb.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
-    nullable_bool_settings
+from zepben.ewb.services.common.translator.util import mrid_or_empty, from_nullable_float
+
 # noinspection PyProtectedMember
 from zepben.ewb.services.network.translator.network_enum_mappers import _map_battery_control_mode, _map_battery_state_kind, _map_end_device_function_kind, \
     _map_feeder_direction, _map_phase_code, _map_phase_shunt_connection_kind, _map_potential_transformer_kind, _map_power_direction_kind, _map_protection_kind, \
     _map_regulating_control_mode_kind, _map_single_phase_kind, _map_streetlight_lamp_kind, _map_svc_control_mode, _map_synchronous_machine_kind, \
     _map_transformer_construction_kind, _map_transformer_cooling_type, _map_transformer_function_kind, _map_unit_symbol, _map_vector_group, \
-    _map_winding_connection, _map_wire_material_kind
+    _map_winding_connection, _map_wire_material_kind, _map_contact_method_type, _map_polarizing_quantity_type
 
 
 def _get_or_none(getter, obj) -> Optional[Any]:
@@ -334,6 +342,31 @@ def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
             recloseFast=cim.reclose_fast,
         )
     )
+
+
+##############################
+# Extensions IEC61968 Common #
+##############################
+
+@bind_to_pb
+def contact_details_to_pb(cim: ContactDetails) -> PBContactDetails:
+    pb = PBContactDetails(
+        id=cim.id,
+        contactAddress=street_address_to_pb(cim.contact_address),
+        preferredContactMethod=_map_contact_method_type.to_pb(cim.preferred_contact_method),
+        phoneNumbers=[telephone_number_to_pb(it) for it in cim.phone_numbers],
+        electronicAddresses=[electronic_address_to_pb(it) for it in cim.electronic_addresses],
+
+        **set_or_null(
+            contactType=cim.contact_type,
+            firstName=cim.first_name,
+            lastName=cim.last_name,
+            isPrimary=cim.is_primary,
+            businessName=cim.business_name,
+        )
+    )
+
+    return pb
 
 
 ################################
@@ -402,6 +435,20 @@ def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
 #######################################
 # Extensions IEC61970 Base Protection #
 #######################################
+
+@bind_to_pb
+def directional_current_relay_to_pb(cim: DirectionalCurrentRelay) -> PBDirectionalCurrentRelay:
+    return PBDirectionalCurrentRelay(
+        polarizingQuantityType=_map_polarizing_quantity_type.to_pb(cim.polarizing_quantity_type),
+        relayElementPhase=_map_phase_code(cim.relay_element_phase),
+        **set_or_null(
+            directionalCharacteristicAngle=cim.directional_characteristic_angle,
+            minimumPickupCurrent=cim.minimum_pickup_current,
+            currentLimit1=cim.current_limit_1,
+            inverseTimeFlag=cim.inverse_time_flag,
+            timeDelay1=cim.time_delay_1,
+        )
+    )
 
 @bind_to_pb
 def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
@@ -707,6 +754,17 @@ def structure_to_pb(cim: Structure) -> PBStructure:
 ###################
 
 @bind_to_pb
+def electronic_address_to_pb(cim: ElectronicAddress) -> PBElectronicAddress:
+    return PBElectronicAddress(
+        **set_or_null(
+            email1=cim.email1,
+            isPrimary=cim.is_primary,
+            description=cim.description,
+        )
+    )
+
+
+@bind_to_pb
 def location_to_pb(cim: Location) -> PBLocation:
     return PBLocation(
         io=identified_object_to_pb(cim),
@@ -746,12 +804,29 @@ def street_detail_to_pb(cim: StreetDetail) -> PBStreetDetail:
         )
     )
 
+@bind_to_pb
+def telephone_number_to_pb(cim: TelephoneNumber) -> PBTelephoneNumber:
+    return PBTelephoneNumber(
+        **set_or_null(
+            areaCode=cim.area_code,
+            cityCode=cim.city_code,
+            countryCode=cim.country_code,
+            dialOut=cim.dial_out,
+            extension=cim.extension,
+            internationalPrefix=cim.international_prefix,
+            localNumber=cim.local_number,
+            isPrimary=cim.is_primary,
+            description=cim.description,
+        )
+    )
+
 
 def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
     return PBTownDetail(
         **set_or_null(
             name=cim.name,
-            stateOrProvince=cim.state_or_province
+            stateOrProvince=cim.state_or_province,
+            country=cim.country,
         )
     )
 
@@ -865,6 +940,7 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
         usagePointLocationMRID=mrid_or_empty(cim.usage_point_location),
         equipmentMRIDs=[str(io.mrid) for io in cim.equipment],
         endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices],
+        contacts=[contact_details_to_pb(it) for it in cim.contacts],
         phaseCode=_map_phase_code.to_pb(cim.phase_code),
         **set_or_null(
             isVirtual=cim.is_virtual,
@@ -989,7 +1065,9 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
         currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers],
-        commissionedDate=ts,
+        **set_or_null(
+            commissionedDate=ts
+        ),
     )
 
 

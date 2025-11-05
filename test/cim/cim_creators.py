@@ -518,7 +518,8 @@ def create_town_detail():
     return builds(
         TownDetail,
         name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        state_or_province=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        state_or_province=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        country=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     )
 
 

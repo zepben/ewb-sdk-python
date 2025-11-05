@@ -66,6 +66,8 @@ from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.ewb.services.common import resolver
 
+PYTEST_TIMEOUT_SEC = 1
+
 hypothesis_settings = dict(
     deadline=2000,
     suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow],
@@ -143,6 +145,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(relay_info=create_relay_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_relay_info(self, relay_info: RelayInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(RelayInfo, relay_info))
 
@@ -152,6 +155,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(pan_demand_response_function=create_pan_demand_response_function(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction):
         await self._validate_schema(SchemaNetworks().network_services_of(PanDemandResponseFunction, pan_demand_response_function))
 
@@ -161,6 +165,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(site=create_site(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_site(self, site: Site):
         await self._validate_schema(SchemaNetworks().network_services_of(Site, site))
 
@@ -170,11 +175,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(loop=create_loop(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_loop(self, loop: Loop):
         await self._validate_schema(SchemaNetworks().network_services_of(Loop, loop))
 
     @settings(**hypothesis_settings)
     @given(lv_feeder=create_lv_feeder(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_lv_feeder(self, lv_feeder: LvFeeder):
         network = SchemaNetworks().network_services_of(LvFeeder, lv_feeder)
         await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
@@ -188,6 +195,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(ev_charging_unit=create_ev_charging_unit(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ev_charging_unit(self, ev_charging_unit: EvChargingUnit):
         await self._validate_schema(SchemaNetworks().network_services_of(EvChargingUnit, ev_charging_unit))
 
@@ -197,21 +205,25 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(distance_relay=create_distance_relay(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_distance_relay(self, distance_relay: DistanceRelay):
         await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, distance_relay))
 
     @settings(**hypothesis_settings)
     @given(protection_relay_scheme=create_protection_relay_scheme(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme):
         await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelayScheme, protection_relay_scheme))
 
     @settings(**hypothesis_settings)
     @given(protection_relay_system=create_protection_relay_system(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem):
         await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelaySystem, protection_relay_system))
 
     @settings(**hypothesis_settings)
     @given(voltage_relay=create_voltage_relay(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_voltage_relay(self, voltage_relay: VoltageRelay):
         await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay))
 
@@ -221,6 +233,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(battery_control=create_battery_control(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_battery_control(self, battery_control: BatteryControl):
         await self._validate_schema(SchemaNetworks().network_services_of(BatteryControl, battery_control))
 
@@ -230,51 +243,61 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(cable_info=create_cable_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_cable_info(self, cable_info: CableInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(CableInfo, cable_info))
 
     @settings(**hypothesis_settings)
     @given(no_load_test=create_no_load_test(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_no_load_test(self, no_load_test: NoLoadTest):
         await self._validate_schema(SchemaNetworks().network_services_of(NoLoadTest, no_load_test))
 
     @settings(**hypothesis_settings)
     @given(open_circuit_test=create_open_circuit_test(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_open_circuit_test(self, open_circuit_test: OpenCircuitTest):
         await self._validate_schema(SchemaNetworks().network_services_of(OpenCircuitTest, open_circuit_test))
 
     @settings(**hypothesis_settings)
     @given(overhead_wire_info=create_overhead_wire_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_overhead_wire_info(self, overhead_wire_info: OverheadWireInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(OverheadWireInfo, overhead_wire_info))
 
     @settings(**hypothesis_settings)
     @given(power_transformer_info=create_power_transformer_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_transformer_info(self, power_transformer_info: PowerTransformerInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerInfo, power_transformer_info))
 
     @settings(**hypothesis_settings)
     @given(short_circuit_test=create_short_circuit_test(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_short_circuit_test(self, short_circuit_test: ShortCircuitTest):
         await self._validate_schema(SchemaNetworks().network_services_of(ShortCircuitTest, short_circuit_test))
 
     @settings(**hypothesis_settings)
     @given(shunt_compensator_info=create_shunt_compensator_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_shunt_compensator_info(self, shunt_compensator_info: ShuntCompensatorInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(ShuntCompensatorInfo, shunt_compensator_info))
 
     @settings(**hypothesis_settings)
     @given(switch_info=create_switch_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_switch_info(self, switch_info: SwitchInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(SwitchInfo, switch_info))
 
     @settings(**hypothesis_settings)
     @given(transformer_end_info=create_transformer_end_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_transformer_end_info(self, transformer_end_info: TransformerEndInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, transformer_end_info))
 
     @settings(**hypothesis_settings)
     @given(transformer_tank_info=create_transformer_tank_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_transformer_tank_info(self, transformer_tank_info: TransformerTankInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, transformer_tank_info))
 
@@ -284,11 +307,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(asset_owner=create_asset_owner(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_asset_owner(self, asset_owner: AssetOwner):
         await self._validate_schema(SchemaNetworks().network_services_of(AssetOwner, asset_owner))
 
     @settings(**hypothesis_settings)
     @given(streetlight=create_streetlight(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_streetlight(self, streetlight: Streetlight):
         await self._validate_schema(SchemaNetworks().network_services_of(Streetlight, streetlight))
 
@@ -298,11 +323,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(location=create_location(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_location(self, location: Location):
         await self._validate_schema(SchemaNetworks().network_services_of(Location, location))
 
     @settings(**hypothesis_settings)
     @given(organisation=create_organisation(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_organisation(self, organisation: Organisation):
         await self._validate_schema(SchemaNetworks().network_services_of(Organisation, organisation))
 
@@ -312,11 +339,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(current_transformer_info=create_current_transformer_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformerInfo, current_transformer_info))
 
     @settings(**hypothesis_settings)
     @given(potential_transformer_info=create_potential_transformer_info(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformerInfo, potential_transformer_info))
 
@@ -326,6 +355,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(pole=create_pole(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_pole(self, pole: Pole):
         await self._validate_schema(SchemaNetworks().network_services_of(Pole, pole))
 
@@ -335,11 +365,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(meter=create_meter(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_meter(self, meter: Meter):
         await self._validate_schema(SchemaNetworks().network_services_of(Meter, meter))
 
     @settings(**hypothesis_settings)
     @given(usage_point=create_usage_point(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_usage_point(self, usage_point: UsagePoint):
         await self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, usage_point))
 
@@ -349,6 +381,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(operational_restriction=create_operational_restriction(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_operational_restriction(self, operational_restriction: OperationalRestriction):
         await self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, operational_restriction))
 
@@ -358,16 +391,19 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(current_transformer=create_current_transformer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_current_transformer(self, current_transformer: CurrentTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformer, current_transformer))
 
     @settings(**hypothesis_settings)
     @given(fault_indicator=create_fault_indicator(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_fault_indicator(self, fault_indicator: FaultIndicator):
         await self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, fault_indicator))
 
     @settings(**hypothesis_settings)
     @given(potential_transformer=create_potential_transformer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_potential_transformer(self, potential_transformer: PotentialTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformer, potential_transformer))
 
@@ -377,16 +413,19 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(base_voltage=create_base_voltage(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_base_voltage(self, base_voltage: BaseVoltage):
         await self._validate_schema(SchemaNetworks().network_services_of(BaseVoltage, base_voltage))
 
     @settings(**hypothesis_settings)
     @given(connectivity_node=create_connectivity_node(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_connectivity_node(self, connectivity_node: ConnectivityNode):
         await self._validate_schema(SchemaNetworks().network_services_of(ConnectivityNode, connectivity_node))
 
     @settings(**hypothesis_settings)
     @given(feeder=create_feeder(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_feeder(self, feeder: Feeder):
         # Need to set feeder directions to match database load.
         network_service = SchemaNetworks().network_services_of(Feeder, feeder)
@@ -409,21 +448,25 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(geographical_region=create_geographical_region(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_geographical_region(self, geographical_region: GeographicalRegion):
         await self._validate_schema(SchemaNetworks().network_services_of(GeographicalRegion, geographical_region))
 
     @settings(**hypothesis_settings)
     @given(sub_geographical_region=create_sub_geographical_region(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion):
         await self._validate_schema(SchemaNetworks().network_services_of(SubGeographicalRegion, sub_geographical_region))
 
     @settings(**hypothesis_settings)
     @given(substation=create_substation(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_substation(self, substation: Substation):
         await self._validate_schema(SchemaNetworks().network_services_of(Substation, substation))
 
     @settings(**hypothesis_settings)
     @given(terminal=create_terminal(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_terminal(self, terminal: Terminal):
         await self._validate_schema(SchemaNetworks().network_services_of(Terminal, terminal))
 
@@ -433,6 +476,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(equivalent_branch=create_equivalent_branch(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_equivalent_branch(self, equivalent_branch: EquivalentBranch):
         await self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, equivalent_branch))
 
@@ -442,16 +486,19 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(battery_unit=create_battery_unit(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_battery_unit(self, battery_unit: BatteryUnit):
         await self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, battery_unit))
 
     @settings(**hypothesis_settings)
     @given(photo_voltaic_unit=create_photo_voltaic_unit(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_photo_voltaic_unit(self, photo_voltaic_unit: PhotoVoltaicUnit):
         await self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, photo_voltaic_unit))
 
     @settings(**hypothesis_settings)
     @given(power_electronics_wind_unit=create_power_electronics_wind_unit(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, power_electronics_wind_unit))
 
@@ -461,21 +508,25 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(accumulator=create_accumulator(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_accumulator(self, accumulator: Accumulator):
         await self._validate_schema(SchemaNetworks().network_services_of(Accumulator, accumulator))
 
     @settings(**hypothesis_settings)
     @given(analog=create_analog(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_analog(self, analog: Analog):
         await self._validate_schema(SchemaNetworks().network_services_of(Analog, analog))
 
     @settings(**hypothesis_settings)
     @given(control=create_control(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_control(self, control: Control):
         await self._validate_schema(SchemaNetworks().network_services_of(Control, control))
 
     @settings(**hypothesis_settings)
     @given(discrete=create_discrete(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_discrete(self, discrete: Discrete):
         await self._validate_schema(SchemaNetworks().network_services_of(Discrete, discrete))
 
@@ -485,6 +536,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(current_relay=create_current_relay(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_current_relay(self, current_relay: CurrentRelay):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay))
 
@@ -494,11 +546,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(remote_control=create_remote_control(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_remote_control(self, remote_control: RemoteControl):
         await self._validate_schema(SchemaNetworks().network_services_of(RemoteControl, remote_control))
 
     @settings(**hypothesis_settings)
     @given(remote_source=create_remote_source(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_remote_source(self, remote_source: RemoteSource):
         await self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, remote_source))
 
@@ -508,36 +562,43 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(ac_line_segment=create_ac_line_segment(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ac_line_segment(self, ac_line_segment: AcLineSegment):
         await self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, ac_line_segment))
 
     @settings(**hypothesis_settings)
     @given(breaker=create_breaker(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_breaker(self, breaker: Breaker):
         await self._validate_schema(SchemaNetworks().network_services_of(Breaker, breaker))
 
     @settings(**hypothesis_settings)
     @given(busbar_section=create_busbar_section(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_busbar_section(self, busbar_section: BusbarSection):
         await self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, busbar_section))
 
     @settings(**hypothesis_settings)
     @given(clamp=create_clamp(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_clamp(self, clamp: Clamp):
         await self._validate_schema(SchemaNetworks().network_services_of(Clamp, clamp))
 
     @settings(**hypothesis_settings)
     @given(cut=create_cut(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_cut(self, cut: Cut):
         await self._validate_schema(SchemaNetworks().network_services_of(Cut, cut))
 
     @settings(**hypothesis_settings)
     @given(disconnector=create_disconnector(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_disconnector(self, disconnector: Disconnector):
         await self._validate_schema(SchemaNetworks().network_services_of(Disconnector, disconnector))
 
     @settings(**hypothesis_settings)
     @given(energy_consumer=create_energy_consumer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_energy_consumer(self, energy_consumer: EnergyConsumer):
         # Need to assure the correct number of phases to prevent errors.
         assume(len(Counter(map(lambda it: it.phase, energy_consumer.phases))) == len(list(energy_consumer.phases)))
@@ -545,11 +606,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(energy_consumer_phase=create_energy_consumer_phase(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_energy_consumer_phase(self, energy_consumer_phase: EnergyConsumerPhase):
         await self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumerPhase, energy_consumer_phase))
 
     @settings(**hypothesis_settings)
     @given(energy_source=create_energy_source(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_energy_source(self, energy_source: EnergySource):
         # Need to assure the correct number of phases to prevent errors.
         assume(len(Counter(map(lambda it: it.phase, energy_source.phases))) == len(list(energy_source.phases)))
@@ -562,121 +625,145 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(energy_source_phase=create_energy_source_phase(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_energy_source_phase(self, energy_source_phase: EnergyConsumerPhase):
         await self._validate_schema(SchemaNetworks().network_services_of(EnergySourcePhase, energy_source_phase))
 
     @settings(**hypothesis_settings)
     @given(fuse=create_fuse(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_fuse(self, fuse: Fuse):
         await self._validate_schema(SchemaNetworks().network_services_of(Fuse, fuse))
 
     @settings(**hypothesis_settings)
     @given(ground=create_ground(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ground(self, ground: Ground):
         await self._validate_schema(SchemaNetworks().network_services_of(Ground, ground))
 
     @settings(**hypothesis_settings)
     @given(ground_disconnector=create_ground_disconnector(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ground_disconnector(self, ground_disconnector: GroundDisconnector):
         await self._validate_schema(SchemaNetworks().network_services_of(GroundDisconnector, ground_disconnector))
 
     @settings(**hypothesis_settings)
     @given(grounding_impedance=create_grounding_impedance(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_grounding_impedance(self, grounding_impedance: GroundingImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(GroundingImpedance, grounding_impedance))
 
     @settings(**hypothesis_settings)
     @given(jumper=create_jumper(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_jumper(self, jumper: Jumper):
         await self._validate_schema(SchemaNetworks().network_services_of(Jumper, jumper))
 
     @settings(**hypothesis_settings)
     @given(junction=create_junction(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_junction(self, junction: Junction):
         await self._validate_schema(SchemaNetworks().network_services_of(Junction, junction))
 
     @settings(**hypothesis_settings)
     @given(linear_shunt_compensator=create_linear_shunt_compensator(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_linear_shunt_compensator(self, linear_shunt_compensator: LinearShuntCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, linear_shunt_compensator))
 
     @settings(**hypothesis_settings)
     @given(load_break_switch=create_load_break_switch(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_load_break_switch(self, load_break_switch: LoadBreakSwitch):
         await self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, load_break_switch))
 
     @settings(**hypothesis_settings)
     @given(per_length_phase_impedance=create_per_length_phase_impedance(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(PerLengthPhaseImpedance, per_length_phase_impedance))
 
     @settings(**hypothesis_settings)
     @given(per_length_sequence_impedance=create_per_length_sequence_impedance(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, per_length_sequence_impedance))
 
     @settings(**hypothesis_settings)
     @given(petersen_coil=create_petersen_coil(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_petersen_coil(self, petersen_coil: PetersenCoil):
         await self._validate_schema(SchemaNetworks().network_services_of(PetersenCoil, petersen_coil))
 
     @settings(**hypothesis_settings)
     @given(power_electronics_connection=create_power_electronics_connection(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, power_electronics_connection))
 
     @settings(**hypothesis_settings)
     @given(power_electronics_connection_phase=create_power_electronics_connection_phase(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_electronics_connection_phase(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnectionPhase, power_electronics_connection_phase))
 
     @settings(**hypothesis_settings)
     @given(power_transformer=create_power_transformer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_transformer(self, power_transformer: PowerTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, power_transformer))
 
     @settings(**hypothesis_settings)
     @given(power_transformer_end=create_power_transformer_end(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_power_transformer_end(self, power_transformer_end: PowerTransformerEnd):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, power_transformer_end))
 
     @settings(**hypothesis_settings)
     @given(ratio_tap_changer=create_ratio_tap_changer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger):
         await self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, ratio_tap_changer))
 
     @settings(**hypothesis_settings)
     @given(reactive_capability_curve=create_reactive_capability_curve(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_reactive_capability_curve(self, reactive_capability_curve: ReactiveCapabilityCurve):
         await self._validate_schema(SchemaNetworks().network_services_of(ReactiveCapabilityCurve, reactive_capability_curve))
 
     @settings(**hypothesis_settings)
     @given(recloser=create_recloser(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_recloser(self, recloser: Recloser):
         await self._validate_schema(SchemaNetworks().network_services_of(Recloser, recloser))
 
     @settings(**hypothesis_settings)
     @given(series_compensator=create_series_compensator(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_series_compensator(self, series_compensator: SeriesCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(SeriesCompensator, series_compensator))
 
     @settings(**hypothesis_settings)
     @given(static_var_compensator=create_static_var_compensator(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_static_var_compensator(self, static_var_compensator: StaticVarCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(StaticVarCompensator, static_var_compensator))
 
     @settings(**hypothesis_settings)
     @given(synchronous_machine=create_synchronous_machine(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_synchronous_machine(self, synchronous_machine: SynchronousMachine):
         await self._validate_schema(SchemaNetworks().network_services_of(SynchronousMachine, synchronous_machine))
 
     @settings(**hypothesis_settings)
     @given(tap_changer_control=create_tap_changer_control(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_tap_changer_control(self, tap_changer_control: TapChangerControl):
         await self._validate_schema(SchemaNetworks().network_services_of(TapChangerControl, tap_changer_control))
 
     @settings(**hypothesis_settings)
     @given(transformer_star_impedance=create_transformer_star_impedance(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, transformer_star_impedance))
 
@@ -686,14 +773,17 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(**hypothesis_settings)
     @given(circuit=create_circuit(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_circuit(self, circuit: Circuit):
         await self._validate_schema(SchemaNetworks().network_services_of(Circuit, circuit))
 
     # ************ Services ************
 
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_name_and_name_type_schema(self):
         await self._validate_schema(SchemaNetworks().create_name_test_services(NetworkService, Junction))
 
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_post_process_fails_with_unresolved_references(self):
         pec = PowerElectronicsConnection(mrid="pec1")
 
@@ -702,6 +792,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
         await self._validate_unresolved_failure(str(pec), "RegulatingControl tcc", add_deferred_reference)
 
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_assigns_feeders_in_parallel_correctly(self):
         # This test is to ensure parallel feeders don't assign directions back through the feeder heads. This was seen in the wild when
         # the feeder directions were set before the equipment was assigned, meaning no feeder heads were detected in the tracing.
@@ -720,6 +811,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         # If the read from the database matches the test network we built, then the equipment is correctly assigned.
         await self._validate_schema(ns)
 
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_only_loads_street_address_fields_if_required(self):
         # This test is here to make sure the database reading correctly removes the parts of loaded street addresses that are not filled out.
         write_service = NetworkService()

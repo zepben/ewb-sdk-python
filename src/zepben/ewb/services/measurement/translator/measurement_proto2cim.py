@@ -14,6 +14,7 @@ from zepben.ewb.model.cim.iec61970.base.meas.accumulator_value import Accumulato
 from zepben.ewb.model.cim.iec61970.base.meas.analog_value import AnalogValue
 from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.measurement.measurements import MeasurementService
 
 
@@ -43,7 +44,7 @@ def discrete_value_to_cim(pb: PBDiscreteValue, service: MeasurementService):
 
 
 def measurement_value_to_cim(pb: PBMeasurementValue, cim: MeasurementValue):
-    cim.time_stamp = pb.timeStamp.ToDatetime()
+    cim.time_stamp = get_nullable(pb, 'timeStamp')  # FIXME: toDatetime() ???
 
 
 PBAccumulatorValue.to_cim = accumulator_value_to_cim

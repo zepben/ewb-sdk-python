@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb import BaseServiceComparator, ObjectDifference, Customer, CustomerAgreement, PricingStructure, Tariff
+from zepben.ewb import BaseServiceComparator, ObjectDifference, Customer, CustomerAgreement, PricingStructure, Tariff, Agreement
 
 
 #
@@ -19,7 +19,8 @@ class CustomerServiceComparator(BaseServiceComparator):
     ###################
 
     def _compare_agreement(self, diff: ObjectDifference) -> ObjectDifference:
-        return self._compare_document(diff)
+        self._compare_document(diff)
+        return self._compare_values(diff, Agreement.validity_interval)
 
     ######################
     # IEC61968 Customers #

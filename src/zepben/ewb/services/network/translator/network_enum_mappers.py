@@ -5,6 +5,8 @@
 
 __all__ = []
 
+from zepben.protobuf.cim.extensions.iec61968.common.ContactMethodType_pb2 import ContactMethodType as PBContactMethodType
+from zepben.protobuf.cim.extensions.iec61970.base.protection.PolarizingQuantityType_pb2 import PolarizingQuantityType as PBPolarizingQuantityType
 from zepben.protobuf.cim.extensions.iec61970.base.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControlMode_pb2 import BatteryControlMode as PBBatteryControlMode
@@ -27,6 +29,8 @@ from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachineKind_pb2 import S
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
@@ -57,10 +61,12 @@ from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDi
 
 _map_battery_control_mode = EnumMapper(BatteryControlMode, PBBatteryControlMode)
 _map_battery_state_kind = EnumMapper(BatteryStateKind, PBBatteryStateKind)
+_map_contact_method_type = EnumMapper(ContactMethodType, PBContactMethodType)
 _map_end_device_function_kind = EnumMapper(EndDeviceFunctionKind, PBEndDeviceFunctionKind)
 _map_feeder_direction = EnumMapper(FeederDirection, PBFeederDirection)
 _map_phase_code = EnumMapper(PhaseCode, PBPhaseCode)
 _map_phase_shunt_connection_kind = EnumMapper(PhaseShuntConnectionKind, PBPhaseShuntConnectionKind)
+_map_polarizing_quantity_type = EnumMapper(PolarizingQuantityType, PBPolarizingQuantityType)
 _map_potential_transformer_kind = EnumMapper(PotentialTransformerKind, PBPotentialTransformerKind)
 _map_power_direction_kind = EnumMapper(PowerDirectionKind, PBPowerDirectionKind)
 _map_protection_kind = EnumMapper(ProtectionKind, PBProtectionKind)

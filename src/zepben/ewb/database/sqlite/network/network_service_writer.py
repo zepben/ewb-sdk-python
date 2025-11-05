@@ -14,6 +14,7 @@ from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
@@ -116,7 +117,7 @@ class NetworkServiceWriter(BaseServiceWriter):
 
         # This is not strictly necessary, it is just to update the type of the writer. It could be done with a generic
         # on the base class which looks like it works, but that actually silently breaks code insight and completion
-        self._writer = writer
+        self._writer: NetworkCimWriter = writer
 
     def _do_save(self) -> bool:
         return all([
@@ -192,6 +193,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(CurrentRelay, self._writer.save_current_relay),
             self._save_each_object(TapChangerControl, self._writer.save_tap_changer_control),
             self._save_each_object(EvChargingUnit, self._writer.save_ev_charging_unit),
+            self._save_each_object(DirectionalCurrentRelay, self._writer.save_directional_current_relay),
             self._save_each_object(DistanceRelay, self._writer.save_distance_relay),
             self._save_each_object(ProtectionRelayScheme, self._writer.save_protection_relay_scheme),
             self._save_each_object(ProtectionRelaySystem, self._writer.save_protection_relay_system),
