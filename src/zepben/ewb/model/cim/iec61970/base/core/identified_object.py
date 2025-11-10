@@ -53,14 +53,13 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     def _retype(self):
         self.names: ListRouter = ...
 
-    # def __hash__(self):
-        # return super().__hash__(self)
-        # return self.mrid.__hash__()
+    def __hash__(self):
+        return self.mrid.__hash__()
 
-    # def __eq__(self, other: IdentifiedObject | str):
-        # if isinstance(other, IdentifiedObject):
-        #     return self.mrid.__eq__(other.mrid)
-        # return self.mrid.__eq__(other)
+    def __eq__(self, other: IdentifiedObject | str):
+        if isinstance(other, IdentifiedObject):
+            return self.mrid.__eq__(other.mrid)
+        return self.mrid.__eq__(other)
         #
     def __str__(self):
         class_name = f'{self.__class__.__name__}'

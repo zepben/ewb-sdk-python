@@ -5,6 +5,7 @@
 
 __all__ = ["QueryNetworkStateClient"]
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Callable, AsyncGenerator
 
@@ -20,7 +21,7 @@ from zepben.ewb.streaming.grpc.grpc import GrpcClient
 from zepben.ewb.util import datetime_to_timestamp
 
 
-@dataslot
+@dataclass(init=False, slots=True)
 class QueryNetworkStateClient(GrpcClient):
     """
     A client class that provides functionality to interact with the gRPC service for querying network states.
@@ -28,6 +29,15 @@ class QueryNetworkStateClient(GrpcClient):
     """
 
     _stub: QueryNetworkStateServiceStub = None
+
+    def __init__(self, channel=None, stub: QueryNetworkStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super(QueryNetworkStateClient, self).__init__(error_handlers=error_handlers, timeout=timeout)
+        if channel is None and stub is None:
+            raise ValueError("Must provide either a channel or a stub")
+        if stub is not None:
+            self._stub = stub
+        else:
+            self._stub = QueryNetworkStateServiceStub(channel)
 
     async def get_current_states(self, query_id: int, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
         """

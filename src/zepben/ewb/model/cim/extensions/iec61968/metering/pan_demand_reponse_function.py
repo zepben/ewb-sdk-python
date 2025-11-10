@@ -38,7 +38,6 @@ class PanDemandResponseFunction(EndDeviceFunction):
 
     @getter(appliance)
     def _appliance_getter(self):
-        print('!!!', self._appliance_bitmask)
         if self._appliance_bitmask is None:
             return None
         else:

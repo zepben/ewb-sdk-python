@@ -34,7 +34,7 @@ ServiceType = TypeVar('ServiceType', bound=BaseService)
 PBIdentifiedObject = TypeVar('PBIdentifiedObject')
 GrpcRequest = TypeVar('GrpcRequest')
 
-@dataclass
+@dataclass(init=False, slots=True)
 class CimConsumerClient(GrpcClient, Generic[ServiceType]):
     """
     Base class that defines some helpful functions when producer clients are sending to the server.
@@ -50,6 +50,10 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
     """
 
     __service_info: ServiceInfo | None = None
+
+    def __init__(self, **kwargs):
+        super(CimConsumerClient, self).__init__(**kwargs)
+        self.__service_info = None
 
     @property
     @abstractmethod

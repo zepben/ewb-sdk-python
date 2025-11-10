@@ -78,7 +78,7 @@ _map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIn
 _map_network_state = EnumMapper(NetworkState, PBNetworkState)
 
 
-@dataclass
+@dataclass(init=False, slots=True)
 class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     """
     Consumer client for a :class:`NetworkService`.
@@ -101,6 +101,23 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         return self.__service
 
     _stub: NetworkConsumerStub = None
+
+    def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        """
+        :param channel: a gRPC channel used to create a stub if no stub is provided.
+        :param stub: the gRPC stub to use for this consumer client.
+        :param error_handlers: a collection of handlers to be processed for any errors that occur.
+        """
+        super(NetworkConsumerClient, self).__init__(error_handlers=error_handlers, timeout=timeout)
+        if channel is None and stub is None:
+            raise ValueError("Must provide either a channel or a stub")
+        if stub is not None:
+            self._stub = stub
+        else:
+            self._stub = NetworkConsumerStub(channel)
+
+        self.__service = NetworkService()
+        self.__network_hierarchy = None
 
     async def get_equipment_for_container(
         self,
@@ -582,7 +599,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         return result
 
 
-@dataclass
+@dataclass(init=False, slots=True)
 class SyncNetworkConsumerClient(NetworkConsumerClient):
     """Synchronised wrapper for :class:`NetworkConsumerClient`"""
 

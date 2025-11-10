@@ -17,7 +17,7 @@ from typing_extensions import deprecated
 T = TypeVar("T")
 
 
-@dataclass
+@dataclass(slots=True)
 class GrpcResult(Generic[T]):
     result: Union[T, Exception]
     was_error_handled: bool = False

@@ -5,6 +5,7 @@
 
 __all__ = ["UpdateNetworkStateClient"]
 
+from dataclasses import dataclass
 from typing import List, Callable, AsyncGenerator, Iterable
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
@@ -18,7 +19,7 @@ from zepben.ewb.streaming.data.set_current_states_status import SetCurrentStates
 from zepben.ewb.streaming.grpc.grpc import GrpcClient
 
 
-@dataslot
+@dataclass(init=False, slots=True)
 class UpdateNetworkStateClient(GrpcClient):
     """
     A client class that provides functionality to interact with the gRPC service for updating network states.
@@ -26,6 +27,15 @@ class UpdateNetworkStateClient(GrpcClient):
     """
 
     _stub: UpdateNetworkStateServiceStub = None
+
+    def __init__(self, channel=None, stub: UpdateNetworkStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super(UpdateNetworkStateClient, self).__init__(error_handlers=error_handlers, timeout=timeout)
+        if channel is None and stub is None:
+            raise ValueError("Must provide either a channel or a stub")
+        if stub is not None:
+            self._stub = stub
+        else:
+            self._stub = UpdateNetworkStateServiceStub(channel)
 
     async def set_current_states(self, batch_id: int, batch: Iterable[CurrentStateEvent]) -> SetCurrentStatesStatus:
         """

@@ -22,8 +22,7 @@ from zepben.ewb import CustomerService, IdentifiedObject, Organisation, Customer
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
-
-@dataclass
+@dataclass(init=False, slots=True)
 class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     """
     Consumer client for a :class:`CustomerService`.
@@ -36,6 +35,17 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     """
 
     __service: CustomerService = None
+
+    def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super(CustomerConsumerClient, self).__init__(error_handlers=error_handlers, timeout=timeout)
+        if channel is None and stub is None:
+            raise ValueError("Must provide either a channel or a stub")
+        if stub is not None:
+            self._stub = stub
+        else:
+            self._stub = CustomerConsumerStub(channel)
+
+        self.__service = CustomerService()
 
     @property
     def service(self) -> CustomerService:
@@ -77,7 +87,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
 
-@dataclass
+@dataclass(init=False, slots=True)
 class SyncCustomerConsumerClient(CustomerConsumerClient):
 
     def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:

@@ -24,7 +24,7 @@ from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import Diag
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
-@dataclass
+@dataclass(init=False, slots=True)
 class DiagramConsumerClient(CimConsumerClient[DiagramService]):
     """
     Consumer client for a :class:`DiagramService`.
@@ -43,6 +43,17 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
         return self.__service
 
     _stub: DiagramConsumerStub = None
+
+    def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super(DiagramConsumerClient, self).__init__(error_handlers=error_handlers, timeout=timeout)
+        if channel is None and stub is None:
+            raise ValueError("Must provide either a channel or a stub")
+        if stub is not None:
+            self._stub = stub
+        else:
+            self._stub = DiagramConsumerStub(channel)
+
+        self.__service = DiagramService()
 
     async def get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return await self._get_diagram_objects(mrids)
@@ -78,7 +89,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
 
-@dataclass
+@dataclass(init=False, slots=True)
 class SyncDiagramConsumerClient(DiagramConsumerClient):
 
     def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
