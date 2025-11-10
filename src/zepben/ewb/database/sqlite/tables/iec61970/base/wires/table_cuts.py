@@ -10,8 +10,8 @@ from abc import ABC
 from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_switches import TableSwitches
 
-
-class TableCuts(TableSwitches, ABC):
+# THIS CLASS IS NOT ABSTRACT
+class TableCuts(TableSwitches):
 
     def __init__(self):
         super().__init__()

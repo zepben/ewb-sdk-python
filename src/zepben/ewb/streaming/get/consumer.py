@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta, ABC
 from dataclasses import field, dataclass
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator, List
 
@@ -35,7 +35,7 @@ PBIdentifiedObject = TypeVar('PBIdentifiedObject')
 GrpcRequest = TypeVar('GrpcRequest')
 
 @dataclass(init=False, slots=True)
-class CimConsumerClient(GrpcClient, Generic[ServiceType]):
+class CimConsumerClient(GrpcClient, Generic[ServiceType], ABC):
     """
     Base class that defines some helpful functions when producer clients are sending to the server.
 
@@ -61,7 +61,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         """
         The service to store all retrieved objects in.
         """
-        raise NotImplementedError()
+        pass
 
     async def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject]:
         """
@@ -110,12 +110,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
     @abstractmethod
     async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
-        #
-        # NOTE: this is a stupid test that is meant to fail to make sure we never yield, but we need to have the yield to make it return the generator.
-        #
-        if self is None:
-            yield
-        raise NotImplementedError()
+        pass
 
     CIM_TYPE = TypeVar("CIM_TYPE", bound=IdentifiedObject)
 
@@ -190,7 +185,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
     @abstractmethod
     async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
-        raise NotImplementedError()
+        pass
 
     async def _handle_metadata(self):
         response: GetMetadataResponse = await self._run_get_metadata(GetMetadataRequest())

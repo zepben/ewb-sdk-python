@@ -5,11 +5,13 @@
 
 __all__ = ["TableRotatingMachines"]
 
+from abc import ABC
+
 from zepben.ewb import TableRegulatingCondEq
 from zepben.ewb.database.sql.column import Column, Nullable
 
 
-class TableRotatingMachines(TableRegulatingCondEq):
+class TableRotatingMachines(TableRegulatingCondEq, ABC):
     """
     A class representing the RotatingMachine columns required for the database table.
     """

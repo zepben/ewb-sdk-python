@@ -358,8 +358,8 @@ def test_test_connection_raises_connection_exception_with_debug(mock_checkConnec
     )
     assert mock_checkConnection.call_count == 5
 
-from pytest import mark
-@mark.skip(reason="subclass finder was patched")
+# from pytest import mark
+# @mark.skip(reason="subclass finder was patched")
 def test_count_grpc_stubs():
     all_clients = all_subclasses(GrpcClient, 'zepben.ewb.streaming')
     expected_stubs = set()

@@ -10,8 +10,8 @@ from abc import ABC
 from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_conducting_equipment import TableConductingEquipment
 
-
-class TableClamps(TableConductingEquipment, ABC):
+# THIS CLASS IS NOT ABSTRACT
+class TableClamps(TableConductingEquipment):
 
     def __init__(self):
         super().__init__()
