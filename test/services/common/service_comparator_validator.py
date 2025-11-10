@@ -139,7 +139,7 @@ class ServiceComparatorValidator(object):
         self,
         prop: Property,
         add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        creator: Callable[[str], TIdentifiedObject],
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -179,7 +179,7 @@ class ServiceComparatorValidator(object):
 
     def validate_name_collection(
         self,
-        creator: [[str], TIdentifiedObject],
+        creator: Callable[[str], TIdentifiedObject],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None
@@ -222,7 +222,7 @@ class ServiceComparatorValidator(object):
         self,
         prop: Property,
         add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        creator: Callable[[str], TIdentifiedObject],
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -273,7 +273,7 @@ class ServiceComparatorValidator(object):
         self,
         prop: Property,
         add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        creator: Callable[[str], TIdentifiedObject],
         create_item_1: Callable[[K], R],
         create_item_2: Callable[[K], R],
         create_diff_item_1: Callable[[K], R],

@@ -38,10 +38,10 @@ class CustomerAgreement(Agreement):
     
     @validate(customer)
     def _customer_validate(self, cust):
-        if self._customer is None or self._customer is cust:
+        if self.customer is None or self.customer is cust:
             return cust
         else:
-            raise ValueError(f"customer for {str(self)} has already been set to {self._customer}, cannot reset this field to {cust}")
+            raise ValueError(f"customer for {str(self)} has already been set to {self.customer}, cannot reset this field to {cust}")
 
     @deprecated("BOILERPLATE: Use len(pricing_structures) instead")
     def num_pricing_structures(self):

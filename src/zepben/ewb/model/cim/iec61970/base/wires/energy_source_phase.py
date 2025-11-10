@@ -32,7 +32,7 @@ class EnergySourcePhase(PowerSystemResource):
 
     @validate(energy_source)
     def _energy_source_validate(self, es):
-        if self._energy_source is None or self._energy_source is es:
+        if self.energy_source is None or self.energy_source is es:
             return es
         else:
-            raise ValueError(f"energy_source for {str(self)} has already been set to {self._energy_source}, cannot reset this field to {es}")
+            raise ValueError(f"energy_source for {str(self)} has already been set to {self.energy_source}, cannot reset this field to {es}")

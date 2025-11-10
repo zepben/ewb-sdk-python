@@ -50,10 +50,10 @@ class LvFeeder(EquipmentContainer):
     
     @validate(normal_head_terminal)
     def _normal_head_terminal_validate(self, term: Terminal | None):
-        if self._normal_head_terminal is None or self._normal_head_terminal is term:
+        if self.normal_head_terminal is None or self.normal_head_terminal is term:
             return term
         else:
-            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
+            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self.normal_head_terminal}, cannot reset this field to {term}")
 
     @deprecated("BOILERPLATE: Use len(normal_energizing_feeders) instead")
     def num_normal_energizing_feeders(self) -> int:

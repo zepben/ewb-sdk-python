@@ -31,7 +31,7 @@ class RegulatingCondEq(EnergyConnection):
 
     @validate(regulating_control)
     def _regulating_control_validate(self, rc):
-        if self._regulating_control is None or rc is self._regulating_control:
+        if self.regulating_control is None or rc is self.regulating_control:
             return rc
         else:
-            raise ValueError(f"regulating_control for {str(self)} has already been set to {self._regulating_control}, cannot set this field again")
+            raise ValueError(f"regulating_control for {str(self)} has already been set to {self.regulating_control}, cannot set this field again")

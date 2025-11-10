@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from dataclasses import field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
@@ -39,7 +40,7 @@ class Terminal(AcDcTerminal):
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
-    traced_phases: TracedPhases = TracedPhases()
+    traced_phases: TracedPhases = field(default_factory=TracedPhases)
     """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
     to match those in `phases`"""
 
@@ -71,10 +72,10 @@ class Terminal(AcDcTerminal):
 
     @validate(conducting_equipment)
     def _conducting_equipment_validate(self, ce):
-        if self._conducting_equipment is None or self._conducting_equipment is ce:
+        if self.conducting_equipment is None or self.conducting_equipment is ce:
             return ce
         else:
-            raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self._conducting_equipment}, cannot reset this field to {ce}")
+            raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self.conducting_equipment}, cannot reset this field to {ce}")
 
     @property
     def connected(self) -> bool:

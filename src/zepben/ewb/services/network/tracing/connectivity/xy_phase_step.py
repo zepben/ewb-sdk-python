@@ -12,7 +12,7 @@ from typing_extensions import deprecated
 from zepben.ewb import Terminal, PhaseCode
 
 
-@dataslot
+@dataclass(unsafe_hash=True)
 class XyPhaseStep(object):
 
     terminal: Terminal

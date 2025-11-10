@@ -43,7 +43,7 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     @validate(energy_consumer)
     def _energy_consumer_validate(self, ec):
-        if self._energy_consumer is None or self._energy_consumer is ec:
+        if self.energy_consumer is None or self.energy_consumer is ec:
             return ec
         else:
-            raise ValueError(f"energy_consumer for {str(self)} has already been set to {self._energy_consumer}, cannot reset this field to {ec}")
+            raise ValueError(f"energy_consumer for {str(self)} has already been set to {self.energy_consumer}, cannot reset this field to {ec}")

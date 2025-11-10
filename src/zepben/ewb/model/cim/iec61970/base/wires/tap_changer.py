@@ -7,8 +7,7 @@ __all__ = ["TapChanger"]
 
 from typing import Optional, TYPE_CHECKING
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
+from zepben.ewb.dataslot import dataslot, ValidatedDescriptor, validate
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.util import require
 
@@ -39,31 +38,31 @@ class TapChanger(PowerSystemResource):
 
     @validate(high_step)
     def _high_step_validate(self, val):
-        require((val is None) or (self._low_step is None) or (val > self._low_step),
-                lambda: f"High step [{val}] must be greater than low step [{self._low_step}]")
+        require((val is None) or (self.low_step is None) or (val > self.low_step),
+                lambda: f"High step [{val}] must be greater than low step [{self.low_step}]")
         self._check_steps(self.low_step, val)
         return val
 
     @validate(low_step)
     def _low_step_validate(self, val):
-        require((val is None) or (self._high_step is None) or (val < self._high_step),
-                lambda: f"Low step [{val}] must be less than high step [{self._high_step}]")
+        require((val is None) or (self.high_step is None) or (val < self.high_step),
+                lambda: f"Low step [{val}] must be less than high step [{self.high_step}]")
         self._check_steps(val, self.high_step)
         return val
 
     @validate(neutral_step)
     def _neutral_step_validate(self, val):
-        require(self._is_in_range(val), lambda: f"Neutral step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Neutral step [{val}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
         return val
 
     @validate(normal_step)
     def _normal_step_validate(self, val):
-        require(self._is_in_range(val), lambda: f"Normal step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Normal step [{val}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
         return val
 
     @validate(step)
     def _step_validate(self, val):
-        require(self._is_in_range(val), lambda: f"Step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Step [{val}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
         return val
 
     def _check_steps(self, low, high):
@@ -80,24 +79,24 @@ class TapChanger(PowerSystemResource):
                     lambda: f"New value would invalidate current neutral_step of [{self.neutral_step}]")
 
     def _validate_steps(self):
-        require((self._high_step is None) or (self._low_step is None) or (self._high_step > self._low_step),
-                lambda: f"High step [{self._high_step}] must be greater than low step [{self._low_step}]")
-        require(self._is_in_range(self._neutral_step),
-                lambda: f"Neutral step [{self.neutral_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._is_in_range(self._normal_step),
-                lambda: f"Normal step [{self.normal_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._is_in_range(self._step), lambda: f"Step [{self._step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require((self.high_step is None) or (self.low_step is None) or (self.high_step > self.low_step),
+                lambda: f"High step [{self.high_step}] must be greater than low step [{self.low_step}]")
+        require(self._is_in_range(self.neutral_step),
+                lambda: f"Neutral step [{self.neutral_step}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
+        require(self._is_in_range(self.normal_step),
+                lambda: f"Normal step [{self.normal_step}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
+        require(self._is_in_range(self.step), lambda: f"Step [{self.step}] must be between high step [{self.high_step}] and low step [{self.low_step}]")
 
     def _is_in_range(self, val) -> bool:
         if val is None:
             return True
 
-        if self._low_step is not None:
-            if val < self._low_step:
+        if self.low_step is not None:
+            if val < self.low_step:
                 return False
 
-        if self._high_step is not None:
-            if val > self._high_step:
+        if self.high_step is not None:
+            if val > self.high_step:
                 return False
 
         return True

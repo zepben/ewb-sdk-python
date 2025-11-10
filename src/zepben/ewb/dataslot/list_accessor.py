@@ -22,8 +22,7 @@ from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Siz
 
 from typing_extensions import override
 
-from zepben.ewb.dataslot.dataslot import BackedDescriptor
-
+from zepben.ewb.dataslot.dataslot import BackedDescriptor, Fget
 
 __all__ = [
     'boilermaker',
@@ -443,9 +442,10 @@ class _Router(Iterable):
         self._la: _ListAccessorBase = accessor
         self._attr: str = attr
         self._name: str = name
-        self.__name__ = self._name
+        self.__name__ = name
 
         self._options = options if options else NamingOptions()
+        self.fget = Fget(descriptor=accessor, name=name)
 
         # Type checker fix - public methods only
         if True: return
@@ -468,6 +468,7 @@ class _Router(Iterable):
 
     def _get_safe(self) -> List:
         return getattr(self._owner, self._attr) or []
+
 
     @property
     def raw(self):
@@ -703,6 +704,8 @@ class MRIDDictRouter(_Router):
 
     @override
     def _get_safe(self) -> Dict:
+        if self._owner is None:
+            return {}
         return getattr(self._owner, self._attr) or {}
 
     @override

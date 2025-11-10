@@ -51,7 +51,7 @@ class Feeder(EquipmentContainer):
     
     @validate(normal_head_terminal)
     def _normal_head_terminal_validate(self, term: Terminal | None):
-        if self._normal_head_terminal is None or self._normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
+        if self.normal_head_terminal is None or self.normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
             return term
         else:
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")

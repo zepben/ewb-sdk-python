@@ -35,7 +35,7 @@ def terminal_compare(terminal: Terminal, other: Terminal):
 Terminal.__lt__ = terminal_compare
 
 
-@dataclass(slots=True, init=False)
+@dataclass(slots=True)
 class ConnectivityResult:
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.
@@ -48,8 +48,12 @@ class ConnectivityResult:
     to_terminal: Terminal
     """The terminal which is connected to the requested terminal."""
 
-    nominal_phase_paths: Tuple[NominalPhasePath]
+    nominal_phase_paths: Iterable[NominalPhasePath]
     """The mapping of nominal phase paths between the from and to terminals."""
+
+    def __post_init__(self):
+        self.nominal_phase_paths: Tuple[NominalPhasePath] = (
+            *sorted(self.nominal_phase_paths, key=attrgetter('from_phase', 'to_phase')),)
 
     def __eq__(self, other: ConnectivityResult):
         if self is other:

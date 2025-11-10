@@ -8,6 +8,7 @@ from _weakref import ref
 from abc import ABCMeta
 from dataclasses import dataclass, field, KW_ONLY
 from enum import Enum
+from os import eventfd_write
 from typing import ClassVar, List, Callable, Any
 
 from typing_extensions import dataclass_transform
@@ -33,14 +34,31 @@ class SetOnceError(Exception):
 class BackingValue:
     ...
 
+class Fget:
+    def __init__(self, descriptor, function=None, name=None):
+        self.descriptor = descriptor
+        if function:
+            self._get = function
+        if name:
+            self.__name__ = name
+
+    def _get(self, it):
+        return getattr(it, self.__name__)
+        # return self.descriptor.__get__(it)
+
+    def __call__(self, it):
+        return self._get(it)
+
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, default=None):
         self.default = default
         self.typed = None
+        self.fget = Fget(self)
 
     def __set_name__(self, owner, name):
         self.owner = owner
         self.__name__ = self.public_name = name
+        self.fget.__name__ = name
 
     def __get__(self, instance, *_):
         raise NotImplementedError()
@@ -54,8 +72,8 @@ class Descriptor(metaclass=ABCMeta):
     def set_type(self, typed: type):
         self.typed = typed
 
-    def fget(self, it):
-        return self.__get__(it)
+    # def fget(self, it):
+    #     return self.__get__(it)
 
 
 Getter = Callable[[Any], Any]
@@ -225,7 +243,7 @@ def setter(var: object | CustomDescriptor):
     return _addressor(var, _Addressor.Setter)
 
 
-DEBUG_LOG = True
+DEBUG_LOG = False
 BAN_KWARGS = True
 
 
@@ -410,14 +428,18 @@ def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
 
     if inherit_hash:
         kwargs['eq'] = False
+        # kwargs['eq'] = True
+        # kwargs['unsafe_hash'] = True
 
     if DEBUG_LOG: _spew(cls)
+
     obj = dataclass(slots=slots, **kwargs)(cls)
     if weakref and slots:
         cls.__slots__ = (*obj.__slots__, '__weakref__')
         obj = dataclass(slots=False, **kwargs)(cls)
 
     amend_init(obj, cls)
+    del cls
     return obj
 
 
@@ -430,7 +452,11 @@ def private(default: Any, /, *, init: bool = False) -> Any:
 )
 def dataslot(cls_outer=None, *, slots=True, weakref=False, inherit_hash=True, **kwargs):
     def dec(cls):
-        return _autoslot(cls, slots=slots, weakref=weakref, inherit_hash=inherit_hash, **kwargs)
+        new = _autoslot(cls, slots=slots, weakref=weakref, inherit_hash=inherit_hash, **kwargs)
+        del cls
+        import gc
+        gc.collect()
+        return new
 
     if cls_outer:
         return dec(cls_outer)
@@ -528,6 +554,7 @@ if __name__ == '__main__':
 
     t = I2([], y='boop')
     print(t)
+
 
     @dataslot(weakref=True)
     class CN:
@@ -664,3 +691,4 @@ if __name__ == '__main__':
     print(abm.a)
     abm.a = [True]
     print(abm.a)
+

@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Type, List, Optional
 
@@ -16,16 +16,17 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 
-@dataslot
-@boilermaker
+@dataclass
 class UnorderedProperties(object):
 
-    values: List[int] | None = ListAccessor()
+    _values: Optional[List[int]] = None
 
-    def _retype(self):
-        self.values: ListRouter = ...
-    
-@dataslot
+    @property
+    def values(self):
+        return self._values
+
+
+@dataclass
 class UnorderedCheck(object):
 
     key: int

@@ -6,6 +6,7 @@
 __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is_after"]
 
 from collections import Counter
+from dataclasses import dataclass, field
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
@@ -53,28 +54,22 @@ def is_after(phase: SinglePhaseKind, after: SinglePhaseKind | None) -> bool:
                          "team to go put the planets back into alignment as they stuffed something up!")
 
 
-@dataslot
-@boilermaker
+@dataclass(slots=True)
 class XyCandidatePhasePaths:
     """
     Used to track the candidate and know paths for XY phase connectivity.
     """
 
-    known_tracking: List[SinglePhaseKind] | None = ListAccessor()
+    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = field(default_factory=dict)
     """
     Map of nominal phase to known phase.
     """
 
-    candidate_tracking: List[List[SinglePhaseKind]] | None = ListAccessor()
+    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = field(default_factory=dict)
     """
     Map of nominal phase to list of candidate phases.
     """
 
-    def _retype(self):
-        self.known_tracking: ListRouter = ...
-        self.candidate_tracking: ListRouter = ...
-    
-    @custom_add(known_tracking)
     def add_known(self, xy_phase: SinglePhaseKind, known_phase: SinglePhaseKind):
         """
         Add a `known_phase` for the specified `xy_phase`. If there is already a `known_phase` the new value will be ignored.
@@ -86,10 +81,9 @@ class XyCandidatePhasePaths:
         Raises `NominalPhaseException` if the `xy_phase` is invalid.
         """
         _validate_for_tracking(xy_phase)
-        if xy_phase not in self.known_tracking:
-            self.known_tracking.raw[xy_phase] = known_phase
+        if xy_phase not in self._known_tracking:
+            self._known_tracking[xy_phase] = known_phase
 
-    @custom_add(candidate_tracking)
     def add_candidates(self, xy_phase: SinglePhaseKind, candidate_phases: List[SinglePhaseKind]):
         """
         Add `candidate_phases` for the specified `xy_phase`. If the same candidate has been found from more than
@@ -104,10 +98,10 @@ class XyCandidatePhasePaths:
         Raises `PhaseException` if the `candidate_phases` is invalid.
          """
         _validate_for_tracking(xy_phase)
-        if xy_phase not in self.candidate_tracking:
-            self.candidate_tracking.raw[xy_phase] = []
+        if xy_phase not in self._candidate_tracking:
+            self._candidate_tracking[xy_phase] = []
 
-        self.candidate_tracking.raw[xy_phase].extend([it for it in candidate_phases if _is_valid_candidate(it, xy_phase)])
+        self._candidate_tracking[xy_phase].extend([it for it in candidate_phases if _is_valid_candidate(it, xy_phase)])
 
     def calculate_paths(self) -> Dict[SinglePhaseKind, SinglePhaseKind]:
         """
@@ -121,11 +115,11 @@ class XyCandidatePhasePaths:
         """
         paths = {}
 
-        known_x = self.known_tracking.get(SinglePhaseKind.X)
+        known_x = self._known_tracking.get(SinglePhaseKind.X)
         if known_x is not None:
             paths[SinglePhaseKind.X] = known_x
 
-        known_y = self.known_tracking.get(SinglePhaseKind.Y)
+        known_y = self._known_tracking.get(SinglePhaseKind.Y)
         if (known_y is not None) and (known_x != known_y):
             paths[SinglePhaseKind.Y] = known_y
         else:
@@ -134,7 +128,7 @@ class XyCandidatePhasePaths:
         if (known_x is not None) and (known_y is not None):
             return paths
 
-        candidate_phase_counts = {xy: Counter(candidates) for xy, candidates in self.candidate_tracking.items()}
+        candidate_phase_counts = {xy: Counter(candidates) for xy, candidates in self._candidate_tracking.items()}
         if known_x is not None:
             candidates = candidate_phase_counts.get(SinglePhaseKind.Y)
             if candidates:
@@ -197,8 +191,8 @@ class XyCandidatePhasePaths:
     def _find_candidate(
         candidate_counts: CounterType[SinglePhaseKind],
         priority: List[SinglePhaseKind],
-        before: SinglePhaseKind | None = None,
-        after: SinglePhaseKind | None = None
+        before: Optional[SinglePhaseKind] = None,
+        after: Optional[SinglePhaseKind] = None
     ) -> SinglePhaseKind:
         valid_candidates = [(phase, count) for (phase, count) in candidate_counts.most_common() if is_before(phase, before) and is_after(phase, after)]
         if not valid_candidates:

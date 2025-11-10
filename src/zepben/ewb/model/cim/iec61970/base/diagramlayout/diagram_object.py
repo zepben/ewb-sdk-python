@@ -47,10 +47,10 @@ class DiagramObject(IdentifiedObject):
 
     @validate(diagram)
     def _diagram_validate(self, diag):
-        if self._diagram is None or self._diagram is diag:
+        if self.diagram is None or self.diagram is diag:
             return diag
         else:
-            raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
+            raise ValueError(f"diagram for {str(self)} has already been set to {self.diagram}, cannot reset this field to {diag}")
 
     @deprecated("BOILERPLATE: Use len(diagram_object_points) instead")
     def num_points(self):
