@@ -31,7 +31,7 @@ class LvFeeder(EquipmentContainer):
     A branch of LV network starting at a distribution substation and continuing until the end of the LV network.
     """
 
-    normal_head_terminal: Terminal | None = ValidatedDescriptor(None)
+    normal_head_terminal: Terminal | None = NoResetDescriptor(None)
     """The normal head terminal or terminals of this LvFeeder"""
 
     normal_energizing_feeders: List[Feeder] | None = MRIDDictAccessor()
@@ -47,13 +47,6 @@ class LvFeeder(EquipmentContainer):
         self.normal_energizing_feeders: MRIDDictRouter = ...
         self.current_equipment: MRIDDictRouter = ...
         self.current_energizing_feeders: MRIDDictRouter = ...
-    
-    @validate(normal_head_terminal)
-    def _normal_head_terminal_validate(self, term: Terminal | None):
-        if self.normal_head_terminal is None or self.normal_head_terminal is term:
-            return term
-        else:
-            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self.normal_head_terminal}, cannot reset this field to {term}")
 
     @deprecated("BOILERPLATE: Use len(normal_energizing_feeders) instead")
     def num_normal_energizing_feeders(self) -> int:
@@ -156,5 +149,6 @@ class LvFeeder(EquipmentContainer):
 
     @deprecated("BOILERPLATE: Use current_equipment.clear() instead")
     def clear_current_equipment(self) -> LvFeeder:
-        return self.current_equipment.clear()
+        self.current_equipment.clear()
         return self
+

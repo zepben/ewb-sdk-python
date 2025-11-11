@@ -71,5 +71,6 @@ class Circuit(Line):
 
     @deprecated("BOILERPLATE: Use end_substations.clear() instead")
     def clear_end_substations(self) -> Circuit:
-        return self.end_substations.clear()
+        self.end_substations.clear()
         return self
+

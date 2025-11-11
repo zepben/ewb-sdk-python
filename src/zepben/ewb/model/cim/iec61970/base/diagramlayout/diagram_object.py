@@ -27,7 +27,7 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    diagram: Diagram | None = ValidatedDescriptor(None)
+    diagram: Diagram | None = NoResetDescriptor(None)
     """A diagram object is part of a diagram."""
 
     identified_object_mrid: str | None = None
@@ -43,14 +43,6 @@ class DiagramObject(IdentifiedObject):
 
     def _retype(self):
         self.diagram_object_points: ListRouter = ...
-    
-
-    @validate(diagram)
-    def _diagram_validate(self, diag):
-        if self.diagram is None or self.diagram is diag:
-            return diag
-        else:
-            raise ValueError(f"diagram for {str(self)} has already been set to {self.diagram}, cannot reset this field to {diag}")
 
     @deprecated("BOILERPLATE: Use len(diagram_object_points) instead")
     def num_points(self):
@@ -146,5 +138,6 @@ class DiagramObject(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use diagram_object_points.clear() instead")
     def clear_points(self) -> DiagramObject:
-        return self.diagram_object_points.clear()
+        self.diagram_object_points.clear()
         return self
+

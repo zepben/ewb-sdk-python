@@ -51,5 +51,6 @@ class ProtectedSwitch(Switch):
 
     @deprecated("BOILERPLATE: Use relay_functions.clear() instead")
     def clear_relay_functions(self) -> ProtectedSwitch:
-        return self.relay_functions.clear()
+        self.relay_functions.clear()
         return self
+

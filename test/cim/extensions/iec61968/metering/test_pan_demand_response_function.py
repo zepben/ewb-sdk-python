@@ -34,15 +34,6 @@ def test_pan_demand_response_function_constructor_default():
 def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwargs):
     pdrf = PanDemandResponseFunction(kind=kind, appliances=appliance, **kwargs)
 
-    print()
-    print(pdrf)
-    for k, v in pdrf.__class__.__dict__.items():
-        print(k, v)
-    print(1, pdrf.kind)
-    print(2, pdrf.appliance)
-    print(2, pdrf.appliances)
-    print(3, pdrf.appliance.bitmask)
-
     verify_end_device_function_constructor_kwargs(pdrf, **kwargs)
     assert pdrf.kind == kind
     assert pdrf.appliance == appliance

@@ -27,11 +27,4 @@ class RegulatingCondEq(EnergyConnection):
     control_enabled: bool | None = None
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    regulating_control: RegulatingControl | None = ValidatedDescriptor(None)
-
-    @validate(regulating_control)
-    def _regulating_control_validate(self, rc):
-        if self.regulating_control is None or rc is self.regulating_control:
-            return rc
-        else:
-            raise ValueError(f"regulating_control for {str(self)} has already been set to {self.regulating_control}, cannot set this field again")
+    regulating_control: RegulatingControl | None = NoResetDescriptor(None)

@@ -55,5 +55,6 @@ class ProtectionRelayScheme(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use functions.clear() instead")
     def clear_function(self) -> ProtectionRelayScheme:
-        return self.functions.clear()
+        self.functions.clear()
         return self
+

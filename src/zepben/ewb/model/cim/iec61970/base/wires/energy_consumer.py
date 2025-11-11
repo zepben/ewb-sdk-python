@@ -77,5 +77,6 @@ class EnergyConsumer(EnergyConnection):
 
     @deprecated("BOILERPLATE: Use energy_consumer_phases.clear() instead")
     def clear_phases(self) -> EnergyConsumer:
-        return self.energy_consumer_phases.clear()
+        self.energy_consumer_phases.clear()
         return self
+

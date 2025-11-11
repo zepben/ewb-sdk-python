@@ -139,5 +139,6 @@ class SynchronousMachine(RotatingMachine):
 
     @deprecated("BOILERPLATE: Use curves.clear() instead")
     def clear_curves(self) -> 'SynchronousMachine':
-        return self.curves.clear()
+        self.curves.clear()
         return self
+

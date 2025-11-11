@@ -44,7 +44,7 @@ class PowerTransformerEnd(TransformerEnd):
     Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
     """
 
-    power_transformer: PowerTransformer | None = ValidatedDescriptor(None)
+    power_transformer: PowerTransformer | None = NoResetDescriptor(None)
     """The power transformer of this power transformer end."""
 
     rated_u: int | None = None
@@ -93,13 +93,6 @@ class PowerTransformerEnd(TransformerEnd):
 
     def _retype(self):
         self.s_ratings: ListRouter = ...
-    
-    @validate(power_transformer)
-    def _power_transformer_validate(self, pt):
-        if self.power_transformer is None or self.power_transformer is pt:
-            return pt
-        else:
-            raise ValueError(f"power_transformer for {str(self)} has already been set to {self.power_transformer}, cannot reset this field to {pt}")
 
     @property
     def nominal_voltage(self):

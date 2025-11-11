@@ -54,5 +54,6 @@ class OperationalRestriction(Document):
 
     @deprecated("BOILERPLATE: Use equipment.clear() instead")
     def clear_equipment(self) -> OperationalRestriction:
-        return self.equipment.clear()
+        self.equipment.clear()
         return self
+

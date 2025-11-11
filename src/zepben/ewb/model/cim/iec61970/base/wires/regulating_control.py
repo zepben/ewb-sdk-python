@@ -132,5 +132,6 @@ class RegulatingControl(PowerSystemResource):
 
     @deprecated("BOILERPLATE: Use regulating_cond_eq.clear() instead")
     def clear_regulating_cond_eq(self) -> RegulatingControl:
-        return self.regulating_conducting_equipment.clear()
+        self.regulating_conducting_equipment.clear()
         return self
+

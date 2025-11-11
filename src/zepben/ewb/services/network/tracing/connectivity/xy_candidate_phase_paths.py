@@ -10,10 +10,9 @@ from dataclasses import dataclass, field
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
+from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate, instantiate
 from typing_extensions import deprecated
 from zepben.ewb import SinglePhaseKind, PhaseCode
-
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """
@@ -60,12 +59,12 @@ class XyCandidatePhasePaths:
     Used to track the candidate and know paths for XY phase connectivity.
     """
 
-    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = field(default_factory=dict)
+    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = instantiate(dict)
     """
     Map of nominal phase to known phase.
     """
 
-    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = field(default_factory=dict)
+    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = instantiate(dict)
     """
     Map of nominal phase to list of candidate phases.
     """

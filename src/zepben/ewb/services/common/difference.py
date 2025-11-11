@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Any, List, Dict, TypeVar
 
 from zepben.ewb import IdentifiedObject
+from zepben.ewb.dataslot.dataslot import instantiate
 
 T = TypeVar("T")
 
@@ -23,16 +24,16 @@ class ValueDifference(Difference):
 
 @dataclass()
 class CollectionDifference(Difference):
-    missing_from_target: List[Any] = field(default_factory=list)
-    missing_from_source: List[Any] = field(default_factory=list)
-    modifications: List[Difference] = field(default_factory=list)
+    missing_from_target: List[Any] = instantiate(list)
+    missing_from_source: List[Any] = instantiate(list)
+    modifications: List[Difference] = instantiate(list)
 
 
 @dataclass()
 class ObjectDifference(Difference):
     source: IdentifiedObject
     target: IdentifiedObject
-    differences: Dict[str, Difference] = field(default_factory=dict)
+    differences: Dict[str, Difference] = instantiate(dict)
 
 
 @dataclass()

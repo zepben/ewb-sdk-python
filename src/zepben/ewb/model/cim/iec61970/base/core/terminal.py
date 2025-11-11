@@ -12,6 +12,8 @@ from weakref import ref, ReferenceType
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import instantiate
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -33,14 +35,14 @@ class Terminal(AcDcTerminal):
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    conducting_equipment: ConductingEquipment | None = ValidatedDescriptor(None)
+    conducting_equipment: ConductingEquipment | None = NoResetDescriptor(None)
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
-    traced_phases: TracedPhases = field(default_factory=TracedPhases)
+    traced_phases: TracedPhases = instantiate(TracedPhases)
     """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
     to match those in `phases`"""
 
@@ -69,13 +71,6 @@ class Terminal(AcDcTerminal):
     def current_phases(self) -> PhaseStatus:
         """ Convenience method for accessing the current phases"""
         return CurrentPhases(self)
-
-    @validate(conducting_equipment)
-    def _conducting_equipment_validate(self, ce):
-        if self.conducting_equipment is None or self.conducting_equipment is ce:
-            return ce
-        else:
-            raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self.conducting_equipment}, cannot reset this field to {ce}")
 
     @property
     def connected(self) -> bool:

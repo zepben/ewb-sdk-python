@@ -89,5 +89,6 @@ class EndDevice(AssetContainer):
 
     @deprecated("BOILERPLATE: Use functions.clear() instead")
     def clear_functions(self) -> EndDevice:
-        return self.functions.clear()
+        self.functions.clear()
         return self
+

@@ -48,7 +48,7 @@ class Feeder(EquipmentContainer):
         self.current_equipment: MRIDDictRouter = ...
         self.normal_energized_lv_feeders: MRIDDictRouter = ...
         self.current_energized_lv_feeders: MRIDDictRouter = ...
-    
+
     @validate(normal_head_terminal)
     def _normal_head_terminal_validate(self, term: Terminal | None):
         if self.normal_head_terminal is None or self.normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
@@ -157,5 +157,6 @@ class Feeder(EquipmentContainer):
 
     @deprecated("BOILERPLATE: Use current_energized_lv_feeders.clear() instead")
     def clear_current_energized_lv_feeders(self) -> Feeder:
-        return self.current_energized_lv_feeders.clear()
+        self.current_energized_lv_feeders.clear()
         return self
+

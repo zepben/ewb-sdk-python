@@ -79,5 +79,6 @@ class Asset(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use power_system_resources.clear() instead")
     def clear_power_system_resources(self) -> Asset:
-        return self.power_system_resources.clear()
+        self.power_system_resources.clear()
         return self
+

@@ -9,6 +9,8 @@ __all__ = ["GrpcResult", "GrpcClient"]
 
 from dataclasses import dataclass, field
 from typing import TypeVar, Generic, Callable, List, Union, Coroutine
+
+from zepben.ewb.dataslot import instantiate
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
 
@@ -84,7 +86,7 @@ class GrpcResult(Generic[T]):
 
 @dataclass(init=False, slots=True)
 class GrpcClient(object):
-    error_handlers: List[Callable[[Exception], bool]] = field(default_factory=list)
+    error_handlers: List[Callable[[Exception], bool]] = instantiate(list)
 
     timeout: int = 0
     '''Timeout for client gRPC requests'''

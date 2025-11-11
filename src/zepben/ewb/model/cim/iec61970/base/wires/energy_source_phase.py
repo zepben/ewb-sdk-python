@@ -22,17 +22,10 @@ class EnergySourcePhase(PowerSystemResource):
     A single phase of an energy source.
     """
 
-    energy_source: Optional['EnergySource'] = ValidatedDescriptor(None)
+    energy_source: Optional['EnergySource'] = NoResetDescriptor(None)
     """The `zepben.ewb.model.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE
     """A `zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
-
-    @validate(energy_source)
-    def _energy_source_validate(self, es):
-        if self.energy_source is None or self.energy_source is es:
-            return es
-        else:
-            raise ValueError(f"energy_source for {str(self)} has already been set to {self.energy_source}, cannot reset this field to {es}")

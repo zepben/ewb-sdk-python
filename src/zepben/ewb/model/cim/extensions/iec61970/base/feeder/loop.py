@@ -97,5 +97,6 @@ class Loop(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use energizing_substations.clear() instead")
     def clear_energizing_substations(self) -> Loop:
-        return self.energizing_substations.clear()
+        self.energizing_substations.clear()
         return self
+

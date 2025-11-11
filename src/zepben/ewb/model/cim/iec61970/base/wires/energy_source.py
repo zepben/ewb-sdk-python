@@ -143,5 +143,6 @@ class EnergySource(EnergyConnection):
 
     @deprecated("BOILERPLATE: Use energy_source_phases.clear() instead")
     def clear_phases(self) -> EnergySource:
-        return self.energy_source_phases.clear()
+        self.energy_source_phases.clear()
         return self
+

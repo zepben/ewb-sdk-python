@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
-    energy_consumer: Optional['EnergyConsumer'] = ValidatedDescriptor(None)
+    energy_consumer: Optional['EnergyConsumer'] = NoResetDescriptor(None)
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
@@ -41,9 +41,3 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: float | None = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    @validate(energy_consumer)
-    def _energy_consumer_validate(self, ec):
-        if self.energy_consumer is None or self.energy_consumer is ec:
-            return ec
-        else:
-            raise ValueError(f"energy_consumer for {str(self)} has already been set to {self.energy_consumer}, cannot reset this field to {ec}")

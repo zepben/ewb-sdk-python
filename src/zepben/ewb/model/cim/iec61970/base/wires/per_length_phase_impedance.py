@@ -77,5 +77,6 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
     @deprecated("BOILERPLATE: Use data.clear() instead")
     def clear_data(self) -> 'PerLengthPhaseImpedance':
-        return self.data.clear()
+        self.data.clear()
         return self
+

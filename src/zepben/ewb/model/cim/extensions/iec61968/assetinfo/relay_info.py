@@ -110,5 +110,6 @@ class RelayInfo(AssetInfo):
 
     @deprecated("BOILERPLATE: Use reclose_delays.clear() instead")
     def clear_delays(self) -> RelayInfo:
-        return self.reclose_delays.clear()
+        self.reclose_delays.clear()
         return self
+

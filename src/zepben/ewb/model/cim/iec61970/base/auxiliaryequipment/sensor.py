@@ -50,5 +50,6 @@ class Sensor(AuxiliaryEquipment):
 
     @deprecated("BOILERPLATE: Use relay_functions.clear() instead")
     def clear_relay_function(self) -> Sensor:
-        return self.relay_functions.clear()
+        self.relay_functions.clear()
         return self
+

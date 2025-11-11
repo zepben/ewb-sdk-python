@@ -197,7 +197,6 @@ class TestCoreTrace:
     async def _run_trace(trace: NetworkTrace, start: ConductingEquipment, phases: PhaseCode) -> List[TrackedPhases]:
         visited = []
 
-        print()
         await (
             trace.add_step_action(lambda step, ctx: print(f"{step.path} - isStopping:{ctx.is_stopping}"))
             .add_step_action(

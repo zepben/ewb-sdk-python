@@ -16,6 +16,7 @@ import requests
 from requests import Response
 from urllib3.exceptions import InsecureRequestWarning
 
+from zepben.ewb.dataslot import instantiate
 from zepben.ewb.auth.common.auth_exception import AuthException
 from zepben.ewb.auth.common.auth_method import AuthMethod
 # noinspection PyProtectedMember
@@ -107,8 +108,8 @@ class ZepbenTokenFetcher:
     audience: str
     issuer: Optional[str] = None
     token_endpoint: Optional[str] = None
-    token_request_data: Optional[dict] = field(default_factory=dict)
-    refresh_request_data: Optional[dict] = field(default_factory=dict)
+    token_request_data: Optional[dict] = instantiate(dict)
+    refresh_request_data: Optional[dict] = instantiate(dict)
     verify: Optional[bool | str] = None
     auth_method: Optional[AuthMethod] = None
 

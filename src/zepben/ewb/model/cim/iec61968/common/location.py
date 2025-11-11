@@ -123,5 +123,6 @@ class Location(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use position_points.clear() instead")
     def clear_points(self) -> Location:
-        return self.position_points.clear()
+        self.position_points.clear()
         return self
+

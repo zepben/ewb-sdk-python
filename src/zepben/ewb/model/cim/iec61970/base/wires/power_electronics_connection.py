@@ -11,6 +11,8 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot.dataslot import RangedDescriptor
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
 
@@ -66,28 +68,28 @@ class PowerElectronicsConnection(RegulatingCondEq):
     This mode is further described in AS4777.2:2015, section 6.3.2.2. True implies the mode is enabled.
     """
 
-    inv_watt_resp_v1: int | None = ValidatedDescriptor(None)
+    inv_watt_resp_v1: int | None = RangedDescriptor(None, min=200, max=300)
     """Set point 1 in volts for inverter Volt-Watt response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    inv_watt_resp_v2: int | None = ValidatedDescriptor(None)
+    inv_watt_resp_v2: int | None = RangedDescriptor(None, min=216, max=230)
     """Set point 2 in volts for inverter Volt-Watt response mode. Permitted range is between 216 and 230 (inclusive)."""
 
-    inv_watt_resp_v3: int | None = ValidatedDescriptor(None)
+    inv_watt_resp_v3: int | None = RangedDescriptor(None, min=235, max=255)
     """Set point 3 in volts for inverter Volt-Watt response mode. Permitted range is between 235 and 255 (inclusive)."""
 
-    inv_watt_resp_v4: int | None = ValidatedDescriptor(None)
+    inv_watt_resp_v4: int | None = RangedDescriptor(None, min=244, max=265)
     """Set point 4 in volts for inverter Volt-Watt response mode. Permitted range is between 244 and 265 (inclusive)."""
 
-    inv_watt_resp_p_at_v1: float | None = ValidatedDescriptor(None)
+    inv_watt_resp_p_at_v1: float | None = RangedDescriptor(None, min=0.0, max=1.0)
     """Power output set point 1 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    inv_watt_resp_p_at_v2: float | None = ValidatedDescriptor(None)
+    inv_watt_resp_p_at_v2: float | None = RangedDescriptor(None, min=0.0, max=1.0)
     """Power output set point 2 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    inv_watt_resp_p_at_v3: float | None = ValidatedDescriptor(None)
+    inv_watt_resp_p_at_v3: float | None = RangedDescriptor(None, min=0.0, max=1.0)
     """Power output set point 3 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    inv_watt_resp_p_at_v4: float | None = ValidatedDescriptor(None)
+    inv_watt_resp_p_at_v4: float | None = RangedDescriptor(None, min=0.0, max=0.2)
     """Power output set point 4 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 0.2 (inclusive)."""
 
     inv_volt_var_resp_mode: bool | None = None
@@ -96,34 +98,34 @@ class PowerElectronicsConnection(RegulatingCondEq):
     This mode is further described in AS4777.2:2015, section 6.3.2.3. True implies the mode is enabled.
     """
 
-    inv_var_resp_v1: int | None = ValidatedDescriptor(None)
+    inv_var_resp_v1: int | None = RangedDescriptor(None, min=200, max=300)
     """Set point 1 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    inv_var_resp_v2: int | None = ValidatedDescriptor(None)
+    inv_var_resp_v2: int | None = RangedDescriptor(None, min=200, max=300)
     """Set point 2 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    inv_var_resp_v3: int | None = ValidatedDescriptor(None)
+    inv_var_resp_v3: int | None = RangedDescriptor(None, min=200, max=300)
     """Set point 3 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    inv_var_resp_v4: int | None = ValidatedDescriptor(None)
+    inv_var_resp_v4: int | None = RangedDescriptor(None, min=200, max=300)
     """Set point 4 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    inv_var_resp_q_at_v1: float | None = ValidatedDescriptor(None)
+    inv_var_resp_q_at_v1: float | None = RangedDescriptor(None, min=0.0, max=0.6)
     """Power output set point 1 as a percentage of rated output for inverter Volt-VAr response mode. Permitted range is between 0 and 0.6 (inclusive)."""
 
-    inv_var_resp_q_at_v2: float | None = ValidatedDescriptor(None)
+    inv_var_resp_q_at_v2: float | None = RangedDescriptor(None, min=-1.0, max=1.0)
     """
     Power output set point 2 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
-    inv_var_resp_q_at_v3: float | None = ValidatedDescriptor(None)
+    inv_var_resp_q_at_v3: float | None = RangedDescriptor(None, min=-1.0, max=1.0)
     """
     Power output set point 3 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
-    inv_var_resp_q_at_v4: float | None = ValidatedDescriptor(None)
+    inv_var_resp_q_at_v4: float | None = RangedDescriptor(None, min=-0.6, max=0.0)
     """
     Power output set point 4 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -0.6 and 0 (inclusive) with a negative number referring to a sink.
@@ -147,86 +149,6 @@ class PowerElectronicsConnection(RegulatingCondEq):
     def _retype(self):
         self.power_electronics_units: MRIDListRouter = ...
         self.power_electronics_connection_phases: MRIDListRouter = ...
-    
-    @validate(inv_watt_resp_v1)
-    def _inv_watt_resp_v1_validate(self, value):
-        require(value is None or 200 <= value <= 300, lambda: f"inv_watt_resp_v1 [{value}] must be between 200 and 300.")
-        return value
-
-    @validate(inv_watt_resp_v2)
-    def _inv_watt_resp_v2_validate(self, value):
-        require(value is None or 216 <= value <= 230, lambda: f"inv_watt_resp_v2 [{value}] must be between 216 and 230.")
-        return value
-
-    @validate(inv_watt_resp_v3)
-    def _inv_watt_resp_v3_validate(self, value):
-        require(value is None or 235 <= value <= 255, lambda: f"inv_watt_resp_v3 [{value}] must be between 235 and 255.")
-        return value
-
-    @validate(inv_watt_resp_v4)
-    def _inv_watt_resp_v4_validate(self, value):
-        require(value is None or 244 <= value <= 265, lambda: f"inv_watt_resp_v4 [{value}] must be between 244 and 265.")
-        return value
-
-    @validate(inv_watt_resp_p_at_v1)
-    def _inv_watt_resp_p_at_v1_validate(self, value):
-        require(value is None or 0.0 <= value <= 1.0, lambda: f"inv_watt_resp_p_at_v1 [{value}] must be between 0.0 and 1.0.")
-        return value
-
-    @validate(inv_watt_resp_p_at_v2)
-    def _inv_watt_resp_p_at_v2_validate(self, value):
-        require(value is None or 0.0 <= value <= 1.0, lambda: f"inv_watt_resp_p_at_v2 [{value}] must be between 0.0 and 1.0.")
-        return value
-
-    @validate(inv_watt_resp_p_at_v3)
-    def _inv_watt_resp_p_at_v3_validate(self, value):
-        require(value is None or 0.0 <= value <= 1.0, lambda: f"inv_watt_resp_p_at_v3 [{value}] must be between 0.0 and 1.0.")
-        return value
-
-    @validate(inv_watt_resp_p_at_v4)
-    def _inv_watt_resp_p_at_v4_validate(self, value):
-        require(value is None or 0.0 <= value <= 0.2, lambda: f"inv_watt_resp_p_at_v4 [{value}] must be between 0.0 and 0.2.")
-        return value
-
-    @validate(inv_var_resp_v1)
-    def _inv_var_resp_v1_validate(self, value):
-        require(value is None or 200 <= value <= 300, lambda: f"inv_var_resp_v1 [{value}] must be between 200 and 300.")
-        return value
-
-    @validate(inv_var_resp_v2)
-    def _inv_var_resp_v2_validate(self, value):
-        require(value is None or 200 <= value <= 300, lambda: f"inv_var_resp_v2 [{value}] must be between 200 and 300.")
-        return value
-
-    @validate(inv_var_resp_v3)
-    def _inv_var_resp_v3_validate(self, value):
-        require(value is None or 200 <= value <= 300, lambda: f"inv_var_resp_v3 [{value}] must be between 200 and 300.")
-        return value
-
-    @validate(inv_var_resp_v4)
-    def _inv_var_resp_v4_validate(self, value):
-        require(value is None or 200 <= value <= 300, lambda: f"inv_var_resp_v4 [{value}] must be between 200 and 300.")
-        return value
-
-    @validate(inv_var_resp_q_at_v1)
-    def _inv_var_resp_q_at_v1_validate(self, value):
-        require(value is None or 0.0 <= value <= 0.6, lambda: f"inv_var_resp_q_at_v1 [{value}] must be between 0.0 and 0.6.")
-        return value
-
-    @validate(inv_var_resp_q_at_v2)
-    def _inv_var_resp_q_at_v2_validate(self, value):
-        require(value is None or -1.0 <= value <= 1.0, lambda: f"inv_var_resp_q_at_v2 [{value}] must be between -1.0 and 1.0.")
-        return value
-
-    @validate(inv_var_resp_q_at_v3)
-    def _inv_var_resp_q_at_v3_validate(self, value):
-        require(value is None or -1.0 <= value <= 1.0, lambda: f"inv_var_resp_q_at_v3 [{value}] must be between -1.0 and 1.0.")
-        return value
-
-    @validate(inv_var_resp_q_at_v4)
-    def _inv_var_resp_q_at_v4_validate(self, value):
-        require(value is None or -0.6 <= value <= 0.0, lambda: f"inv_var_resp_q_at_v4 [{value}] must be between -0.6 and 0.0.")
-        return value
 
     @property
     def units(self) -> Generator[PowerElectronicsUnit, None, None]:
@@ -280,5 +202,6 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     @deprecated("BOILERPLATE: Use power_electronics_connection_phases.clear() instead")
     def clear_phases(self) -> PowerElectronicsConnection:
-        return self.power_electronics_connection_phases.clear()
+        self.power_electronics_connection_phases.clear()
         return self
+

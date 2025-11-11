@@ -50,5 +50,6 @@ class PricingStructure(Document):
 
     @deprecated("BOILERPLATE: Use tariffs.clear() instead")
     def clear_tariffs(self) -> PricingStructure:
-        return self.tariffs.clear()
+        self.tariffs.clear()
         return self
+

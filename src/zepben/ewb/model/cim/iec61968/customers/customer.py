@@ -62,5 +62,6 @@ class Customer(OrganisationRole):
 
     @deprecated("BOILERPLATE: Use customer_agreements.clear() instead")
     def clear_agreements(self) -> Customer:
-        return self.customer_agreements.clear()
+        self.customer_agreements.clear()
         return self
+

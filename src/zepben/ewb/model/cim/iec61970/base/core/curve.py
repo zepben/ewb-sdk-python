@@ -110,5 +110,6 @@ class Curve(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use data.clear() instead")
     def clear_data(self) -> 'Curve':
-        return self.data.clear()
+        self.data.clear()
         return self
+

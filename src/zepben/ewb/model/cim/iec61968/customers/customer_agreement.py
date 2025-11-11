@@ -28,20 +28,13 @@ class CustomerAgreement(Agreement):
     during charge creation to determine the type of service.
     """
 
-    customer: Customer | None = ValidatedDescriptor(None)
+    customer: Customer | None = NoResetDescriptor(None)
     """The `zepben.ewb.model.cim.iec61968.customers.customer.Customer` that has this `CustomerAgreement`."""
 
     pricing_structures: List[PricingStructure] | None = MRIDListAccessor()
 
     def _retype(self):
         self.pricing_structures: MRIDListRouter = ...
-    
-    @validate(customer)
-    def _customer_validate(self, cust):
-        if self.customer is None or self.customer is cust:
-            return cust
-        else:
-            raise ValueError(f"customer for {str(self)} has already been set to {self.customer}, cannot reset this field to {cust}")
 
     @deprecated("BOILERPLATE: Use len(pricing_structures) instead")
     def num_pricing_structures(self):
@@ -61,5 +54,6 @@ class CustomerAgreement(Agreement):
 
     @deprecated("BOILERPLATE: Use pricing_structures.clear() instead")
     def clear_pricing_structures(self) -> CustomerAgreement:
-        return self.pricing_structures.clear()
+        self.pricing_structures.clear()
         return self
+

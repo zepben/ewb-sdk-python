@@ -45,5 +45,6 @@ class GeographicalRegion(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use sub_geographical_regions.clear() instead")
     def clear_sub_geographical_regions(self) -> GeographicalRegion:
-        return self.sub_geographical_regions.clear()
+        self.sub_geographical_regions.clear()
         return self
+

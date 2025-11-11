@@ -270,5 +270,6 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     @deprecated("BOILERPLATE: Use schemes.clear() instead")
     def clear_schemes(self) -> ProtectionRelayFunction:
-        return self.schemes.clear()
+        self.schemes.clear()
         return self
+

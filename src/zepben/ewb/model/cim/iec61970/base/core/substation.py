@@ -131,5 +131,6 @@ class Substation(EquipmentContainer):
 
     @deprecated("BOILERPLATE: Use circuits.clear() instead")
     def clear_circuits(self) -> Substation:
-        return self.circuits.clear()
+        self.circuits.clear()
         return self
+

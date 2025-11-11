@@ -52,5 +52,6 @@ class SubGeographicalRegion(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use substations.clear() instead")
     def clear_substations(self) -> SubGeographicalRegion:
-        return self.substations.clear()
+        self.substations.clear()
         return self
+

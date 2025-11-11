@@ -15,6 +15,8 @@ from typing_extensions import dataclass_transform
 
 __all__ = [
     'dataslot',
+    'private',
+    'instantiate',
     'validate',
     'BackingValue',
     'BackedDescriptor',
@@ -447,6 +449,10 @@ def private(default: Any, /, *, init: bool = False) -> Any:
     """A shorthand for a non-init dataclass field with a default value."""
     return field(default=default, init=init)  # or whatever sentinel your runtime uses
 
+def instantiate(default_factory: Callable[[], Any], **kwargs):
+    """A shorthand for a non-init dataclass field with a default factory."""
+    return field(default_factory=default_factory, **kwargs)
+
 @dataclass_transform(
     field_specifiers=(field,private,)
 )
@@ -489,6 +495,7 @@ if __name__ == '__main__':
         a: int = 42
         _l: List[int] = private(None)
         b: int = CustomDescriptor(3)
+        l2: List[int] = instantiate(list)
 
         @getter(b)
         def get_b(self):
@@ -511,6 +518,7 @@ if __name__ == '__main__':
     print(a1)
 
     tst = Tst(24,7)
+    print(tst.l2)
     print(sys.getsizeof(tst))
     tst2 = Tst2(24)
     print(sys.getsizeof(tst2))

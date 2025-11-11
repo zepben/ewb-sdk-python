@@ -49,5 +49,6 @@ class Pole(Structure):
 
     @deprecated("BOILERPLATE: Use streetlights.clear() instead")
     def clear_streetlights(self) -> Pole:
-        return self.streetlights.clear()
+        self.streetlights.clear()
         return self
+

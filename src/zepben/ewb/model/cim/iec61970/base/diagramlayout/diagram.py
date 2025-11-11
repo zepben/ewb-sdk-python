@@ -83,5 +83,6 @@ class Diagram(IdentifiedObject):
 
     @deprecated("BOILERPLATE: Use diagram_objects.clear() instead")
     def clear_diagram_objects(self) -> Diagram:
-        return self.diagram_objects.clear()
+        self.diagram_objects.clear()
         return self
+
