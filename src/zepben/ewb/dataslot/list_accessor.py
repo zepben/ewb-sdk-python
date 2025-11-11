@@ -15,7 +15,6 @@ Do not rely on features from this file.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import field, dataclass
 from enum import Enum
 from functools import partial, cache
 from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Collection
@@ -64,14 +63,59 @@ _plurals = {
     _Actions.LEN
 }
 
-
-
-@dataclass
-class NamingOptions:
-    attr_alias: str | None = None
-    singular: bool = False
-    method_aliases: dict[_Actions, str] = field(default_factory=dict)
-
+# def _get_boilerplate_forwarding(list_name):
+#     def forward_num(self):
+#         print('num', list_name, self)
+#         print('num', getattr(self, list_name), len(getattr(self, list_name)))
+#         return len(getattr(self, list_name))
+#
+#     def forward_get_by_mrid(self, mrid: str):
+#         print('get_by_mrid', list_name, self)
+#         return getattr(self, list_name).get_by_mrid(mrid)
+#
+#     def forward_add(self, item):
+#         print('add', list_name, self)
+#         getattr(self, list_name).append(item)
+#         return self
+#
+#     def forward_remove(self, item):
+#         print('remove', list_name, self)
+#         getattr(self, list_name).remove(item)
+#         return self
+#
+#     def forward_clear(self):
+#         print('clear', list_name, self)
+#         getattr(self, list_name).clear()
+#         return self
+#
+#     return {
+#         _Actions.LEN: forward_num,
+#         _Actions.GET_BY_MRID: forward_get_by_mrid,
+#         _Actions.ADD: forward_add,
+#         _Actions.REMOVE: forward_remove,
+#         _Actions.CLEAR: forward_clear,
+#     }
+#
+#
+# def _read_boilerplate_message(msg: str):
+#     msg = msg.lower()
+#     if not ' use ' in msg: return None
+#     msg = msg.split(' use ')[1]
+#     try:
+#         if msg.startswith('len('):
+#             name = msg[4:].split(')')[0]
+#             return _get_boilerplate_forwarding(name)[_Actions.LEN]
+#         else:
+#             name = msg.split('.')[0]
+#             action = {
+#                 'append': _Actions.ADD,
+#                 'clear': _Actions.CLEAR,
+#                 'get_by_mrid': _Actions.GET_BY_MRID,
+#                 'remove': _Actions.REMOVE
+#             }[msg.split('.')[1].split('(')[0]]
+#             return _get_boilerplate_forwarding(name)[action]
+#     except (KeyError, IndexError):
+#         return None
 
 def boilermaker(cls):
     for name, member in cls.__dict__.items():
@@ -80,12 +124,10 @@ def boilermaker(cls):
             target = member.__target_list__
             target.methods[action] = member
 
-    # for attr, _type in cls.__annotations__.items():
-    #     val = cls.__dict__.get(attr, None)
-    #     if val is None: continue
-    #     if isinstance(val, ListAccessor):
-    #         _attr = val.private_name
-    #         inject(cls, val, attr, _attr, val.options)
+        # if hasattr(member, '__deprecated__'):
+        #     injected = _read_boilerplate_message(member.__deprecated__)
+        #     if injected is not None:
+        #         setattr(cls, name, injected)
 
     return cls
 
@@ -510,3 +552,16 @@ def custom_len(l: Iterable):
     return override_boilerplate(l, _Actions.LEN)
 def custom_remove(l: Iterable):
     return override_boilerplate(l, _Actions.REMOVE)
+
+
+if __name__ == '__main__':
+    @dataslot
+    @boilermaker
+    class A:
+        l: List[int] = ListAccessor()
+
+        @deprecated(' use len(l) instead')
+        def len(self): ...
+
+    a = A([1, 2, 3])
+    print(a.len())
