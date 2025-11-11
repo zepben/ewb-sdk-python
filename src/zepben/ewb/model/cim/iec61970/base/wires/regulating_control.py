@@ -122,13 +122,15 @@ class RegulatingControl(PowerSystemResource):
     def get_regulating_cond_eq(self, mrid: str) -> RegulatingCondEq:
         return self.regulating_conducting_equipment.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use regulating_cond_eq.append(regulating_cond_eq) instead")
+    @deprecated("Boilerplate: Use regulating_cond_eq.append(regulating_cond_eq) instead")
     def add_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq) -> RegulatingControl:
-        return self.regulating_conducting_equipment.append(regulating_cond_eq)
+        self.regulating_conducting_equipment.append(regulating_cond_eq)
+        return self
 
-    @deprecated("BOILERPLATE: Use regulating_cond_eq.remove(regulating_cond_eq) instead")
+    @deprecated("Boilerplate: Use regulating_cond_eq.remove(regulating_cond_eq) instead")
     def remove_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq | None) -> RegulatingControl:
-        return self.regulating_conducting_equipment.remove(regulating_cond_eq)
+        self.regulating_conducting_equipment.remove(regulating_cond_eq)
+        return self
 
     @deprecated("BOILERPLATE: Use regulating_cond_eq.clear() instead")
     def clear_regulating_cond_eq(self) -> RegulatingControl:

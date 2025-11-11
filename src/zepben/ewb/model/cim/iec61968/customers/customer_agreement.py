@@ -44,13 +44,15 @@ class CustomerAgreement(Agreement):
     def get_pricing_structure(self, mrid: str) -> PricingStructure:
         return self.pricing_structures.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use pricing_structures.append(ps) instead")
+    @deprecated("Boilerplate: Use pricing_structures.append(ps) instead")
     def add_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:
-        return self.pricing_structures.append(ps)
+        self.pricing_structures.append(ps)
+        return self
 
-    @deprecated("BOILERPLATE: Use pricing_structures.remove(ps) instead")
+    @deprecated("Boilerplate: Use pricing_structures.remove(ps) instead")
     def remove_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:
-        return self.pricing_structures.remove(ps)
+        self.pricing_structures.remove(ps)
+        return self
 
     @deprecated("BOILERPLATE: Use pricing_structures.clear() instead")
     def clear_pricing_structures(self) -> CustomerAgreement:

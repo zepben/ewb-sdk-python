@@ -77,9 +77,10 @@ class Diagram(IdentifiedObject):
 
         return self
 
-    @deprecated("BOILERPLATE: Use diagram_objects.remove(diagram_object) instead")
+    @deprecated("Boilerplate: Use diagram_objects.remove(diagram_object) instead")
     def remove_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
-        return self.diagram_objects.remove(diagram_object)
+        self.diagram_objects.remove(diagram_object)
+        return self
 
     @deprecated("BOILERPLATE: Use diagram_objects.clear() instead")
     def clear_diagram_objects(self) -> Diagram:

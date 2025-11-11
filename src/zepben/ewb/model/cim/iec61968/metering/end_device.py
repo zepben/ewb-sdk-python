@@ -59,13 +59,15 @@ class EndDevice(AssetContainer):
     def get_usage_point(self, mrid: str) -> UsagePoint:
         return self.usage_points.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use usage_points.append(up) instead")
+    @deprecated("Boilerplate: Use usage_points.append(up) instead")
     def add_usage_point(self, up: UsagePoint) -> EndDevice:
-        return self.usage_points.append(up)
+        self.usage_points.append(up)
+        return self
 
-    @deprecated("BOILERPLATE: Use usage_points.remove(up) instead")
+    @deprecated("Boilerplate: Use usage_points.remove(up) instead")
     def remove_usage_point(self, up: UsagePoint) -> EndDevice:
-        return self.usage_points.remove(up)
+        self.usage_points.remove(up)
+        return self
 
     @deprecated("BOILERPLATE: Use usage_points.clear() instead")
     def clear_usage_points(self) -> EndDevice:
@@ -79,13 +81,15 @@ class EndDevice(AssetContainer):
     def get_function(self, mrid: str) -> EndDeviceFunction:
         return self.functions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use functions.append(edf) instead")
+    @deprecated("Boilerplate: Use functions.append(edf) instead")
     def add_function(self, edf: EndDeviceFunction) -> EndDevice:
-        return self.functions.append(edf)
+        self.functions.append(edf)
+        return self
 
-    @deprecated("BOILERPLATE: Use functions.remove(edf) instead")
+    @deprecated("Boilerplate: Use functions.remove(edf) instead")
     def remove_function(self, edf: EndDeviceFunction) -> EndDevice:
-        return self.functions.remove(edf)
+        self.functions.remove(edf)
+        return self
 
     @deprecated("BOILERPLATE: Use functions.clear() instead")
     def clear_functions(self) -> EndDevice:

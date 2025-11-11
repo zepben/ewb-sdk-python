@@ -216,17 +216,19 @@ class ProtectionRelayFunction(PowerSystemResource):
     def get_sensor(self, mrid: str) -> Sensor:
         return self.sensors.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use sensors.append(sensor) instead")
+    @deprecated("Boilerplate: Use sensors.append(sensor) instead")
     def add_sensor(self, sensor: Sensor) -> ProtectionRelayFunction:
-        return self.sensors.append(sensor)
+        self.sensors.append(sensor)
+        return self
 
     @deprecated("BOILERPLATE: Use len(sensors) instead")
     def num_sensors(self) -> int:
         return len(self.sensors)
 
-    @deprecated("BOILERPLATE: Use sensors.remove(sensor) instead")
+    @deprecated("Boilerplate: Use sensors.remove(sensor) instead")
     def remove_sensor(self, sensor: Sensor | None) -> ProtectionRelayFunction:
-        return self.sensors.remove(sensor)
+        self.sensors.remove(sensor)
+        return self
 
     @deprecated("BOILERPLATE: Use sensors.clear() instead")
     def clear_sensors(self) -> ProtectionRelayFunction:
@@ -236,17 +238,19 @@ class ProtectionRelayFunction(PowerSystemResource):
     def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
         return self.protected_switches.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use protected_switches.append(protected_switch) instead")
+    @deprecated("Boilerplate: Use protected_switches.append(protected_switch) instead")
     def add_protected_switch(self, protected_switch: ProtectedSwitch) -> ProtectionRelayFunction:
-        return self.protected_switches.append(protected_switch)
+        self.protected_switches.append(protected_switch)
+        return self
 
     @deprecated("BOILERPLATE: Use len(protected_switches) instead")
     def num_protected_switches(self) -> int:
         return len(self.protected_switches)
 
-    @deprecated("BOILERPLATE: Use protected_switches.remove(protected_switch) instead")
+    @deprecated("Boilerplate: Use protected_switches.remove(protected_switch) instead")
     def remove_protected_switch(self, protected_switch: ProtectedSwitch | None) -> ProtectionRelayFunction:
-        return self.protected_switches.remove(protected_switch)
+        self.protected_switches.remove(protected_switch)
+        return self
 
     @deprecated("BOILERPLATE: Use protected_switches.clear() instead")
     def clear_protected_switches(self) -> ProtectionRelayFunction:
@@ -256,17 +260,19 @@ class ProtectionRelayFunction(PowerSystemResource):
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         return self.schemes.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use schemes.append(scheme) instead")
+    @deprecated("Boilerplate: Use schemes.append(scheme) instead")
     def add_scheme(self, scheme: ProtectionRelayScheme) -> ProtectionRelayFunction:
-        return self.schemes.append(scheme)
+        self.schemes.append(scheme)
+        return self
 
     @deprecated("BOILERPLATE: Use len(schemes) instead")
     def num_schemes(self) -> int:
         return len(self.schemes)
 
-    @deprecated("BOILERPLATE: Use schemes.remove(scheme) instead")
+    @deprecated("Boilerplate: Use schemes.remove(scheme) instead")
     def remove_scheme(self, scheme: ProtectionRelayScheme | None) -> ProtectionRelayFunction:
-        return self.schemes.remove(scheme)
+        self.schemes.remove(scheme)
+        return self
 
     @deprecated("BOILERPLATE: Use schemes.clear() instead")
     def clear_schemes(self) -> ProtectionRelayFunction:

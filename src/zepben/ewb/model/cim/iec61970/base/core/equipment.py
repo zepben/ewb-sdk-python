@@ -160,13 +160,15 @@ class Equipment(PowerSystemResource):
     def get_container(self, mrid: str) -> EquipmentContainer:
         return self.equipment_containers.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use equipment_containers.append(ec) instead")
+    @deprecated("Boilerplate: Use equipment_containers.append(ec) instead")
     def add_container(self, ec: EquipmentContainer) -> Equipment:
-        return self.equipment_containers.append(ec)
+        self.equipment_containers.append(ec)
+        return self
 
-    @deprecated("BOILERPLATE: Use equipment_containers.remove(ec) instead")
+    @deprecated("Boilerplate: Use equipment_containers.remove(ec) instead")
     def remove_container(self, ec: EquipmentContainer) -> Equipment:
-        return self.equipment_containers.remove(ec)
+        self.equipment_containers.remove(ec)
+        return self
 
     @deprecated("BOILERPLATE: Use equipment_containers.clear() instead")
     def clear_containers(self) -> Equipment:
@@ -176,13 +178,15 @@ class Equipment(PowerSystemResource):
     def get_current_container(self, mrid: str) -> EquipmentContainer:
         return self.current_containers.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use current_containers.append(equipment_container) instead")
+    @deprecated("Boilerplate: Use current_containers.append(equipment_container) instead")
     def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        return self.current_containers.append(equipment_container)
+        self.current_containers.append(equipment_container)
+        return self
 
-    @deprecated("BOILERPLATE: Use current_containers.remove(equipment_container) instead")
+    @deprecated("Boilerplate: Use current_containers.remove(equipment_container) instead")
     def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
-        return self.current_containers.remove(equipment_container)
+        self.current_containers.remove(equipment_container)
+        return self
 
     @deprecated("BOILERPLATE: Use current_containers.clear() instead")
     def clear_current_containers(self) -> Equipment:
@@ -192,13 +196,15 @@ class Equipment(PowerSystemResource):
     def get_usage_point(self, mrid: str) -> UsagePoint:
         return self.usage_points.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use usage_points.append(up) instead")
+    @deprecated("Boilerplate: Use usage_points.append(up) instead")
     def add_usage_point(self, up: UsagePoint) -> Equipment:
-        return self.usage_points.append(up)
+        self.usage_points.append(up)
+        return self
 
-    @deprecated("BOILERPLATE: Use usage_points.remove(up) instead")
+    @deprecated("Boilerplate: Use usage_points.remove(up) instead")
     def remove_usage_point(self, up: UsagePoint) -> Equipment:
-        return self.usage_points.remove(up)
+        self.usage_points.remove(up)
+        return self
 
     @deprecated("BOILERPLATE: Use usage_points.clear() instead")
     def clear_usage_points(self) -> Equipment:
@@ -208,13 +214,15 @@ class Equipment(PowerSystemResource):
     def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
         return self.operational_restrictions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use operational_restrictions.append(op) instead")
+    @deprecated("Boilerplate: Use operational_restrictions.append(op) instead")
     def add_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        return self.operational_restrictions.append(op)
+        self.operational_restrictions.append(op)
+        return self
 
-    @deprecated("BOILERPLATE: Use operational_restrictions.remove(op) instead")
+    @deprecated("Boilerplate: Use operational_restrictions.remove(op) instead")
     def remove_operational_restriction(self, op: OperationalRestriction) -> Equipment:
-        return self.operational_restrictions.remove(op)
+        self.operational_restrictions.remove(op)
+        return self
 
     @deprecated("BOILERPLATE: Use operational_restrictions.clear() instead")
     def clear_operational_restrictions(self) -> Equipment:

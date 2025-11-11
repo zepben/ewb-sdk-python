@@ -133,9 +133,10 @@ class SynchronousMachine(RotatingMachine):
         self.curves.append_unchecked(curve)
         return self
 
-    @deprecated("BOILERPLATE: Use curves.remove(curve) instead")
+    @deprecated("Boilerplate: Use curves.remove(curve) instead")
     def remove_curve(self, curve: 'ReactiveCapabilityCurve') -> 'SynchronousMachine':
-        return self.curves.remove(curve)
+        self.curves.remove(curve)
+        return self
 
     @deprecated("BOILERPLATE: Use curves.clear() instead")
     def clear_curves(self) -> 'SynchronousMachine':

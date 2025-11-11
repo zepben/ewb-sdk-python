@@ -71,9 +71,10 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
         return self
 
-    @deprecated("BOILERPLATE: Use data.remove(phase_impedance_data) instead")
+    @deprecated("Boilerplate: Use data.remove(phase_impedance_data) instead")
     def remove_data(self, phase_impedance_data: PhaseImpedanceData) -> 'PerLengthPhaseImpedance':
-        return self.data.remove(phase_impedance_data)
+        self.data.remove(phase_impedance_data)
+        return self
 
     @deprecated("BOILERPLATE: Use data.clear() instead")
     def clear_data(self) -> 'PerLengthPhaseImpedance':

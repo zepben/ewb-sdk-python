@@ -41,13 +41,15 @@ class ProtectedSwitch(Switch):
     def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
         return self.relay_functions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use relay_functions.append(relay_function) instead")
+    @deprecated("Boilerplate: Use relay_functions.append(relay_function) instead")
     def add_relay_function(self, relay_function: ProtectionRelayFunction) -> ProtectedSwitch:
-        return self.relay_functions.append(relay_function)
+        self.relay_functions.append(relay_function)
+        return self
 
-    @deprecated("BOILERPLATE: Use relay_functions.remove(relay_function) instead")
+    @deprecated("Boilerplate: Use relay_functions.remove(relay_function) instead")
     def remove_relay_function(self, relay_function: ProtectionRelayFunction | None) -> ProtectedSwitch:
-        return self.relay_functions.remove(relay_function)
+        self.relay_functions.remove(relay_function)
+        return self
 
     @deprecated("BOILERPLATE: Use relay_functions.clear() instead")
     def clear_relay_functions(self) -> ProtectedSwitch:

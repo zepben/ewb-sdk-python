@@ -35,13 +35,15 @@ class GeographicalRegion(IdentifiedObject):
     def get_sub_geographical_region(self, mrid: str) -> SubGeographicalRegion:
         return self.sub_geographical_regions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use sub_geographical_regions.append(sub_geographical_region) instead")
+    @deprecated("Boilerplate: Use sub_geographical_regions.append(sub_geographical_region) instead")
     def add_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        return self.sub_geographical_regions.append(sub_geographical_region)
+        self.sub_geographical_regions.append(sub_geographical_region)
+        return self
 
-    @deprecated("BOILERPLATE: Use sub_geographical_regions.remove(sub_geographical_region) instead")
+    @deprecated("Boilerplate: Use sub_geographical_regions.remove(sub_geographical_region) instead")
     def remove_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        return self.sub_geographical_regions.remove(sub_geographical_region)
+        self.sub_geographical_regions.remove(sub_geographical_region)
+        return self
 
     @deprecated("BOILERPLATE: Use sub_geographical_regions.clear() instead")
     def clear_sub_geographical_regions(self) -> GeographicalRegion:

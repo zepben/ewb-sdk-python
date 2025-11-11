@@ -41,13 +41,15 @@ class Circuit(Line):
     def get_end_terminal(self, mrid: str) -> Terminal:
         return self.end_terminals.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use end_terminals.append(terminal) instead")
+    @deprecated("Boilerplate: Use end_terminals.append(terminal) instead")
     def add_end_terminal(self, terminal: Terminal) -> Circuit:
-        return self.end_terminals.append(terminal)
+        self.end_terminals.append(terminal)
+        return self
 
-    @deprecated("BOILERPLATE: Use end_terminals.remove(terminal) instead")
+    @deprecated("Boilerplate: Use end_terminals.remove(terminal) instead")
     def remove_end_terminal(self, terminal: Terminal) -> Circuit:
-        return self.end_terminals.remove(terminal)
+        self.end_terminals.remove(terminal)
+        return self
 
     @deprecated("BOILERPLATE: Use end_terminals.clear() instead")
     def clear_end_terminals(self) -> Circuit:
@@ -61,13 +63,15 @@ class Circuit(Line):
     def get_end_substation(self, mrid: str) -> Substation:
         return self.end_substations.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use end_substations.append(substation) instead")
+    @deprecated("Boilerplate: Use end_substations.append(substation) instead")
     def add_end_substation(self, substation: Substation) -> Circuit:
-        return self.end_substations.append(substation)
+        self.end_substations.append(substation)
+        return self
 
-    @deprecated("BOILERPLATE: Use end_substations.remove(substation) instead")
+    @deprecated("Boilerplate: Use end_substations.remove(substation) instead")
     def remove_end_substation(self, substation: Substation) -> Circuit:
-        return self.end_substations.remove(substation)
+        self.end_substations.remove(substation)
+        return self
 
     @deprecated("BOILERPLATE: Use end_substations.clear() instead")
     def clear_end_substations(self) -> Circuit:

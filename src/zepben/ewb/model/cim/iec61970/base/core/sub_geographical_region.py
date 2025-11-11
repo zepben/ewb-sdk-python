@@ -42,13 +42,15 @@ class SubGeographicalRegion(IdentifiedObject):
     def get_substation(self, mrid: str) -> Substation:
         return self.substations.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use substations.append(substation) instead")
+    @deprecated("Boilerplate: Use substations.append(substation) instead")
     def add_substation(self, substation: Substation) -> SubGeographicalRegion:
-        return self.substations.append(substation)
+        self.substations.append(substation)
+        return self
 
-    @deprecated("BOILERPLATE: Use substations.remove(substation) instead")
+    @deprecated("Boilerplate: Use substations.remove(substation) instead")
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:
-        return self.substations.remove(substation)
+        self.substations.remove(substation)
+        return self
 
     @deprecated("BOILERPLATE: Use substations.clear() instead")
     def clear_substations(self) -> SubGeographicalRegion:

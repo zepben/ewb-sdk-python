@@ -39,13 +39,15 @@ class Pole(Structure):
     def get_streetlight(self, mrid: str) -> Streetlight:
         return self.streetlights.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use streetlights.append(streetlight) instead")
+    @deprecated("Boilerplate: Use streetlights.append(streetlight) instead")
     def add_streetlight(self, streetlight: Streetlight) -> Pole:
-        return self.streetlights.append(streetlight)
+        self.streetlights.append(streetlight)
+        return self
 
-    @deprecated("BOILERPLATE: Use streetlights.remove(streetlight) instead")
+    @deprecated("Boilerplate: Use streetlights.remove(streetlight) instead")
     def remove_streetlight(self, streetlight: Streetlight) -> Pole:
-        return self.streetlights.remove(streetlight)
+        self.streetlights.remove(streetlight)
+        return self
 
     @deprecated("BOILERPLATE: Use streetlights.clear() instead")
     def clear_streetlights(self) -> Pole:

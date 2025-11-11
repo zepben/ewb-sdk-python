@@ -160,9 +160,10 @@ class PowerTransformer(ConductingEquipment):
         self.power_transformer_ends.sort(key=lambda t: t.end_number)
         return self
 
-    @deprecated("BOILERPLATE: Use power_transformer_ends.remove(end) instead")
+    @deprecated("Boilerplate: Use power_transformer_ends.remove(end) instead")
     def remove_end(self, end: PowerTransformerEnd) -> PowerTransformer:
-        return self.power_transformer_ends.remove(end)
+        self.power_transformer_ends.remove(end)
+        return self
 
     @custom_clear(power_transformer_ends)
     def clear_ends(self) -> PowerTransformer:

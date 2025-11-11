@@ -76,13 +76,15 @@ class UsagePoint(IdentifiedObject):
     def get_equipment(self, mrid: str) -> Equipment:
         return self.equipment.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use equipment.append(equipment) instead")
+    @deprecated("Boilerplate: Use equipment.append(equipment) instead")
     def add_equipment(self, equipment: Equipment) -> UsagePoint:
-        return self.equipment.append(equipment)
+        self.equipment.append(equipment)
+        return self
 
-    @deprecated("BOILERPLATE: Use equipment.remove(equipment) instead")
+    @deprecated("Boilerplate: Use equipment.remove(equipment) instead")
     def remove_equipment(self, equipment: Equipment) -> UsagePoint:
-        return self.equipment.remove(equipment)
+        self.equipment.remove(equipment)
+        return self
 
     @deprecated("BOILERPLATE: Use equipment.clear() instead")
     def clear_equipment(self) -> UsagePoint:
@@ -92,13 +94,15 @@ class UsagePoint(IdentifiedObject):
     def get_end_device(self, mrid: str) -> EndDevice:
         return self.end_devices.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use end_devices.append(end_device) instead")
+    @deprecated("Boilerplate: Use end_devices.append(end_device) instead")
     def add_end_device(self, end_device: EndDevice) -> UsagePoint:
-        return self.end_devices.append(end_device)
+        self.end_devices.append(end_device)
+        return self
 
-    @deprecated("BOILERPLATE: Use end_devices.remove(end_device) instead")
+    @deprecated("Boilerplate: Use end_devices.remove(end_device) instead")
     def remove_end_device(self, end_device: EndDevice) -> UsagePoint:
-        return self.end_devices.remove(end_device)
+        self.end_devices.remove(end_device)
+        return self
 
     @deprecated("BOILERPLATE: Use end_devices.clear() instead")
     def clear_end_devices(self) -> UsagePoint:

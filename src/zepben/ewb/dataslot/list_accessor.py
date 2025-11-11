@@ -231,11 +231,9 @@ class _Router(Iterable):
             self._set([item])
         else:
             l.append(item)
-        return self._owner
 
     def _default_clear(self):
         self._set(None)
-        return self._owner
 
     def _default_get(self, identifier):
         l: List = self._get_safe()
@@ -252,7 +250,6 @@ class _Router(Iterable):
         l.remove(item)
         if not l:
             self._set(None)
-        return self._owner
 
     # +-----+ BOILERPLATE CALLERS +-----+
     # Note: The re-assignment speeds the methods up by 10x for subsequent calls;
@@ -374,14 +371,13 @@ class MRIDListRouter(ListRouter):
         l: List = self._get()
         if not l:
             self._set([item])
-            return self._owner
+            return
 
         other = next((io for io in l if io.mrid == item.mrid), None)
         if other is None:
             l.append(item)
         elif other is not item:
             _error_duplicate(self._owner, item)
-        return self._owner
 
     def _default_get_by_mrid(self, mrid):
         l = self._get_safe()
@@ -452,19 +448,17 @@ class MRIDDictRouter(_Router):
         mrid = item.mrid
         if not l:
             self._set({mrid: item})
-            return self._owner
+            return
 
         other = l.get(mrid, None)
         if other is None:
             l[mrid] = item
         elif other is not item:
             _error_duplicate(self._owner, item)
-        return self._owner
 
     @override
     def _default_clear(self):
         self._set(None)
-        return self._owner
 
     @override
     def _default_get(self, identifier):
@@ -479,7 +473,6 @@ class MRIDDictRouter(_Router):
         del l[item.mrid]
         if not l:
             self._set(None)
-        return self._owner
 
     def _default_get_by_mrid(self, mrid):
         l: Dict = self._get_safe()

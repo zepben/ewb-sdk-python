@@ -102,9 +102,10 @@ class AcLineSegment(Conductor):
         self.cuts.append_unchecked(cut)
         return self
 
-    @deprecated("BOILERPLATE: Use cuts.remove(cut) instead")
+    @deprecated("Boilerplate: Use cuts.remove(cut) instead")
     def remove_cut(self, cut: 'Cut') -> 'AcLineSegment':
-        return self.cuts.remove(cut)
+        self.cuts.remove(cut)
+        return self
 
     @custom_clear(cuts)
     def clear_cuts(self) -> 'AcLineSegment':
@@ -138,9 +139,10 @@ class AcLineSegment(Conductor):
         self.clamps.append_unchecked(clamp)
         return self
 
-    @deprecated("BOILERPLATE: Use clamps.remove(clamp) instead")
+    @deprecated("Boilerplate: Use clamps.remove(clamp) instead")
     def remove_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
-        return self.clamps.remove(clamp)
+        self.clamps.remove(clamp)
+        return self
 
     @custom_clear(clamps)
     def clear_clamps(self) -> 'AcLineSegment':

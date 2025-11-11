@@ -44,13 +44,15 @@ class OperationalRestriction(Document):
     def get_equipment(self, mrid: str) -> Equipment:
         return self.equipment.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use equipment.append(equipment) instead")
+    @deprecated("Boilerplate: Use equipment.append(equipment) instead")
     def add_equipment(self, equipment: Equipment) -> OperationalRestriction:
-        return self.equipment.append(equipment)
+        self.equipment.append(equipment)
+        return self
 
-    @deprecated("BOILERPLATE: Use equipment.remove(equipment) instead")
+    @deprecated("Boilerplate: Use equipment.remove(equipment) instead")
     def remove_equipment(self, equipment: Equipment) -> OperationalRestriction:
-        return self.equipment.remove(equipment)
+        self.equipment.remove(equipment)
+        return self
 
     @deprecated("BOILERPLATE: Use equipment.clear() instead")
     def clear_equipment(self) -> OperationalRestriction:

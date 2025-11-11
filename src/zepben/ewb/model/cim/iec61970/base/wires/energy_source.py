@@ -133,13 +133,15 @@ class EnergySource(EnergyConnection):
     def get_phase(self, mrid: str) -> EnergySourcePhase:
         return self.energy_source_phases.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use energy_source_phases.append(phase) instead")
+    @deprecated("Boilerplate: Use energy_source_phases.append(phase) instead")
     def add_phase(self, phase: EnergySourcePhase) -> EnergySource:
-        return self.energy_source_phases.append(phase)
+        self.energy_source_phases.append(phase)
+        return self
 
-    @deprecated("BOILERPLATE: Use energy_source_phases.remove(phase) instead")
+    @deprecated("Boilerplate: Use energy_source_phases.remove(phase) instead")
     def remove_phase(self, phase: EnergySourcePhase) -> EnergySource:
-        return self.energy_source_phases.remove(phase)
+        self.energy_source_phases.remove(phase)
+        return self
 
     @deprecated("BOILERPLATE: Use energy_source_phases.clear() instead")
     def clear_phases(self) -> EnergySource:

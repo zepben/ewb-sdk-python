@@ -41,17 +41,19 @@ class ProtectionRelayScheme(IdentifiedObject):
     def get_function(self, mrid: str) -> ProtectionRelayFunction:
         return self.functions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use functions.append(function) instead")
+    @deprecated("Boilerplate: Use functions.append(function) instead")
     def add_function(self, function: ProtectionRelayFunction) -> ProtectionRelayScheme:
-        return self.functions.append(function)
+        self.functions.append(function)
+        return self
 
     @deprecated("BOILERPLATE: Use len(functions) instead")
     def num_functions(self) -> int:
         return len(self.functions)
 
-    @deprecated("BOILERPLATE: Use functions.remove(function) instead")
+    @deprecated("Boilerplate: Use functions.remove(function) instead")
     def remove_function(self, function: ProtectionRelayFunction | None) -> ProtectionRelayScheme:
-        return self.functions.remove(function)
+        self.functions.remove(function)
+        return self
 
     @deprecated("BOILERPLATE: Use functions.clear() instead")
     def clear_function(self) -> ProtectionRelayScheme:

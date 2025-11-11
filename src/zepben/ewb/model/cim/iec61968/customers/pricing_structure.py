@@ -40,13 +40,15 @@ class PricingStructure(Document):
     def get_tariff(self, mrid: str) -> Tariff:
         return self.tariffs.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use tariffs.append(tariff) instead")
+    @deprecated("Boilerplate: Use tariffs.append(tariff) instead")
     def add_tariff(self, tariff: Tariff) -> PricingStructure:
-        return self.tariffs.append(tariff)
+        self.tariffs.append(tariff)
+        return self
 
-    @deprecated("BOILERPLATE: Use tariffs.remove(tariff) instead")
+    @deprecated("Boilerplate: Use tariffs.remove(tariff) instead")
     def remove_tariff(self, tariff: Tariff) -> PricingStructure:
-        return self.tariffs.remove(tariff)
+        self.tariffs.remove(tariff)
+        return self
 
     @deprecated("BOILERPLATE: Use tariffs.clear() instead")
     def clear_tariffs(self) -> PricingStructure:

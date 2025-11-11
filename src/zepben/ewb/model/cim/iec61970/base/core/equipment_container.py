@@ -70,13 +70,15 @@ class EquipmentContainer(ConnectivityNodeContainer):
         self.equipment.append_unchecked(equipment)
         return self
 
-    @deprecated("BOILERPLATE: Use equipment.remove(equipment) instead")
+    @deprecated("Boilerplate: Use equipment.remove(equipment) instead")
     def remove_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        return self.equipment.remove(equipment)
+        self.equipment.remove(equipment)
+        return self
 
     @deprecated("BOILERPLATE: Use equipment.clear() instead")
     def clear_equipment(self) -> EquipmentContainer:
-        return self.equipment.clear()
+        self.equipment.clear()
+        return self
 
     @property
     def current_equipment(self) -> Generator[Equipment, None, None]:

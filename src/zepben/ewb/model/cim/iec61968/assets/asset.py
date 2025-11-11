@@ -49,13 +49,15 @@ class Asset(IdentifiedObject):
     def get_organisation_role(self, mrid: str) -> AssetOrganisationRole:
         return self.organisation_roles.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use organisation_roles.append(role) instead")
+    @deprecated("Boilerplate: Use organisation_roles.append(role) instead")
     def add_organisation_role(self, role: AssetOrganisationRole) -> Asset:
-        return self.organisation_roles.append(role)
+        self.organisation_roles.append(role)
+        return self
 
-    @deprecated("BOILERPLATE: Use organisation_roles.remove(role) instead")
+    @deprecated("Boilerplate: Use organisation_roles.remove(role) instead")
     def remove_organisation_role(self, role: AssetOrganisationRole) -> Asset:
-        return self.organisation_roles.remove(role)
+        self.organisation_roles.remove(role)
+        return self
 
     @deprecated("BOILERPLATE: Use organisation_roles.clear() instead")
     def clear_organisation_roles(self) -> Asset:
@@ -69,13 +71,15 @@ class Asset(IdentifiedObject):
     def get_power_system_resource(self, mrid: str) -> PowerSystemResource:
         return self.power_system_resources.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use power_system_resources.append(resource) instead")
+    @deprecated("Boilerplate: Use power_system_resources.append(resource) instead")
     def add_power_system_resource(self, resource: PowerSystemResource) -> Asset:
-        return self.power_system_resources.append(resource)
+        self.power_system_resources.append(resource)
+        return self
 
-    @deprecated("BOILERPLATE: Use power_system_resources.remove(resource) instead")
+    @deprecated("Boilerplate: Use power_system_resources.remove(resource) instead")
     def remove_power_system_resource(self, resource: PowerSystemResource) -> Asset:
-        return self.power_system_resources.remove(resource)
+        self.power_system_resources.remove(resource)
+        return self
 
     @deprecated("BOILERPLATE: Use power_system_resources.clear() instead")
     def clear_power_system_resources(self) -> Asset:

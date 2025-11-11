@@ -47,13 +47,15 @@ class Loop(IdentifiedObject):
     def get_circuit(self, mrid: str) -> Circuit:
         return self.circuits.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use circuits.append(circuit) instead")
+    @deprecated("Boilerplate: Use circuits.append(circuit) instead")
     def add_circuit(self, circuit: Circuit) -> Loop:
-        return self.circuits.append(circuit)
+        self.circuits.append(circuit)
+        return self
 
-    @deprecated("BOILERPLATE: Use circuits.remove(circuit) instead")
+    @deprecated("Boilerplate: Use circuits.remove(circuit) instead")
     def remove_circuit(self, circuit: Circuit) -> Loop:
-        return self.circuits.remove(circuit)
+        self.circuits.remove(circuit)
+        return self
 
     @deprecated("BOILERPLATE: Use circuits.clear() instead")
     def clear_circuits(self) -> Loop:
@@ -67,13 +69,15 @@ class Loop(IdentifiedObject):
     def get_substation(self, mrid: str) -> Substation:
         return self.substations.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use substations.append(substation) instead")
+    @deprecated("Boilerplate: Use substations.append(substation) instead")
     def add_substation(self, substation: Substation) -> Loop:
-        return self.substations.append(substation)
+        self.substations.append(substation)
+        return self
 
-    @deprecated("BOILERPLATE: Use substations.remove(substation) instead")
+    @deprecated("Boilerplate: Use substations.remove(substation) instead")
     def remove_substation(self, substation: Substation) -> Loop:
-        return self.substations.remove(substation)
+        self.substations.remove(substation)
+        return self
 
     @deprecated("BOILERPLATE: Use substations.clear() instead")
     def clear_substations(self) -> Loop:
@@ -87,13 +91,15 @@ class Loop(IdentifiedObject):
     def get_energizing_substation(self, mrid: str) -> Substation:
         return self.energizing_substations.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use energizing_substations.append(substation) instead")
+    @deprecated("Boilerplate: Use energizing_substations.append(substation) instead")
     def add_energizing_substation(self, substation: Substation) -> Loop:
-        return self.energizing_substations.append(substation)
+        self.energizing_substations.append(substation)
+        return self
 
-    @deprecated("BOILERPLATE: Use energizing_substations.remove(substation) instead")
+    @deprecated("Boilerplate: Use energizing_substations.remove(substation) instead")
     def remove_energizing_substation(self, substation: Substation) -> Loop:
-        return self.energizing_substations.remove(substation)
+        self.energizing_substations.remove(substation)
+        return self
 
     @deprecated("BOILERPLATE: Use energizing_substations.clear() instead")
     def clear_energizing_substations(self) -> Loop:

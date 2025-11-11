@@ -40,13 +40,15 @@ class Sensor(AuxiliaryEquipment):
     def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
         return self.relay_functions.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use relay_functions.append(protection_relay_function) instead")
+    @deprecated("Boilerplate: Use relay_functions.append(protection_relay_function) instead")
     def add_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        return self.relay_functions.append(protection_relay_function)
+        self.relay_functions.append(protection_relay_function)
+        return self
 
-    @deprecated("BOILERPLATE: Use relay_functions.remove(protection_relay_function) instead")
+    @deprecated("Boilerplate: Use relay_functions.remove(protection_relay_function) instead")
     def remove_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        return self.relay_functions.remove(protection_relay_function)
+        self.relay_functions.remove(protection_relay_function)
+        return self
 
     @deprecated("BOILERPLATE: Use relay_functions.clear() instead")
     def clear_relay_function(self) -> Sensor:

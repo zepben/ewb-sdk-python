@@ -67,13 +67,15 @@ class EnergyConsumer(EnergyConnection):
     def get_phase(self, mrid: str) -> EnergyConsumerPhase:
         return self.energy_consumer_phases.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use energy_consumer_phases.append(phase) instead")
+    @deprecated("Boilerplate: Use energy_consumer_phases.append(phase) instead")
     def add_phase(self, phase: EnergyConsumerPhase) -> EnergyConsumer:
-        return self.energy_consumer_phases.append(phase)
+        self.energy_consumer_phases.append(phase)
+        return self
 
-    @deprecated("BOILERPLATE: Use energy_consumer_phases.remove(phase) instead")
+    @deprecated("Boilerplate: Use energy_consumer_phases.remove(phase) instead")
     def remove_phase(self, phase: EnergyConsumerPhase) -> EnergyConsumer:
-        return self.energy_consumer_phases.remove(phase)
+        self.energy_consumer_phases.remove(phase)
+        return self
 
     @deprecated("BOILERPLATE: Use energy_consumer_phases.clear() instead")
     def clear_phases(self) -> EnergyConsumer:

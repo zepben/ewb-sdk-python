@@ -172,13 +172,15 @@ class PowerElectronicsConnection(RegulatingCondEq):
     def get_unit(self, mrid: str) -> PowerElectronicsUnit:
         return self.power_electronics_units.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use power_electronics_units.append(unit) instead")
+    @deprecated("Boilerplate: Use power_electronics_units.append(unit) instead")
     def add_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
-        return self.power_electronics_units.append(unit)
+        self.power_electronics_units.append(unit)
+        return self
 
-    @deprecated("BOILERPLATE: Use power_electronics_units.remove(unit) instead")
+    @deprecated("Boilerplate: Use power_electronics_units.remove(unit) instead")
     def remove_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
-        return self.power_electronics_units.remove(unit)
+        self.power_electronics_units.remove(unit)
+        return self
 
     @deprecated("BOILERPLATE: Use power_electronics_units.clear() instead")
     def clear_units(self) -> PowerElectronicsConnection:
@@ -192,13 +194,15 @@ class PowerElectronicsConnection(RegulatingCondEq):
     def get_phase(self, mrid: str) -> PowerElectronicsConnectionPhase:
         return self.power_electronics_connection_phases.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use power_electronics_connection_phases.append(phase) instead")
+    @deprecated("Boilerplate: Use power_electronics_connection_phases.append(phase) instead")
     def add_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
-        return self.power_electronics_connection_phases.append(phase)
+        self.power_electronics_connection_phases.append(phase)
+        return self
 
-    @deprecated("BOILERPLATE: Use power_electronics_connection_phases.remove(phase) instead")
+    @deprecated("Boilerplate: Use power_electronics_connection_phases.remove(phase) instead")
     def remove_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
-        return self.power_electronics_connection_phases.remove(phase)
+        self.power_electronics_connection_phases.remove(phase)
+        return self
 
     @deprecated("BOILERPLATE: Use power_electronics_connection_phases.clear() instead")
     def clear_phases(self) -> PowerElectronicsConnection:

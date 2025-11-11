@@ -41,17 +41,19 @@ class ProtectionRelaySystem(Equipment):
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         return self.schemes.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use schemes.append(scheme) instead")
+    @deprecated("Boilerplate: Use schemes.append(scheme) instead")
     def add_scheme(self, scheme: ProtectionRelayScheme) -> ProtectionRelaySystem:
-        return self.schemes.append(scheme)
+        self.schemes.append(scheme)
+        return self
 
     @deprecated("BOILERPLATE: Use len(schemes) instead")
     def num_schemes(self) -> int:
         return len(self.schemes)
 
-    @deprecated("BOILERPLATE: Use schemes.remove(scheme) instead")
+    @deprecated("Boilerplate: Use schemes.remove(scheme) instead")
     def remove_scheme(self, scheme: ProtectionRelayScheme | None) -> ProtectionRelaySystem:
-        return self.schemes.remove(scheme)
+        self.schemes.remove(scheme)
+        return self
 
     @deprecated("BOILERPLATE: Use schemes.clear() instead")
     def clear_scheme(self) -> ProtectionRelaySystem:

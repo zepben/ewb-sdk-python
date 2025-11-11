@@ -61,13 +61,15 @@ class Substation(EquipmentContainer):
     def get_feeder(self, mrid: str) -> Feeder:
         return self.normal_energized_feeders.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use normal_energized_feeders.append(feeder) instead")
+    @deprecated("Boilerplate: Use normal_energized_feeders.append(feeder) instead")
     def add_feeder(self, feeder: Feeder) -> Substation:
-        return self.normal_energized_feeders.append(feeder)
+        self.normal_energized_feeders.append(feeder)
+        return self
 
-    @deprecated("BOILERPLATE: Use normal_energized_feeders.remove(feeder) instead")
+    @deprecated("Boilerplate: Use normal_energized_feeders.remove(feeder) instead")
     def remove_feeder(self, feeder: Feeder) -> Substation:
-        return self.normal_energized_feeders.remove(feeder)
+        self.normal_energized_feeders.remove(feeder)
+        return self
 
     @deprecated("BOILERPLATE: Use normal_energized_feeders.clear() instead")
     def clear_feeders(self) -> Substation:
@@ -81,13 +83,15 @@ class Substation(EquipmentContainer):
     def get_loop(self, mrid: str) -> Loop:
         return self.loops.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use loops.append(loop) instead")
+    @deprecated("Boilerplate: Use loops.append(loop) instead")
     def add_loop(self, loop: Loop) -> Substation:
-        return self.loops.append(loop)
+        self.loops.append(loop)
+        return self
 
-    @deprecated("BOILERPLATE: Use loops.remove(loop) instead")
+    @deprecated("Boilerplate: Use loops.remove(loop) instead")
     def remove_loop(self, loop: Loop) -> Substation:
-        return self.loops.remove(loop)
+        self.loops.remove(loop)
+        return self
 
     @deprecated("BOILERPLATE: Use loops.clear() instead")
     def clear_loops(self) -> Substation:
@@ -101,13 +105,15 @@ class Substation(EquipmentContainer):
     def get_energized_loop(self, mrid: str) -> Loop:
         return self.energized_loops.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use energized_loops.append(loop) instead")
+    @deprecated("Boilerplate: Use energized_loops.append(loop) instead")
     def add_energized_loop(self, loop: Loop) -> Substation:
-        return self.energized_loops.append(loop)
+        self.energized_loops.append(loop)
+        return self
 
-    @deprecated("BOILERPLATE: Use energized_loops.remove(loop) instead")
+    @deprecated("Boilerplate: Use energized_loops.remove(loop) instead")
     def remove_energized_loop(self, loop: Loop) -> Substation:
-        return self.energized_loops.remove(loop)
+        self.energized_loops.remove(loop)
+        return self
 
     @deprecated("BOILERPLATE: Use energized_loops.clear() instead")
     def clear_energized_loops(self) -> Substation:
@@ -121,13 +127,15 @@ class Substation(EquipmentContainer):
     def get_circuit(self, mrid: str) -> Circuit:
         return self.circuits.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use circuits.append(circuit) instead")
+    @deprecated("Boilerplate: Use circuits.append(circuit) instead")
     def add_circuit(self, circuit: Circuit) -> Substation:
-        return self.circuits.append(circuit)
+        self.circuits.append(circuit)
+        return self
 
-    @deprecated("BOILERPLATE: Use circuits.remove(circuit) instead")
+    @deprecated("Boilerplate: Use circuits.remove(circuit) instead")
     def remove_circuit(self, circuit: Circuit) -> Substation:
-        return self.circuits.remove(circuit)
+        self.circuits.remove(circuit)
+        return self
 
     @deprecated("BOILERPLATE: Use circuits.clear() instead")
     def clear_circuits(self) -> Substation:

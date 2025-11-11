@@ -59,13 +59,15 @@ class PowerSystemResource(IdentifiedObject):
     def get_asset(self, mrid: str) -> Asset:
         return self.assets.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use assets.append(asset) instead")
+    @deprecated("Boilerplate: Use assets.append(asset) instead")
     def add_asset(self, asset: Asset) -> PowerSystemResource:
-        return self.assets.append(asset)
+        self.assets.append(asset)
+        return self
 
-    @deprecated("BOILERPLATE: Use assets.remove(asset) instead")
+    @deprecated("Boilerplate: Use assets.remove(asset) instead")
     def remove_asset(self, asset: Asset) -> PowerSystemResource:
-        return self.assets.remove(asset)
+        self.assets.remove(asset)
+        return self
 
     @deprecated("BOILERPLATE: Use assets.clear() instead")
     def clear_assets(self) -> PowerSystemResource:

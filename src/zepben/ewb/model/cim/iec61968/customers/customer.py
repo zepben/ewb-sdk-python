@@ -52,13 +52,15 @@ class Customer(OrganisationRole):
     def get_agreement(self, mrid: str) -> CustomerAgreement:
         return self.customer_agreements.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use customer_agreements.append(customer_agreement) instead")
+    @deprecated("Boilerplate: Use customer_agreements.append(customer_agreement) instead")
     def add_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        return self.customer_agreements.append(customer_agreement)
+        self.customer_agreements.append(customer_agreement)
+        return self
 
-    @deprecated("BOILERPLATE: Use customer_agreements.remove(customer_agreement) instead")
+    @deprecated("Boilerplate: Use customer_agreements.remove(customer_agreement) instead")
     def remove_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        return self.customer_agreements.remove(customer_agreement)
+        self.customer_agreements.remove(customer_agreement)
+        return self
 
     @deprecated("BOILERPLATE: Use customer_agreements.clear() instead")
     def clear_agreements(self) -> Customer:

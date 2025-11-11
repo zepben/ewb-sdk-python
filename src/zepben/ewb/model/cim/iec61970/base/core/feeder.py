@@ -83,9 +83,10 @@ class Feeder(EquipmentContainer):
         self.current_equipment.append(equipment)
         return self
 
-    @deprecated("BOILERPLATE: Use current_equipment.remove(equipment) instead")
+    @deprecated("Boilerplate: Use current_equipment.remove(equipment) instead")
     def remove_current_equipment(self, equipment: Equipment) -> Feeder:
-        return self.current_equipment.remove(equipment)
+        self.current_equipment.remove(equipment)
+        return self
 
     @deprecated("BOILERPLATE: Use current_equipment.clear() instead")
     def clear_current_equipment(self) -> Feeder:
@@ -117,9 +118,10 @@ class Feeder(EquipmentContainer):
         self.normal_energized_lv_feeders.append(lv_feeder)
         return self
 
-    @deprecated("BOILERPLATE: Use normal_energized_lv_feeders.remove(lv_feeder) instead")
+    @deprecated("Boilerplate: Use normal_energized_lv_feeders.remove(lv_feeder) instead")
     def remove_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        return self.normal_energized_lv_feeders.remove(lv_feeder)
+        self.normal_energized_lv_feeders.remove(lv_feeder)
+        return self
 
     @deprecated("BOILERPLATE: Use normal_energized_lv_feeders.clear() instead")
     def clear_normal_energized_lv_feeders(self) -> Feeder:
@@ -151,9 +153,10 @@ class Feeder(EquipmentContainer):
         self.current_energized_lv_feeders.append(lv_feeder)
         return self
 
-    @deprecated("BOILERPLATE: Use current_energized_lv_feeders.remove(lv_feeder) instead")
+    @deprecated("Boilerplate: Use current_energized_lv_feeders.remove(lv_feeder) instead")
     def remove_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        return self.current_energized_lv_feeders.remove(lv_feeder)
+        self.current_energized_lv_feeders.remove(lv_feeder)
+        return self
 
     @deprecated("BOILERPLATE: Use current_energized_lv_feeders.clear() instead")
     def clear_current_energized_lv_feeders(self) -> Feeder:

@@ -42,13 +42,15 @@ class TransformerTankInfo(AssetInfo):
     def get_transformer_end_info(self, mrid: str) -> TransformerEndInfo:
         return self.transformer_end_infos.get_by_mrid(mrid)
 
-    @deprecated("BOILERPLATE: Use transformer_end_infos.append(tei) instead")
+    @deprecated("Boilerplate: Use transformer_end_infos.append(tei) instead")
     def add_transformer_end_info(self, tei: TransformerEndInfo) -> TransformerTankInfo:
-        return self.transformer_end_infos.append(tei)
+        self.transformer_end_infos.append(tei)
+        return self
 
-    @deprecated("BOILERPLATE: Use transformer_end_infos.remove(tei) instead")
+    @deprecated("Boilerplate: Use transformer_end_infos.remove(tei) instead")
     def remove_transformer_end_info(self, tei: TransformerEndInfo) -> TransformerTankInfo:
-        return self.transformer_end_infos.remove(tei)
+        self.transformer_end_infos.remove(tei)
+        return self
 
     @deprecated("BOILERPLATE: Use transformer_end_infos.clear() instead")
     def clear_transformer_end_infos(self) -> TransformerTankInfo:
