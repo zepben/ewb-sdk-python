@@ -72,16 +72,6 @@ class NamingOptions:
     singular: bool = False
     method_aliases: dict[_Actions, str] = field(default_factory=dict)
 
-def _hash_on_mrid(cls):
-    # TODO
-    def __hash__(self):
-        return self.mrid.__hash__()
-
-    # if not hasattr(cls, '__hash__'):
-    if hasattr(cls, 'mrid'):
-        cls.__hash__ = __hash__
-            # setattr(cls, '__hash__', mrid_hash)
-
 
 def boilermaker(cls):
     for name, member in cls.__dict__.items():
@@ -97,264 +87,7 @@ def boilermaker(cls):
     #         _attr = val.private_name
     #         inject(cls, val, attr, _attr, val.options)
 
-    # _hash_on_mrid(cls)
-
     return cls
-
-# def _to_singular(name: str):
-#     if name.endswith('s'):
-#         return name[:-1]
-#     return name
-#
-# def _get_method_name(attr: str, action: _Actions, options: NamingOptions=None):
-#
-#     options = options if options else NamingOptions()
-#
-#     if options.attr_alias is not None:
-#         attr = options.attr_alias
-#
-#     name = options.method_aliases.get(action)
-#     if name:
-#         return name
-#     if action not in _plurals or options.singular:
-#         attr = _to_singular(attr)
-#     return action.value(attr)
-#
-#
-
-
-# class _BoilerplateInjector:
-#
-#     def __init__(self, accessor, public, private, options):
-#         self.accessor = accessor
-#         self.public = public
-#         self.private = private
-#         self.options = options
-#
-#     _base_class_error = BaseException("Base class methods should not be called! " +
-#                                       "Use a subclass.")
-#
-#     def _make_add(self): raise _BoilerplateInjector._base_class_error
-#
-#     def _make_clear(self): raise _BoilerplateInjector._base_class_error
-#
-#     def _make_get(self): raise _BoilerplateInjector._base_class_error
-#
-#     def _make_num(self): raise _BoilerplateInjector._base_class_error
-#
-#     def _make_remove(self): raise _BoilerplateInjector._base_class_error
-#
-#     def _inject_method(self, cls, action: _Actions, method: Callable):
-#         name = _get_method_name(self.public, action, self.options)
-#
-#         # If user has defined a custom method, skip injection
-#         user_method = self.accessor.methods.get(action, None)
-#         if user_method is not None:
-#             return
-#
-#         # If there exists a non-deprecated method, raise a name conflict
-#         existing_method = getattr(cls, name, None)
-#         if existing_method is not None:
-#             if not hasattr(existing_method, '__deprecated__'):
-#                 raise AttributeError(f"Class {cls.__name__} has a custom method " +
-#                                      f"{name} that is not marked as boilerplate override, " +
-#                                      f'causing a name conflict. Rename the method or mark it as ' +
-#                                      f'@override_boilerplate({self.public}, {action}).')
-#
-#         # Assign method to the class; Inform the accessor.
-#         setattr(cls, name, method)
-#         method.__name__ = name
-#         self.accessor.methods[action] = method
-#
-#     def inject_into(self, cls):
-#         self._inject_method(cls, _Actions.ADD,    self._make_add())
-#         self._inject_method(cls, _Actions.CLEAR,  self._make_clear())
-#         self._inject_method(cls, _Actions.GET,    self._make_get())
-#         self._inject_method(cls, _Actions.LEN,    self._make_num())
-#         self._inject_method(cls, _Actions.REMOVE, self._make_remove())
-#
-#
-# class ListInjector(_BoilerplateInjector):
-#
-#     @override
-#     def _make_add(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def add(obj, item):
-#             l: List = getattr(obj, self.private)
-#             if l is None:
-#                 setattr(obj, self.private, [item])
-#             else:
-#                 l.append(item)
-#             return obj
-#         # +-----+ END +-----+
-#         return add
-#
-#     @override
-#     def _make_clear(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def clear(obj):
-#             setattr(obj, self.private, None)
-#             return obj
-#         # +-----+ END +-----+
-#         return clear
-#
-#     @override
-#     def _make_get(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def get(obj, identifier):
-#             l: List = getattr(obj, self.private) or []
-#             return l[identifier]
-#         # +-----+ END +-----+
-#         return get
-#
-#
-#     @override
-#     def _make_num(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def num(obj):
-#             l: Sized = getattr(obj, self.private) or []
-#             return len(l)
-#         # +-----+ END +-----+
-#         return num
-#
-#     @override
-#     def _make_remove(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def remove(obj, item):
-#             l: List = getattr(obj, self.private)
-#             if not l:
-#                 raise ValueError()
-#             l.remove(item)
-#             if not l:
-#                 setattr(obj, self.private, None)
-#             return obj
-#         # +-----+ END +-----+
-#         return remove
-#
-#
-# class MRIDListInjector(ListInjector):
-#
-#     @staticmethod
-#     def error_duplicate(obj, item):
-#         raise ValueError(f"{item.__class__.__name__} " +
-#                          f"with mRID {item.mrid} already exists " +
-#                          f"in this {obj.__class__.__name__}.")
-#
-#     @override
-#     def _make_add(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def add(obj, item):
-#             l: List = getattr(obj, self.private)
-#             if not l:
-#                 setattr(obj, self.private, [item])
-#                 return obj
-#
-#             other = next((io for io in l if io.mrid == item.mrid), None)
-#             if other is None:
-#                 l.append(item)
-#             elif other is not item:
-#                 MRIDListInjector.error_duplicate(obj, item)
-#             return obj
-#         # +-----+ END +-----+
-#         return add
-#
-#     def _make_get_by_mrid(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def get_by_mrid(obj, mrid):
-#             l = getattr(obj, self.private)
-#             if not l:
-#                 raise KeyError(mrid)
-#             try:
-#                 return next(io for io in l if io.mrid == mrid)
-#             except StopIteration:
-#                 raise KeyError(mrid)
-#         # +-----+ END +-----+
-#         return get_by_mrid
-#
-#     @override
-#     def _make_get(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def get(obj, identifier):
-#             if isinstance(identifier, str):
-#                 return obj.get_by_mrid(obj, identifier)
-#             elif isinstance(identifier, int):
-#                 l: List = getattr(obj, self.private) or []
-#                 return l[identifier]
-#             raise TypeError(f'Attempting to access MRID list with identifier ' +
-#                            f'of type {type(identifier)}.')
-#         # +-----+ END +-----+
-#         return get
-#
-#     @override
-#     def inject_into(self, cls):
-#         super().inject_into(cls)
-#         self._inject_method(cls, _Actions.GET_BY_MRID, self._make_get_by_mrid())
-#
-# class MRIDDictInjector(MRIDListInjector):
-#
-#     @override
-#     def _make_add(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def add(obj, item):
-#             mrid = item.mrid
-#             d: Dict = getattr(obj, self.private)
-#             if not d:
-#                 setattr(obj, self.private, {mrid: item})
-#                 return obj
-#
-#             other = d.get(mrid, None)
-#             if other is None:
-#                 d[mrid] = item
-#             elif other is not item:
-#                 MRIDListInjector.error_duplicate(obj, item)
-#             return obj
-#         # +-----+ END +-----+
-#         return add
-#
-#     @override
-#     def _make_get(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def get(obj, identifier):
-#             l: Dict = getattr(obj, self.private) or {}
-#             return l[identifier]
-#         # +-----+ END +-----+
-#         return get
-#
-#     @override
-#     def _make_get_by_mrid(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def get_by_mrid(obj, mrid):
-#             d: Dict = getattr(obj, self.private)
-#             if not d:
-#                 raise KeyError(mrid)
-#             return d[mrid]
-#         # +-----+ END +-----+
-#         return get_by_mrid
-#
-#     @override
-#     def _make_remove(self):
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         def remove(obj, item):
-#             d: Dict = getattr(obj, self.private)
-#             if not d:
-#                 raise KeyError() # Different to MRIDList
-#             del d[item.mrid]
-#             if not d:
-#                 setattr(obj, self.private, None)
-#             return obj
-#         # +-----+ BOILERPLATE TEMPLATE +-----+
-#         return remove
-#
-#
-# def inject(cls, val, public, private, options=None):
-#     if isinstance(val, MRIDListAccessor):
-#         injector_class = MRIDListInjector
-#     elif isinstance(val, MRIDDictAccessor):
-#         injector_class = MRIDDictInjector
-#     else:
-#         injector_class = ListInjector
-#     injector = injector_class(val, public, private, options)
-#     injector.inject_into(cls)
 
 _action_methods = {
     _Actions.ADD: '_default_add',
@@ -378,15 +111,13 @@ class _ListAccessorBase(BackedDescriptor):
 class ListAccessor(_ListAccessorBase):
     def __init__(self,
                  default=None,
-                 backed_name=None,
-                 naming_options=None):
+                 backed_name=None):
         super().__init__(default, backed_name)
-        self.options = naming_options
         # self.methods = {}
         self.router_class = ListRouter
 
     def _rawdog(self, instance):
-        return self.router_class(instance, self, self.private_name, self.public_name, self.options)
+        return self.router_class(instance, self, self.private_name, self.public_name)
 
     @cache
     def _get_cached(self, instance, _id):
@@ -414,17 +145,15 @@ class ListAccessor(_ListAccessorBase):
 class MRIDListAccessor(ListAccessor):
     def __init__(self,
                  default=None,
-                 backed_name=None,
-                 naming_options=None):
-        super().__init__(default, backed_name, naming_options)
+                 backed_name=None):
+        super().__init__(default, backed_name)
         self.router_class = MRIDListRouter
 
 class MRIDDictAccessor(ListAccessor):
     def __init__(self,
                  default=None,
-                 backed_name=None,
-                 naming_options=None):
-        super().__init__(default, backed_name, naming_options)
+                 backed_name=None):
+        super().__init__(default, backed_name)
         self.router_class = MRIDDictRouter
 
 
@@ -436,15 +165,13 @@ class _Router(Iterable):
                  owner: object,
                  accessor: _ListAccessorBase,
                  attr: str,
-                 name: str,
-                 options: NamingOptions = None):
+                 name: str):
         self._owner: object = owner
         self._la: _ListAccessorBase = accessor
         self._attr: str = attr
         self._name: str = name
         self.__name__ = name
 
-        self._options = options if options else NamingOptions()
         self.fget = Fget(descriptor=accessor, name=name)
 
         # Type checker fix - public methods only
@@ -460,8 +187,6 @@ class _Router(Iterable):
         name = _action_methods[action]
         return getattr(self, name)
 
-        # method = _get_method_name(self._name, action, self._options)
-        # return getattr(self._owner, method)
 
     def _get(self) -> Optional[Collection]:
         return getattr(self._owner, self._attr)
@@ -635,9 +360,8 @@ class MRIDListRouter(ListRouter):
                  owner: object,
                  accessor: ListAccessor,
                  attr: str,
-                 name: str,
-                 options: NamingOptions = None):
-        super().__init__(owner, accessor, attr, name, options)
+                 name: str):
+        super().__init__(owner, accessor, attr, name)
 
 
         # Type checker fix - public methods only
@@ -691,9 +415,8 @@ class MRIDDictRouter(_Router):
                  owner: object,
                  accessor: ListAccessor,
                  attr: str,
-                 name: str,
-                 options: NamingOptions = None):
-        super().__init__(owner, accessor, attr, name, options)
+                 name: str):
+        super().__init__(owner, accessor, attr, name)
 
         # Type checker fix - public methods only
         self.get_by_mrid = self.get_by_mrid
