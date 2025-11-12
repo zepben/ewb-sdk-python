@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from enum import Enum
 from functools import partial, cache
-from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Collection
+from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized
 
 from typing_extensions import override
 
@@ -63,59 +63,6 @@ _plurals = {
     _Actions.LEN
 }
 
-# def _get_boilerplate_forwarding(list_name):
-#     def forward_num(self):
-#         print('num', list_name, self)
-#         print('num', getattr(self, list_name), len(getattr(self, list_name)))
-#         return len(getattr(self, list_name))
-#
-#     def forward_get_by_mrid(self, mrid: str):
-#         print('get_by_mrid', list_name, self)
-#         return getattr(self, list_name).get_by_mrid(mrid)
-#
-#     def forward_add(self, item):
-#         print('add', list_name, self)
-#         getattr(self, list_name).append(item)
-#         return self
-#
-#     def forward_remove(self, item):
-#         print('remove', list_name, self)
-#         getattr(self, list_name).remove(item)
-#         return self
-#
-#     def forward_clear(self):
-#         print('clear', list_name, self)
-#         getattr(self, list_name).clear()
-#         return self
-#
-#     return {
-#         _Actions.LEN: forward_num,
-#         _Actions.GET_BY_MRID: forward_get_by_mrid,
-#         _Actions.ADD: forward_add,
-#         _Actions.REMOVE: forward_remove,
-#         _Actions.CLEAR: forward_clear,
-#     }
-#
-#
-# def _read_boilerplate_message(msg: str):
-#     msg = msg.lower()
-#     if not ' use ' in msg: return None
-#     msg = msg.split(' use ')[1]
-#     try:
-#         if msg.startswith('len('):
-#             name = msg[4:].split(')')[0]
-#             return _get_boilerplate_forwarding(name)[_Actions.LEN]
-#         else:
-#             name = msg.split('.')[0]
-#             action = {
-#                 'append': _Actions.ADD,
-#                 'clear': _Actions.CLEAR,
-#                 'get_by_mrid': _Actions.GET_BY_MRID,
-#                 'remove': _Actions.REMOVE
-#             }[msg.split('.')[1].split('(')[0]]
-#             return _get_boilerplate_forwarding(name)[action]
-#     except (KeyError, IndexError):
-#         return None
 
 def boilermaker(cls):
     for name, member in cls.__dict__.items():
@@ -123,11 +70,9 @@ def boilermaker(cls):
             action = member.__list_action__
             target = member.__target_list__
             target.methods[action] = member
-
-        # if hasattr(member, '__deprecated__'):
-        #     injected = _read_boilerplate_message(member.__deprecated__)
-        #     if injected is not None:
-        #         setattr(cls, name, injected)
+    for name, member in cls.__dict__.items():
+        if isinstance(member, ListAccessor):
+            member._attach_router()
 
     return cls
 
@@ -155,8 +100,24 @@ class ListAccessor(_ListAccessorBase):
                  default=None,
                  backed_name=None):
         super().__init__(default, backed_name)
-        # self.methods = {}
         self.router_class = ListRouter
+
+    def _router_method_lookup(self, action: _Actions):
+        if action in self.methods:
+            return None
+        name = _action_methods[action]
+        return getattr(self.router_class, name)
+
+    def _attach_router(self):
+        router_subname = f"{self.owner.__name__}_{self.public_name}_Router"
+        r = self.router_class = type(router_subname, (self.router_class, ), {})
+
+        r.append = self._router_method_lookup(_Actions.ADD) or r.append
+        r.clear = self._router_method_lookup(_Actions.CLEAR) or r.clear
+        r.remove = self._router_method_lookup(_Actions.REMOVE) or r.remove
+        r._len = self._router_method_lookup(_Actions.LEN) or r._len
+        r._getitem = self._router_method_lookup(_Actions.GET) or r._getitem
+
 
     def _rawdog(self, instance):
         return self.router_class(instance, self, self.private_name, self.public_name)
@@ -183,13 +144,18 @@ class ListAccessor(_ListAccessorBase):
             raise KeyError('Trying to assign to a list that is already defined!')
         if value:
             self._rawdog(instance).extend(value)
-
 class MRIDListAccessor(ListAccessor):
     def __init__(self,
                  default=None,
                  backed_name=None):
         super().__init__(default, backed_name)
         self.router_class = MRIDListRouter
+
+    def _attach_router(self):
+        super()._attach_router()
+        r = self.router_class
+        r.get_by_mrid = self._router_method_lookup(_Actions.GET_BY_MRID) or r.get_by_mrid
+
 
 class MRIDDictAccessor(ListAccessor):
     def __init__(self,
@@ -198,6 +164,10 @@ class MRIDDictAccessor(ListAccessor):
         super().__init__(default, backed_name)
         self.router_class = MRIDDictRouter
 
+    def _attach_router(self):
+        super()._attach_router()
+        r = self.router_class
+        r.get_by_mrid = self._router_method_lookup(_Actions.GET_BY_MRID) or r.get_by_mrid
 
 
 
@@ -223,14 +193,14 @@ class _Router(Iterable):
         self.remove = self.remove
 
     def _method(self, action: _Actions):
-        if action in self._la.methods:
-            name = self._la.methods[action].__name__
-            return getattr(self._owner, name)
-        name = _action_methods[action]
-        return getattr(self, name)
+        # if action in self._la.methods:
+        name = self._la.methods[action].__name__
+        return getattr(self._owner, name)
+        # name = _action_methods[action]
+        # return getattr(self, name)
 
 
-    def _get(self) -> Optional[Collection]:
+    def _get(self) -> List | None:
         return getattr(self._owner, self._attr)
 
     def _get_safe(self) -> List:
@@ -447,8 +417,6 @@ class MRIDListRouter(ListRouter):
 
 class MRIDDictRouter(_Router):
 
-    action_methods = super
-
     def __init__(self,
                  owner: object,
                  accessor: ListAccessor,
@@ -553,15 +521,3 @@ def custom_len(l: Iterable):
 def custom_remove(l: Iterable):
     return override_boilerplate(l, _Actions.REMOVE)
 
-
-if __name__ == '__main__':
-    @dataslot
-    @boilermaker
-    class A:
-        l: List[int] = ListAccessor()
-
-        @deprecated(' use len(l) instead')
-        def len(self): ...
-
-    a = A([1, 2, 3])
-    print(a.len())

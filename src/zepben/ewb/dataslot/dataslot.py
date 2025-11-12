@@ -18,6 +18,7 @@ __all__ = [
     'private',
     'instantiate',
     'validate',
+    'Fget',
     'BackingValue',
     'BackedDescriptor',
     'WeakrefDescriptor',

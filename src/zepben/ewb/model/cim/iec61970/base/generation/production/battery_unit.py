@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 
 @dataslot
+@boilermaker
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
 
