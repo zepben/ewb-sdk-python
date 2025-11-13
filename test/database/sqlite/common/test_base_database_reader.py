@@ -72,6 +72,12 @@ class TestBaseDatabaseReader:
         self._verify_readers_called()
         assert self.reader.post_load_called, "post_load should have been called"
 
+    async def test_can_opt_out_of_post_load_processing(self):
+        assert await self.reader.load(perform_after_read_processing=False), "Should have loaded"
+
+        self._verify_readers_called(expect_post_load=False)
+        assert not self.reader.post_load_called, "post_load shouldn't have been called"
+
     async def test_can_only_run_once(self):
         assert await self.reader.load(), "Should have loaded the first time"
         assert not await self.reader.load(), "Shouldn't have loaded a second time"
