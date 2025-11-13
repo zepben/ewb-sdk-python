@@ -84,16 +84,20 @@ class BaseDatabaseReader(ABC):
 
         return True
 
-    async def load(self) -> bool:
+    async def load(self, perform_after_read_processing: bool = True) -> bool:
         """
-        Load the database.
+        Read the database.
+
+        :param perform_after_read_processing: An optional "opt-out" control for performing the "after read processing".
+
+        :return: `True` if the database was successfully read, otherwise `False`.
         """
         try:
             if self._has_been_used:
                 raise ValueError("You can only use the database reader once.")
             self._has_been_used = True
 
-            return self._pre_load() and self._load_from_readers() and await self._post_load()
+            return self._pre_load() and self._load_from_readers() and ((not perform_after_read_processing) or await self._post_load())
         except Exception as e:
             self._logger.exception(f"Unable to load database: {e}")
             return False

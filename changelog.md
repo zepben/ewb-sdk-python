@@ -10,6 +10,7 @@
 ### Enhancements
 * Bumped `hypothesis` version for tests to latest (6.138.2), fixed examples generating large numbers of results causing tests to run extremely slow.
 * Bumped every other dependency to the latest version aside from dataclassy.
+* You can now opt out of the post read processing in the database readers using the optional `preform_after_read_processing` parameter.
 
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
