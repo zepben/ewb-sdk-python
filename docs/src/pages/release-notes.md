@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[1.0.4](#104)| `14 November 2025` |
 |[1.0.3](#103)| `29 August 2025` |
 |[0.48.0](#v0480)| `10 July 2025` |
 |[0.47.1](#v0471)| `13 May 2025` |
@@ -58,6 +59,26 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.0.4]
+
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* Fix an ImportError being raised when calling `Conductor.is_underground()`
+* `TypeError`s occurring in `StepAction`s will no longer silently pass
+
+### Notes
+* None.
 
 ---
 
