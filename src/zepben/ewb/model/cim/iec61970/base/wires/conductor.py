@@ -8,9 +8,9 @@ __all__ = ["Conductor"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 
 if TYPE_CHECKING:
-    from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
     from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
 
 

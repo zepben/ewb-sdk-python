@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* Fix an ImportError being raised when calling `Conductor.is_underground()`
 
 ### Notes
 * None.
