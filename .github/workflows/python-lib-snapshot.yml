@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - LTS/*
+      - hotfix/*
   workflow_dispatch:
 
 jobs:
