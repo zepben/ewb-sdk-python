@@ -21,6 +21,11 @@
 ### Notes
 * None.
 
+## [1.0.4] - 2025-11-14
+### Fixes
+* Fix an ImportError being raised when calling `Conductor.is_underground()`
+* `TypeError`s occurring in `StepAction`s will no longer silently pass
+
 ## [1.0.3] - 2025-08-29
 ### Fixes
 * Moved ZepbenTokenAuth to use python dataclasses instead of `zepben.ewb.dataclassy`, existing code should work as is.
