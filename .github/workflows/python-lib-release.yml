@@ -5,7 +5,4 @@ on: workflow_dispatch
 jobs:
   run:
     uses: zepben/.github/.github/workflows/python-lib-release.yml@main
-    with:
-      private: false
-      product-key: "python-sdk"   # Must be unique
     secrets: inherit
