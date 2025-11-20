@@ -1,0 +1,4 @@
+# Site-config
+!*./site-config/sidebars.json
+!*./site-config/release-notes.md
+site-config

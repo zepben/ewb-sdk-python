@@ -1,6 +1,7 @@
 ---
 id: sdk-data-model
 title: Data Model
+slug: /
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,13 +12,13 @@ build your own solutions from scratch that will be compatible with other things 
 
 ## CIM Model
 
-The EWB platform is composed around a domain model based on the 'Common Information Model' (CIM). The CIM is a very
-large standard that covers a huge amount of use cases. To make things more digestible, Zepben publishes its own CIM
-profile. CIM profiles are subsets of the whole CIM standard that dictates which parts of the model are in use. EWB
+The Evolve platform is composed around a domain model based on the 'Common Information Model' (CIM). The CIM is a very
+large standard that covers a huge amount of use cases. To make things more digestible, Evolve publishes its own CIM
+profile. CIM profiles are subsets of the whole CIM standard that dictates which parts of the model are in use. Evolve
 publishes its model at [https://zepben.github.io/evolve/docs/cim/evolve/](https://zepben.github.io/evolve/docs/cim/evolve/).
 
-If the EWB profile doesn't contain a part of CIM that you require for your use case, you can request or propose a change to the model
-by starting a discussion at the [GitHub discussions](https://github.com/zepben/evolve/discussions) or by contacting Zepben directly at \<https://www.zepben.com/contact\>.
+If the Evolve profile doesn't contain a part of CIM that you require for your use case, you can request or propose a change to the model
+by starting a discussion at the [Evolve GitHub discussions](https://github.com/zepben/evolve/discussions) or by contacting Zepben directly at \<https://www.zepben.com/contact\>.
 
 ## Getting Started With The Model
 
@@ -29,7 +30,7 @@ attributes such as mRID (master resource identifier), name, description, etc.
 
 Let's get started with the data model by building the following contrived electrical circuit.
 
-![circuit](./assets/contrived-circuit.png)
+![](./assets/contrived-circuit.png)
 
 Here we simply have an AC energy source ([EnergySource](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Wires/EnergySource/))
 connected to a conductor ([ACLineSegment](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Wires/ACLineSegment/))
@@ -40,7 +41,7 @@ In CIM all these things are a subtype of
 Let's see how we create them:
 
 ```python
-from zepben.ewb import EnergySource, AcLineSegment, Breaker
+from zepben.evolve import EnergySource, AcLineSegment, Breaker
 
 # Create the energy source. Providing no ID will generate a UUID.
 source = EnergySource()
@@ -59,14 +60,14 @@ In CIM, all conducting equipment can have any number of [Terminals](https://zepb
 and terminals connect to other terminals using a [ConnectivityNode](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/ConnectivityNode/).
 If we redraw the above diagram with all the required items from CIM it would look like:
 
-![cim-circuit](./assets/contrived-circuit-cim.png)
+![](./assets/contrived-circuit-cim.png)
 
 Where the back dots represent the terminals and the black diamonds represent connectivity nodes.
 
 Now, lets redo the above code sample this time also creating connectivity between the objects.
 
 ```python
-from zepben.ewb import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
+from zepben.evolve import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
 
 # Create the energy source
 source = EnergySource()
@@ -121,7 +122,7 @@ to tell if the network is currently in the normal state or not. This can be impo
 analytics you may be running when using the model.
 
 ```python
-from zepben.ewb import Breaker
+from zepben.evolve import Breaker
 
 # Example of setting normal and current switch states
 switch = Breaker()
@@ -142,7 +143,7 @@ There are a number of helpful functions for tracing phases based on connectivity
 :::
 
 ```python
-from zepben.ewb import Terminal, PhaseCode
+from zepben.evolve import Terminal, PhaseCode
 # Example of setting nominal phases on a terminal
 Terminal terminal = Terminal(phases=PhaseCode.ABC)
 ```
@@ -153,15 +154,12 @@ In electricity distribution networks, a model is typically made up of groups of 
 sections of the network. For example things like: feeder, zone (substation), transmission line etc. The terminology 
 differs within the industry, however CIM provides types of 
 [EquipmentContainer](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/EquipmentContainer) to allow you to
-group equipment into the above types of categories. You can refer to the EWB CIM profile for all supported equipment
+group equipment into the above types of categories. You can refer to the Evolve profile CIM profile for all supported equipment 
 container types in the model, however the most common ones are:
 
 - [Line](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Wires/Line/)
 - [Substation](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/Substation/)
 - [Feeder](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/Feeder/)
-
-We also extend CIM to provide an extension of the hierarchy to an `LvFeeder`, representing LV equipment underneath
-a distribution transformer.
 
 ### Network Hierarchy
 
@@ -170,7 +168,7 @@ When creating a `Substation` you will see that it can belong to a
 `SubGeogrpahicalRegion` can belong to a 
 [GeographicalRegion](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/GeographicalRegion).
 
-When using various parts of the EWB platform, it will refer to the concept of a network hierarchy. This is the
+When using various parts of the Evolve platform, it will refer to the concept of a network hierarchy. This is the 
 mechanism used to chunk up the network and provides an overview of what makes up the model. The network hierarchy looks
 as follows:
 
@@ -178,27 +176,9 @@ as follows:
   * SubGeographicalRegion
     * Substation
       * Feeder
-        * LvFeeder
 
-When working with the EWB Platform, it is important to make sure equipment and equipment containers are correctly
+When working with the Evolve Platform, it is important to make sure equipment and equipment containers are correctly
 populated as there are assumptions built around the network being structured in this pattern.
-
-### Names and IDs
-
- As everything in our model is ultimately an IdentifiedObject, it can have one or many "names" associated with it.
- The `IdentifiedObject.name` property is typically treated as a user-friendly name for a particular object. It is not a required field, and will
- default to an empty string if left unset. If set, it should be considered a presentation field for displaying in UI's or for providing context
- for an object. It should be avoided for storing any sort of information or metadata about an object beyond a human readable name.
-
- Sometimes a need will arise to store extra IDs or metadata about a specific object alongside it's existing `mRID` and `name`. For example these could be IDs
- for separate systems (e.g GIS, DMS), or NMI's associated with the object.
- To store this information we recommend storing additional "names" via the `IdentifiedObject.names` field utilising `NameType`s. Extra names are not
- considered presentation fields, and thus can have more structured string data within them.
-
- To add extra names to an IdentifiedObject, utilise the `addName` function:
-
- IdentifiedObject.add_name([str], [NameType])
- The [str] represents the etra name given to the [IdentifiedObject] and [NameType] is the [NameType] object representing the type of this name.
 
 ### Feeders
 
@@ -215,7 +195,7 @@ The following example shows how you can build a network hierarchy and assign equ
 containers.
 
 ```python
-from zepben.ewb import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
+from zepben.evolve import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
 
 region = GeographicalRegion()
 sub_region = SubGeographicalRegion(geographical_region=region)
