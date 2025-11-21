@@ -92,7 +92,7 @@ class PowerTransformerEnd(TransformerEnd):
     rated_s: int | None = CustomDescriptor()
 
     def _retype(self):
-        self.s_ratings: ListRouter = ...
+        self.s_ratings: ListRouter[TransformerEndRatedS] = ...
 
     @property
     def nominal_voltage(self):

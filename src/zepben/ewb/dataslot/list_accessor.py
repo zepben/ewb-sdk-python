@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from enum import Enum
 from functools import partial, cache
-from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized
+from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Generic, Iterator
 
 from typing_extensions import override
 
@@ -171,7 +171,7 @@ class MRIDDictAccessor(ListAccessor):
 
 
 
-class _Router(Iterable):
+class _Router(Generic[T]):
 
     def __init__(self,
                  owner: object,
@@ -188,9 +188,9 @@ class _Router(Iterable):
 
         # Type checker fix - public methods only
         if True: return
-        self.append = self.append
-        self.clear = self.clear
-        self.remove = self.remove
+        self.append: Callable[[T], None] = self.append
+        self.clear: Callable[None, None] = self.clear
+        self.remove: Callable[[T], None] = self.remove
 
     def _method(self, action: _Actions):
         # if action in self._la.methods:
@@ -215,10 +215,10 @@ class _Router(Iterable):
     def _set(self, val):
         setattr(self._owner, self._attr, val)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         return iter(self._get_safe())
 
-    def __next__(self):
+    def __next__(self) -> T:
         return next(iter(self._get_safe()))
 
     def __repr__(self):
@@ -268,7 +268,7 @@ class _Router(Iterable):
     #       It is not done in __init__ to avoid defining ones we don't use.
     #       Dunders are aliased because python bypasses instance-wise dunder reassignment.
 
-    def append(self, item):
+    def append(self, item: T):
         self.append = self._method(_Actions.ADD)
         return self.append(item)
 
@@ -276,7 +276,7 @@ class _Router(Iterable):
         self.clear = self._method(_Actions.CLEAR)
         return self.clear()
 
-    def remove(self, item):
+    def remove(self, item: T):
         self.remove = self._method(_Actions.REMOVE)
         return self.remove(item)
 
@@ -284,10 +284,10 @@ class _Router(Iterable):
         self._len = self._method(_Actions.LEN)
         return self._len()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self._len()
 
-    def num(self):
+    def num(self) -> int:
         return self._len()
 
     def __hash__(self):
@@ -297,14 +297,14 @@ class _Router(Iterable):
         self._getitem = self._method(_Actions.GET)
         return self._getitem(item)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> T:
         return self._getitem(item)
 
     def get(self, item):
         return self._getitem(item)
 
 
-class ListRouter(_Router):
+class ListRouter(_Router[T]):
 
     @override
     def _get(self) -> Optional[List]:
@@ -363,7 +363,7 @@ def _error_duplicate(obj, item):
 # E       ValueError: AssetOrganisationRole with mRID 1 already exists in this Asset.
 # An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {re.escape(str(it))}
 
-class MRIDListRouter(ListRouter):
+class MRIDListRouter(ListRouter[T]):
 
     def __init__(self,
                  owner: object,
@@ -415,7 +415,7 @@ class MRIDListRouter(ListRouter):
 
 
 
-class MRIDDictRouter(_Router):
+class MRIDDictRouter(_Router[T]):
 
     def __init__(self,
                  owner: object,
@@ -438,7 +438,7 @@ class MRIDDictRouter(_Router):
         return getattr(self._owner, self._attr) or {}
 
     @override
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         return iter(self._get_safe().values())
 
     @override

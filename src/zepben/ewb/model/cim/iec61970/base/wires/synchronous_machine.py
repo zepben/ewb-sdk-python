@@ -109,7 +109,7 @@ class SynchronousMachine(RotatingMachine):
     """Current mode of operation."""
 
     def _retype(self):
-        self.curves: MRIDListRouter = ...
+        self.curves: MRIDListRouter['ReactiveCapabilityCurve'] = ...
     
     @deprecated("BOILERPLATE: Use len(curves) instead")
     def num_curves(self):

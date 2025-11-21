@@ -87,7 +87,7 @@ class PowerTransformer(ConductingEquipment):
     power_transformer_info: PowerTransformerInfo | None = Alias(backed_name='asset_info')
 
     def _retype(self):
-        self.power_transformer_ends: MRIDListRouter = ...
+        self.power_transformer_ends: MRIDListRouter[PowerTransformerEnd] = ...
     
     @deprecated("BOILERPLATE: Use len(power_transformer_ends) instead")
     def num_ends(self):

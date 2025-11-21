@@ -42,7 +42,7 @@ class DiagramObject(IdentifiedObject):
     diagram_object_points: List[DiagramObjectPoint] | None = ListAccessor()
 
     def _retype(self):
-        self.diagram_object_points: ListRouter = ...
+        self.diagram_object_points: ListRouter[DiagramObjectPoint] = ...
 
     @deprecated("BOILERPLATE: Use len(diagram_object_points) instead")
     def num_points(self):

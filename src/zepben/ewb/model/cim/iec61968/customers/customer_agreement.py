@@ -34,7 +34,7 @@ class CustomerAgreement(Agreement):
     pricing_structures: List[PricingStructure] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.pricing_structures: MRIDListRouter = ...
+        self.pricing_structures: MRIDListRouter[PricingStructure] = ...
 
     @deprecated("BOILERPLATE: Use len(pricing_structures) instead")
     def num_pricing_structures(self):

@@ -31,7 +31,7 @@ class RelayInfo(AssetInfo):
     reclose_delays: List[float] | None = ListAccessor()
 
     def _retype(self):
-        self.reclose_delays: ListRouter = ...
+        self.reclose_delays: ListRouter[float] = ...
     
     @deprecated("BOILERPLATE: Use len(reclose_delays) instead")
     def num_delays(self) -> int:

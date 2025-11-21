@@ -34,7 +34,7 @@ class OperationalRestriction(Document):
     equipment: List[Equipment] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.equipment: MRIDListRouter = ...
+        self.equipment: MRIDListRouter[Equipment] = ...
     
     @deprecated("BOILERPLATE: Use len(equipment) instead")
     def num_equipment(self):

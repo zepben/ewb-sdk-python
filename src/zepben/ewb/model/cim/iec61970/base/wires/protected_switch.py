@@ -31,7 +31,7 @@ class ProtectedSwitch(Switch):
     relay_functions: List[ProtectionRelayFunction] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.relay_functions: MRIDListRouter = ...
+        self.relay_functions: MRIDListRouter[ProtectionRelayFunction] = ...
     
     @deprecated("BOILERPLATE: Use len(relay_functions) instead")
     def num_relay_functions(self) -> int:

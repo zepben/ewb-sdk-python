@@ -25,7 +25,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
     data: List[PhaseImpedanceData] | None = ListAccessor()
 
     def _retype(self):
-        self.data: ListRouter = ...
+        self.data: ListRouter[PhaseImpedanceData] = ...
     
     @property
     def diagonal(self) -> Generator[PhaseImpedanceData, None, None]:

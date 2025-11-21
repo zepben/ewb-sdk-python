@@ -30,7 +30,7 @@ class Location(IdentifiedObject):
     position_points: List[PositionPoint] | None = ListAccessor()
 
     def _retype(self):
-        self.position_points: ListRouter = ...
+        self.position_points: ListRouter[PositionPoint] = ...
     
     @deprecated("BOILERPLATE: Use len(position_points) instead")
     def num_points(self):

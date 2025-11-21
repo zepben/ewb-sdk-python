@@ -30,7 +30,7 @@ class PricingStructure(Document):
     tariffs: List[Tariff] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.tariffs: MRIDListRouter = ...
+        self.tariffs: MRIDListRouter[Tariff] = ...
     
     @deprecated("BOILERPLATE: Use len(tariffs) instead")
     def num_tariffs(self):

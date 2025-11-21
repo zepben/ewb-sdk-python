@@ -35,7 +35,7 @@ class BatteryUnit(PowerElectronicsUnit):
     controls: List['BatteryControl'] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.controls: MRIDListRouter = ...
+        self.controls: MRIDListRouter['BatteryControl'] = ...
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
     @deprecated("BOILERPLATE: Use len(controls) instead")

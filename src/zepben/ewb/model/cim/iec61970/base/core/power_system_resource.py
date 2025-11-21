@@ -42,7 +42,7 @@ class PowerSystemResource(IdentifiedObject):
     assets: List[Asset] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.assets: MRIDListRouter = ...
+        self.assets: MRIDListRouter[Asset] = ...
     
     @property
     def has_controls(self) -> bool:

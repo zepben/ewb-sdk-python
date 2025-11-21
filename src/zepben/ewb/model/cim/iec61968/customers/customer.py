@@ -35,7 +35,7 @@ class Customer(OrganisationRole):
     customer_agreements: List[CustomerAgreement] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.customer_agreements: MRIDListRouter = ...
+        self.customer_agreements: MRIDListRouter[CustomerAgreement] = ...
     
     @deprecated("BOILERPLATE: Use len(customer_agreements) instead")
     def num_agreements(self) -> int:

@@ -29,7 +29,7 @@ class Pole(Structure):
     streetlights: List[Streetlight] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.streetlights: MRIDListRouter = ...
+        self.streetlights: MRIDListRouter[Streetlight] = ...
     
     @deprecated("BOILERPLATE: Use len(streetlights) instead")
     def num_streetlights(self) -> int:

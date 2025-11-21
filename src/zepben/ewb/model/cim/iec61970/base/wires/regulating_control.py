@@ -112,7 +112,7 @@ class RegulatingControl(PowerSystemResource):
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
     def _retype(self):
-        self.regulating_conducting_equipment: MRIDListRouter = ...
+        self.regulating_conducting_equipment: MRIDListRouter[RegulatingCondEq] = ...
 
     @deprecated("BOILERPLATE: Use len(regulating_cond_eq) instead")
     def num_regulating_cond_eq(self) -> int:

@@ -32,7 +32,7 @@ class SubGeographicalRegion(IdentifiedObject):
     substations: List[Substation] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.substations: MRIDListRouter = ...
+        self.substations: MRIDListRouter[Substation] = ...
     
     @deprecated("BOILERPLATE: Use len(substations) instead")
     def num_substations(self) -> int:

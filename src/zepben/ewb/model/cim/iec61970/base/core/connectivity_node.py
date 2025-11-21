@@ -29,7 +29,7 @@ class ConnectivityNode(IdentifiedObject):
     terminals: List[Terminal] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.terminals: MRIDListRouter = ...
+        self.terminals: MRIDListRouter[Terminal] = ...
     
     def __iter__(self):
         return iter(self.terminals)

@@ -116,7 +116,7 @@ class EnergySource(EnergyConnection):
     """Maximum zero sequence Thevenin reactance."""
 
     def _retype(self):
-        self.energy_source_phases: MRIDListRouter = ...
+        self.energy_source_phases: MRIDListRouter[EnergySourcePhase] = ...
     
     @property
     def phases(self) -> Generator[EnergySourcePhase, None, None]:

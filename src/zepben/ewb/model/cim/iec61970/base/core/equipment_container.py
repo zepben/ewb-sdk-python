@@ -34,7 +34,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
     def _retype(self):
-        self.equipment: MRIDDictRouter = ...
+        self.equipment: MRIDDictRouter[Equipment] = ...
     
     @deprecated("BOILERPLATE: Use len(equipment) instead")
     def num_equipment(self):

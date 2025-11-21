@@ -51,7 +51,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     # TODO: Missing num_diagram_objects: int = None  def has_diagram_objects(self): return (self.num_diagram_objects or 0) > 0
 
     def _retype(self):
-        self.names: ListRouter = ...
+        self.names: ListRouter[Name] = ...
 
     def __hash__(self):
         return self.mrid.__hash__()

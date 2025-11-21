@@ -25,7 +25,7 @@ class GeographicalRegion(IdentifiedObject):
     sub_geographical_regions: List[SubGeographicalRegion] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.sub_geographical_regions: MRIDListRouter = ...
+        self.sub_geographical_regions: MRIDListRouter[SubGeographicalRegion] = ...
     
     @deprecated("BOILERPLATE: Use len(sub_geographical_regions) instead")
     def num_sub_geographical_regions(self) -> int:

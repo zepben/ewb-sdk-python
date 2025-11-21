@@ -35,7 +35,7 @@ class ProtectionRelayScheme(IdentifiedObject):
     functions: List[ProtectionRelayFunction] | None = MRIDListAccessor()
 
     def _retype(self):
-        self.functions: MRIDListRouter = ...
+        self.functions: MRIDListRouter[ProtectionRelayFunction] = ...
     
     @deprecated("BOILERPLATE: Use functions.get_by_mrid(mrid) instead")
     def get_function(self, mrid: str) -> ProtectionRelayFunction:

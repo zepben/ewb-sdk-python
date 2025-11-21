@@ -24,7 +24,7 @@ class Curve(IdentifiedObject):
     data: List[CurveData] | None = ListAccessor()
 
     def _retype(self):
-        self.data: ListRouter = ...
+        self.data: ListRouter[CurveData] = ...
     
     @deprecated("BOILERPLATE: Use len(data) instead")
     def num_data(self):

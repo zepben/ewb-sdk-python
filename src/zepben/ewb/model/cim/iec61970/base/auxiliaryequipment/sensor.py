@@ -30,7 +30,7 @@ class Sensor(AuxiliaryEquipment):
     """The relay functions influenced by this [Sensor]."""
 
     def _retype(self):
-        self.relay_functions: MRIDListRouter = ...
+        self.relay_functions: MRIDListRouter[ProtectionRelayFunction] = ...
     
     @deprecated("BOILERPLATE: Use len(relay_functions) instead")
     def num_relay_functions(self) -> int:

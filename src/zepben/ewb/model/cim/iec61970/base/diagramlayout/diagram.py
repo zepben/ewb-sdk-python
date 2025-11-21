@@ -37,7 +37,7 @@ class Diagram(IdentifiedObject):
     diagram_objects: List[DiagramObject] | None = MRIDDictAccessor()
 
     def _retype(self):
-        self.diagram_objects: MRIDDictRouter = ...
+        self.diagram_objects: MRIDDictRouter[DiagramObject] = ...
     
     @deprecated("BOILERPLATE: Use len(diagram_objects) instead")
     def num_diagram_objects(self):

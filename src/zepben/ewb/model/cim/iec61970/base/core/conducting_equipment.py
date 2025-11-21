@@ -43,7 +43,7 @@ class ConductingEquipment(Equipment):
     max_terminals = int(sys.maxsize)
 
     def _retype(self):
-        self.terminals: MRIDListRouter = ...
+        self.terminals: MRIDListRouter[Terminal] = ...
     
     # pylint: disable=unused-argument
     def get_base_voltage(self, terminal: Terminal = None):

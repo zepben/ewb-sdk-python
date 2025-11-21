@@ -52,7 +52,7 @@ class EnergyConsumer(EnergyConnection):
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     def _retype(self):
-        self.energy_consumer_phases: MRIDListRouter = ...
+        self.energy_consumer_phases: MRIDListRouter[EnergyConsumerPhase] = ...
     
     @deprecated("BOILERPLATE: Use len(energy_consumer_phases) instead")
     def num_phases(self):

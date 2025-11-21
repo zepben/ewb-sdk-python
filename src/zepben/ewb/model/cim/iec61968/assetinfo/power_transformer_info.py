@@ -28,7 +28,7 @@ class PowerTransformerInfo(AssetInfo):
     """Data for all the tanks described by this power transformer data."""
 
     def _retype(self):
-        self.transformer_tank_infos: MRIDListRouter = ...
+        self.transformer_tank_infos: MRIDListRouter[TransformerTankInfo] = ...
     
     @deprecated("BOILERPLATE: Use len(transformer_tank_infos) instead")
     def num_transformer_tank_infos(self):
