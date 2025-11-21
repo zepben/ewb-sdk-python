@@ -1,6 +1,6 @@
 import React from 'react';
 
-function MyGlobalTopContent() {
+function GlobalTopContent() {
   return (
     <div style={{ backgroundColor: 'lightyellow', padding: '10px', textAlign: 'center' }}>
       🚨 This is an important announcement! 🚨
@@ -12,4 +12,4 @@ function MyGlobalTopContent() {
   );
 }
 
-export default MyGlobalTopContent;
+export default GlobalTopContent;
