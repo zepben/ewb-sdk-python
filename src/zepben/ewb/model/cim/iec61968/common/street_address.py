@@ -13,7 +13,7 @@ from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
 
 @dataclass
-class StreetAddress(object):
+class StreetAddress:
     """
     General purpose street and postal address information.
 
@@ -27,6 +27,7 @@ class StreetAddress(object):
     town_detail: Optional[TownDetail] = None
     po_box: Optional[str] = None
     street_detail: Optional[StreetDetail] = None
+
     def __init__(self, postal_code=None, town_detail=None, po_box=None, street_detail=None):
         self.postal_code = str(postal_code) if postal_code is not None else None
         self.town_detail = town_detail

@@ -7,7 +7,7 @@ __all__ = ["ContactDetails"]
 
 from typing import Generator, Any
 
-from zepben.ewb import CopyableUUID, ngen, nlen
+from zepben.ewb.util import CopyableUUID, ngen, nlen
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress

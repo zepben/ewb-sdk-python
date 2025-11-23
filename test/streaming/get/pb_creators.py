@@ -603,7 +603,11 @@ def street_detail():
 
 
 def town_detail():
-    return builds(PBTownDetail, nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvinceSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+    return builds(
+        PBTownDetail,
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        stateOrProvinceSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)
+    )
 
 
 ######################
@@ -829,7 +833,7 @@ def equipment():
         psr=power_system_resource(),
         inService=booleans(),
         normallyInService=booleans(),
-        commissionedDate=timestamp(),
+        commissionedDateSet=timestamp(),
         equipmentContainerMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         operationalRestrictionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
