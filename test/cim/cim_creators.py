@@ -494,9 +494,9 @@ def create_position_point():
 def create_street_address():
     return builds(
         StreetAddress,
-        postal_code=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        postal_code=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)),
         town_detail=create_town_detail(),
-        po_box=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        po_box=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)),
         street_detail=create_street_detail()
     )
 
