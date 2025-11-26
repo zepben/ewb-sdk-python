@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,

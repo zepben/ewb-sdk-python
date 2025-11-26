@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PowerTransformerInfo(AssetInfo):
     """Set of power transformer data, from an equipment library."""
 

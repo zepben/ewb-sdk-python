@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PowerSystemResource(IdentifiedObject):
     """
     Abstract class, should only be used through subclasses.

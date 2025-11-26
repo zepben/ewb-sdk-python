@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation

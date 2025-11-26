@@ -16,7 +16,6 @@ from zepben.ewb.util import require, ngen, nlen, safe_remove, none
 
 
 @dataslot
-@boilermaker
 class PerLengthPhaseImpedance(PerLengthImpedance):
     """
     Impedance and admittance parameters per unit length for n-wire unbalanced lines, in matrix form.

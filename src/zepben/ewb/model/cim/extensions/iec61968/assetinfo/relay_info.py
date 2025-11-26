@@ -18,7 +18,7 @@ from zepben.ewb.util import ngen, nlen, safe_remove, require
 
 @zbex
 @dataslot
-@boilermaker
+
 class RelayInfo(AssetInfo):
     """Relay Datasheet Information."""
 

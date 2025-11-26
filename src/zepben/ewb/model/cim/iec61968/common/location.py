@@ -18,7 +18,7 @@ from zepben.ewb.util import require, nlen, ngen, safe_remove
 
 
 @dataslot
-@boilermaker
+
 class Location(IdentifiedObject):
     """
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.

@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Customer(OrganisationRole):
     """
     Organisation receiving services from service supplier.

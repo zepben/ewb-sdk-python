@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Asset(IdentifiedObject):
     """
     Tangible resource of the utility, including power system equipment, various end devices, cabinets, buildings,

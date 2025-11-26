@@ -17,7 +17,6 @@ from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
 
 @dataslot
-@boilermaker
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.

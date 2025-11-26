@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class EndDevice(AssetContainer):
     """
     Asset container that performs one or more end device functions. One type of end device is a meter which can perform

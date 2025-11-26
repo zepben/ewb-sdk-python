@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 @dataslot
-@boilermaker
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.

@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from enum import Enum
 from functools import partial, cache
-from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Generic, Iterator
+from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Generic, Iterator, ClassVar
 
 from typing_extensions import override
 
@@ -49,24 +49,15 @@ T = TypeVar('T')
 S = TypeVar('S')
 
 class _Actions(Enum):
-    ADD         = partial(lambda item : f'add_{item}')
-    CLEAR       = partial(lambda item : f'clear_{item}')
-    REMOVE      = partial(lambda item : f'remove_{item}')
+    ADD = partial(lambda item : f'add_{item}')
+    CLEAR = partial(lambda item : f'clear_{item}')
+    REMOVE = partial(lambda item : f'remove_{item}')
 
 ListActions = None
 
 
 def boilermaker(cls):
     ...
-    # for name, member in cls.__dict__.items():
-    #     if hasattr(member, '__list_action__'):
-    #         action = member.__list_action__
-    #         target = member.__target_list__
-    #         target.methods[action] = member
-    # for name, member in cls.__dict__.items():
-    #     if isinstance(member, ListAccessor):
-    #         member._attach_router()
-
     return cls
 
 _action_methods = {
@@ -74,6 +65,35 @@ _action_methods = {
     _Actions.CLEAR: '_default_clear',
     _Actions.REMOVE: '_default_remove',
 }
+
+
+class _Fwd:
+    def __init__(self, callable):
+        self._callable = callable
+    def __call__(self, *args, **kwargs):
+        self._callable(*args, **kwargs)
+
+class ListInterface:
+    def __init__(self, _owner=None):
+        self.__owner__ = _owner
+
+    def append_unchecked(self, __object):
+        raise NotImplementedError()
+    def remove_unchecked(self, __object):
+        raise NotImplementedError()
+    def clear_unchecked(self):
+        raise NotImplementedError()
+
+    _custom_append: ClassVar[Callable | None] = None
+    _custom_clear: ClassVar[Callable | None] = None
+    _custom_remove: ClassVar[Callable | None] = None
+
+    def _append_caller(self, __object):
+        self._custom_append(self.__owner__, __object)
+    def _clear_caller(self):
+        self._custom_clear(self.__owner__)
+    def _remove_caller(self, __object):
+        self._custom_remove(self.__owner__, __object)
 
 # This is needed to make the type checker chill out
 # ListAccessor __get__ return is picked up as default type otherwise
@@ -91,7 +111,9 @@ class ListAccessor(_ListAccessorBase):
                  backed_name=None):
         super().__init__(default, backed_name)
         self.router_class = ListRouter
-        # self._subclass_router()
+        self.custom_append = None
+        self.custom_clear = None
+        self.custom_remove = None
 
     def __set_name__(self, owner, name):
         super().__set_name__(owner, name)
@@ -101,32 +123,24 @@ class ListAccessor(_ListAccessorBase):
         router_subname = (self.owner.__name__ + "_"
                           + self.public_name + "_"
                           + self.router_class.__name__)
-        self.router_class = type(router_subname, (self.router_class,), {})
+        r = self.router_class = type(router_subname, (self.router_class,), {})
+        if self.custom_append is not None:
+            r._custom_append = self.custom_append
+            r.append = r._append_forwarding
+        elif self.custom_clear is not None:
+            r._custom_clear = self.custom_clear
+            r.clear = r._clear_forwarding
+        elif self.custom_remove is not None:
+            r._custom_remove = self.custom_remove
+            r.remove = r._remove_forwarding
 
     def attach_router_member(self, member: Callable, action: _Actions):
         if action == _Actions.ADD:
-            self.router_class.append = member
-        if action == _Actions.REMOVE:
-            self.router_class.remove = member
-        if action == _Actions.CLEAR:
-            self.router_class.clear = member
-
-    def _router_method_lookup(self, action: _Actions):
-        if action in self.methods:
-            return None
-        name = _action_methods[action]
-        return getattr(self.router_class, name)
-
-    def _attach_router(self):
-        router_subname = (self.owner.__name__ + "_"
-                          + self.public_name + "_"
-                          + self.router_class.__name__)
-        r = self.router_class = type(router_subname, (self.router_class, ), {})
-
-        r.append = self._router_method_lookup(_Actions.ADD) or r.append
-        r.clear = self._router_method_lookup(_Actions.CLEAR) or r.clear
-        r.remove = self._router_method_lookup(_Actions.REMOVE) or r.remove
-
+            self.custom_append = member
+        elif action == _Actions.CLEAR:
+            self.custom_clear = member
+        elif action == _Actions.REMOVE:
+            self.custom_remove = member
 
     def _rawdog(self, instance):
         return self.router_class(instance, self, self.private_name, self.public_name)
@@ -191,20 +205,11 @@ class _Router(Generic[T]):
         self.clear: Callable[None, None] = self.clear
         self.remove: Callable[[T], None] = self.remove
 
-    def _method(self, action: _Actions):
-        if action in self._la.methods:
-            name = self._la.methods[action].__name__
-            return getattr(self._owner, name)
-        name = _action_methods[action]
-        return getattr(self, name)
-
-
     def _get(self) -> List | None:
         return getattr(self._owner, self._attr)
 
     def _get_safe(self) -> List:
         return getattr(self._owner, self._attr) or []
-
 
     @property
     def raw(self):
@@ -236,25 +241,17 @@ class _Router(Generic[T]):
 
     # +-----+ BOILERPLATE DEFAULTS +-----+
 
-    def _default_add(self, item):
+    def append(self, item):
         l: List = self._get()
         if l is None:
             self._set([item])
         else:
             l.append(item)
 
-    def _default_clear(self):
+    def clear(self):
         self._set(None)
 
-    def _default_get(self, identifier):
-        l: List = self._get_safe()
-        return l[identifier]
-
-    def _default_num(self):
-        l: Sized = self._get_safe()
-        return len(l)
-
-    def _default_remove(self, item):
+    def remove(self, item):
         l: List = self._get()
         if not l:
             raise ValueError()
@@ -265,22 +262,22 @@ class _Router(Generic[T]):
     # +-----+ BOILERPLATE CALLERS +-----+
     # Note: The re-assignment speeds the methods up by 10x for subsequent calls;
     #       It is not done in __init__ to avoid defining ones we don't use.
-    #       Dunders are aliased because python bypasses instance-wise dunder reassignment.
 
-    def append(self, item: T):
-        # self.append = self._method(_Actions.ADD)
-        self.append = self._default_add
-        return self.append(item)
+    _custom_append: ClassVar[Callable] = None
+    _custom_clear: ClassVar[Callable] = None
+    _custom_remove: ClassVar[Callable] = None
 
-    def clear(self):
-#         self.clear = self._method(_Actions.CLEAR)
-        self.clear = self._default_clear
-        return self.clear()
+    def _append_forwarding(self, item: T):
+        self.append = getattr(self._owner, self._custom_append.__name__)
+        self.append(item)
 
-    def remove(self, item: T):
-#         self.remove = self._method(_Actions.REMOVE)
-        self.remove = self._default_remove
-        return self.remove(item)
+    def _clear_forwarding(self):
+        self.clear = getattr(self._owner, self._custom_clear.__name__)
+        self.clear()
+
+    def _remove_forwarding(self, item: T):
+        self.remove = getattr(self._owner, self._custom_remove.__name__)
+        self.remove(item)
 
     def __len__(self):
         return len(self._get_safe())
@@ -356,7 +353,7 @@ class MRIDListRouter(ListRouter[T]):
     # +-----+ BOILERPLATE DEFAULTS +-----+
 
     @override
-    def _default_add(self, item):
+    def append(self, item):
         l: List = self._get()
         if not l:
             self._set([item])
@@ -414,7 +411,7 @@ class MRIDDictRouter(_Router[T]):
 
     # +-----+ BOILERPLATE DEFAULTS +-----+
     @override
-    def _default_add(self, item):
+    def append(self, item):
         l: Dict = self._get()
         mrid = item.mrid
         if not l:
@@ -438,7 +435,7 @@ class MRIDDictRouter(_Router[T]):
         return l[identifier]
 
     @override
-    def _default_remove(self, item):
+    def remove(self, item):
         l: Dict = self._get()
         if not l:
             raise ValueError()
@@ -461,8 +458,6 @@ class MRIDDictRouter(_Router[T]):
 def override_boilerplate(l: ListAccessor, action: _Actions):
     def inner(f):
         l.attach_router_member(f, action)
-        # f.__list_action__ = action
-        # f.__target_list__ = l
         return f
     return inner
 

@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.

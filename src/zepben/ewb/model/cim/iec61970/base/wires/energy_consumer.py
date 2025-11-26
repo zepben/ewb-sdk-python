@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 

@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.

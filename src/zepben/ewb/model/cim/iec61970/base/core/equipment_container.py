@@ -23,7 +23,6 @@ T = TypeVar("T")
 
 
 @dataslot
-@boilermaker
 class EquipmentContainer(ConnectivityNodeContainer):
     """
     A modeling construct to provide a root class for containing equipment.

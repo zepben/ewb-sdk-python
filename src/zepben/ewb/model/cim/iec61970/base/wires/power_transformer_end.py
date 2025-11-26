@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PowerTransformerEnd(TransformerEnd):
     """
     A PowerTransformerEnd is associated with each Terminal of a PowerTransformer.

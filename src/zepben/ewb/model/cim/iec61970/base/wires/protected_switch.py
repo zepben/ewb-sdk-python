@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class ProtectedSwitch(Switch):
     """
     A ProtectedSwitch is a switching device that can be operated by :class:`ProtectionRelayFunction`.

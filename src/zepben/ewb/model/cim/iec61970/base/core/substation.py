@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Substation(EquipmentContainer):
     """
     A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk

@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PowerElectronicsConnection(RegulatingCondEq):
     """
     A connection to the AC network for energy production or consumption that uses power electronics rather than rotating machines.

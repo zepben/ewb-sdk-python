@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class ConductingEquipment(Equipment):
     """
     Abstract class, should only be used through subclasses.

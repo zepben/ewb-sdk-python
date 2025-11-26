@@ -24,7 +24,6 @@ if typing.TYPE_CHECKING:
 
 @zbex
 @dataslot
-@boilermaker
 class LvFeeder(EquipmentContainer):
     """
     [ZBEX]

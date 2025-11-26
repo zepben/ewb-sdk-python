@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Pole(Structure):
     """A Pole Asset"""
 

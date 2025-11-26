@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class OperationalRestriction(Document):
     """
     A document that can be associated with equipment to describe any sort of restrictions compared with the

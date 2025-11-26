@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class TransformerTankInfo(AssetInfo):
     """Set of transformer tank data, from an equipment library."""
 

@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PricingStructure(Document):
     """
     Grouping of pricing components and prices used in the creation of customer charges and the eligibility

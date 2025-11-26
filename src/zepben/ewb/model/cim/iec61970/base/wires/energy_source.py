@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.

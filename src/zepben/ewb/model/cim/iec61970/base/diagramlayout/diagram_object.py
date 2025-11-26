@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
 @dataslot
-@boilermaker
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything

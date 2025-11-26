@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class PowerTransformer(ConductingEquipment):
     """
     An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing

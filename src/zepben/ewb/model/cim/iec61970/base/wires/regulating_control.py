@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class RegulatingControl(PowerSystemResource):
     """
     Specifies a set of equipment that works together to control a power system quantity such as voltage or flow. Remote bus voltage control is possible by

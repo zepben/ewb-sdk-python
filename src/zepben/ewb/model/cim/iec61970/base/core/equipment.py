@@ -28,7 +28,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Equipment(PowerSystemResource):
     """
     Abstract class, should only be used through subclasses.

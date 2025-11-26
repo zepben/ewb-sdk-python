@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class UsagePoint(IdentifiedObject):
     """
     Logical or physical point in the network to which readings or events may be attributed.

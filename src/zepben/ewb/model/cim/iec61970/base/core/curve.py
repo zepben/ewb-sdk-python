@@ -15,7 +15,6 @@ from zepben.ewb.util import require, ngen, nlen, safe_remove
 
 
 @dataslot
-@boilermaker
 class Curve(IdentifiedObject):
     """
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.

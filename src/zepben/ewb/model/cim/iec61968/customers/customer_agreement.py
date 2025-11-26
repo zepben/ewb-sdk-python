@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class CustomerAgreement(Agreement):
     """
     Agreement between the customer and the service supplier to pay for service at a specific service location. It

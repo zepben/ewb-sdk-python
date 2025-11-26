@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 @dataslot
-@boilermaker
 class Sensor(AuxiliaryEquipment):
     """
     This class describes devices that transform a measured quantity into signals that can be presented at displays,

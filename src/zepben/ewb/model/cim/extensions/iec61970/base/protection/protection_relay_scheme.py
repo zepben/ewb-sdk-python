@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 @zbex
 @dataslot
-@boilermaker
 class ProtectionRelayScheme(IdentifiedObject):
     """
     [ZBEX]
