@@ -44,7 +44,7 @@ class Location(IdentifiedObject):
         for point in ngen(self.position_points):
             yield point
 
-    @custom_get(position_points)
+    @deprecated("BOILERPLATE: Use points[sequence_number] instead")
     def get_point(self, sequence_number: int) -> PositionPoint:
         """
         Get the `sequence_number` `PositionPoint` for this `Location`.
@@ -53,7 +53,7 @@ class Location(IdentifiedObject):
         Returns The `PositionPoint` identified by `sequence_number`
         Raises IndexError if this `Location` didn't contain `sequence_number` points.
         """
-        return self.position_points.raw[sequence_number]
+        return self.position_points[sequence_number]
 
     def __getitem__(self, item):
         return self.get_point(item)
@@ -118,7 +118,7 @@ class Location(IdentifiedObject):
         :raises IndexError: If no :class:`PositionPoint` with the specified `sequence_number` was not associated with this :class:`Location`.
         """
         point = self.get_point(sequence_number)
-        self.position_points.raw.remove(point)
+        self.position_points.remove(point)
         return point
 
     @deprecated("BOILERPLATE: Use position_points.clear() instead")

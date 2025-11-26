@@ -135,7 +135,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         :raises IndexError: If `sequence_number` is out of range.
         """
         threshold = self.get_threshold(sequence_number)
-        self.thresholds.raw.remove(threshold)
+        self.thresholds.remove(threshold)
         return threshold
 
     @deprecated("BOILERPLATE: Use thresholds.clear() instead")

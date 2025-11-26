@@ -40,7 +40,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
     def num_equipment(self):
         return len(self.equipment)
 
-    @custom_get_by_mrid(equipment)
+    @deprecated("BOILERPLATE: Use equipment.get_by_mrid(mrid) instead")
     def get_equipment(self, mrid: str) -> Equipment:
         """
         Get the `Equipment` for this `EquipmentContainer` identified by `mrid`
@@ -49,12 +49,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        if not self.equipment:
-            raise KeyError(mrid)
-        try:
-            return self.equipment.raw[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return self.equipment.get_by_mrid(mrid)
 
     @custom_add(equipment)
     def add_equipment(self, equipment: Equipment) -> EquipmentContainer:

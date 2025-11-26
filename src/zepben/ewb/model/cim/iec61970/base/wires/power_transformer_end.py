@@ -158,7 +158,7 @@ class PowerTransformerEnd(TransformerEnd):
         if self.s_ratings:
             for transformer_end_rated_s in self.s_ratings:
                 if transformer_end_rated_s.cooling_type == cooling_type:
-                    self.s_ratings.raw.remove(transformer_end_rated_s)
+                    self.s_ratings.remove(transformer_end_rated_s)
                     return transformer_end_rated_s
         raise IndexError(cooling_type)
 

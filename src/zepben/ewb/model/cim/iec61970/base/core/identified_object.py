@@ -103,7 +103,6 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                         return name_
         raise KeyError(name_type, name)
 
-    @custom_get(names)
     def get_names(self, name_type: NameType | str):
         """
         Find all `Name` with the matching `name_type`

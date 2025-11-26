@@ -90,7 +90,6 @@ class ConductingEquipment(Equipment):
     def get_terminal_by_mrid(self, mrid: str) -> Terminal:
         return self.terminals.get_by_mrid(mrid)
 
-    @custom_get(terminals)
     def get_terminal_by_sn(self, sequence_number: int):
         """
         Get the `Terminal` on this `ConductingEquipment` by its `sequence_number`.
@@ -134,7 +133,7 @@ class ConductingEquipment(Equipment):
 
         return self
 
-    @custom_remove(terminals)
+    @deprecated("BOILERPLATE: Use terminals.remove(terminal) instead")
     def remove_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
         Disassociate `terminal` from this `ConductingEquipment`
@@ -143,16 +142,16 @@ class ConductingEquipment(Equipment):
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConductingEquipment`.
         """
-        self.terminals.raw.remove(terminal)
+        self.terminals.remove(terminal)
         return self
 
-    @custom_clear(terminals)
+    @deprecated("BOILERPLATE: Use terminals.clear() instead")
     def clear_terminals(self) -> ConductingEquipment:
         """
         Clear all terminals.
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         """
-        self.terminals.raw.clear()
+        self.terminals.clear()
         return self
 
     def __repr__(self):

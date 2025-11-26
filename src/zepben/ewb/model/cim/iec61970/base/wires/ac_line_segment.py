@@ -107,13 +107,13 @@ class AcLineSegment(Conductor):
         self.cuts.remove(cut)
         return self
 
-    @custom_clear(cuts)
+    @deprecated("Boilerplate: Use cuts.clear() instead")
     def clear_cuts(self) -> 'AcLineSegment':
         """
         Clear all `Cut`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self.cuts.raw.clear()
+        self.cuts.clear()
         return self
 
     @deprecated("BOILERPLATE: Use len(clamps) instead")
@@ -144,13 +144,13 @@ class AcLineSegment(Conductor):
         self.clamps.remove(clamp)
         return self
 
-    @custom_clear(clamps)
+    @deprecated("Boilerplate: clamps.clear() instead")
     def clear_clamps(self) -> 'AcLineSegment':
         """
         Clear all `Clamp`s.
         :return: A reference to this `AcLineSegment` to allow fluent use.
         """
-        self.clamps.raw.clear()
+        self.clamps.clear()
         return self
 
     def _validate_cut(self, cut: 'Cut') -> bool:

@@ -133,7 +133,7 @@ class DiagramObject(IdentifiedObject):
         :raises IndexError: If no :class:`DiagramObjectPoint` with the specified `sequence_number` was not associated with this :class:`DiagramObject`.
         """
         point = self.get_point(sequence_number)
-        self.diagram_object_points.raw.remove(point)
+        self.diagram_object_points.remove(point)
         return point
 
     @deprecated("BOILERPLATE: Use diagram_object_points.clear() instead")

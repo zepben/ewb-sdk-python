@@ -57,7 +57,7 @@ class ConnectivityNode(IdentifiedObject):
         self.terminals.append_unchecked(terminal)
         return self
 
-    @custom_remove(terminals)
+    @deprecated("BOILERPLATE: Use terminals.remove(terminal) instead")
     def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
         Disassociate `terminal` from this `ConnectivityNode`.
@@ -66,22 +66,21 @@ class ConnectivityNode(IdentifiedObject):
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
         """
-        self.terminals.raw.remove(terminal)
+        self.terminals.remove(terminal)
         return self
 
-    @custom_clear(terminals)
+    @deprecated("BOILERPLATE: Use terminals.clear() instead")
     def clear_terminals(self) -> ConnectivityNode:
         """
         Clear all terminals.
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         """
-        self.terminals.raw.clear()
+        self.terminals.clear()
         return self
 
     def is_switched(self):
         return self.get_switch() is not None
 
-    @custom_get(terminals)
     def get_switch(self):
         for term in self.terminals:
             try:

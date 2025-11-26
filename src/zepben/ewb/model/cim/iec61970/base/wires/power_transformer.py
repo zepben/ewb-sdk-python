@@ -125,7 +125,6 @@ class PowerTransformer(ConductingEquipment):
                     return end
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self)}")
 
-    @custom_get(power_transformer_ends)
     def get_end_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
         """
         Get the `PowerTransformerEnd` on this `PowerTransformer` by its `terminal`.
@@ -165,13 +164,13 @@ class PowerTransformer(ConductingEquipment):
         self.power_transformer_ends.remove(end)
         return self
 
-    @custom_clear(power_transformer_ends)
+    @deprecated("Boilerplate: Use power_transformer_ends.clear() instead")
     def clear_ends(self) -> PowerTransformer:
         """
         Clear all `PowerTransformerEnd`s.
         Returns A reference to this `PowerTransformer` to allow fluent use.
         """
-        self.power_transformer_ends.raw.clear()
+        self.power_transformer_ends.clear()
         return self
 
     def _validate_end(self, end: PowerTransformerEnd) -> bool:

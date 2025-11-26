@@ -38,7 +38,6 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
     def num_data(self):
         return len(self.data)
 
-    @custom_get(data)
     def get_data(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
         """
         Get the matrix entry for the corresponding to and from phases.

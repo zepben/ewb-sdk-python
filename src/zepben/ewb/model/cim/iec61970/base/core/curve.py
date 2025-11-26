@@ -105,7 +105,7 @@ class Curve(IdentifiedObject):
         :raises IndexError: If no :class:`CurveData` with a value of `x` was not associated with this :class:`Curve`.
         """
         data = self.get_data(x)
-        self.data.raw.remove(data)
+        self.data.remove(data)
         return data
 
     @deprecated("BOILERPLATE: Use data.clear() instead")
