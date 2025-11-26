@@ -17,6 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from enum import Enum
 from functools import partial, cache
+from types import MethodType
 from typing import List, Iterable, Optional, TypeVar, Generator, Type, Dict, Sized, Generic, Iterator, ClassVar
 
 from typing_extensions import override

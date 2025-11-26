@@ -13,7 +13,6 @@ __all__ = [
     'WeakrefDescriptor',
     'ValidatedDescriptor',
     'NoResetDescriptor',
-    'TypeRestrictedDescriptor',
 ]
 
 
@@ -23,7 +22,7 @@ from _weakref import ref
 from abc import ABCMeta
 from dataclasses import dataclass, field, KW_ONLY
 from enum import Enum
-from typing import ClassVar, List, Callable, Any
+from typing import ClassVar, List, Callable, Any, TYPE_CHECKING
 
 from typing_extensions import dataclass_transform
 
@@ -119,10 +118,11 @@ class CustomDescriptor(Descriptor):
 
 class BackedDescriptor(Descriptor):
 
-    def __init__(self, default=None, backed_name=None):
+    def __init__(self, default=None, backed_name=None, exposed_backing=False):
         super().__init__(default=default)
         self.default = default
         self.private_name = backed_name
+        self.exposed_backing=exposed_backing
 
     def __set_name__(self, owner, name):
         super().__set_name__(owner=owner, name=name)
@@ -195,16 +195,6 @@ class WeakrefDescriptor(BackedDescriptor):
         setattr(obj, self.private_name, value)
 
 
-class TypeRestrictedDescriptor(BackedDescriptor):
-
-    def __set__(self, obj, value, direct: bool=False):
-        if value is not self and self.typed:
-            if not isinstance(value, self.typed):
-                raise TypeError(f'Trying to pass type {type(value)} ' +
-                                f'to descriptor {self.public_name} ' +
-                                f'which only accepts type {self.typed}')
-        super().__set__(obj, value, direct)
-
 class RangedDescriptor(ValidatedDescriptor):
     def __init__(self,
                  default = None,
@@ -221,7 +211,8 @@ class RangedDescriptor(ValidatedDescriptor):
         super().__init__(default=default, validate=check, backed_name=backed_name)
 
 class Alias(BackedDescriptor):
-    ...
+    def __init__(self, default=None, backed_name=None):
+        super().__init__(default, backed_name, exposed_backing=True)
 
 
 
@@ -339,54 +330,60 @@ def _validate_backed_name(cls: type, attr, _attr):
                                  f'because the field already exists in superclass {base.__name__}')
 
 
-def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
+def _autoslot(cls, slots=True, weakref=False, **kwargs):
     """
-    Wrangle object creation to enable descriptor use
-    in dataclasses with slots.
+    This method changes runtime annotations to trick dataclasses into
+    generating the correct slots signature, while maintaining correct
+    type hinting in the editor.
 
-    This creates annotations and defaults for the internal variables,
-    and re-types descriptors as ClassVar to force the dataclass
-    creator to skip them.
+    The specific steps are:
+    1. Change descriptors to ClassVar (removes them from slots)
+    2. Add descriptor private fields to annotations (adds them to slots without showing in init)
+    3. Set defaults for private fields to those specified in the decorators
+
+    It re-builds all annotations to maintain parameter order consistent with type hints.
     """
-    new_annotations = cls.__annotations__.copy()
+    new_annotations = {}
 
     for attr, _type in cls.__annotations__.items():
         val = cls.__dict__.get(attr, None)
-        del new_annotations[attr]
         if isinstance(val, Descriptor):
-            _attr = None
+            # Step 1: force dataclass to ignore descriptors
+            new_annotations[attr] = ClassVar[_type]
+            val.set_type(_type)     # Communicate type to the descriptor
+
+            # Step 2: if descriptor has a private field, add it to the class definition
             if isinstance(val, BackedDescriptor):
                 _attr = val.private_name
-                if not isinstance(val, Alias):
+                if not val.exposed_backing:
                     new_annotations[_attr] = _type
-            elif isinstance(val, CustomDescriptor):
-                new_annotations[attr] = ClassVar[_type]
-                continue
-            if _attr and not isinstance(val, Alias):
-                _validate_backed_name(cls, attr, _attr)
-
-            val.set_type(_type)
-            new_annotations[attr] = ClassVar[_type]
-            if _attr and not isinstance(val, Alias):
-                setattr(cls, _attr, val.default)
-
+                    _validate_backed_name(cls, attr, _attr)     # Check that there is no name conflict
+                    # Step 3: set the default for the private field
+                    setattr(cls, _attr, val.default)
+        # If the member is not a descriptor, copy it over with no changes
         else:
             new_annotations[attr] = _type
 
+    # Update the annotations on the original class
     cls.__annotations__ = new_annotations
 
-    if inherit_hash:
-        kwargs['eq'] = False
+    # Manually invoke the dataclass decorator
+    new_cls = dataclass(slots=slots, **kwargs)(cls)
 
-    obj = dataclass(slots=slots, **kwargs)(cls)
+    # We can't partially define slots, so to add weakref, we use those generated by the dataclass
+    # and inject the weakref, then re-generate the class.
+    # Note: Dubious.
+    # TODO: Remove this once 3.10 is deprecated. 3.11 onwards has weakref as one of the dataclass params.
     if weakref and slots:
-        cls.__slots__ = (*obj.__slots__, '__weakref__')
-        obj = dataclass(slots=False, **kwargs)(cls)
+        cls.__slots__ = (*new_cls.__slots__, '__weakref__')
+        new_cls = dataclass(slots=False, **kwargs)(cls)
 
-    amend_init(obj, cls)
+    # Fix the init to comprehend descriptors correctly
+    amend_init(new_cls, cls)
+    # Remove the old class because it is unused
     del cls
-    return obj
 
+    return new_cls
 
 def private(default: Any, /, *, init: bool = False) -> Any:
     """A shorthand for a non-init dataclass field with a default value."""
@@ -398,16 +395,15 @@ def instantiate(default_factory: Callable[[], Any], **kwargs):
 
 @dataclass_transform(
     field_specifiers=(field,private,),
+    eq_default=False,
     kw_only_default=True
 )
-def dataslot(cls_outer=None, *, slots=True, weakref=False, inherit_hash=True, **kwargs):
-    if not 'kw_only' in kwargs:
-        kwargs['kw_only'] = True
+def dataslot(cls_outer=None, *, slots=True, weakref=False, **kwargs):
+    # TODO: Add kwargs mimicking dataclass
+    kwargs.setdefault('kw_only', True)
+    kwargs.setdefault('eq', False)
     def dec(cls):
-        new = _autoslot(cls, slots=slots, weakref=weakref, inherit_hash=inherit_hash, **kwargs)
-        del cls
-        import gc
-        gc.collect()
+        new = _autoslot(cls, slots=slots, weakref=weakref, **kwargs)
         return new
 
     if cls_outer:
@@ -495,7 +491,6 @@ if __name__ == '__main__':
     @dataslot
     class T(A):
         _z: ClassVar = BackingValue()
-        t: int = TypeRestrictedDescriptor(backed_name='_z')
 
     @dataslot
     class I1(A):
