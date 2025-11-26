@@ -435,9 +435,12 @@ def instantiate(default_factory: Callable[[], Any], **kwargs):
     return field(default_factory=default_factory, **kwargs)
 
 @dataclass_transform(
-    field_specifiers=(field,private,)
+    field_specifiers=(field,private,),
+    kw_only_default=True
 )
 def dataslot(cls_outer=None, *, slots=True, weakref=False, inherit_hash=True, **kwargs):
+    if not 'kw_only' in kwargs:
+        kwargs['kw_only'] = True
     def dec(cls):
         new = _autoslot(cls, slots=slots, weakref=weakref, inherit_hash=inherit_hash, **kwargs)
         del cls

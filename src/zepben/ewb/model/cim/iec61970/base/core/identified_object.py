@@ -34,11 +34,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     relation, however must be in snake case to keep the phases PEP compliant.
     """
 
-    mrid: str = field(default_factory=lambda: CopyableUUID().__str__())
+    mrid: str = field(kw_only=False, default_factory=lambda: CopyableUUID().__str__())
     """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
-
-    _: KW_ONLY = ... # Everything from this point on will have to be a kwarg
 
     name: str | None = None
     """The name is any free human readable and possibly non unique text naming the object."""
