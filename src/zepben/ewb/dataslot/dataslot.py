@@ -225,14 +225,6 @@ class Alias(BackedDescriptor):
 
 
 
-
-def _addressor(var: object | ValidatedDescriptor, _type: _Addressor):
-    def dec(f):
-        f.__addressor_target__ = var
-        f.__addressor_type__ = _type
-        return f
-    return dec
-
 def validate(var: object | ValidatedDescriptor):
     def inner(f):
         if not isinstance(var, ValidatedDescriptor):
@@ -240,7 +232,6 @@ def validate(var: object | ValidatedDescriptor):
                                  f"to attribute {var} that is not a ValidatedDescriptor!")
         var.validate = f
     return inner
-    # return _addressor(var, _Addressor.Validator)
 
 def getter(var: object | CustomDescriptor):
     def inner(f):
@@ -249,7 +240,6 @@ def getter(var: object | CustomDescriptor):
                                  f"to attribute {var} that is not a CustomDescriptor!")
         var.add_getter(f)
     return inner
-    # return _addressor(var, _Addressor.Getter)
 
 def setter(var: object | CustomDescriptor):
     def inner(f):
@@ -258,7 +248,6 @@ def setter(var: object | CustomDescriptor):
                                  f"to attribute {var} that is not a CustomDescriptor!")
         var.add_setter(f)
     return inner
-    # return _addressor(var, _Addressor.Setter)
 
 
 

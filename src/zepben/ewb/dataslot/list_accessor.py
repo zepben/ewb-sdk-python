@@ -24,9 +24,6 @@ from typing_extensions import override
 from zepben.ewb.dataslot.dataslot import BackedDescriptor, Fget
 
 __all__ = [
-    'boilermaker',
-    'ListActions',
-
     'ListAccessor',
     'MRIDListAccessor',
     'MRIDDictAccessor',
@@ -38,9 +35,6 @@ __all__ = [
     'override_boilerplate',
     'custom_add',
     'custom_clear',
-    'custom_get',
-    'custom_get_by_mrid',
-    'custom_len',
     'custom_remove',
 ]
 
@@ -53,47 +47,6 @@ class _Actions(Enum):
     CLEAR = partial(lambda item : f'clear_{item}')
     REMOVE = partial(lambda item : f'remove_{item}')
 
-ListActions = None
-
-
-def boilermaker(cls):
-    ...
-    return cls
-
-_action_methods = {
-    _Actions.ADD: '_default_add',
-    _Actions.CLEAR: '_default_clear',
-    _Actions.REMOVE: '_default_remove',
-}
-
-
-class _Fwd:
-    def __init__(self, callable):
-        self._callable = callable
-    def __call__(self, *args, **kwargs):
-        self._callable(*args, **kwargs)
-
-class ListInterface:
-    def __init__(self, _owner=None):
-        self.__owner__ = _owner
-
-    def append_unchecked(self, __object):
-        raise NotImplementedError()
-    def remove_unchecked(self, __object):
-        raise NotImplementedError()
-    def clear_unchecked(self):
-        raise NotImplementedError()
-
-    _custom_append: ClassVar[Callable | None] = None
-    _custom_clear: ClassVar[Callable | None] = None
-    _custom_remove: ClassVar[Callable | None] = None
-
-    def _append_caller(self, __object):
-        self._custom_append(self.__owner__, __object)
-    def _clear_caller(self):
-        self._custom_clear(self.__owner__)
-    def _remove_caller(self, __object):
-        self._custom_remove(self.__owner__, __object)
 
 # This is needed to make the type checker chill out
 # ListAccessor __get__ return is picked up as default type otherwise
@@ -468,7 +421,3 @@ def custom_clear(l: Iterable):
     return override_boilerplate(l, _Actions.CLEAR)
 def custom_remove(l: Iterable):
     return override_boilerplate(l, _Actions.REMOVE)
-
-custom_get = None
-custom_get_by_mrid = None
-custom_len = None
