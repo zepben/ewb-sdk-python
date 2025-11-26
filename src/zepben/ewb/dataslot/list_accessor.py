@@ -53,22 +53,19 @@ class _Actions(Enum):
     CLEAR       = partial(lambda item : f'clear_{item}')
     REMOVE      = partial(lambda item : f'remove_{item}')
 
-ListActions = _Actions
-
-_plurals = {
-    _Actions.CLEAR,
-}
+ListActions = None
 
 
 def boilermaker(cls):
-    for name, member in cls.__dict__.items():
-        if hasattr(member, '__list_action__'):
-            action = member.__list_action__
-            target = member.__target_list__
-            target.methods[action] = member
-    for name, member in cls.__dict__.items():
-        if isinstance(member, ListAccessor):
-            member._attach_router()
+    ...
+    # for name, member in cls.__dict__.items():
+    #     if hasattr(member, '__list_action__'):
+    #         action = member.__list_action__
+    #         target = member.__target_list__
+    #         target.methods[action] = member
+    # for name, member in cls.__dict__.items():
+    #     if isinstance(member, ListAccessor):
+    #         member._attach_router()
 
     return cls
 
@@ -94,6 +91,25 @@ class ListAccessor(_ListAccessorBase):
                  backed_name=None):
         super().__init__(default, backed_name)
         self.router_class = ListRouter
+        # self._subclass_router()
+
+    def __set_name__(self, owner, name):
+        super().__set_name__(owner, name)
+        self._subclass_router()
+
+    def _subclass_router(self):
+        router_subname = (self.owner.__name__ + "_"
+                          + self.public_name + "_"
+                          + self.router_class.__name__)
+        self.router_class = type(router_subname, (self.router_class,), {})
+
+    def attach_router_member(self, member: Callable, action: _Actions):
+        if action == _Actions.ADD:
+            self.router_class.append = member
+        if action == _Actions.REMOVE:
+            self.router_class.remove = member
+        if action == _Actions.CLEAR:
+            self.router_class.clear = member
 
     def _router_method_lookup(self, action: _Actions):
         if action in self.methods:
@@ -102,7 +118,9 @@ class ListAccessor(_ListAccessorBase):
         return getattr(self.router_class, name)
 
     def _attach_router(self):
-        router_subname = f"{self.owner.__name__}_{self.public_name}_Router"
+        router_subname = (self.owner.__name__ + "_"
+                          + self.public_name + "_"
+                          + self.router_class.__name__)
         r = self.router_class = type(router_subname, (self.router_class, ), {})
 
         r.append = self._router_method_lookup(_Actions.ADD) or r.append
@@ -174,11 +192,11 @@ class _Router(Generic[T]):
         self.remove: Callable[[T], None] = self.remove
 
     def _method(self, action: _Actions):
-        # if action in self._la.methods:
-        name = self._la.methods[action].__name__
-        return getattr(self._owner, name)
-        # name = _action_methods[action]
-        # return getattr(self, name)
+        if action in self._la.methods:
+            name = self._la.methods[action].__name__
+            return getattr(self._owner, name)
+        name = _action_methods[action]
+        return getattr(self, name)
 
 
     def _get(self) -> List | None:
@@ -250,15 +268,18 @@ class _Router(Generic[T]):
     #       Dunders are aliased because python bypasses instance-wise dunder reassignment.
 
     def append(self, item: T):
-        self.append = self._method(_Actions.ADD)
+        # self.append = self._method(_Actions.ADD)
+        self.append = self._default_add
         return self.append(item)
 
     def clear(self):
-        self.clear = self._method(_Actions.CLEAR)
+#         self.clear = self._method(_Actions.CLEAR)
+        self.clear = self._default_clear
         return self.clear()
 
     def remove(self, item: T):
-        self.remove = self._method(_Actions.REMOVE)
+#         self.remove = self._method(_Actions.REMOVE)
+        self.remove = self._default_remove
         return self.remove(item)
 
     def __len__(self):
@@ -437,10 +458,11 @@ class MRIDDictRouter(_Router[T]):
         return list((getattr(it, self._attr) or {}).values())
 
 
-def override_boilerplate(l: Iterable, action: _Actions):
+def override_boilerplate(l: ListAccessor, action: _Actions):
     def inner(f):
-        f.__list_action__ = action
-        f.__target_list__ = l
+        l.attach_router_member(f, action)
+        # f.__list_action__ = action
+        # f.__target_list__ = l
         return f
     return inner
 
