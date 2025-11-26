@@ -47,7 +47,6 @@ class Fget:
 
     def _get(self, it):
         return getattr(it, self.__name__)
-        # return self.descriptor.__get__(it)
 
     def __call__(self, it):
         return self._get(it)
@@ -69,14 +68,11 @@ class Descriptor(metaclass=ABCMeta):
     def __set__(self, instance, value, direct: bool=False):
         raise NotImplementedError()
 
-    def _set_default(self, obj):
+    def set_default(self, obj):
         self.__set__(obj, self.default, direct=True)
 
     def set_type(self, typed: type):
         self.typed = typed
-
-    # def fget(self, it):
-    #     return self.__get__(it)
 
 
 Getter = Callable[[Any], Any]
@@ -139,7 +135,7 @@ class BackedDescriptor(Descriptor):
             return self
         value = getattr(obj, self.private_name)
         if value is self:
-            self._set_default(obj)
+            self.set_default(obj)
             return self.default
         return value
 
@@ -188,7 +184,7 @@ class WeakrefDescriptor(BackedDescriptor):
             return self
         value = getattr(obj, self.private_name)
         if value is self:
-            self._set_default(obj)
+            self.set_default(obj)
             value = self.default
         if value is not None:
             return value()
@@ -289,53 +285,37 @@ def amend_init(obj: type, cls: type):
 
     # Make dictionaries for easy access
     descriptors = _get_descriptors_inherited(cls, Descriptor)
-    public_names = {d.public_name: d for d in descriptors}
+    names = {d.public_name: d for d in descriptors}
     private_names = {d.private_name: d for d in descriptors if hasattr(d, 'private_name')}
     del descriptors  # Free memory
 
-    def add_kv(attr, val, dc_kwargs, descriptor_values):
-        attr = attr_or_placeholder(attr)
-        if attr in private_names:
-            desc = private_names[attr]
-            name = desc.public_name
-            descriptor_values[name] = val
-        elif attr in public_names:
-            descriptor_values[attr] = val
-        else:
-            dc_kwargs[attr] = val
 
-    if hasattr(cls, 'mrid') and BAN_KWARGS:
-        def __init__(self, mrid=None, *args, **kwargs):
-            dc_kwargs = {}
-            descriptor_values = {}
-            it = iter(init_signature.parameters)
-            it.__next__()
-            if args:
-                raise ValueError('Objects derived from IdentifiedObject take at most 1 positional' +
-                                 'argument - mrid; Use kwargs for object instantiation!')
-            if mrid is not None and isinstance(mrid, str):
-                dc_kwargs['mrid'] = mrid
-            for attr, val in kwargs.items():
-                add_kv(attr, val, dc_kwargs, descriptor_values)
+    def __init__(self, *args, **kwargs):
+        dc_kwargs = {}
+        descriptor_values = {}
 
-            self.__dataclass_init__(**dc_kwargs)
-            for k, v in descriptor_values.items():
-                setattr(self, k, v)
-    else:
-        def __init__(self, *args, **kwargs):
-            dc_kwargs = {}
-            descriptor_values = {}
-            it = iter(init_signature.parameters)
-            it.__next__()
-            for val in args:
-                attr = it.__next__()
-                add_kv(attr, val, dc_kwargs, descriptor_values)
-            for attr, val in kwargs.items():
-                add_kv(attr, val, dc_kwargs, descriptor_values)
+        it = iter(init_signature.parameters.values())
+        it.__next__()
+        args = list(args)
+        for i, val in enumerate(args):
+            param = it.__next__()
+            name = param.name if not param.name in private_names else private_names[param.name].name
+            if param.kind == inspect.Parameter.KEYWORD_ONLY:
+                raise TypeError(f"Parameter {name} of {cls.__name__} is keyword-only!")
+            kwargs[name] = val
 
-            self.__dataclass_init__(**dc_kwargs)
-            for k, v in descriptor_values.items():
-                setattr(self, k, v)
+        for attr, val in kwargs.items():
+            attr = attr_or_placeholder(attr)
+            if attr in names:
+                descriptor_values[attr] = val
+            else:
+                dc_kwargs[attr] = val
+
+        self.__dataclass_init__(**dc_kwargs)
+        for k, d in names.items():
+            if k in descriptor_values:
+                v = descriptor_values[k]
+                d.__set__(self, v)
 
     obj.__dataclass_init__ = obj.__init__
     obj.__init__ = __init__
