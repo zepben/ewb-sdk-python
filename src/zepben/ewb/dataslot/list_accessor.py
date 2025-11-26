@@ -51,16 +51,12 @@ S = TypeVar('S')
 class _Actions(Enum):
     ADD         = partial(lambda item : f'add_{item}')
     CLEAR       = partial(lambda item : f'clear_{item}')
-    GET         = partial(lambda item : f'get_{item}')
-    GET_BY_MRID = partial(lambda item : f'get_{item}_by_mrid')
-    LEN         = partial(lambda item : f'num_{item}')
     REMOVE      = partial(lambda item : f'remove_{item}')
 
 ListActions = _Actions
 
 _plurals = {
     _Actions.CLEAR,
-    _Actions.LEN
 }
 
 
@@ -79,10 +75,7 @@ def boilermaker(cls):
 _action_methods = {
     _Actions.ADD: '_default_add',
     _Actions.CLEAR: '_default_clear',
-    _Actions.GET: '_default_get',
-    _Actions.LEN: '_default_num',
     _Actions.REMOVE: '_default_remove',
-    _Actions.GET_BY_MRID: '_default_get_by_mrid'
 }
 
 # This is needed to make the type checker chill out
@@ -115,8 +108,6 @@ class ListAccessor(_ListAccessorBase):
         r.append = self._router_method_lookup(_Actions.ADD) or r.append
         r.clear = self._router_method_lookup(_Actions.CLEAR) or r.clear
         r.remove = self._router_method_lookup(_Actions.REMOVE) or r.remove
-        r._len = self._router_method_lookup(_Actions.LEN) or r._len
-        r._getitem = self._router_method_lookup(_Actions.GET) or r._getitem
 
 
     def _rawdog(self, instance):
@@ -151,11 +142,6 @@ class MRIDListAccessor(ListAccessor):
         super().__init__(default, backed_name)
         self.router_class = MRIDListRouter
 
-    def _attach_router(self):
-        super()._attach_router()
-        r = self.router_class
-        r.get_by_mrid = self._router_method_lookup(_Actions.GET_BY_MRID) or r.get_by_mrid
-
 
 class MRIDDictAccessor(ListAccessor):
     def __init__(self,
@@ -163,11 +149,6 @@ class MRIDDictAccessor(ListAccessor):
                  backed_name=None):
         super().__init__(default, backed_name)
         self.router_class = MRIDDictRouter
-
-    def _attach_router(self):
-        super()._attach_router()
-        r = self.router_class
-        r.get_by_mrid = self._router_method_lookup(_Actions.GET_BY_MRID) or r.get_by_mrid
 
 
 
@@ -280,28 +261,14 @@ class _Router(Generic[T]):
         self.remove = self._method(_Actions.REMOVE)
         return self.remove(item)
 
-    def _len(self):
-        self._len = self._method(_Actions.LEN)
-        return self._len()
-
-    def __len__(self) -> int:
-        return self._len()
-
-    def num(self) -> int:
-        return self._len()
+    def __len__(self):
+        return len(self._get_safe())
 
     def __hash__(self):
         return 0
 
-    def _getitem(self, item):
-        self._getitem = self._method(_Actions.GET)
-        return self._getitem(item)
-
     def __getitem__(self, item) -> T:
-        return self._getitem(item)
-
-    def get(self, item):
-        return self._getitem(item)
+        return self._get_safe()[item]
 
 
 class ListRouter(_Router[T]):
@@ -365,17 +332,6 @@ def _error_duplicate(obj, item):
 
 class MRIDListRouter(ListRouter[T]):
 
-    def __init__(self,
-                 owner: object,
-                 accessor: ListAccessor,
-                 attr: str,
-                 name: str):
-        super().__init__(owner, accessor, attr, name)
-
-
-        # Type checker fix - public methods only
-        self.get_by_mrid = self.get_by_mrid
-
     # +-----+ BOILERPLATE DEFAULTS +-----+
 
     @override
@@ -391,7 +347,7 @@ class MRIDListRouter(ListRouter[T]):
         elif other is not item:
             _error_duplicate(self._owner, item)
 
-    def _default_get_by_mrid(self, mrid):
+    def get_by_mrid(self, mrid):
         l = self._get_safe()
         try:
             return next(io for io in l if io.mrid == mrid)
@@ -399,7 +355,7 @@ class MRIDListRouter(ListRouter[T]):
             raise KeyError(mrid)
 
     @override
-    def _default_get(self, identifier):
+    def __getitem__(self, identifier):
         if isinstance(identifier, str):
             return self.get_by_mrid(identifier)
         elif isinstance(identifier, int):
@@ -407,25 +363,9 @@ class MRIDListRouter(ListRouter[T]):
         raise TypeError(f'Attempting to access MRID list with identifier ' +
                         f'of type {type(identifier)}.')
 
-    # +-----+ BOILERPLATE CALLERS +-----+
-
-    def get_by_mrid(self, mrid: str):
-        self.get_by_mrid = self._method(_Actions.GET_BY_MRID)
-        return self.get_by_mrid(mrid)
-
 
 
 class MRIDDictRouter(_Router[T]):
-
-    def __init__(self,
-                 owner: object,
-                 accessor: ListAccessor,
-                 attr: str,
-                 name: str):
-        super().__init__(owner, accessor, attr, name)
-
-        # Type checker fix - public methods only
-        self.get_by_mrid = self.get_by_mrid
 
     @override
     def _get(self) -> Optional[Dict]:
@@ -467,11 +407,12 @@ class MRIDDictRouter(_Router[T]):
             _error_duplicate(self._owner, item)
 
     @override
-    def _default_clear(self):
-        self._set(None)
-
-    @override
-    def _default_get(self, identifier):
+    def __getitem__(self, identifier):
+        if isinstance(identifier, int):
+            val = next((v for i, v in enumerate(self._get_safe().values()) if i == identifier), None)
+            if val is None:
+                raise IndexError("List index out of range")
+            return val
         l: Dict = self._get_safe()
         return l[identifier]
 
@@ -484,15 +425,11 @@ class MRIDDictRouter(_Router[T]):
         if not l:
             self._set(None)
 
-    def _default_get_by_mrid(self, mrid):
+    def get_by_mrid(self, mrid):
         l: Dict = self._get_safe()
         return l[mrid]
 
     # +-----+ BOILERPLATE CALLERS +-----+
-
-    def get_by_mrid(self, mrid):
-        self.get_by_mrid = self._method(_Actions.GET_BY_MRID)
-        return self.get_by_mrid(mrid)
 
     def fget(self, it) -> List:
         import warnings
@@ -512,12 +449,9 @@ def custom_add(l: Iterable):
     return override_boilerplate(l, _Actions.ADD)
 def custom_clear(l: Iterable):
     return override_boilerplate(l, _Actions.CLEAR)
-def custom_get(l: Iterable):
-    return override_boilerplate(l, _Actions.GET)
-def custom_get_by_mrid(l: Iterable):
-    return override_boilerplate(l, _Actions.GET_BY_MRID)
-def custom_len(l: Iterable):
-    return override_boilerplate(l, _Actions.LEN)
 def custom_remove(l: Iterable):
     return override_boilerplate(l, _Actions.REMOVE)
 
+custom_get = None
+custom_get_by_mrid = None
+custom_len = None

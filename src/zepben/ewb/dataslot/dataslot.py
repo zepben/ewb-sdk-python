@@ -2,17 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import inspect
-import sys
-from _weakref import ref
-from abc import ABCMeta
-from dataclasses import dataclass, field, KW_ONLY
-from enum import Enum
-from os import eventfd_write
-from typing import ClassVar, List, Callable, Any
-
-from typing_extensions import dataclass_transform
-
 __all__ = [
     'dataslot',
     'private',
@@ -27,7 +16,17 @@ __all__ = [
     'TypeRestrictedDescriptor',
 ]
 
-# from zepben.ewb import require
+
+import inspect
+import sys
+from _weakref import ref
+from abc import ABCMeta
+from dataclasses import dataclass, field, KW_ONLY
+from enum import Enum
+from typing import ClassVar, List, Callable, Any
+
+from typing_extensions import dataclass_transform
+
 
 
 class SetOnceError(Exception):
@@ -79,9 +78,9 @@ Getter = Callable[[Any], Any]
 Setter = Callable[[Any, Any], Any]
 
 class _Addressor(Enum):
-    Getter     = 0
-    Setter     = 1
-    Validator  = 2
+    Getter = 0
+    Setter = 1
+    Validator = 2
 
 class CustomDescriptor(Descriptor):
     def __init__(self,
@@ -235,21 +234,32 @@ def _addressor(var: object | ValidatedDescriptor, _type: _Addressor):
     return dec
 
 def validate(var: object | ValidatedDescriptor):
-    return _addressor(var, _Addressor.Validator)
+    def inner(f):
+        if not isinstance(var, ValidatedDescriptor):
+            raise AttributeError(f"Trying to add a validation method {f} " +
+                                 f"to attribute {var} that is not a ValidatedDescriptor!")
+        var.validate = f
+    return inner
+    # return _addressor(var, _Addressor.Validator)
+
 def getter(var: object | CustomDescriptor):
-    return _addressor(var, _Addressor.Getter)
+    def inner(f):
+        if not isinstance(var, CustomDescriptor):
+            raise AttributeError(f"Trying to add a get method {f} " +
+                                 f"to attribute {var} that is not a CustomDescriptor!")
+        var.add_getter(f)
+    return inner
+    # return _addressor(var, _Addressor.Getter)
+
 def setter(var: object | CustomDescriptor):
-    return _addressor(var, _Addressor.Setter)
+    def inner(f):
+        if not isinstance(var, CustomDescriptor):
+            raise AttributeError(f"Trying to add a set method {f} " +
+                                 f"to attribute {var} that is not a CustomDescriptor!")
+        var.add_setter(f)
+    return inner
+    # return _addressor(var, _Addressor.Setter)
 
-
-DEBUG_LOG = False
-BAN_KWARGS = True
-
-
-def _spew(cls):
-    print(cls.__name__, '::')
-    # for k, v in cls.__dict__.items():
-    #     print(f'\t{k}: {v}')
 
 
 def _get_descriptors(cls: type, _type: type):
@@ -270,11 +280,6 @@ def _get_descriptors_inherited(cls: type, _type: type):
     for base in cls.__bases__:
         descriptors += _get_descriptors_inherited(base, _type)
     return set(descriptors)
-
-def attr_or_placeholder(attr: str):
-    if not attr.startswith('_init_placeholder_for_'):
-        return attr
-    return attr[len('_init_placeholder_for_'):-1]
 
 def amend_init(obj: type, cls: type):
     """
@@ -302,10 +307,11 @@ def amend_init(obj: type, cls: type):
             name = param.name if not param.name in private_names else private_names[param.name].name
             if param.kind == inspect.Parameter.KEYWORD_ONLY:
                 raise TypeError(f"Parameter {name} of {cls.__name__} is keyword-only!")
+            if isinstance(val, CustomDescriptor):
+                raise TypeError(f"CustomDecsriptors cannot be instantiated with positional args! ({name} of {cls.__name__})")
             kwargs[name] = val
 
         for attr, val in kwargs.items():
-            attr = attr_or_placeholder(attr)
             if attr in names:
                 descriptor_values[attr] = val
             else:
@@ -343,25 +349,6 @@ def _validate_backed_name(cls: type, attr, _attr):
                                  f'backed by field {_attr} ' +
                                  f'because the field already exists in superclass {base.__name__}')
 
-def _attach_accessors(cls):
-    for name, member in cls.__dict__.items():
-        if hasattr(member, '__addressor_target__'):
-            target = member.__addressor_target__
-            _type = member.__addressor_type__
-            if _type == _Addressor.Validator:
-                if not isinstance(target, ValidatedDescriptor):
-                    raise AttributeError(f"Trying to add a validation method {member} " +
-                                         f"to attribute {target} that is not an instance of ValidatedDescriptor!")
-                target.validate = member
-            elif _type in [_Addressor.Getter, _Addressor.Setter]:
-                if isinstance(target, CustomDescriptor):
-                    if _type == _Addressor.Getter:
-                        target.add_getter(member)
-                    if _type == _Addressor.Setter:
-                        target.add_setter(member)
-                else:
-                    raise AttributeError(f"Trying to add a get/set method {member} " +
-                                     f"to attribute {target} that is not an instance of CustomDescriptor!")
 
 def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
     """
@@ -373,9 +360,6 @@ def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
     creator to skip them.
     """
     new_annotations = cls.__annotations__.copy()
-    if DEBUG_LOG: _spew(cls)
-
-    no_kwargs = BAN_KWARGS and hasattr(cls, 'mrid')
 
     for attr, _type in cls.__annotations__.items():
         val = cls.__dict__.get(attr, None)
@@ -387,12 +371,8 @@ def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
                 if not isinstance(val, Alias):
                     new_annotations[_attr] = _type
             elif isinstance(val, CustomDescriptor):
-                if not no_kwargs:
-                    _attr = f'_init_placeholder_for_{attr}_'
-                    new_annotations[_attr] = bool
-                else:
-                    new_annotations[attr] = ClassVar[_type]
-                    continue
+                new_annotations[attr] = ClassVar[_type]
+                continue
             if _attr and not isinstance(val, Alias):
                 _validate_backed_name(cls, attr, _attr)
 
@@ -404,17 +384,10 @@ def _autoslot(cls, slots=True, weakref=False, inherit_hash=True, **kwargs):
         else:
             new_annotations[attr] = _type
 
-    _attach_accessors(cls)
-
-
     cls.__annotations__ = new_annotations
 
     if inherit_hash:
         kwargs['eq'] = False
-        # kwargs['eq'] = True
-        # kwargs['unsafe_hash'] = True
-
-    if DEBUG_LOG: _spew(cls)
 
     obj = dataclass(slots=slots, **kwargs)(cls)
     if weakref and slots:
