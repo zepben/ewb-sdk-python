@@ -7,13 +7,14 @@ from __future__ import annotations
 
 __all__ = ["RelayInfo"]
 
-from typing import Optional, List, Generator, Callable
+from typing import List, Callable
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot import dataslot, ListAccessor, custom_add, ListRouter
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.ewb.util import ngen, nlen, safe_remove, require
+from zepben.ewb.util import require
 
 
 @zbex

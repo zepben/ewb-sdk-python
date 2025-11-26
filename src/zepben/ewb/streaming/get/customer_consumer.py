@@ -9,10 +9,8 @@ __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
 from asyncio import get_event_loop
 from dataclasses import dataclass
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
@@ -21,6 +19,7 @@ from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.ewb import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
+
 
 @dataclass(init=False, slots=True)
 class CustomerConsumerClient(CimConsumerClient[CustomerService]):

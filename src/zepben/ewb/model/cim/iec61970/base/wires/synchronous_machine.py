@@ -5,13 +5,13 @@
 
 __all__ = ["SynchronousMachine"]
 
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot import MRIDListRouter, dataslot, MRIDListAccessor, custom_add
 from zepben.ewb.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
-from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve

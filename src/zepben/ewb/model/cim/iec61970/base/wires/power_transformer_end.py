@@ -8,18 +8,17 @@ from __future__ import annotations
 __all__ = ["PowerTransformerEnd"]
 
 import warnings
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
 
+from zepben.ewb.dataslot import dataslot, ListAccessor, custom_add, NoResetDescriptor, ListRouter
 from zepben.ewb.dataslot.dataslot import CustomDescriptor, setter, getter
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
-from zepben.ewb.util import ngen, nlen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer

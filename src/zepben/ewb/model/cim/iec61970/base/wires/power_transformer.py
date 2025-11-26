@@ -7,17 +7,17 @@ from __future__ import annotations
 
 __all__ = ["PowerTransformer"]
 
-from typing import List, Optional, Generator, TYPE_CHECKING
+from typing import List, Generator, TYPE_CHECKING
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
 
+from zepben.ewb.dataslot import MRIDListRouter, dataslot, MRIDListAccessor, custom_add
 from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.ewb.util import require, nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import require, ngen
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo

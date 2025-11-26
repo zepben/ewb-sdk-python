@@ -7,12 +7,12 @@ from __future__ import annotations
 
 __all__ = ['EquipmentContainer']
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar
+from typing import Generator, List, TYPE_CHECKING, TypeVar
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot import MRIDDictRouter, dataslot, MRIDDictAccessor, custom_add
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.ewb.util import nlen, ngen, safe_remove_by_id
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment

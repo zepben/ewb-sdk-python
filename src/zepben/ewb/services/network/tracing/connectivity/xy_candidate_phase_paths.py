@@ -6,13 +6,12 @@
 __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is_after"]
 
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate, instantiate
-from typing_extensions import deprecated
 from zepben.ewb import SinglePhaseKind, PhaseCode
+from zepben.ewb.dataslot import instantiate
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """

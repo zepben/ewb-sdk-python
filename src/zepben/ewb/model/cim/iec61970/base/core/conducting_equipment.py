@@ -8,12 +8,13 @@ from __future__ import annotations
 __all__ = ['ConductingEquipment']
 
 import sys
-from typing import List, Optional, Generator, TYPE_CHECKING, Union
+from typing import List, TYPE_CHECKING, Union
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
+
+from zepben.ewb.dataslot import MRIDListRouter, dataslot, MRIDListAccessor, custom_add
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.ewb.util import get_by_mrid, require, ngen
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage

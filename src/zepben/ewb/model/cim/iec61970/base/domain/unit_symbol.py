@@ -7,8 +7,6 @@ __all__ = ["UnitSymbol", "unit_symbol_from_id", "unit_symbol_from_cim_name"]
 
 from enum import Enum
 
-from zepben.ewb import unique
-
 
 def unit_symbol_from_cim_name(value: str):
     return _unitsymbol_by_cim_name[value]

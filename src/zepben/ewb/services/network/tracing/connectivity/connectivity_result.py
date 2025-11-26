@@ -9,11 +9,8 @@ __all__ = ["ConnectivityResult", "terminal_compare"]
 
 from dataclasses import dataclass
 from operator import attrgetter
-from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
+from typing import List, Tuple, TYPE_CHECKING, Iterable
 
-
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind

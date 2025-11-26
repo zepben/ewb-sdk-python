@@ -10,9 +10,6 @@ __all__ = ["ServiceInfo"]
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
-
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
 if TYPE_CHECKING:
     from zepben.ewb import DataSource
 

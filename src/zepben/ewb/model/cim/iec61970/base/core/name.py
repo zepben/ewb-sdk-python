@@ -8,7 +8,6 @@ from __future__ import annotations
 __all__ = ["Name"]
 
 from dataclasses import dataclass, field
-from email.policy import default
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:

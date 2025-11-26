@@ -8,11 +8,8 @@ from __future__ import annotations
 __all__ = ["NameType"]
 
 from dataclasses import field, dataclass
-from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional
+from typing import Dict, List, Generator, TYPE_CHECKING, Callable, Optional
 
-
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 
 if TYPE_CHECKING:

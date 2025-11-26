@@ -7,17 +7,17 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayFunction"]
 
-from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
+from typing import List, Callable, TYPE_CHECKING
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
 from typing_extensions import deprecated
 
+from zepben.ewb.dataslot import MRIDListRouter, dataslot, ListAccessor, MRIDListAccessor, custom_add, ListRouter
 from zepben.ewb.dataslot.dataslot import Alias
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.util import require, nlen, ngen, safe_remove, get_by_mrid
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo

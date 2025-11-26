@@ -9,10 +9,8 @@ __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
 from asyncio import get_event_loop
 from dataclasses import dataclass
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
-from zepben.ewb.dataslot import custom_len, MRIDListRouter, MRIDDictRouter, boilermaker, TypeRestrictedDescriptor, WeakrefDescriptor, dataslot, BackedDescriptor, ListAccessor, ValidatedDescriptor, MRIDListAccessor, custom_get, custom_remove, override_boilerplate, ListActions, MRIDDictAccessor, BackingValue, custom_clear, custom_get_by_mrid, custom_add, NoResetDescriptor, ListRouter, validate
-from typing_extensions import deprecated
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
@@ -23,6 +21,7 @@ from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
+
 
 @dataclass(init=False, slots=True)
 class DiagramConsumerClient(CimConsumerClient[DiagramService]):
