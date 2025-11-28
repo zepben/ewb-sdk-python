@@ -1198,14 +1198,14 @@ class NetworkCimReader(BaseCimReader):
     @staticmethod
     def _load_street_detail(table: TableStreetAddresses, result_set: ResultSet) -> Optional[StreetDetail]:
         sd = StreetDetail(
-            result_set.get_string(table.building_name.query_index, on_none=None),
-            result_set.get_string(table.floor_identification.query_index, on_none=None),
-            result_set.get_string(table.street_name.query_index, on_none=None),
-            result_set.get_string(table.number.query_index, on_none=None),
-            result_set.get_string(table.suite_number.query_index, on_none=None),
-            result_set.get_string(table.type.query_index, on_none=None),
-            result_set.get_string(table.display_address.query_index, on_none=None),
-            result_set.get_string(table.building_number.query_index, on_none=None)
+            building_name=result_set.get_string(table.building_name.query_index, on_none=None),
+            floor_identification=result_set.get_string(table.floor_identification.query_index, on_none=None),
+            name=result_set.get_string(table.street_name.query_index, on_none=None),
+            number=result_set.get_string(table.number.query_index, on_none=None),
+            suite_number=result_set.get_string(table.suite_number.query_index, on_none=None),
+            type=result_set.get_string(table.type.query_index, on_none=None),
+            display_address=result_set.get_string(table.display_address.query_index, on_none=None),
+            building_number=result_set.get_string(table.building_number.query_index, on_none=None)
         )
 
         return sd if not sd.all_fields_null() else None

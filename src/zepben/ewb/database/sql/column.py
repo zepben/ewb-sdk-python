@@ -22,7 +22,7 @@ class Nullable(Enum):
 
 
 class Type(Enum):
-    STRING = "STRING"
+    STRING = "TEXT"
     INTEGER = "INTEGER"
     DOUBLE = "NUMBER"
     BOOLEAN = "BOOLEAN"

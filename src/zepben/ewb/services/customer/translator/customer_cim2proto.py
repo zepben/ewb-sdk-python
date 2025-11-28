@@ -39,8 +39,7 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
     """
     return PBAgreement(
         **set_or_null(
-            validity_interval=(date_time_interval_to_pb(cim.validity_interval)
-                               if cim.validity_interval else None)
+            validityInterval=date_time_interval_to_pb(cim.validity_interval)
         ),
         doc=document_to_pb(cim)
     )
@@ -90,13 +89,14 @@ def tariff_to_pb(cim: Tariff) -> PBTariff:
 ########################
 
 @bind_to_pb
-def date_time_interval_to_pb(cim: DateTimeInterval) -> PBDateTimeInterval:
+def date_time_interval_to_pb(cim: DateTimeInterval) -> PBDateTimeInterval | None:
     """
     Convert the :class:`DateTimeInterval` into its protobuf counterpart.
 
     :param cim: The :class:`DateTimeInterval` to convert.
     :return: the new protobuf object for fluent use.
     """
-    return DateTimeInterval(
-        **set_or_null(start=cim.start, end=cim.end),
-    )
+    if cim:
+        return DateTimeInterval(
+            **set_or_null(start=cim.start, end=cim.end),
+        )

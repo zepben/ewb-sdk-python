@@ -6,7 +6,6 @@
 __all__ = ["StreetDetail"]
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -62,4 +61,5 @@ class StreetDetail(object):
                 self.type is None,
                 self.display_address is None,
                 self.building_number is None,
-            ))
+            )
+        )

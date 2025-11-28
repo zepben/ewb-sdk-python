@@ -57,8 +57,8 @@ def document_to_pb(cim: Document) -> PBDocument:
 
     return PBDocument(
         io=identified_object_to_pb(cim),
-        createdDateTime=timestamp,
         **set_or_null(
+            createdDateTime=timestamp,
             title=cim.title,
             authorName=cim.author_name,
             type=cim.type,
