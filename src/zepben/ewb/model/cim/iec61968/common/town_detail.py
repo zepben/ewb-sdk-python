@@ -6,7 +6,6 @@
 __all__ = ["TownDetail"]
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -21,10 +20,6 @@ class TownDetail(object):
     """Name of the state or province."""
     country: str | None = None
     """Name of the country"""
-    def __init__(self, name=None, state_or_province=None, country=None):
-        self.name = name
-        self.state_or_province = str(state_or_province) if state_or_province is not None else None
-        self.country = str(country) if country is not None else None
 
     def all_fields_null_or_empty(self):
         """Check to see if all fields of this `TownDetail` are null or empty."""

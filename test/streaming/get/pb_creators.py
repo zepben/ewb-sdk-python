@@ -555,7 +555,7 @@ def document():
         PBDocument,
         io=identified_object(),
         titleSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        createdDateTime=timestamp(),
+        createdDateTimeSet=timestamp(),
         authorNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         statusSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -592,13 +592,14 @@ def street_address():
 def street_detail():
     return builds(
         PBStreetDetail,
-        buildingNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        floorIdentificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        numberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        suiteNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        displayAddressSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        buildingNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        floorIdentificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        numberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        suiteNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        displayAddressSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        buildingNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)
     )
 
 

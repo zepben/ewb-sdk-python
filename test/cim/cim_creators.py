@@ -153,15 +153,15 @@ def create_distance_relay(include_runtime: bool = True):
     return builds(
         DistanceRelay,
         **create_protection_relay_function(include_runtime),
-        backward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        backward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        backward_blind=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        backward_reach=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        backward_reactance=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        forward_blind=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        forward_reach=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        forward_reactance=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        operation_phase_angle1=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        operation_phase_angle2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        operation_phase_angle3=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -494,9 +494,9 @@ def create_position_point():
 def create_street_address():
     return builds(
         StreetAddress,
-        postal_code=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)),
+        postal_code=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         town_detail=create_town_detail(),
-        po_box=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)),
+        po_box=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         street_detail=create_street_detail()
     )
 
@@ -504,13 +504,14 @@ def create_street_address():
 def create_street_detail():
     return builds(
         StreetDetail,
-        building_name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        floor_identification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        suite_number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        display_address=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        building_name=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        floor_identification=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        name=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        number=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        suite_number=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        type=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        display_address=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        building_number=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
     )
 
 
