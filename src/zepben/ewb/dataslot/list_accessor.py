@@ -75,7 +75,7 @@ class ListAccessor(_ListAccessorBase):
 
     def _subclass_router(self):
         router_subname = (self.owner.__name__ + "_"
-                          + self.public_name + "_"
+                          + self.name + "_"
                           + self.router_class.__name__)
         r = self.router_class = type(router_subname, (self.router_class,), {})
         if self.custom_append is not None:
@@ -97,7 +97,7 @@ class ListAccessor(_ListAccessorBase):
             self.custom_remove = member
 
     def _rawdog(self, instance):
-        return self.router_class(instance, self, self.private_name, self.public_name)
+        return self.router_class(instance, self, self.private_name, self.name)
 
     @cache
     def _get_cached(self, instance, _id):

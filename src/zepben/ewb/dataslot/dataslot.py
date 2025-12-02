@@ -22,7 +22,7 @@ from _weakref import ref
 from abc import ABCMeta
 from dataclasses import dataclass, field, KW_ONLY
 from enum import Enum
-from typing import ClassVar, List, Callable, Any, TYPE_CHECKING
+from typing import ClassVar, List, Callable, Any, TYPE_CHECKING, overload, Type, TypeVar
 
 from typing_extensions import dataclass_transform
 
@@ -57,7 +57,7 @@ class Descriptor(metaclass=ABCMeta):
 
     def __set_name__(self, owner, name):
         self.owner = owner
-        self.__name__ = self.public_name = name
+        self.__name__ = self.name = name
         self.fget.__name__ = name
 
     def __get__(self, instance, *_):
@@ -93,26 +93,26 @@ class CustomDescriptor(Descriptor):
 
     def add_setter(self, setter: Callable=None):
         if self.setter is not None:
-            raise SetOnceError(f"Attribute {self.public_name} already has a setter.")
+            raise SetOnceError(f"Attribute {self.name} already has a setter.")
         self.setter = setter
 
     def add_getter(self, getter: Callable=None):
         if self.getter is not None:
-            raise SetOnceError(f"Attribute {self.public_name} already has a getter.")
+            raise SetOnceError(f"Attribute {self.name} already has a getter.")
         self.getter = getter
 
     def __get__(self, instance, owner):
         if instance is None:
             return self
         if self.getter is None:
-            raise AttributeError(f"Descriptor {self.public_name} of " +
+            raise AttributeError(f"Descriptor {self.name} of " +
                                  f"{self.owner.__name__} is missing a getter!")
         return self.getter(instance)
 
     def __set__(self, obj, value, _: bool=False):
         if value is not self:
             if self.setter is None:
-                raise AttributeError(f"Descriptor {self.public_name} of " +
+                raise AttributeError(f"Descriptor {self.name} of " +
                                      f"{self.owner.__name__} is missing a getter!")
             self.setter(obj, value)
 
@@ -201,7 +201,7 @@ class RangedDescriptor(ValidatedDescriptor):
                  min=0, max=0,
                  backed_name=None):
         error_msg = lambda val: (
-            f"{self.public_name} [{val}] " +
+            f"{self.name} [{val}] " +
             f"must be between {min} " +
             f"and {max}.")
         def check(_, val):
@@ -250,7 +250,6 @@ def _get_descriptors(cls: type, _type: type):
     return [dict_[attr] for attr in dict_
             if isinstance(dict_[attr], _type)]
 
-
 def _get_descriptors_inherited(cls: type, _type: type):
     """
     Find all class variables of cls and its superclasses
@@ -261,57 +260,69 @@ def _get_descriptors_inherited(cls: type, _type: type):
         descriptors += _get_descriptors_inherited(base, _type)
     return set(descriptors)
 
-def amend_init(obj: type, cls: type):
+def _amend_init(obj: type, cls: type):
     """
     Intercept dataclass init and initialise descriptors separately.
     Call the original init to allow the dataclass to handle fields.
     """
+
+    # Retrieve the dataclass init signature to ensure arg ordering is maintained
     init_signature = inspect.signature(obj.__init__)
 
-    # Make dictionaries for easy access
+    # Make dictionaries for easy access (associated with type, not instances)
     descriptors = _get_descriptors_inherited(cls, Descriptor)
-    names = {d.public_name: d for d in descriptors}
+    # Indexed by descriptor names (for kwargs)
+    names = {d.name: d for d in descriptors}
+    # Indexed by private names (dataclass args will be generated with private field names)
     private_names = {d.private_name: d for d in descriptors if hasattr(d, 'private_name')}
-    del descriptors  # Free memory
+    # Free memory
+    del descriptors
 
 
     def __init__(self, *args, **kwargs):
-        dc_kwargs = {}
-        descriptor_values = {}
+        dc_kwargs = {}  # kwargs for dataclass - normal fields
+        descriptor_values = {}  # Descriptor args - ignored by the dataclass init
 
+        # Iterate through the generated args first
         it = iter(init_signature.parameters.values())
-        it.__next__()
-        args = list(args)
+        it.__next__()   # Skip self
         for i, val in enumerate(args):
+            # Retrieve generated init arg
             param = it.__next__()
             name = param.name if not param.name in private_names else private_names[param.name].name
             if param.kind == inspect.Parameter.KEYWORD_ONLY:
                 raise TypeError(f"Parameter {name} of {cls.__name__} is keyword-only!")
             if isinstance(val, CustomDescriptor):
                 raise TypeError(f"CustomDecsriptors cannot be instantiated with positional args! ({name} of {cls.__name__})")
+            # Put the parameter into kwargs (processed later)
             kwargs[name] = val
 
+        # Go through all passed kwargs, including calues extracted from args above
         for attr, val in kwargs.items():
-            if attr in names:
+            if attr in names:   # value belongs to a descriptor
                 descriptor_values[attr] = val
-            else:
+            else:   # Normal dc field
                 dc_kwargs[attr] = val
 
-        self.__dataclass_init__(**dc_kwargs)
-        for k, d in names.items():
-            if k in descriptor_values:
-                v = descriptor_values[k]
-                d.__set__(self, v)
+        # Call the dataclass init with just the normal fields
+        self.__dataclass_init_for_dataslot(**dc_kwargs)
+        # Manually call the setter for all the found descriptor values
+        for k, v in descriptor_values.items():
+            d = names[k]
+            d.__set__(self, v)
 
-    obj.__dataclass_init__ = obj.__init__
+    # Save the dataclass init under a different name
+    obj.__dataclass_init_for_dataslot = obj.__init__
+    # Insert the newly generated init to be called on creation
     obj.__init__ = __init__
-
 
 def _validate_backed_name(cls: type, attr, _attr):
     """
     Check that the name about to be used to back a descriptor
     is not already in use.
     """
+    if not hasattr(cls, '__annotations__'):
+        return
     if _attr in cls.__annotations__:
         an = cls.__annotations__[_attr]
         if an == ClassVar or an.__origin__ == ClassVar:
@@ -322,12 +333,13 @@ def _validate_backed_name(cls: type, attr, _attr):
                          f'backed by field {_attr} ' +
                          f'because the field already exists in class {cls.__name__}')
     for base in cls.__bases__:
-        if not hasattr(base, '__annotations__'):
-            continue
-        if _attr in base.__annotations__:
-            raise AttributeError(f'Cannot create a descriptor {attr} ' +
-                                 f'backed by field {_attr} ' +
-                                 f'because the field already exists in superclass {base.__name__}')
+        _validate_backed_name(base, attr, _attr)
+        # if not hasattr(base, '__annotations__'):
+        #     continue
+        # if _attr in base.__annotations__:
+        #     raise AttributeError(f'Cannot create a descriptor {attr} ' +
+        #                          f'backed by field {_attr} ' +
+        #                          f'because the field already exists in superclass {base.__name__}')
 
 
 def _autoslot(cls, slots=True, weakref=False, **kwargs):
@@ -379,7 +391,7 @@ def _autoslot(cls, slots=True, weakref=False, **kwargs):
         new_cls = dataclass(slots=False, **kwargs)(cls)
 
     # Fix the init to comprehend descriptors correctly
-    amend_init(new_cls, cls)
+    _amend_init(new_cls, cls)
     # Remove the old class because it is unused
     del cls
 
@@ -389,7 +401,7 @@ def private(default: Any, /, *, init: bool = False) -> Any:
     """A shorthand for a non-init dataclass field with a default value."""
     return field(default=default, init=init)  # or whatever sentinel your runtime uses
 
-def instantiate(default_factory: Callable[[], Any], **kwargs):
+def instantiate(default_factory: Callable[[], Any] | type, **kwargs):
     """A shorthand for a non-init dataclass field with a default factory."""
     return field(default_factory=default_factory, **kwargs)
 
@@ -398,7 +410,7 @@ def instantiate(default_factory: Callable[[], Any], **kwargs):
     eq_default=False,
     kw_only_default=True
 )
-def dataslot(cls_outer=None, *, slots=True, weakref=False, **kwargs):
+def _dataslot(cls_outer=None, /, *, slots=True, weakref=False, **kwargs):
     # TODO: Add kwargs mimicking dataclass
     kwargs.setdefault('kw_only', True)
     kwargs.setdefault('eq', False)
@@ -410,9 +422,59 @@ def dataslot(cls_outer=None, *, slots=True, weakref=False, **kwargs):
         return dec(cls_outer)
     return dec
 
+
+
+T = TypeVar("T")
+
+if TYPE_CHECKING:
+
+    # Python < 3.11 overload (no weakref_slot)
+    if sys.version_info < (3, 11):
+
+        @overload
+        def dataslot(
+            *,
+            init: bool = True, repr: bool = True, eq: bool = False, order: bool = False, unsafe_hash: bool = False,
+            frozen: bool = False, match_args: bool = True, kw_only: bool = True, slots: bool = True,
+        ) -> Callable[[Type[T]], Type[T]]:
+            ...
+
+
+        @overload
+        def dataslot(
+            _cls: Type[T], /, *,
+            init: bool = True, repr: bool = True, eq: bool = False, order: bool = False, unsafe_hash: bool = False,
+            frozen: bool = False, match_args: bool = True, kw_only: bool = True, slots: bool = True,
+        ) -> Type[T]:
+            ...
+
+    # Python >= 3.11 overload (adds weakref_slot)
+    else:
+
+        @overload
+        def dataslot(
+            *,
+            init: bool = True, repr: bool = True, eq: bool = False, order: bool = False, unsafe_hash: bool = False,
+            frozen: bool = False, match_args: bool = True, kw_only: bool = True, slots: bool = True,
+            weakref_slot: bool = False,
+        ) -> Callable[[Type[T]], Type[T]]:
+            ...
+
+        @overload
+        def dataslot(
+            _cls: Type[T], /, *,
+            init: bool = True, repr: bool = True, eq: bool = False, order: bool = False, unsafe_hash: bool = False,
+            frozen: bool = False, match_args: bool = True, kw_only: bool = True, slots: bool = True,
+            weakref_slot: bool = False,
+        ) -> Type[T]:
+            ...
+else:
+    def dataslot(*args, **kwargs):
+        return _dataslot(*args, **kwargs)
+
 if __name__ == '__main__':
 
-    @dataslot
+    @dataslot(kw_only=False)
     class A:
         l: List[int]
 
