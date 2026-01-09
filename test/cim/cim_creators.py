@@ -46,6 +46,7 @@ from datetime import datetime
 from random import choice
 
 from streaming.get.pb_creators import lists, floats
+from util import mrid_strategy
 # @formatter:off
 
 # This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
@@ -181,12 +182,12 @@ def create_protection_relay_function(include_runtime: bool = True):
         "protection_kind": sampled_protection_kind(),
         "directable": boolean_or_none(),
         "power_direction": sampled_power_direction_kind(),
-        "sensors": lists(builds(CurrentTransformer), max_size=2),
-        "protected_switches": lists(builds(Breaker), max_size=2),
-        "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
+        "sensors": lists(builds(CurrentTransformer, mrid=mrid_strategy), max_size=2),
+        "protected_switches": lists(builds(Breaker, mrid=mrid_strategy), max_size=2),
+        "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy), max_size=2),
         "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
         "thresholds": lists(create_relay_setting(), min_size=4, max_size=4),
-        "relay_info": builds(RelayInfo)
+        "relay_info": builds(RelayInfo, mrid=mrid_strategy)
     }
 
 
@@ -194,8 +195,8 @@ def create_protection_relay_scheme(include_runtime: bool = True):
     return builds(
         ProtectionRelayScheme,
         **create_identified_object(include_runtime),
-        system=builds(ProtectionRelaySystem),
-        functions=lists(builds(CurrentRelay))
+        system=builds(ProtectionRelaySystem, mrid=mrid_strategy),
+        functions=lists(builds(CurrentRelay, mrid=mrid_strategy))
     )
 
 
@@ -204,7 +205,7 @@ def create_protection_relay_system(include_runtime: bool = True):
         ProtectionRelaySystem,
         **create_equipment(include_runtime),
         protection_kind=sampled_protection_kind(),
-        schemes=lists(builds(ProtectionRelayScheme))
+        schemes=lists(builds(ProtectionRelayScheme, mrid=mrid_strategy))
     )
 
 
@@ -741,7 +742,7 @@ def sampled_potential_transformer_kind():
 def create_sensor(include_runtime: bool = True):
     return {
         **create_auxiliary_equipment(include_runtime),
-        "relay_functions": lists(builds(CurrentRelay), max_size=10)
+        "relay_functions": lists(builds(CurrentRelay, mrid=mrid_strategy), max_size=10)
     }
 
 
@@ -1334,7 +1335,7 @@ def create_fuse(include_runtime: bool = True):
     return builds(
         Fuse,
         **create_switch(include_runtime),
-        function=builds(DistanceRelay)
+        function=builds(DistanceRelay, mrid=mrid_strategy)
     )
 
 
@@ -1533,7 +1534,7 @@ def create_protected_switch(include_runtime: bool):
     return {
         **create_switch(include_runtime),
         "breaking_capacity": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "relay_functions": lists(builds(CurrentRelay), min_size=1, max_size=2)
+        "relay_functions": lists(builds(CurrentRelay, mrid=mrid_strategy), min_size=1, max_size=2)
     }
 
 

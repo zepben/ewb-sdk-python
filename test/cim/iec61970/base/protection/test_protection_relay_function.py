@@ -3,14 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
-from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
-    UnitSymbol, unit_symbol_from_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from cim.private_collection_validator import validate_unordered_1234567890, validate_ordered_other_1234567890
+from cim.private_collection_validator import validate_unordered, validate_ordered_other
 from cim.property_validator import validate_property_accessor
+from util import mrid_strategy
+from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
+    UnitSymbol, unit_symbol_from_id, generate_id
 
 protection_relay_function_kwargs = {
     **power_system_resource_kwargs,
@@ -20,18 +21,28 @@ protection_relay_function_kwargs = {
     "protection_kind": sampled_from(ProtectionKind),
     "directable": booleans(),
     "power_direction": sampled_from(PowerDirectionKind),
-    "sensors": lists(builds(Sensor), max_size=2),
-    "protected_switches": lists(builds(ProtectedSwitch), max_size=2),
-    "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
+    "sensors": lists(builds(Sensor, mrid=mrid_strategy), max_size=2),
+    "protected_switches": lists(builds(ProtectedSwitch, mrid=mrid_strategy), max_size=2),
+    "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy), max_size=2),
     "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
     "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_from(UnitSymbol), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
                                name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
 }
 
-protection_relay_function_args = [*power_system_resource_args, "model_string", False, 1.1, ProtectionKind.JG, True, PowerDirectionKind.FORWARD, [Sensor()],
-                                  [ProtectedSwitch()], [ProtectionRelayScheme()], [2.2, 3.3],
-                                  [RelaySetting(unit_symbol=UnitSymbol.METRES, value=1.1, name="rs1"),
-                                   RelaySetting(unit_symbol=UnitSymbol.GYPERS, value=2.2, name="rs2")]]
+protection_relay_function_args = [
+    *power_system_resource_args,
+    "model_string",
+    False,
+    1.1,
+    ProtectionKind.JG,
+    True,
+    PowerDirectionKind.FORWARD,
+    [Sensor(mrid=generate_id())],
+    [ProtectedSwitch(mrid=generate_id())],
+    [ProtectionRelayScheme(mrid=generate_id())],
+    [2.2, 3.3],
+    [RelaySetting(unit_symbol=UnitSymbol.METRES, value=1.1, name="rs1"), RelaySetting(unit_symbol=UnitSymbol.GYPERS, value=2.2, name="rs2")]
+]
 
 
 def verify_protection_relay_function_constructor_default(prf: ProtectionRelayFunction):
@@ -95,7 +106,7 @@ def verify_protection_relay_function_constructor_args(prf: ProtectionRelayFuncti
 
 
 def test_sensors_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ProtectionRelayFunction,
         lambda mrid: Sensor(mrid),
         ProtectionRelayFunction.sensors,
@@ -108,7 +119,7 @@ def test_sensors_collection():
 
 
 def test_protected_switches_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ProtectionRelayFunction,
         lambda mrid: ProtectedSwitch(mrid),
         ProtectionRelayFunction.protected_switches,
@@ -121,7 +132,7 @@ def test_protected_switches_collection():
 
 
 def test_scheme_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ProtectionRelayFunction,
         lambda mrid: ProtectionRelayScheme(mrid),
         ProtectionRelayFunction.schemes,
@@ -134,7 +145,7 @@ def test_scheme_collection():
 
 
 def test_time_limits_collection():
-    validate_ordered_other_1234567890(
+    validate_ordered_other(
         ProtectionRelayFunction,
         lambda i: float(i),
         ProtectionRelayFunction.time_limits,
@@ -150,7 +161,7 @@ def test_time_limits_collection():
 
 
 def test_thresholds_collection():
-    validate_ordered_other_1234567890(
+    validate_ordered_other(
         ProtectionRelayFunction,
         lambda i: RelaySetting(unit_symbol_from_id(i), int(i), str(i)),
         ProtectionRelayFunction.thresholds,

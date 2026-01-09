@@ -6,14 +6,14 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
-from zepben.ewb import Disconnector
+from zepben.ewb import Disconnector, generate_id
 
 disconnector_kwargs = switch_kwargs
 disconnector_args = switch_args
 
 
 def test_disconnector_constructor_default():
-    verify_switch_constructor_default(Disconnector())
+    verify_switch_constructor_default(Disconnector(mrid=generate_id()))
 
 
 @given(**disconnector_kwargs)

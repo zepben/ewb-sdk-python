@@ -3,17 +3,19 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds
-from zepben.ewb import AuxiliaryEquipment, Terminal
+
+from util import mrid_strategy
+from zepben.ewb import AuxiliaryEquipment, Terminal, generate_id
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 
 auxiliary_equipment_kwargs = {
     **equipment_kwargs,
-    "terminal": builds(Terminal)
+    "terminal": builds(Terminal, mrid=mrid_strategy)
 }
 
-auxiliary_equipment_args = [*equipment_args, Terminal()]
+auxiliary_equipment_args = [*equipment_args, Terminal(mrid=generate_id())]
 
 
 def verify_auxiliary_equipment_constructor_default(ae: AuxiliaryEquipment):

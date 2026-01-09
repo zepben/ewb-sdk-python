@@ -7,14 +7,14 @@ from hypothesis import given
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from zepben.ewb import Site, TestNetworkBuilder, Equipment, AssignToLvFeeders, LvFeeder, NetworkStateOperators
+from zepben.ewb import Site, TestNetworkBuilder, Equipment, AssignToLvFeeders, LvFeeder, NetworkStateOperators, generate_id
 
 site_kwargs = equipment_container_kwargs
 site_args = equipment_container_args
 
 
 def test_site_constructor_default():
-    verify_equipment_container_constructor_default(Site())
+    verify_equipment_container_constructor_default(Site(mrid=generate_id()))
 
 
 @given(**site_kwargs)
@@ -31,7 +31,7 @@ async def test_find_lv_feeders_excludes_open_switches():
     # tx0 21 b1(lvf5) 21--c2--2
     #     21 b3(lvf6) 21--c4--2
     #
-    site = Site()
+    site = Site(mrid=generate_id())
     network = (TestNetworkBuilder()
                .from_power_transformer(action=lambda pt: _add_to_site(pt, site))  # tx0
                .from_breaker(is_normally_open=True, is_open=True, action=lambda b: _add_to_site(b, site))  # b1

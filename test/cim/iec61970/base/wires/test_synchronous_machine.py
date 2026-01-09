@@ -4,16 +4,18 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, one_of, none, booleans, integers, sampled_from, lists, builds
+
+from util import mrid_strategy
 from zepben.ewb import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_rotating_machine import rotating_machine_kwargs, rotating_machine_args, \
     verify_rotating_machine_constructor_default, verify_rotating_machine_constructor_kwargs, verify_rotating_machine_constructor_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 synchronous_machine_kwargs = {
     **rotating_machine_kwargs,
-    "curves": lists(builds(ReactiveCapabilityCurve), max_size=2),
+    "curves": lists(builds(ReactiveCapabilityCurve, mrid=mrid_strategy), max_size=2),
     "base_q": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
     "condenser_p": one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
     "earthing": booleans(),
@@ -179,7 +181,7 @@ def verify_synchronous_machine_constructor_args():
 
 
 def test_curves_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         SynchronousMachine,
         lambda mrid: ReactiveCapabilityCurve(mrid),
         SynchronousMachine.curves,

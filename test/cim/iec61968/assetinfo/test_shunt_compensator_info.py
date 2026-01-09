@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers
-from zepben.ewb import ShuntCompensatorInfo
+from zepben.ewb import ShuntCompensatorInfo, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \
@@ -22,7 +22,7 @@ shunt_compensator_info_args = [*asset_info_args, 1, 2, 3, 4]
 
 
 def test_shunt_compensator_info_constructor_default():
-    sci = ShuntCompensatorInfo()
+    sci = ShuntCompensatorInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(sci)
     assert sci.max_power_loss is None

@@ -59,7 +59,7 @@ def validate_service_translations(
             def run_test(cim):
                 nonlocal processing
                 processing = f"blank {desc}"
-                blank = type(cim)()
+                blank = type(cim)(mrid="blank")
 
                 # Convert the blank object to protobuf and ensure it didn't get converted to an instance of PBIdentifiedObject,
                 # which indicates a missing `to_pb` implementation or import.

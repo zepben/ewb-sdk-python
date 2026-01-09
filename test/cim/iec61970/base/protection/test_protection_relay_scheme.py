@@ -4,23 +4,29 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.ewb import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme
+
+from util import mrid_strategy
+from zepben.ewb import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme, generate_id
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 protection_relay_scheme_kwargs = {
     **identified_object_kwargs,
-    "system": builds(ProtectionRelaySystem),
-    "functions": lists(builds(ProtectionRelayFunction))
+    "system": builds(ProtectionRelaySystem, mrid=mrid_strategy),
+    "functions": lists(builds(ProtectionRelayFunction, mrid=mrid_strategy))
 }
 
-protection_relay_scheme_args = [*identified_object_args, ProtectionRelaySystem(), [ProtectionRelayFunction(), ProtectionRelayFunction()]]
+protection_relay_scheme_args = [
+    *identified_object_args,
+    ProtectionRelaySystem(mrid=generate_id()),
+    [ProtectionRelayFunction(mrid=generate_id()), ProtectionRelayFunction(mrid=generate_id())]
+]
 
 
 def test_protection_relay_scheme_constructor_default():
-    prs = ProtectionRelayScheme()
+    prs = ProtectionRelayScheme(mrid=generate_id())
 
     verify_identified_object_constructor_default(prs)
     assert prs.system is None
@@ -51,7 +57,7 @@ def test_protection_relay_scheme_constructor_args():
 
 
 def test_functions_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ProtectionRelayScheme,
         lambda mrid: ProtectionRelayFunction(mrid),
         ProtectionRelayScheme.functions,

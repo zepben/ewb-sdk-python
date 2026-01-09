@@ -3,7 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, builds
-from zepben.ewb import PowerElectronicsUnit, PowerElectronicsConnection
+
+from util import mrid_strategy
+from zepben.ewb import PowerElectronicsUnit, PowerElectronicsConnection, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
@@ -11,12 +13,12 @@ from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equip
 
 power_electronics_unit_kwargs = {
     **equipment_kwargs,
-    "power_electronics_connection": builds(PowerElectronicsConnection),
+    "power_electronics_connection": builds(PowerElectronicsConnection, mrid=mrid_strategy),
     "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
 }
 
-power_electronics_unit_args = [*equipment_args, PowerElectronicsConnection(), 1, 2]
+power_electronics_unit_args = [*equipment_args, PowerElectronicsConnection(mrid=generate_id()), 1, 2]
 
 
 def verify_power_electronics_unit_constructor_default(peu: PowerElectronicsUnit):

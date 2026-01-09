@@ -7,19 +7,20 @@ from hypothesis.strategies import builds, lists
 
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
-from zepben.ewb import Terminal
+from util import mrid_strategy
+from zepben.ewb import Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 
 busbar_section_kwargs = {
     **connector_kwargs,
-    'terminals': lists(builds(Terminal), max_size=1)  # Busbar's can only have 1 terminal
+    'terminals': lists(builds(Terminal, mrid=mrid_strategy), max_size=1)  # Busbar's can only have 1 terminal
 }
 
 busbar_section_args = connector_args
 
 
 def test_busbar_section_constructor_default():
-    verify_connector_constructor_default(BusbarSection())
+    verify_connector_constructor_default(BusbarSection(mrid=generate_id()))
 
 
 @given(**busbar_section_kwargs)

@@ -4,26 +4,34 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.ewb import Terminal, Equipment, LvFeeder
+
+from util import mrid_strategy
+from zepben.ewb import Terminal, Equipment, LvFeeder, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 lv_feeder_kwargs = {
     **equipment_container_kwargs,
-    "normal_head_terminal": builds(Terminal),
-    "normal_energizing_feeders": lists(builds(Feeder), max_size=2),
-    "current_equipment": lists(builds(Equipment), max_size=2),
-    "current_energizing_feeders": lists(builds(Feeder), max_size=2)
+    "normal_head_terminal": builds(Terminal, mrid=mrid_strategy),
+    "normal_energizing_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2),
+    "current_equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
+    "current_energizing_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2)
 }
 
-lv_feeder_args = [*equipment_container_args, Terminal(), {"f": Feeder()}, {"ce": Equipment()}, {"cef": Feeder()}]
+lv_feeder_args = [
+    *equipment_container_args,
+    Terminal(mrid=generate_id()),
+    {"f": Feeder(mrid=generate_id())},
+    {"ce": Equipment(mrid=generate_id())},
+    {"cef": Feeder(mrid=generate_id())}
+]
 
 
 def test_lv_feeder_constructor_default():
-    lvf = LvFeeder()
+    lvf = LvFeeder(mrid=generate_id())
 
     verify_equipment_container_constructor_default(lvf)
     assert not lvf.normal_head_terminal
@@ -64,7 +72,7 @@ def test_lv_feeder_constructor_args():
 
 
 def test_current_equipment_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         LvFeeder,
         lambda mrid: Equipment(mrid),
         LvFeeder.current_equipment,
@@ -77,7 +85,7 @@ def test_current_equipment_collection():
 
 
 def test_normal_energizing_feeder_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         LvFeeder,
         lambda mrid: Feeder(mrid),
         LvFeeder.normal_energizing_feeders,
@@ -90,7 +98,7 @@ def test_normal_energizing_feeder_collection():
 
 
 def test_current_energizing_feeder_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         LvFeeder,
         lambda mrid: Feeder(mrid),
         LvFeeder.current_energizing_feeders,

@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, text
-from zepben.ewb import Control, RemoteControl
+
+from util import mrid_strategy
+from zepben.ewb import Control, RemoteControl, generate_id
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
@@ -13,14 +15,14 @@ from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_poin
 control_kwargs = {
     **io_point_kwargs,
     "power_system_resource_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "remote_control": builds(RemoteControl)
+    "remote_control": builds(RemoteControl, mrid=mrid_strategy)
 }
 
-control_args = [*io_point_args, "a", RemoteControl()]
+control_args = [*io_point_args, "a", RemoteControl(mrid=generate_id())]
 
 
 def test_control_constructor_default():
-    c = Control()
+    c = Control(mrid=generate_id())
 
     verify_io_point_constructor_default(c)
     assert not c.power_system_resource_mrid

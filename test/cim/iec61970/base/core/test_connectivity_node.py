@@ -4,22 +4,24 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import ConnectivityNode, Terminal
+
+from util import mrid_strategy
+from zepben.ewb import ConnectivityNode, Terminal, generate_id
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 connectivity_node_kwargs = {
     **identified_object_kwargs,
-    "terminals": lists(builds(Terminal), max_size=2)
+    "terminals": lists(builds(Terminal, mrid=mrid_strategy), max_size=2)
 }
 
-connectivity_node_args = [*identified_object_args, [Terminal()]]
+connectivity_node_args = [*identified_object_args, [Terminal(mrid=generate_id())]]
 
 
 def test_connectivity_node_constructor_default():
-    cn = ConnectivityNode()
+    cn = ConnectivityNode(mrid=generate_id())
 
     verify_identified_object_constructor_default(cn)
     assert not list(cn.terminals)
@@ -43,7 +45,7 @@ def test_connectivity_node_constructor_args():
 
 
 def test_terminals_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ConnectivityNode,
         lambda mrid: Terminal(mrid),
         ConnectivityNode.terminals,

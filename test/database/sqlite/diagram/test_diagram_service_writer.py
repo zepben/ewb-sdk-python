@@ -5,7 +5,7 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.ewb import DiagramService, DiagramCimWriter, DiagramServiceWriter, DiagramDatabaseTables
+from zepben.ewb import DiagramService, DiagramCimWriter, DiagramServiceWriter, DiagramDatabaseTables, generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
 
@@ -27,7 +27,7 @@ class TestDiagramServiceWriter:
         )
 
     def test_passes_objects_through_to_the_cim_writer(self):
-        diagram = Diagram()
+        diagram = Diagram(mrid=generate_id())
         self.diagram_service.add(diagram)
 
         # NOTE: the save method will fail due to the relaxed mock returning false for all save operations,

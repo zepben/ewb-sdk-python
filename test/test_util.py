@@ -2,7 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.util import none
+from uuid import UUID
+
+from zepben.ewb.util import none, generate_id
 
 
 def test_none():
@@ -17,3 +19,10 @@ def test_none():
     assert none([0, 0, 0])
     assert none([[], [], []])
     assert not none([[], [False], []])
+
+def test_generate_id():
+    # make sure our generated ID is a valid UUID.
+    UUID(generate_id())
+
+    # Make sure each call gives a new UUID.
+    assert generate_id() != generate_id()

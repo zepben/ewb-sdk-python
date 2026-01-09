@@ -13,7 +13,7 @@ import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
 from zepben.ewb import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, \
-    Tracing, StepActionWithContextValue, EnergyConsumer
+    Tracing, StepActionWithContextValue, EnergyConsumer, generate_id
 from zepben.ewb.testing.test_network_builder import TestNetworkBuilder
 
 Terminal.__add__ = PathTerminal.__add__
@@ -25,8 +25,8 @@ class TestNetworkTrace:
     @pytest.mark.asyncio
     async def test_add_start_clamp_terminal_as_traversed_segment_path(self):
         trace = Tracing.network_trace()
-        segment = AcLineSegment()
-        clamp = Clamp().add_terminal(Terminal())
+        segment = AcLineSegment(mrid=generate_id())
+        clamp = Clamp(mrid=generate_id()).add_terminal(Terminal(mrid=generate_id()))
         segment.add_clamp(clamp)
 
         trace.add_start_item(clamp[1])
@@ -35,8 +35,8 @@ class TestNetworkTrace:
     @pytest.mark.asyncio
     def test_adds_start_whole_clamp_as_not_traversed_segment_path(self):
         trace = Tracing.network_trace()
-        segment = AcLineSegment()
-        clamp = Clamp().add_terminal(Terminal())
+        segment = AcLineSegment(mrid=generate_id())
+        clamp = Clamp(mrid=generate_id()).add_terminal(Terminal(mrid=generate_id()))
         segment.add_clamp(clamp)
 
         trace.add_start_item(clamp)
@@ -45,26 +45,26 @@ class TestNetworkTrace:
     @pytest.mark.asyncio
     def test_adds_start_AcLineSegment_terminals_cut_terminals_and_clamp_terminals_as_traversed_segment(self):
         trace = Tracing.network_trace()
-        segment = AcLineSegment() \
-            .add_terminal(Terminal()) \
-            .add_terminal(Terminal())
+        segment = AcLineSegment(mrid=generate_id()) \
+            .add_terminal(Terminal(mrid=generate_id())) \
+            .add_terminal(Terminal(mrid=generate_id()))
 
-        clamp1 = Clamp() \
-            .add_terminal(Terminal())
+        clamp1 = Clamp(mrid=generate_id()) \
+            .add_terminal(Terminal(mrid=generate_id()))
         segment.add_clamp(clamp1)
 
-        clamp2 = Clamp() \
-            .add_terminal(Terminal())
+        clamp2 = Clamp(mrid=generate_id()) \
+            .add_terminal(Terminal(mrid=generate_id()))
         segment.add_clamp(clamp2)
 
-        cut1 = Cut() \
-            .add_terminal(Terminal()) \
-            .add_terminal(Terminal())
+        cut1 = Cut(mrid=generate_id()) \
+            .add_terminal(Terminal(mrid=generate_id())) \
+            .add_terminal(Terminal(mrid=generate_id()))
         segment.add_cut(cut1)
 
-        cut2 = Cut() \
-            .add_terminal(Terminal()) \
-            .add_terminal(Terminal())
+        cut2 = Cut(mrid=generate_id()) \
+            .add_terminal(Terminal(mrid=generate_id())) \
+            .add_terminal(Terminal(mrid=generate_id()))
         segment.add_cut(cut2)
 
         trace.add_start_item(segment)
@@ -330,5 +330,3 @@ class TestNetworkTrace:
         assert len(data_capture) == 2
         assert data_capture == [('ec3', ['c0', 'c0', 'c1', 'c1', 'c2', 'c2']),
                                 ('ec5', ['c0', 'c0', 'c1', 'c1-clamp1', 'c4', 'c4'])]
-
-

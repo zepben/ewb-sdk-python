@@ -8,6 +8,7 @@ import pkgutil
 from concurrent import futures
 
 import grpc
+from hypothesis.strategies import uuids
 
 
 def all_subclasses(cls, package):
@@ -57,3 +58,6 @@ def grpc_aio_server():
     server.add_insecure_port(host)
 
     return server, host
+
+
+mrid_strategy = uuids(version=4).map(lambda x: str(x))

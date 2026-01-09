@@ -5,7 +5,8 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, floats, integers, text
-from zepben.ewb import PotentialTransformerInfo, PowerTransformerInfo, Ratio
+
+from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
@@ -13,7 +14,7 @@ from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_
 
 potential_transformer_info_kwargs = {
     **asset_info_kwargs,
-    "accuracy_class": builds(PowerTransformerInfo),
+    "accuracy_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "nominal_ratio": builds(Ratio, floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
     "primary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "pt_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -26,7 +27,7 @@ potential_transformer_info_args = [*asset_info_args, "a", Ratio(1.1, 2.2), 3.3, 
 
 
 def test_potential_transformer_info_constructor_default():
-    vti = PotentialTransformerInfo()
+    vti = PotentialTransformerInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(vti)
     assert vti.accuracy_class is None

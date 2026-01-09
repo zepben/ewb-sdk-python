@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from zepben.ewb import NetworkStateOperators, FeederDirection, NetworkTraceStep, Terminal
+from zepben.ewb import NetworkStateOperators, FeederDirection, NetworkTraceStep, Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
 from zepben.ewb.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
@@ -165,8 +165,8 @@ def _terminal_should_queue(condition: Tuple[FeederDirection, FeederDirection, bo
 
     next_path = MagicMock(spec=NetworkTraceStep.Path)()
     next_path.traced_internally = traced_internally
-    next_path.to_terminal = Terminal()
-    next_path.to_equipment = Junction()
+    next_path.to_terminal = Terminal(mrid=generate_id())
+    next_path.to_equipment = Junction(mrid=generate_id())
     next_path.did_traverse_ac_line_segment = False
 
     next_item = NetworkTraceStep(next_path, 0, 0, None)
@@ -182,11 +182,11 @@ def _start_terminal_should_queue(condition: Tuple[FeederDirection, FeederDirecti
 
     next_path = MagicMock(spec=NetworkTraceStep.Path)
     next_path.configure_mock(
-        to_terminal=Terminal(),
-        to_equipment=Junction()
+        to_terminal=Terminal(mrid=generate_id()),
+        to_equipment=Junction(mrid=generate_id())
     )
-    next_path.to_terminal = Terminal()
-    next_path.to_equipment = Junction()
+    next_path.to_terminal = Terminal(mrid=generate_id())
+    next_path.to_equipment = Junction(mrid=generate_id())
     next_path.did_traverse_ac_line_segment = False
 
     next_item = NetworkTraceStep(next_path, 0, 0, None)

@@ -9,7 +9,7 @@ from hypothesis.strategies import sampled_from, lists, builds
 from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, \
     verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
-from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance
+from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 
 pan_demand_response_function_kwargs = {
@@ -22,7 +22,7 @@ pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctio
 
 
 def test_pan_demand_response_function_constructor_default():
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
 
     verify_end_device_function_constructor_default(pdrf)
 
@@ -50,14 +50,14 @@ def test_pan_demand_response_function_constructor_args():
 
 def test_constructor_with_controlled_appliance():
     ca = ControlledAppliance([Appliance.SMART_APPLIANCE, Appliance.IRRIGATION_PUMP])
-    pdrf = PanDemandResponseFunction(appliances=ca)
+    pdrf = PanDemandResponseFunction(mrid=generate_id(), appliances=ca)
 
     assert pdrf.appliance == ca
 
 
 def test_appliance_setter():
     ca = ControlledAppliance([Appliance.SMART_APPLIANCE, Appliance.IRRIGATION_PUMP])
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
     pdrf.appliance = ca
     assert pdrf.appliance == ca
 
@@ -66,7 +66,7 @@ def test_appliance_setter():
 
 
 def test_add_remove_appliances():
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
 
     assert pdrf.add_appliance(Appliance.WATER_HEATER), "should have added"
     validate_appliance(pdrf.appliance, is_water_heater=True)
@@ -87,7 +87,7 @@ def test_add_remove_appliances():
 
 
 def test_add_remove_multiple_appliances():
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
 
     with raises(ValueError, match="You must provide at least one appliance to add"):
         pdrf.add_appliances([])
@@ -122,7 +122,7 @@ def test_add_remove_multiple_appliances():
 
 
 def test_remove_appliance_initialises_bitmask():
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
     assert pdrf._appliance_bitmask is None
     assert pdrf.appliance is None
 
@@ -132,7 +132,7 @@ def test_remove_appliance_initialises_bitmask():
 
 
 def test_removing_appliances_initialises_bitmask():
-    pdrf = PanDemandResponseFunction()
+    pdrf = PanDemandResponseFunction(mrid=generate_id())
     assert pdrf._appliance_bitmask is None
     assert pdrf.appliance is None
 

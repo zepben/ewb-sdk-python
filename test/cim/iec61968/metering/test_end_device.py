@@ -8,8 +8,9 @@ from hypothesis.strategies import text, builds, lists
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
-from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.ewb import Location
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import Location, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
@@ -17,11 +18,11 @@ from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 end_device_kwargs = {
     **asset_container_kwargs,
     "customer_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "service_location": builds(Location),
-    "usage_points": lists(builds(UsagePoint), max_size=2)
+    "service_location": builds(Location, mrid=mrid_strategy),
+    "usage_points": lists(builds(UsagePoint, mrid=mrid_strategy), max_size=2)
 }
 
-end_device_args = [*asset_container_args, "a", Location(), [UsagePoint]]
+end_device_args = [*asset_container_args, "a", Location(mrid=generate_id()), [UsagePoint(mrid=generate_id())]]
 
 
 def verify_end_device_constructor_default(ed: EndDevice):
@@ -48,7 +49,7 @@ def verify_end_device_constructor_args(ed: EndDevice):
 
 
 def test_usage_points_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         EndDevice,
         lambda mrid: UsagePoint(mrid),
         EndDevice.usage_points,
@@ -61,7 +62,7 @@ def test_usage_points_collection():
 
 
 def test_end_device_function_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         EndDevice,
         lambda mrid: EndDeviceFunction(mrid),
         EndDevice.functions,

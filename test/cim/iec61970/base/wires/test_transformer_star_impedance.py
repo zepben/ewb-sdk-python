@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, builds
-from zepben.ewb import TransformerStarImpedance, TransformerEndInfo
+
+from util import mrid_strategy
+from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
@@ -16,14 +18,14 @@ transformer_star_impedance_kwargs = {
     "r0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "transformer_end_info": builds(TransformerEndInfo)
+    "transformer_end_info": builds(TransformerEndInfo, mrid=mrid_strategy)
 }
 
-transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, TransformerEndInfo()]
+transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, TransformerEndInfo(mrid=generate_id())]
 
 
 def test_transformer_star_impedance_constructor_default():
-    tsi = TransformerStarImpedance()
+    tsi = TransformerStarImpedance(mrid=generate_id())
 
     verify_identified_object_constructor_default(tsi)
     assert tsi.r is None

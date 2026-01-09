@@ -79,7 +79,7 @@ def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
 @bind_to_cim
 @add_to_network_or_none
 def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Optional[Organisation]:
-    cim = Organisation()
+    cim = Organisation(mrid=pb.mrid())
 
     identified_object_to_cim(pb.io, cim, service)
     return cim

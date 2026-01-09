@@ -4,16 +4,18 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
-from zepben.ewb import EnergySource, EnergySourcePhase
+
+from util import mrid_strategy
+from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 energy_source_kwargs = {
     **energy_connection_kwargs,
-    "energy_source_phases": lists(builds(EnergySourcePhase)),
+    "energy_source_phases": lists(builds(EnergySourcePhase, mrid=mrid_strategy)),
     "active_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "reactive_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "voltage_angle": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -41,12 +43,39 @@ energy_source_kwargs = {
     "x0_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
 }
 
-energy_source_args = [*energy_connection_args, [EnergySourcePhase()], 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, 11.11, 12.21, True,
-                      13.31, 14.41, 15.51, 16.61, 17.71, 18.81, 19.91, 20.02, 21.12, 22.22, 23.32, 24.42]
+energy_source_args = [
+    *energy_connection_args,
+    [EnergySourcePhase(mrid=generate_id())],
+    1.1,
+    2.2,
+    3.3,
+    4.4,
+    5.5,
+    6.6,
+    7.7,
+    8.8,
+    9.9,
+    10.01,
+    11.11,
+    12.21,
+    True,
+    13.31,
+    14.41,
+    15.51,
+    16.61,
+    17.71,
+    18.81,
+    19.91,
+    20.02,
+    21.12,
+    22.22,
+    23.32,
+    24.42
+]
 
 
 def test_energy_source_constructor_default():
-    es = EnergySource()
+    es = EnergySource(mrid=generate_id())
 
     verify_energy_connection_constructor_default(es)
     assert not list(es.phases)
@@ -175,7 +204,7 @@ def test_energy_source_constructor_args():
 
 
 def test_phases_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         EnergySource,
         lambda mrid: EnergySourcePhase(mrid),
         EnergySource.phases,

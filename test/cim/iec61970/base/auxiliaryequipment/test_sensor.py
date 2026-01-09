@@ -4,18 +4,20 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import lists, builds
-from zepben.ewb import Sensor, ProtectionRelayFunction
+
+from util import mrid_strategy
+from zepben.ewb import Sensor, ProtectionRelayFunction, generate_id
 
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 sensor_kwargs = {
     **auxiliary_equipment_kwargs,
-    "relay_functions": lists(builds(ProtectionRelayFunction), max_size=2)
+    "relay_functions": lists(builds(ProtectionRelayFunction, mrid=mrid_strategy), max_size=2)
 }
 
-sensor_args = [*auxiliary_equipment_args, [ProtectionRelayFunction()]]
+sensor_args = [*auxiliary_equipment_args, [ProtectionRelayFunction(mrid=generate_id())]]
 
 
 def verify_sensor_constructor_default(sn: Sensor):
@@ -37,7 +39,7 @@ def verify_sensor_constructor_args(sn: Sensor):
 
 
 def test_relay_functions_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Sensor,
         lambda mrid: ProtectionRelayFunction(mrid),
         Sensor.relay_functions,

@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from pytest import raises
 from hypothesis.strategies import floats, booleans, builds, integers
-from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
+
+from util import mrid_strategy
+from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 
@@ -17,14 +19,24 @@ transformer_end_kwargs = {
     "grounded": booleans(),
     "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "ratio_tap_changer": builds(RatioTapChanger),
-    "terminal": builds(Terminal),
-    "base_voltage": builds(BaseVoltage),
+    "ratio_tap_changer": builds(RatioTapChanger, mrid=mrid_strategy),
+    "terminal": builds(Terminal, mrid=mrid_strategy),
+    "base_voltage": builds(BaseVoltage, mrid=mrid_strategy),
     "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "star_impedance": builds(TransformerStarImpedance)
+    "star_impedance": builds(TransformerStarImpedance, mrid=mrid_strategy)
 }
 
-transformer_end_args = [*identified_object_args, True, 1.1, 2.2, RatioTapChanger(), Terminal(), BaseVoltage(), 3, TransformerStarImpedance()]
+transformer_end_args = [
+    *identified_object_args,
+    True,
+    1.1,
+    2.2,
+    RatioTapChanger(mrid=generate_id()),
+    Terminal(mrid=generate_id()),
+    BaseVoltage(mrid=generate_id()),
+    3,
+    TransformerStarImpedance(mrid=generate_id())
+]
 
 
 def verify_transformer_end_constructor_default(te: TransformerEnd):
@@ -67,9 +79,9 @@ def verify_transformer_end_constructor_args(te: TransformerEnd):
 
 
 def test_allow_terminal_with_no_conducting_equipment():
-    te = TransformerEnd()
+    te = TransformerEnd(mrid=generate_id())
 
-    terminal = Terminal()
+    terminal = Terminal(mrid=generate_id())
     te.terminal = terminal
     assert te.terminal == terminal
 
@@ -84,8 +96,8 @@ def test_terminal_must_belong_to_power_transformer():
                                   r"Fuse\[fuse_mrid\] rather than a PowerTransformer."):
         te.terminal = t1
 
-    t2 = Terminal()
-    t2.conducting_equipment = PowerTransformer()
+    t2 = Terminal(mrid=generate_id())
+    t2.conducting_equipment = PowerTransformer(mrid=generate_id())
 
     te.terminal = t2
     assert te.terminal == t2

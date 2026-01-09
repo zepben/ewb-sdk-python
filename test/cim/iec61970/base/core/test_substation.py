@@ -4,27 +4,35 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import Substation, Feeder, Loop, Circuit
-from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import Substation, Feeder, Loop, Circuit, generate_id
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 
 substation_kwargs = {
     **equipment_container_kwargs,
-    "sub_geographical_region": builds(SubGeographicalRegion),
-    "normal_energized_feeders": lists(builds(Feeder), max_size=2),
-    "loops": lists(builds(Loop), max_size=2),
-    "energized_loops": lists(builds(Loop), max_size=2),
-    "circuits": lists(builds(Circuit), max_size=2)
+    "sub_geographical_region": builds(SubGeographicalRegion, mrid=mrid_strategy),
+    "normal_energized_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2),
+    "loops": lists(builds(Loop, mrid=mrid_strategy), max_size=2),
+    "energized_loops": lists(builds(Loop, mrid=mrid_strategy), max_size=2),
+    "circuits": lists(builds(Circuit, mrid=mrid_strategy), max_size=2)
 }
 
-substation_args = [*equipment_container_args, Substation(), [Feeder()], [Loop()], [Loop()], [Circuit()]]
+substation_args = [
+    *equipment_container_args,
+    Substation(mrid=generate_id()),
+    [Feeder(mrid=generate_id())],
+    [Loop(mrid=generate_id())],
+    [Loop(mrid=generate_id())],
+    [Circuit(mrid=generate_id())]
+]
 
 
 def test_substation_constructor_default():
-    cn = Substation()
+    cn = Substation(mrid=generate_id())
 
     verify_equipment_container_constructor_default(cn)
     assert not cn.sub_geographical_region
@@ -65,7 +73,7 @@ def test_substation_constructor_args():
 
 
 def test_normal_energized_feeders_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Substation,
         lambda mrid: Feeder(mrid),
         Substation.feeders,
@@ -78,7 +86,7 @@ def test_normal_energized_feeders_collection():
 
 
 def test_loops_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Substation,
         lambda mrid: Loop(mrid),
         Substation.loops,
@@ -91,7 +99,7 @@ def test_loops_collection():
 
 
 def test_energized_loops_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Substation,
         lambda mrid: Loop(mrid),
         Substation.energized_loops,
@@ -104,7 +112,7 @@ def test_energized_loops_collection():
 
 
 def test_circuits_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Substation,
         lambda mrid: Circuit(mrid),
         Substation.circuits,

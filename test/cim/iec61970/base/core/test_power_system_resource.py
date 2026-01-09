@@ -4,22 +4,28 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds, integers, lists
 
-from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.ewb import PowerSystemResource, Location, PowerTransformerInfo, Asset
-
 from cim.cim_creators import sampled_wire_info, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import PowerSystemResource, Location, PowerTransformerInfo, Asset, generate_id
 
 power_system_resource_kwargs = {
     **identified_object_kwargs,
-    "location": builds(Location),
+    "location": builds(Location, mrid=mrid_strategy),
     "asset_info": sampled_wire_info(True),
     "num_controls": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "assets": lists(builds(Asset), max_size=2)
+    "assets": lists(builds(Asset, mrid=mrid_strategy), max_size=2)
 }
 
-power_system_resource_args = [*identified_object_args, Location(), PowerTransformerInfo(), 1, [Asset()]]
+power_system_resource_args = [
+    *identified_object_args,
+    Location(mrid=generate_id()),
+    PowerTransformerInfo(mrid=generate_id()),
+    1,
+    [Asset(mrid=generate_id())]
+]
 
 
 def verify_power_system_resource_constructor_default(psr: PowerSystemResource):
@@ -49,7 +55,7 @@ def verify_power_system_resource_constructor_args(psr: PowerSystemResource):
 
 
 def test_assets_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         PowerSystemResource,
         lambda mrid: Asset(mrid),
         PowerSystemResource.assets,

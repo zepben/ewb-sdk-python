@@ -7,7 +7,7 @@ from unittest.mock import create_autospec
 
 from util import import_submodules, all_subclasses
 from zepben.ewb import TableEquipmentEquipmentContainers, PreparedStatement, NetworkDatabaseTables, NetworkCimWriter, EquipmentContainer, Site, Substation, \
-    Circuit, Feeder, LvFeeder, Junction
+    Circuit, Feeder, LvFeeder, Junction, generate_id
 
 
 def test_only_exports_equipment_for_expected_equipment_containers():
@@ -31,7 +31,7 @@ def test_only_exports_equipment_for_expected_equipment_containers():
 
     assert {it.__class__ for it in (should_export + should_ignore)} == all_equipment_container_classes, "Should be checking all EquipmentContainer subclasses"
 
-    junction = Junction()
+    junction = Junction(mrid=generate_id())
     for it in should_export:
         junction.add_container(it)
     for it in should_ignore:

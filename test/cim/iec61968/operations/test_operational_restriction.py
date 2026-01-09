@@ -5,22 +5,24 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import OperationalRestriction, Equipment
+
+from util import mrid_strategy
+from zepben.ewb import OperationalRestriction, Equipment, generate_id
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 operational_restriction_kwargs = {
     **document_kwargs,
-    "equipment": lists(builds(Equipment), max_size=2),
+    "equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
 }
 
-operational_restriction_args = [*document_args, [Equipment()]]
+operational_restriction_args = [*document_args, [Equipment(mrid=generate_id())]]
 
 
 def test_operational_restriction_constructor_default():
-    or_ = OperationalRestriction()
+    or_ = OperationalRestriction(mrid=generate_id())
 
     verify_document_constructor_default(or_)
     assert not list(or_.equipment)
@@ -47,7 +49,7 @@ def test_operational_restriction_constructor_args():
 
 
 def test_equipment_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         OperationalRestriction,
         lambda mrid: Equipment(mrid),
         OperationalRestriction.equipment,

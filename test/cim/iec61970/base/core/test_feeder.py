@@ -5,27 +5,35 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 from pytest import raises
-from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch
-from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 feeder_kwargs = {
     **equipment_container_kwargs,
-    "normal_head_terminal": builds(Terminal),
-    "normal_energizing_substation": builds(Substation),
-    "normal_energized_lv_feeders": lists(builds(LvFeeder), max_size=2),
-    "current_equipment": lists(builds(Equipment), max_size=2),
-    "current_energized_lv_feeders": lists(builds(LvFeeder), max_size=2)
+    "normal_head_terminal": builds(Terminal, mrid=mrid_strategy),
+    "normal_energizing_substation": builds(Substation, mrid=mrid_strategy),
+    "normal_energized_lv_feeders": lists(builds(LvFeeder, mrid=mrid_strategy), max_size=2),
+    "current_equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
+    "current_energized_lv_feeders": lists(builds(LvFeeder, mrid=mrid_strategy), max_size=2)
 }
 
-feeder_args = [*equipment_container_args, Terminal(), Substation(), {"lvf": LvFeeder()}, {"ce": Equipment()}, {"celvf": Equipment()}]
+feeder_args = [
+    *equipment_container_args,
+    Terminal(mrid=generate_id()),
+    Substation(mrid=generate_id()),
+    {"lvf": LvFeeder(mrid=generate_id())},
+    {"ce": Equipment(mrid=generate_id())},
+    {"celvf": Equipment(mrid=generate_id())}
+]
 
 
 def test_feeder_constructor_default():
-    f = Feeder()
+    f = Feeder(mrid=generate_id())
 
     verify_equipment_container_constructor_default(f)
     assert not f.normal_head_terminal
@@ -36,7 +44,8 @@ def test_feeder_constructor_default():
 
 
 @given(**feeder_kwargs)
-def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, normal_energized_lv_feeders, current_equipment, current_energized_lv_feeders, **kwargs):
+def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, normal_energized_lv_feeders, current_equipment,
+                                   current_energized_lv_feeders, **kwargs):
     f = Feeder(normal_head_terminal=normal_head_terminal,
                normal_energizing_substation=normal_energizing_substation,
                normal_energized_lv_feeders=normal_energized_lv_feeders,
@@ -69,7 +78,7 @@ def test_feeder_constructor_args():
 
 
 def test_current_equipment_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Feeder,
         lambda mrid: Equipment(mrid),
         Feeder.current_equipment,
@@ -82,7 +91,7 @@ def test_current_equipment_collection():
 
 
 def test_normal_energized_lv_feeder_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Feeder,
         lambda mrid: LvFeeder(mrid),
         Feeder.normal_energized_lv_feeders,
@@ -95,7 +104,7 @@ def test_normal_energized_lv_feeder_collection():
 
 
 def test_current_energized_lv_feeder_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Feeder,
         lambda mrid: LvFeeder(mrid),
         Feeder.current_energized_lv_feeders,
@@ -108,9 +117,9 @@ def test_current_energized_lv_feeder_collection():
 
 
 def test_can_update_normal_head_terminal_on_empty_feeder():
-    empty_feeder = Feeder()
-    terminal1 = Terminal()
-    terminal2 = Terminal()
+    empty_feeder = Feeder(mrid=generate_id())
+    terminal1 = Terminal(mrid=generate_id())
+    terminal2 = Terminal(mrid=generate_id())
 
     empty_feeder.normal_head_terminal = terminal1
     assert empty_feeder.normal_head_terminal == terminal1
@@ -121,7 +130,7 @@ def test_can_update_normal_head_terminal_on_empty_feeder():
     empty_feeder.normal_head_terminal = None
     assert empty_feeder.normal_head_terminal is None
 
-    equipment = Switch()
+    equipment = Switch(mrid=generate_id())
     empty_feeder.add_equipment(equipment).add_current_equipment(equipment)
     empty_feeder.clear_equipment().clear_current_equipment()
 
@@ -131,10 +140,10 @@ def test_can_update_normal_head_terminal_on_empty_feeder():
 
 def test_block_normal_head_terminal_update_when_equipment_assigned():
     feeder = Feeder(mrid="fdr")
-    terminal1 = Terminal()
-    terminal2 = Terminal()
+    terminal1 = Terminal(mrid=generate_id())
+    terminal2 = Terminal(mrid=generate_id())
 
-    equipment = Switch()
+    equipment = Switch(mrid=generate_id())
 
     feeder.add_equipment(equipment)
 
@@ -153,10 +162,10 @@ def test_block_normal_head_terminal_update_when_equipment_assigned():
 
 def test_block_normal_head_terminal_update_when_current_equipment_assigned():
     feeder = Feeder(mrid="fdr")
-    terminal1 = Terminal()
-    terminal2 = Terminal()
+    terminal1 = Terminal(mrid=generate_id())
+    terminal2 = Terminal(mrid=generate_id())
 
-    equipment = Switch()
+    equipment = Switch(mrid=generate_id())
 
     feeder.add_current_equipment(equipment)
 

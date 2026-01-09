@@ -7,14 +7,14 @@ from hypothesis import given
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
-from zepben.ewb import Tariff
+from zepben.ewb import Tariff, generate_id
 
 tariff_kwargs = document_kwargs
 tariff_args = document_args
 
 
 def test_tariff_constructor_default():
-    verify_document_constructor_default(Tariff())
+    verify_document_constructor_default(Tariff(mrid=generate_id()))
 
 
 @given(**tariff_kwargs)

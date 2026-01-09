@@ -5,23 +5,25 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo
+
+from util import mrid_strategy
+from zepben.ewb import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, generate_id
 
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 transformer_tank_info_kwargs = {
     **asset_info_kwargs,
-    "power_transformer_info": builds(PowerTransformerInfo),
-    "transformer_end_infos": lists(builds(TransformerEndInfo), max_size=2)
+    "power_transformer_info": builds(PowerTransformerInfo, mrid=mrid_strategy),
+    "transformer_end_infos": lists(builds(TransformerEndInfo, mrid=mrid_strategy), max_size=2)
 }
 
-transformer_tank_info_args = [*asset_info_args, PowerTransformerInfo(), [TransformerEndInfo(), TransformerEndInfo()]]
+transformer_tank_info_args = [*asset_info_args, PowerTransformerInfo(mrid=generate_id()), [TransformerEndInfo(mrid=generate_id()), TransformerEndInfo(mrid=generate_id())]]
 
 
 def test_transformer_tank_info_constructor_default():
-    tti = TransformerTankInfo()
+    tti = TransformerTankInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(tti)
     assert not list(tti.transformer_end_infos)
@@ -45,7 +47,7 @@ def test_transformer_tank_info_constructor_args():
 
 
 def test_transformer_tank_info_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         TransformerTankInfo,
         lambda mrid: TransformerEndInfo(mrid),
         TransformerTankInfo.transformer_end_infos,

@@ -8,17 +8,19 @@ import pytest
 from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
-from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType
+
+from util import mrid_strategy
+from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType, generate_id
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
-from cim.private_collection_validator import validate_unordered_other_1234567890
+from cim.private_collection_validator import validate_unordered_other
 
 power_transformer_end_kwargs = {
     **transformer_end_kwargs,
-    "power_transformer": builds(PowerTransformer),
+    "power_transformer": builds(PowerTransformer, mrid=mrid_strategy),
     "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -33,11 +35,11 @@ power_transformer_end_kwargs = {
     "phase_angle_clock": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
 }
 
-power_transformer_end_args = [*transformer_end_args, PowerTransformer(), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11]
+power_transformer_end_args = [*transformer_end_args, PowerTransformer(mrid=generate_id()), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11]
 
 
 def test_power_transformer_end_constructor_default():
-    pte = PowerTransformerEnd()
+    pte = PowerTransformerEnd(mrid=generate_id())
 
     verify_transformer_end_constructor_default(pte)
     assert not pte.power_transformer
@@ -120,7 +122,7 @@ def test_power_transformer_end_constructor_args():
 
 
 def test_power_transformer_end_s_ratings():
-    validate_unordered_other_1234567890(
+    validate_unordered_other(
         PowerTransformerEnd,
         lambda i: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)),  # how python?
         PowerTransformerEnd.s_ratings,
@@ -135,7 +137,7 @@ def test_power_transformer_end_s_ratings():
 
 
 def test_power_transformer_cant_add_rating_with_same_cooling_type():
-    pte = PowerTransformerEnd()
+    pte = PowerTransformerEnd(mrid=generate_id())
     s_rating = TransformerEndRatedS(TransformerCoolingType.KNAF, 1)
     pte.add_transformer_end_rated_s(s_rating)
 
@@ -147,7 +149,7 @@ def test_power_transformer_cant_add_rating_with_same_cooling_type():
 
 
 def test_power_transformer_remove_rating_by_cooling_type():
-    pte = PowerTransformerEnd()
+    pte = PowerTransformerEnd(mrid=generate_id())
     for index, cooling_type in enumerate(TransformerCoolingType):
         pte.add_rating(index * 10, cooling_type)
 
@@ -159,7 +161,7 @@ def test_power_transformer_remove_rating_by_cooling_type():
 
 
 def test_power_transformer_rated_s_backwards_compatibility():
-    pte = PowerTransformerEnd()
+    pte = PowerTransformerEnd(mrid=generate_id())
     pte.rated_s = 1
     assert pte.rated_s == 1
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1)]
@@ -181,4 +183,4 @@ def test_power_transformer_rated_s_backwards_compatibility():
 
 def test_power_transformer_s_ratings_backing_field_cant_through_the_constructor():
     with raises(ValueError, match="Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected."):
-        PowerTransformerEnd(_s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 4)])
+        PowerTransformerEnd(mrid=generate_id(), _s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 4)])

@@ -5,8 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
 from pytest import raises
+
+from util import mrid_strategy
 from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind, \
-    Terminal
+    Terminal, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
@@ -16,18 +18,24 @@ from cim.property_validator import validate_property_accessor
 power_transformer_kwargs = {
     **conducting_equipment_kwargs,
     "vector_group": sampled_from(VectorGroup),
-    "power_transformer_ends": lists(builds(PowerTransformerEnd), max_size=2),
+    "power_transformer_ends": lists(builds(PowerTransformerEnd, mrid=mrid_strategy), max_size=2),
     "transformer_utilisation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "construction_kind": sampled_from(TransformerConstructionKind),
     "function": sampled_from(TransformerFunctionKind)
 }
 
-power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTransformerEnd()], 1.1, TransformerConstructionKind.padmountFeedThrough,
-                          TransformerFunctionKind.secondaryTransformer]
+power_transformer_args = [
+    *conducting_equipment_args,
+    VectorGroup.DD6,
+    [PowerTransformerEnd(mrid=generate_id())],
+    1.1,
+    TransformerConstructionKind.padmountFeedThrough,
+    TransformerFunctionKind.secondaryTransformer
+]
 
 
 def test_power_transformer_constructor_default():
-    pt = PowerTransformer()
+    pt = PowerTransformer(mrid=generate_id())
 
     verify_conducting_equipment_constructor_default(pt)
     assert pt.vector_group == VectorGroup.UNKNOWN

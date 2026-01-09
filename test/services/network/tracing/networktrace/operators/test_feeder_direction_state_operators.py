@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb import Terminal, FeederDirection
+from zepben.ewb import Terminal, FeederDirection, generate_id
 from zepben.ewb.services.network.tracing.networktrace.operators.feeder_direction_state_operations import FeederDirectionStateOperations
 
 
@@ -13,14 +13,14 @@ class TestFeederDirectionStateOperators:
 
     def test_get_direction(self):
         for operations, attr in ((self.normal, 'normal_feeder_direction'), (self.current, 'current_feeder_direction')):
-            terminal = Terminal()
+            terminal = Terminal(mrid=generate_id())
             setattr(terminal, attr, FeederDirection.UPSTREAM)
             assert operations.get_direction(terminal) == FeederDirection.UPSTREAM
 
 
     def test_set_direction(self):
         for operations, attr in ((self.normal, 'normal_feeder_direction'), (self.current, 'current_feeder_direction')):
-            terminal = Terminal()
+            terminal = Terminal(mrid=generate_id())
             setattr(terminal, attr, FeederDirection.NONE)
             assert operations.set_direction(terminal, FeederDirection.UPSTREAM)
             assert getattr(terminal, attr) == FeederDirection.UPSTREAM
@@ -34,7 +34,7 @@ class TestFeederDirectionStateOperators:
 
     def test_add_direction(self):
         for operations, attr in ((self.normal, 'normal_feeder_direction'), (self.current, 'current_feeder_direction')):
-            terminal = Terminal()
+            terminal = Terminal(mrid=generate_id())
             setattr(terminal, attr, FeederDirection.NONE)
             assert operations.add_direction(terminal, FeederDirection.UPSTREAM)
             assert getattr(terminal, attr) == FeederDirection.UPSTREAM
@@ -48,7 +48,7 @@ class TestFeederDirectionStateOperators:
 
     def test_remove_direction(self):
         for operations, attr in ((self.normal, 'normal_feeder_direction'), (self.current, 'current_feeder_direction')):
-            terminal = Terminal()
+            terminal = Terminal(mrid=generate_id())
             setattr(terminal, attr, FeederDirection.BOTH)
             assert operations.remove_direction(terminal, FeederDirection.UPSTREAM)
             assert getattr(terminal, attr) == FeederDirection.DOWNSTREAM

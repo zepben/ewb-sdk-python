@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, booleans
-from zepben.ewb import CurrentRelay, ProtectionKind
+from zepben.ewb import CurrentRelay, ProtectionKind, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
@@ -21,7 +21,7 @@ current_relay_args = [*protection_relay_function_args, 1.1, True, 2.2]
 
 
 def test_current_relay_constructor_default():
-    cr = CurrentRelay()
+    cr = CurrentRelay(mrid=generate_id())
 
     verify_protection_relay_function_constructor_default(cr)
     assert cr.current_limit_1 is None

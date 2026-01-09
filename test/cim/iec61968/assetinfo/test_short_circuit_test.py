@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-from zepben.ewb import ShortCircuitTest
+from zepben.ewb import ShortCircuitTest, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
@@ -28,7 +28,7 @@ short_circuit_test_args = [*transformer_test_args, 1.1, 2, 3, 4.4, 5.5, 6, 7, 8,
 
 
 def test_short_circuit_test_constructor_default():
-    sct = ShortCircuitTest()
+    sct = ShortCircuitTest(mrid=generate_id())
 
     verify_transformer_test_constructor_default(sct)
     assert sct.current is None

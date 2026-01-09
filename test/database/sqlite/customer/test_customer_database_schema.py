@@ -33,7 +33,7 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
         return CustomerServiceComparator()
 
     def create_identified_object(self) -> IdentifiedObject:
-        return Customer()
+        return Customer(mrid="test")
 
     ###################
     # IEC61968 Common #

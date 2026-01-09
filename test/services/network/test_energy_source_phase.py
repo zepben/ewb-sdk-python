@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb import NetworkService, EnergySourcePhase
+from zepben.ewb import NetworkService, EnergySourcePhase, generate_id
 
 
 class TestNetworkService(object):
@@ -10,7 +10,7 @@ class TestNetworkService(object):
     def test_objects(self):
 
         network = NetworkService()
-        esf = EnergySourcePhase()
+        esf = EnergySourcePhase(mrid=generate_id())
         network.add(esf)
 
         for obj in network.objects(EnergySourcePhase):

@@ -4,6 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
+
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -26,7 +28,7 @@ per_length_sequence_impedance_args = [*per_length_impedance_args, 1.1, 2.2, 3.3,
 
 
 def test_per_length_sequence_impedance_constructor_default():
-    plsi = PerLengthSequenceImpedance()
+    plsi = PerLengthSequenceImpedance(mrid=generate_id())
 
     verify_per_length_impedance_constructor_default(plsi)
     assert plsi.r is None

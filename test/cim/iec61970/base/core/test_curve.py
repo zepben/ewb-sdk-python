@@ -5,11 +5,11 @@
 from typing import Callable
 
 from pytest import raises
-from zepben.ewb import Curve, CurveData
+from zepben.ewb import Curve, CurveData, generate_id
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
-from cim.private_collection_validator import validate_unordered_other_1234567890
+from cim.private_collection_validator import validate_unordered_other
 
 # todo curve data?
 curve_kwargs = identified_object_kwargs
@@ -29,7 +29,7 @@ def verify_curve_constructor_args(curve: Curve):
 
 
 def test_curve_data_collection():
-    validate_unordered_other_1234567890(
+    validate_unordered_other(
         Curve,
         lambda it: CurveData(it + 0.1, it + 0.2, it + 0.3, it + 0.4),
         Curve.data,
@@ -43,7 +43,7 @@ def test_curve_data_collection():
 
 
 def test_add_curve_data_by_passing_in_the_values_and_data_is_sorted_by_x_value_in_ascending_order_when_retrieved():
-    curve = Curve()
+    curve = Curve(mrid=generate_id())
 
     curve.add_data(4, 3, 2, 1)
     curve.add_data(2, 1, 2, 3)
@@ -54,7 +54,7 @@ def test_add_curve_data_by_passing_in_the_values_and_data_is_sorted_by_x_value_i
 
 
 def test_cant_add_duplicate_curve_data():
-    curve = Curve()
+    curve = Curve(mrid=generate_id())
 
     curve.add_data(1, 1, 2, 3)
     _validate_duplicate_error(curve, 1, lambda it: it.add_data(1, 1.1, 2.1, 3.1))

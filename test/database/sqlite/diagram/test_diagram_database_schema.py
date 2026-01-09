@@ -34,7 +34,7 @@ class TestDiagramDatabaseSchema(CimDatabaseSchemaCommonTests[DiagramService, Dia
         return DiagramServiceComparator()
 
     def create_identified_object(self) -> IdentifiedObject:
-        return DiagramObject()
+        return DiagramObject(mrid="test")
 
     ################################
     # IEC61970 Base Diagram Layout #

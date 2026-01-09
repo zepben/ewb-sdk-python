@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb import NetworkService, BaseVoltage
+from zepben.ewb import NetworkService, BaseVoltage, generate_id
 
 
 class TestNetworkService(object):
@@ -10,7 +10,7 @@ class TestNetworkService(object):
     def test_objects(self):
 
         network = NetworkService()
-        bv = BaseVoltage()
+        bv = BaseVoltage(mrid=generate_id())
         network.add(bv)
 
         for obj in network.objects(BaseVoltage):

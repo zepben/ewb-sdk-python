@@ -15,7 +15,7 @@ __all__ = [
     "is_none_or_empty",
     "require",
     "pb_or_none",
-    "CopyableUUID",
+    "generate_id",
     "datetime_to_timestamp",
     "none",
     "classproperty",
@@ -170,14 +170,8 @@ def none(collection: Collection):
     raise ValueError("none() only supports collection types")
 
 
-class CopyableUUID(UUID):
-
-    def __init__(self):
-        super().__init__(bytes=os.urandom(16), version=4)
-
-    @staticmethod
-    def copy():
-        return str(UUID(bytes=os.urandom(16), version=4))
+def generate_id() -> str:
+    return str(UUID(bytes=os.urandom(16), version=4))
 
 
 class classproperty(property):

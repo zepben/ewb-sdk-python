@@ -5,24 +5,26 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.ewb import Circuit, Loop, Terminal, Substation
+
+from util import mrid_strategy
+from zepben.ewb import Circuit, Loop, Terminal, Substation, generate_id
 
 from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 circuit_kwargs = {
     **line_kwargs,
-    "loop": builds(Loop),
-    "end_terminals": lists(builds(Terminal)),
-    "end_substations": lists(builds(Substation))
+    "loop": builds(Loop, mrid=mrid_strategy),
+    "end_terminals": lists(builds(Terminal, mrid=mrid_strategy)),
+    "end_substations": lists(builds(Substation, mrid=mrid_strategy))
 }
 
-circuit_args = [*line_args, Loop(), [Terminal], [Substation]]
+circuit_args = [*line_args, Loop(mrid=generate_id()), [Terminal(mrid=generate_id())], [Substation(mrid=generate_id())]]
 
 
 def test_circuit_constructor_default():
-    c = Circuit()
+    c = Circuit(mrid=generate_id())
 
     verify_line_constructor_default(c)
     assert not c.loop
@@ -52,7 +54,7 @@ def test_circuit_constructor_args():
 
 
 def test_end_terminals_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Circuit,
         lambda mrid: Terminal(mrid),
         Circuit.end_terminals,
@@ -65,7 +67,7 @@ def test_end_terminals_collection():
 
 
 def test_end_substations_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Circuit,
         lambda mrid: Substation(mrid),
         Circuit.end_substations,

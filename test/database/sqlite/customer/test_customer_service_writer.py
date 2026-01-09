@@ -5,7 +5,7 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.ewb import CustomerService, CustomerCimWriter, Customer, CustomerServiceWriter, CustomerDatabaseTables
+from zepben.ewb import CustomerService, CustomerCimWriter, Customer, CustomerServiceWriter, CustomerDatabaseTables, generate_id
 
 
 class TestCustomerServiceWriter:
@@ -26,7 +26,7 @@ class TestCustomerServiceWriter:
         )
 
     def test_passes_objects_through_to_the_cim_writer(self):
-        customer = Customer()
+        customer = Customer(mrid=generate_id())
         self.customer_service.add(customer)
 
         # NOTE: the save method will fail due to the relaxed mock returning false for all save operations,

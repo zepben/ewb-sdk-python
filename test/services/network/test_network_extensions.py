@@ -8,7 +8,7 @@ from pytest import fixture
 
 from zepben.ewb import NetworkService, BaseVoltage, Terminal, EnergySource, \
     PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, Location, \
-    ConnectivityNode, Breaker
+    ConnectivityNode, Breaker, generate_id
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 NetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
@@ -17,22 +17,22 @@ NetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "p
 @fixture()
 def tnc():
     net = NetworkService()
-    bv = BaseVoltage()
-    cn1 = ConnectivityNode()
-    cn2 = ConnectivityNode()
-    pt_info = PowerTransformerInfo()
+    bv = BaseVoltage(mrid=generate_id())
+    cn1 = ConnectivityNode(mrid=generate_id())
+    cn2 = ConnectivityNode(mrid=generate_id())
+    pt_info = PowerTransformerInfo(mrid=generate_id())
     # noinspection PyArgumentList
     point1 = PositionPoint(x_position=149.12791965570293, y_position=-35.277592101000934)
     # noinspection PyArgumentList
     point2 = PositionPoint(x_position=149.12779472660375, y_position=-35.278183862759285)
-    loc1 = Location().add_point(point1)
-    loc2 = Location().add_point(point2)
-    loc3 = Location().add_point(point2).add_point(point2)
+    loc1 = Location(mrid=generate_id()).add_point(point1)
+    loc2 = Location(mrid=generate_id()).add_point(point2)
+    loc3 = Location(mrid=generate_id()).add_point(point2).add_point(point2)
     yield NetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
 
 
 def test_create_energy_source(tnc):
-    ce1 = tnc.net.create_energy_source(cn=tnc.cn1)
+    ce1 = tnc.net.create_energy_source(mrid=generate_id(), cn=tnc.cn1)
     ce2 = tnc.net.get(ce1.mrid)
     assert ce1 is ce2
     assert isinstance(ce1, EnergySource)
@@ -43,7 +43,7 @@ def test_create_energy_source(tnc):
 
 
 def test_create_energy_consumer(tnc):
-    ce1 = tnc.net.create_energy_consumer(cn=tnc.cn1, location=tnc.loc1)
+    ce1 = tnc.net.create_energy_consumer(mrid=generate_id(), cn=tnc.cn1, location=tnc.loc1)
     ce2 = tnc.net.get(ce1.mrid)
     assert ce1 is ce2
     assert ce2.num_terminals() == 1
@@ -55,8 +55,13 @@ def test_create_energy_consumer(tnc):
 
 
 def test_create_two_winding_power_transformer(tnc):
-    tnc.net.create_two_winding_power_transformer(cn1=tnc.cn1, cn2=tnc.cn2, asset_info=tnc.pt_info,
-                                                 location=tnc.loc1)
+    tnc.net.create_two_winding_power_transformer(
+        mrid=generate_id(),
+        cn1=tnc.cn1,
+        cn2=tnc.cn2,
+        asset_info=tnc.pt_info,
+        location=tnc.loc1
+    )
     objects = tnc.net.objects(PowerTransformer)
     for ce in objects:
         pt: PowerTransformer = ce
@@ -69,7 +74,7 @@ def test_create_two_winding_power_transformer(tnc):
 
 
 def test_create_ac_line_segment(tnc):
-    ce1 = tnc.net.create_ac_line_segment(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
+    ce1 = tnc.net.create_ac_line_segment(mrid=generate_id(), cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
     ce2 = tnc.net.get(ce1.mrid)
     assert ce1 is ce2
     t: Terminal = ce1.get_terminal_by_sn(1)
@@ -81,7 +86,7 @@ def test_create_ac_line_segment(tnc):
 
 
 def test_create_breaker(tnc):
-    b1 = tnc.net.create_breaker(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
+    b1 = tnc.net.create_breaker(mrid=generate_id(), cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
     b2 = tnc.net.get(b1.mrid)
     assert b1 is b2
     assert isinstance(b1, Breaker)

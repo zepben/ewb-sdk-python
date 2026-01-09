@@ -28,7 +28,8 @@ class RegulatingCondEq(EnergyConnection):
 
     def __init__(self, regulating_control: Optional[RegulatingControl] = None, **kwargs):
         super(RegulatingCondEq, self).__init__(**kwargs)
-        self.regulating_control = regulating_control
+        if regulating_control:
+            self.regulating_control = regulating_control
 
     @property
     def regulating_control(self):

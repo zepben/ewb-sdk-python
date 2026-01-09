@@ -6,14 +6,14 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
-from zepben.ewb import Jumper
+from zepben.ewb import Jumper, generate_id
 
 jumper_kwargs = switch_kwargs
 jumper_args = switch_args
 
 
 def test_jumper_constructor_default():
-    verify_switch_constructor_default(Jumper())
+    verify_switch_constructor_default(Jumper(mrid=generate_id()))
 
 
 @given(**jumper_kwargs)

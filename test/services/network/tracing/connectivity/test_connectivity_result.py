@@ -4,13 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 
-from zepben.ewb import Terminal, PhaseCode, SinglePhaseKind, NominalPhasePath, ConnectivityResult
+from zepben.ewb import Terminal, PhaseCode, SinglePhaseKind, NominalPhasePath, ConnectivityResult, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 
 class TestConnectivityResult:
-    terminal11, terminal12 = Terminal(phases=PhaseCode.A), Terminal(phases=PhaseCode.A)
-    terminal21, terminal22 = Terminal(phases=PhaseCode.A), Terminal(phases=PhaseCode.A)
+    terminal11, terminal12 = Terminal(mrid=generate_id(), phases=PhaseCode.A), Terminal(mrid=generate_id(), phases=PhaseCode.A)
+    terminal21, terminal22 = Terminal(mrid=generate_id(), phases=PhaseCode.A), Terminal(mrid=generate_id(), phases=PhaseCode.A)
     asset1 = Junction(mrid="asset1", name="asset 1", terminals=[terminal11, terminal12])
     asset2 = Junction(mrid="asset2", name="asset 2", terminals=[terminal21, terminal22])
 

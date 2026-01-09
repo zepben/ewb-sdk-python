@@ -109,7 +109,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         return NetworkServiceComparator()
 
     def create_identified_object(self) -> IdentifiedObject:
-        return Junction()
+        return Junction(mrid="test")
 
     @unittest.skip("Only load real files on demand, not as part of the actual test suite")
     @pytest.mark.timeout(65536)

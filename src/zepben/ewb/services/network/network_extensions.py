@@ -18,7 +18,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.ewb.services.network.network_service import NetworkService
-from zepben.ewb.util import CopyableUUID
+from zepben.ewb.util import generate_id
 
 
 # !! WARNING !! #
@@ -39,7 +39,7 @@ def create_two_winding_power_transformer(network_service: NetworkService, cn1: C
     _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, cn1=cn1, cn2=cn2)
     # TODO: How to associated PowerTransformerEndInfo to a PowerTransformerInfo
     for i in range(1, 2):
-        end = PowerTransformerEnd(power_transformer=power_transformer)
+        end = PowerTransformerEnd(f"{power_transformer.mrid}-pte{i}", power_transformer=power_transformer)
         power_transformer.add_end(end)
         end.terminal = power_transformer.get_terminal_by_sn(i)
     return power_transformer
@@ -69,7 +69,7 @@ def create_breaker(network_service: NetworkService, cn1: ConnectivityNode, cn2: 
 def create_bus(network_service: NetworkService, **kwargs) -> Junction:
     bus = Junction(**kwargs)
     if 'mrid' not in kwargs:
-        bus.mrid = str(CopyableUUID())
+        bus.mrid = generate_id()
     network_service.add(bus)
     _create_terminals(ce=bus, network=network_service)
     # TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the
@@ -79,7 +79,7 @@ def create_bus(network_service: NetworkService, **kwargs) -> Junction:
 
 def _create_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
-        ce.mrid = str(CopyableUUID())
+        ce.mrid = generate_id()
     network_service.add(ce)
     _create_terminals(ce=ce, num_terms=2, network=network_service)
 
@@ -92,7 +92,7 @@ def _connect_two_terminal_conducting_equipment(network_service: NetworkService, 
 
 def _create_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
-        ce.mrid = str(CopyableUUID())
+        ce.mrid = generate_id()
     network_service.add(ce)
     _create_terminals(ce=ce, network=network_service)
 

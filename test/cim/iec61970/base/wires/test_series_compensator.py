@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats, integers
-from zepben.ewb import SeriesCompensator
+from zepben.ewb import SeriesCompensator, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
@@ -25,7 +25,7 @@ series_compensator_args = [*conducting_equipment_args, 1.1, 2.2, 3.3, 4.4, 5, 6]
 
 
 def test_series_compensator_constructor_default():
-    sc = SeriesCompensator()
+    sc = SeriesCompensator(mrid=generate_id())
 
     verify_conducting_equipment_constructor_default(sc)
     assert sc.r is None
@@ -72,7 +72,7 @@ def test_series_compensator_constructor_args():
 
 
 def test_varistor_present_flag():
-    sc = SeriesCompensator(varistor_rated_current=None, varistor_voltage_threshold=None)
+    sc = SeriesCompensator(mrid=generate_id(), varistor_rated_current=None, varistor_voltage_threshold=None)
 
     assert sc.varistor_present() is False
 

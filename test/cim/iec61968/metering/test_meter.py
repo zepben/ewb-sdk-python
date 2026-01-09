@@ -7,6 +7,7 @@ from hypothesis import given
 
 from cim.iec61968.metering.test_end_device import end_device_kwargs, verify_end_device_constructor_default, verify_end_device_constructor_kwargs, \
     verify_end_device_constructor_args, end_device_args
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61968.metering.meter import Meter
 
 meter_kwargs = end_device_kwargs
@@ -14,7 +15,7 @@ meter_args = end_device_args
 
 
 def test_meter_constructor_default():
-    meter = Meter()
+    meter = Meter(mrid=generate_id())
     verify_end_device_constructor_default(meter)
     assert meter.company_meter_id is None
     assert  meter.name is None

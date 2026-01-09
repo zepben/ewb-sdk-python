@@ -4,22 +4,24 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import PowerTransformerInfo, TransformerTankInfo
+
+from util import mrid_strategy
+from zepben.ewb import PowerTransformerInfo, TransformerTankInfo, generate_id
 
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 power_transformer_info_kwargs = {
     **asset_info_kwargs,
-    "transformer_tank_infos": lists(builds(TransformerTankInfo), max_size=2)
+    "transformer_tank_infos": lists(builds(TransformerTankInfo, mrid=mrid_strategy), max_size=2)
 }
 
-power_transformer_info_args = [*asset_info_args, [TransformerTankInfo(), TransformerTankInfo()]]
+power_transformer_info_args = [*asset_info_args, [TransformerTankInfo(mrid=generate_id()), TransformerTankInfo(mrid=generate_id())]]
 
 
 def test_power_transformer_info_constructor_default():
-    pti = PowerTransformerInfo()
+    pti = PowerTransformerInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(pti)
     assert not list(pti.transformer_tank_infos)
@@ -43,7 +45,7 @@ def test_power_transformer_info_constructor_args():
 
 
 def test_transformer_tank_info_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         PowerTransformerInfo,
         lambda mrid: TransformerTankInfo(mrid),
         PowerTransformerInfo.transformer_tank_infos,

@@ -5,29 +5,37 @@
 import datetime
 
 from hypothesis.strategies import booleans, lists, builds, datetimes
-from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer
-from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.cim_creators import sampled_equipment_container, sampled_hvlv_feeder
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer, generate_id
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 equipment_kwargs = {
     **power_system_resource_kwargs,
     "in_service": booleans(),
     "normally_in_service": booleans(),
     "commissioned_date": datetimes(),
-    "usage_points": lists(builds(UsagePoint), max_size=2),
+    "usage_points": lists(builds(UsagePoint, mrid=mrid_strategy), max_size=2),
     "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
-    "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
+    "operational_restrictions": lists(builds(OperationalRestriction, mrid=mrid_strategy), max_size=2),
     "current_containers": lists(sampled_hvlv_feeder(True), max_size=2),
 }
 
-equipment_args = [*power_system_resource_args, False, False, datetime.datetime(2023, 1, 2), [UsagePoint(), UsagePoint()],
-                  [EquipmentContainer(), EquipmentContainer()],
-                  [OperationalRestriction(), OperationalRestriction()], [Feeder(), Feeder()]]
+equipment_args = [
+    *power_system_resource_args,
+    False,
+    False,
+    datetime.datetime(2023, 1, 2),
+    [UsagePoint(mrid=generate_id()), UsagePoint(mrid=generate_id())],
+    [EquipmentContainer(mrid=generate_id()), EquipmentContainer(mrid=generate_id())],
+    [OperationalRestriction(mrid=generate_id()), OperationalRestriction(mrid=generate_id())],
+    [Feeder(mrid=generate_id()), Feeder(mrid=generate_id())]
+]
 
 
 def verify_equipment_constructor_default(eq: Equipment):
@@ -68,7 +76,7 @@ def verify_equipment_constructor_args(eq: Equipment):
 
 
 def test_usage_points_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Equipment,
         lambda mrid: UsagePoint(mrid),
         Equipment.usage_points,
@@ -81,7 +89,7 @@ def test_usage_points_collection():
 
 
 def test_equipment_containers_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Equipment,
         lambda mrid: EquipmentContainer(mrid),
         Equipment.containers,
@@ -94,7 +102,7 @@ def test_equipment_containers_collection():
 
 
 def test_operational_restrictions_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Equipment,
         lambda mrid: OperationalRestriction(mrid),
         Equipment.operational_restrictions,
@@ -107,7 +115,7 @@ def test_operational_restrictions_collection():
 
 
 def test_current_containers_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Equipment,
         lambda mrid: EquipmentContainer(mrid),
         Equipment.current_containers,

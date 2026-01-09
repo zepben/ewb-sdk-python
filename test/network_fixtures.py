@@ -30,7 +30,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance impo
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.ewb.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.ewb.testing.test_network_builder import TestNetworkBuilder
-from zepben.ewb.util import CopyableUUID
+from zepben.ewb.util import generate_id
 
 
 def create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int, phases: PhaseCode = PhaseCode.ABCN) -> List[Terminal]:
@@ -56,7 +56,7 @@ def create_terminal(network: NetworkService, ce: Optional[ConductingEquipment], 
             terminal = Terminal(mrid=f"{ce.mrid}_t{len(list(ce.terminals)) + 1}", conducting_equipment=ce, phases=phases, sequence_number=sequence_number)
             ce.add_terminal(terminal)
         else:
-            terminal = Terminal(phases=phases, sequence_number=sequence_number)
+            terminal = Terminal(mrid=generate_id(), phases=phases, sequence_number=sequence_number)
         network.add(terminal)
     return terminal
 
@@ -72,7 +72,7 @@ def create_connectivitynode_with_terminals(ns: NetworkService, mrid: str, *termi
 
 def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> Junction:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     junction = Junction(mrid=mrid, name="test junction")
     create_terminals(network, junction, num_terms, phases)
@@ -82,11 +82,11 @@ def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_
 
 def create_source_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> EnergySource:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     source = EnergySource(mrid=mrid)
     for phase in phases.single_phases:
-        esp = EnergySourcePhase(energy_source=source, phase=phase)
+        esp = EnergySourcePhase(mrid=f"{mrid}-{phase}", energy_source=source, phase=phase)
 
         source.add_phase(esp)
         network.add(esp)
@@ -99,7 +99,7 @@ def create_source_for_connecting(network: NetworkService, mrid: str = "", num_te
 def create_switch_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABC,
                                  normal_phase_states: List[bool] = None, current_phase_states: List[bool] = None) -> Breaker:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     cb = Breaker(mrid=mrid, name="test breaker")
     create_terminals(network, cb, num_terms, phases)
@@ -143,7 +143,7 @@ def create_asset_owner(network: NetworkService, company: str, customer_service: 
 
 def create_meter(network: NetworkService, mrid: str = "") -> Meter:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     meter = Meter(mrid=mrid, name=f"companyMeterId{mrid}")
     meter.add_organisation_role(create_asset_owner(network, f"company{mrid}"))
@@ -158,7 +158,7 @@ def create_power_transformer_for_connecting(network: NetworkService, mrid: str =
                can be passed to the `PowerTransformerEnd` constructor. Keep in mind CIM recommends the HV end is first in the list.
     """
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     pt = PowerTransformer(mrid=mrid, name="test powertransformer")
     terminals = create_terminals(network, pt, num_terms, phases)
@@ -184,7 +184,7 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
                                plsi_mrid: str = "perLengthSequenceImepedance",
                                wi_mrid: str = "wireInfo") -> AcLineSegment:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     try:
         plsi = network.get(plsi_mrid, PerLengthSequenceImpedance)
@@ -208,7 +208,7 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
 
 def create_energy_consumer_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> EnergyConsumer:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     ec = EnergyConsumer(mrid=mrid, name=f"{mrid}-name")
     create_terminals(network, ec, num_terms, phases)
@@ -218,7 +218,7 @@ def create_energy_consumer_for_connecting(network: NetworkService, mrid: str = "
 
 def create_geographical_region(network: NetworkService, mrid: str = "", name: str = "") -> GeographicalRegion:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     gr = GeographicalRegion(mrid=mrid, name=name)
     network.add(gr)
@@ -227,7 +227,7 @@ def create_geographical_region(network: NetworkService, mrid: str = "", name: st
 
 def create_subgeographical_region(network: NetworkService, mrid: str = "", name: str = "", gr: GeographicalRegion = None) -> SubGeographicalRegion:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     sgr = SubGeographicalRegion(mrid=mrid, name=name)
     if gr is not None:
@@ -240,7 +240,7 @@ def create_subgeographical_region(network: NetworkService, mrid: str = "", name:
 
 def create_substation(network: NetworkService, mrid: str = "", name: str = "", sgr: SubGeographicalRegion = None) -> Substation:
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
 
     sub = Substation(mrid=mrid, name=name, sub_geographical_region=sgr)
     if sgr is not None:
@@ -256,7 +256,7 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
     `equipment_mrids` Equipment to fetch from the network and add to this feeder.
     """
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
     feeder = Feeder(mrid=mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_substation=sub)
     if sub:
         sub.add_feeder(feeder)
@@ -276,7 +276,7 @@ def create_lv_feeder(network: NetworkService, mrid: str = "", name: str = "", fe
     `equipment_mrids` Equipment to fetch from the network and add to this feeder.
     """
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
     lv_feeder = LvFeeder(mrid=mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_feeders=[feeder] if feeder is not None else None)
     if feeder:
         feeder.add_normal_energized_lv_feeder(lv_feeder)
@@ -292,7 +292,7 @@ def create_lv_feeder(network: NetworkService, mrid: str = "", name: str = "", fe
 
 def create_operational_restriction(network: NetworkService, mrid: str = "", name: str = "", *equipment_mrids: str, **document_kwargs):
     if not mrid:
-        mrid = str(CopyableUUID())
+        mrid = generate_id()
     restriction = OperationalRestriction(mrid=mrid, name=name, **document_kwargs)
     network.add(restriction)
 
@@ -309,7 +309,7 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     `coords` XY/longlats to use for the PositionPoint for this location. Must be an even number of coords.
     :return:
     """
-    loc = Location()
+    loc = Location(mrid=f"{psr.mrid}-loc")
     # noinspection PyTypeChecker
     for i in range(0, len(coords), 2):
         # noinspection PyArgumentList, PyUnresolvedReferences

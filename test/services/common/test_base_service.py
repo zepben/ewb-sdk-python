@@ -16,7 +16,7 @@ from zepben.ewb import Terminal, resolver, UnresolvedReference, NetworkService, 
     Circuit, Substation, ConnectivityNodeContainer, Equipment, EnergySourcePhase, ConnectivityNode, BaseVoltage, \
     Control, RemoteControl, RemoteSource, Loop, AssetInfo, \
     OrganisationRole, Document, LvFeeder, EvChargingUnit, TapChangerControl, BatteryControl, PanDemandResponseFunction, \
-    StaticVarCompensator
+    StaticVarCompensator, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
@@ -223,9 +223,9 @@ def test_objects():
 
 
 def test_objects_exclude(service: BaseService):
-    b1 = Breaker()
-    acls1 = AcLineSegment()
-    j1 = Junction()
+    b1 = Breaker(mrid=generate_id())
+    acls1 = AcLineSegment(mrid=generate_id())
+    j1 = Junction(mrid=generate_id())
 
     service.add(b1)
     service.add(acls1)
@@ -235,7 +235,7 @@ def test_objects_exclude(service: BaseService):
 
 
 def test_contains(service: BaseService):
-    breaker = Breaker()
+    breaker = Breaker(mrid=generate_id())
     service.add(breaker)
 
     assert breaker.mrid in service
@@ -243,7 +243,7 @@ def test_contains(service: BaseService):
 
 
 def test_unresolved_references_by_id(service: BaseService):
-    breaker = Breaker()
+    breaker = Breaker(mrid=generate_id())
     service.add(breaker)
     service.resolve_or_defer_reference(resolver.ce_terminals(breaker), "terminal")
 
@@ -269,8 +269,8 @@ def _add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObjec
 
 
 def _create_objects_test(service, type_):
-    obj = type_()
-    io = IdentifiedObject()
+    obj = type_(mrid=generate_id())
+    io = IdentifiedObject(mrid=generate_id())
     service.add(obj)
     service.add(io)
     for obj in service.objects(type_):

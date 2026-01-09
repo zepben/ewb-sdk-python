@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers
-from zepben.ewb import BaseVoltage
+from zepben.ewb import BaseVoltage, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
@@ -19,7 +19,7 @@ base_voltage_args = [*identified_object_args, 1]
 
 
 def test_base_voltage_constructor_default():
-    bv = BaseVoltage()
+    bv = BaseVoltage(mrid=generate_id())
 
     verify_identified_object_constructor_default(bv)
     assert bv.nominal_voltage == 0
