@@ -4,6 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, floats
+
+from util import mrid_strategy
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 
@@ -13,15 +16,15 @@ from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_construc
 
 ratio_tap_changer_kwargs = {
     **tap_changer_kwargs,
-    "transformer_end": builds(TransformerEnd),
+    "transformer_end": builds(TransformerEnd, mrid=mrid_strategy),
     "step_voltage_increment": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
 }
 
-ratio_tap_changer_args = [*tap_changer_args, TransformerEnd(), 1.1]
+ratio_tap_changer_args = [*tap_changer_args, TransformerEnd(mrid=generate_id()), 1.1]
 
 
 def test_ratio_tap_changer_constructor_default():
-    rtc = RatioTapChanger()
+    rtc = RatioTapChanger(mrid=generate_id())
 
     verify_tap_changer_constructor_default(rtc)
     assert not rtc.transformer_end

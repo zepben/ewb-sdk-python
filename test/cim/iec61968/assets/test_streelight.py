@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
-from zepben.ewb import Streetlight, Pole
+
+from util import mrid_strategy
+from zepben.ewb import Streetlight, Pole, generate_id
 from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
@@ -13,16 +15,16 @@ from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructo
 
 streetlight_kwargs = {
     **asset_kwargs,
-    "pole": builds(Pole),
+    "pole": builds(Pole, mrid=mrid_strategy),
     "light_rating": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "lamp_kind": sampled_from(StreetlightLampKind)
 }
 
-streetlight_args = [*asset_args, Pole(), 1, StreetlightLampKind.HIGH_PRESSURE_SODIUM]
+streetlight_args = [*asset_args, Pole(mrid=generate_id()), 1, StreetlightLampKind.HIGH_PRESSURE_SODIUM]
 
 
 def test_streetlight_constructor_default():
-    p = Streetlight()
+    p = Streetlight(mrid=generate_id())
 
     verify_asset_constructor_default(p)
     assert not p.pole

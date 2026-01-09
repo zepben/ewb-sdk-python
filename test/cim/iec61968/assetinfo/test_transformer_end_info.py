@@ -6,13 +6,13 @@ from unittest.mock import patch
 
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
-    ShortCircuitTest, OpenCircuitTest
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection, create_transformer_tank_info, \
     create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
+from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
+    ShortCircuitTest, OpenCircuitTest, generate_id
 
 transformer_end_info_kwargs = {
     **asset_info_kwargs,
@@ -34,12 +34,29 @@ transformer_end_info_kwargs = {
     "energised_end_open_circuit_tests": create_open_circuit_test(),
 }
 
-transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN, 1, 2, 3, 4, 5.0, 6, 7, 8, TransformerTankInfo(), TransformerStarImpedance(),
-                             NoLoadTest(), ShortCircuitTest(), ShortCircuitTest(), OpenCircuitTest(), OpenCircuitTest()]
+transformer_end_info_args = [
+    *asset_info_args,
+    WindingConnection.UNKNOWN,
+    1,
+    2,
+    3,
+    4,
+    5.0,
+    6,
+    7,
+    8,
+    TransformerTankInfo(mrid=generate_id()),
+    TransformerStarImpedance(mrid=generate_id()),
+    NoLoadTest(mrid=generate_id()),
+    ShortCircuitTest(mrid=generate_id()),
+    ShortCircuitTest(mrid=generate_id()),
+    OpenCircuitTest(mrid=generate_id()),
+    OpenCircuitTest(mrid=generate_id()),
+]
 
 
 def test_transformer_end_info_constructor_default():
-    tei = TransformerEndInfo()
+    tei = TransformerEndInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(tei)
     assert tei.connection_kind == WindingConnection.UNKNOWN
@@ -130,7 +147,7 @@ def test_transformer_end_info_constructor_args():
 
 def test_populates_resistance_reactance_off_end_star_impedance_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
-        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=1.2, r0=1.3, x0=1.4))
+        info = TransformerEndInfo(mrid=generate_id(), transformer_star_impedance=TransformerStarImpedance(mrid=generate_id(), r=1.1, x=1.2, r0=1.3, x0=1.4))
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 1.2, 1.3, 1.4)
         method.assert_not_called()
 
@@ -138,7 +155,7 @@ def test_populates_resistance_reactance_off_end_star_impedance_if_available():
 def test_populates_resistance_reactance_off_end_info_tests_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
         method.return_value = ResistanceReactance(2.1, 2.2, 2.3, 2.4)
-        info = TransformerEndInfo()
+        info = TransformerEndInfo(mrid=generate_id())
         validate_resistance_reactance(info.resistance_reactance(), 2.1, 2.2, 2.3, 2.4)
         method.assert_called_once()
 
@@ -146,17 +163,20 @@ def test_populates_resistance_reactance_off_end_info_tests_if_available():
 def test_merges_resistance_reactance_if_required():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
         method.return_value = ResistanceReactance(None, 2.2, None, None)
-        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=None, r0=None, x0=None))
+        info = TransformerEndInfo(
+            mrid=generate_id(),
+            transformer_star_impedance=TransformerStarImpedance(mrid=generate_id(), r=1.1, x=None, r0=None, x0=None)
+        )
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
         method.assert_called_once()
 
 
 def test_calculates_resistance_reactance_of_end_info_tests_if_available():
-    loss_test = ShortCircuitTest(loss=2020180, voltage=11.85)
-    loss_no_voltage_test = ShortCircuitTest(loss=2020180)
-    ohmic_test = ShortCircuitTest(voltage_ohmic_part=0.124, voltage=11.85)
-    ohmic_no_voltage_test = ShortCircuitTest(voltage_ohmic_part=0.124)
-    voltage_only_test = ShortCircuitTest(voltage=11.85)
+    loss_test = ShortCircuitTest(mrid=generate_id(), loss=2020180, voltage=11.85)
+    loss_no_voltage_test = ShortCircuitTest(mrid=generate_id(), loss=2020180)
+    ohmic_test = ShortCircuitTest(mrid=generate_id(), voltage_ohmic_part=0.124, voltage=11.85)
+    ohmic_no_voltage_test = ShortCircuitTest(mrid=generate_id(), voltage_ohmic_part=0.124)
+    voltage_only_test = ShortCircuitTest(mrid=generate_id(), voltage=11.85)
 
     # check via loss
     validate_resistance_reactance_from_test(400000, 1630000000, loss_test, loss_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
@@ -180,6 +200,7 @@ def test_calculates_resistance_reactance_of_end_info_tests_if_available():
 
 def validate_resistance_reactance_from_test(rated_u, rated_s, energised_test, grounded_test, expected_rr):
     info = TransformerEndInfo(
+        mrid=generate_id(),
         rated_u=rated_u,
         rated_s=rated_s,
         grounded_end_short_circuit_tests=grounded_test,

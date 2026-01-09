@@ -14,7 +14,8 @@ from zepben.ewb import MetadataCollection, NetworkService, DiagramService, Custo
     Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, PowerElectronicsConnection, \
     PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
     Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
-    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit
+    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
+    generate_id
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -101,12 +102,12 @@ class SchemaNetworks:
     @staticmethod
     def _fill_required(service: NetworkService, io: T) -> T:
         if isinstance(io, EnergyConsumerPhase):
-            ec = EnergyConsumer()
+            ec = EnergyConsumer(mrid=generate_id())
             ec.add_phase(io)
             service.add(ec)
             io.energy_consumer = ec
         elif isinstance(io, EnergySourcePhase):
-            es = EnergySource()
+            es = EnergySource(mrid=generate_id())
             es.add_phase(io)
             service.add(es)
             io.energy_source = es

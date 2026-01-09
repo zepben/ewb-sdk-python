@@ -14,7 +14,7 @@ from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-from zepben.ewb.util import require, CopyableUUID, nlen, ngen, safe_remove
+from zepben.ewb.util import require, nlen, ngen, safe_remove
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     relation, however must be in snake case to keep the phases PEP compliant.
     """
 
-    mrid: str = CopyableUUID()
+    mrid: str
     """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
@@ -46,6 +46,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     def __init__(self, names: Optional[List[Name]] = None, **kwargs):
         super(IdentifiedObject, self).__init__(**kwargs)
+        if not self.mrid or not self.mrid.strip():
+            raise ValueError("You must provide an mRID for this object.")
+
         if names:
             for name in names:
                 self.add_name(name.type, name.name)

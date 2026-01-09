@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.ewb import DistanceRelay
+from zepben.ewb import DistanceRelay, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
@@ -27,7 +27,7 @@ distance_relay_args = [*protection_relay_function_args, 1.1, 2.2, 3.3, 4.4, 5.5,
 
 
 def test_distance_relay_constructor_default():
-    dr = DistanceRelay()
+    dr = DistanceRelay(mrid=generate_id())
 
     verify_protection_relay_function_constructor_default(dr)
     assert dr.backward_blind is None

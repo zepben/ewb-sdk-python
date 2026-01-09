@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.ewb import Breaker, Substation, Terminal
+from zepben.ewb import Breaker, Substation, Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -19,7 +19,7 @@ breaker_args = [*protected_switch_args, 1.1]
 
 
 def test_breaker_constructor_default():
-    br = Breaker()
+    br = Breaker(mrid=generate_id())
     verify_protected_switch_constructor_default(br)
 
     assert br.in_transit_time is None
@@ -43,18 +43,18 @@ def test_breaker_constructor_args():
 
 
 def test_is_substation_breaker_when_associated_with_a_substation_equipment():
-    br = Breaker()
+    br = Breaker(mrid=generate_id())
 
     assert not br.is_substation_breaker, "is_substation_breaker should return False for Breakers without containers"
 
-    br.add_container(Substation())
+    br.add_container(Substation(mrid=generate_id()))
 
     assert br.is_substation_breaker, "is_substation_breaker should return True for Breakers with a Substation container"
 
 
 def test_is_feeder_head_breaker_when_a_terminal_is_a_feeder_head_terminal():
-    br = Breaker().add_terminal(Terminal()).add_terminal(Terminal())
-    fdr = Feeder(normal_head_terminal=Terminal())
+    br = Breaker(mrid=generate_id()).add_terminal(Terminal(mrid=generate_id())).add_terminal(Terminal(mrid=generate_id()))
+    fdr = Feeder(mrid=generate_id(), normal_head_terminal=Terminal(mrid=generate_id()))
 
     assert not br.is_feeder_head_breaker, "is_feeder_head_breaker should return False for Breakers without feeder head terminals"
 

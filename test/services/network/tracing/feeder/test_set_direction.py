@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Type, Union
+from typing import Union
 
 import pytest
 
@@ -11,7 +11,7 @@ from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetw
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.ewb import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
-    NetworkStateOperators, Cut
+    NetworkStateOperators, Cut, generate_id
 
 UPSTREAM = FeederDirection.UPSTREAM
 DOWNSTREAM = FeederDirection.DOWNSTREAM
@@ -167,7 +167,7 @@ class TestSetDirection:
         n = await TestNetworkBuilder() \
             .from_breaker() \
             .to_acls() \
-            .to_power_transformer(action=lambda tx: tx.add_container(Substation())) \
+            .to_power_transformer(action=lambda tx: tx.add_container(Substation(mrid=generate_id()))) \
             .to_acls() \
             .add_feeder("b0", 2) \
             .build()

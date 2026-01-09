@@ -5,32 +5,34 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists, booleans, text, integers, sampled_from
-from zepben.ewb import Location, Equipment, PhaseCode
+
+from util import mrid_strategy
+from zepben.ewb import Location, Equipment, PhaseCode, generate_id
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 usage_point_kwargs = {
     **identified_object_kwargs,
-    "usage_point_location": builds(Location),
+    "usage_point_location": builds(Location, mrid=mrid_strategy),
     "is_virtual": booleans(),
     "connection_category": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "rated_power": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "approved_inverter_capacity": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "phase_code": sampled_from(PhaseCode),
-    "equipment": lists(builds(Equipment)),
-    "end_devices": lists(builds(EndDevice))
+    "equipment": lists(builds(Equipment, mrid=mrid_strategy)),
+    "end_devices": lists(builds(EndDevice, mrid=mrid_strategy))
 }
 
-usage_point_args = [*identified_object_args, Location(), True, "1", 1, 2, PhaseCode.XYN, [Equipment()], [EndDevice()]]
+usage_point_args = [*identified_object_args, Location(mrid=generate_id()), True, "1", 1, 2, PhaseCode.XYN, [Equipment(mrid=generate_id())], [EndDevice(mrid=generate_id())]]
 
 
 def test_usage_point_constructor_default():
-    up = UsagePoint()
+    up = UsagePoint(mrid=generate_id())
 
     verify_identified_object_constructor_default(up)
     assert up.usage_point_location is None
@@ -93,7 +95,7 @@ def test_usage_point_constructor_args():
 
 
 def test_equipment_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         UsagePoint,
         lambda mrid: Equipment(mrid),
         UsagePoint.equipment,
@@ -106,7 +108,7 @@ def test_equipment_collection():
 
 
 def test_end_devices_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         UsagePoint,
         lambda mrid: EndDevice(mrid),
         UsagePoint.end_devices,

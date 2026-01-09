@@ -5,6 +5,8 @@
 
 from hypothesis import given
 from hypothesis.strategies import text, builds
+
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
@@ -19,7 +21,7 @@ name_kwargs = {
 }
 
 # noinspection PyArgumentList
-name_args = ["1", NameType("nt1"), Junction()]
+name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
 
 
 #

@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds
-from zepben.ewb import AcLineSegment
+
+from util import mrid_strategy
+from zepben.ewb import AcLineSegment, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
@@ -13,14 +15,14 @@ from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import 
 
 ac_line_segment_kwargs = {
     **conductor_kwargs,
-    "per_length_impedance": builds(PerLengthSequenceImpedance)
+    "per_length_impedance": builds(PerLengthSequenceImpedance, mrid=mrid_strategy)
 }
 
-ac_line_segment_args = [*conductor_args, PerLengthSequenceImpedance()]
+ac_line_segment_args = [*conductor_args, PerLengthSequenceImpedance(mrid=generate_id())]
 
 
 def test_ac_line_segment_constructor_default():
-    als = AcLineSegment()
+    als = AcLineSegment(mrid=generate_id())
 
     verify_conductor_constructor_default(als)
     assert not als.per_length_impedance
@@ -48,9 +50,9 @@ def test_ac_line_segment_constructor_args():
 
 
 def test_properties():
-    acls = AcLineSegment()
-    plpi = PerLengthPhaseImpedance()
-    plsi = PerLengthSequenceImpedance()
+    acls = AcLineSegment(mrid=generate_id())
+    plpi = PerLengthPhaseImpedance(mrid=generate_id())
+    plsi = PerLengthSequenceImpedance(mrid=generate_id())
 
     acls.per_length_phase_impedance = plpi
     assert acls.per_length_impedance == plpi

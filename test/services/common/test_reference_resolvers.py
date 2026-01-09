@@ -3,15 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.ewb import NetworkService, AcLineSegment, Pole, Streetlight, PowerTransformerInfo, PowerTransformer
-from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb import NetworkService, AcLineSegment, Pole, Streetlight, PowerTransformerInfo, PowerTransformer, generate_id
 from zepben.ewb import resolver
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
 def test_resolves_acls_plsi():
     ns = NetworkService()
-    plsi = PerLengthSequenceImpedance()
-    acls = AcLineSegment(per_length_impedance=plsi)
+    plsi = PerLengthSequenceImpedance(mrid=generate_id())
+    acls = AcLineSegment(mrid=generate_id(), per_length_impedance=plsi)
     br = resolver.per_length_impedance(acls)
     ns.resolve_or_defer_reference(br, plsi.mrid)
     assert plsi.mrid in ns.get_unresolved_reference_mrids_by_resolver(br)
@@ -30,8 +30,8 @@ def test_resolves_acls_plsi():
 
 def test_resolves_pt_pti():
     ns = NetworkService()
-    pti = PowerTransformerInfo()
-    pt = PowerTransformer()
+    pti = PowerTransformerInfo(mrid=generate_id())
+    pt = PowerTransformer(mrid=generate_id())
     pt.asset_info = pti
 
     br = resolver.power_transformer_info(pt)
@@ -54,8 +54,8 @@ def test_resolves_pt_pti():
 
 def test_resolves_pole_streetlight():
     ns = NetworkService()
-    pole = Pole()
-    streetlight = Streetlight(pole=pole)
+    pole = Pole(mrid=generate_id())
+    streetlight = Streetlight(mrid=generate_id(), pole=pole)
     pole.add_streetlight(streetlight)
     br = resolver.streetlights(pole)
     ns.resolve_or_defer_reference(br, streetlight.mrid)

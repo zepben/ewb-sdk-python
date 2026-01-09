@@ -4,14 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import Location
+from zepben.ewb import Location, generate_id
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 from cim.cim_creators import create_position_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_ordered_other_1234567890
+from cim.private_collection_validator import validate_ordered_other
 
 location_kwargs = {
     **identified_object_kwargs,
@@ -23,7 +23,7 @@ location_args = [*identified_object_args, StreetAddress(), [PositionPoint(1.1, 2
 
 
 def test_location_constructor_default():
-    loc = Location()
+    loc = Location(mrid=generate_id())
 
     verify_identified_object_constructor_default(loc)
     assert not loc.main_address
@@ -50,7 +50,7 @@ def test_location_constructor_args():
 
 
 def test_points_collection():
-    validate_ordered_other_1234567890(
+    validate_ordered_other(
         Location,
         lambda i: PositionPoint(i, i),
         Location.points,

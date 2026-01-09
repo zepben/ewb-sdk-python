@@ -5,8 +5,9 @@
 from typing import Iterable
 
 import pytest
-from zepben.ewb import Equipment, TestNetworkBuilder, BaseVoltage, Tracing, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, \
-    ConductingEquipment
+from zepben.ewb import Equipment, TestNetworkBuilder, BaseVoltage, Tracing, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, \
+    ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, \
+    ConductingEquipment, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
@@ -22,8 +23,8 @@ def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
 
 class TestAssignToFeeders:
 
-    bv_hv = BaseVoltage(nominal_voltage=11000)
-    bv_lv = BaseVoltage(nominal_voltage=400)
+    bv_hv = BaseVoltage(mrid=generate_id(), nominal_voltage=11000)
+    bv_lv = BaseVoltage(mrid=generate_id(), nominal_voltage=400)
 
     @staticmethod
     def base_voltage(ce: ConductingEquipment, voltage: BaseVoltage):

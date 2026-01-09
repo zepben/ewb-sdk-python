@@ -4,18 +4,20 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text, floats
-from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
-from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_ordered_other_1234567890
+from cim.private_collection_validator import validate_ordered_other
+from util import mrid_strategy
+from zepben.ewb import generate_id
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
 diagram_object_kwargs = {
     **identified_object_kwargs,
-    "diagram": builds(Diagram),
+    "diagram": builds(Diagram, mrid=mrid_strategy),
     "identified_object_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "style": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "rotation": floats(min_value=0, max_value=360),
@@ -23,11 +25,11 @@ diagram_object_kwargs = {
 }
 
 # noinspection PyArgumentList
-diagram_object_args = [*identified_object_args, Diagram(), "a", "CB", 1.1, [DiagramObjectPoint(1.1, 2.2)]]
+diagram_object_args = [*identified_object_args, Diagram(mrid=generate_id()), "a", "CB", 1.1, [DiagramObjectPoint(1.1, 2.2)]]
 
 
 def test_diagram_object_constructor_default():
-    do = DiagramObject()
+    do = DiagramObject(mrid=generate_id())
 
     verify_identified_object_constructor_default(do)
     assert not do.diagram
@@ -69,7 +71,7 @@ def test_diagram_object_constructor_args():
 
 def test_points_collection():
     # noinspection PyArgumentList
-    validate_ordered_other_1234567890(
+    validate_ordered_other(
         DiagramObject,
         lambda i: DiagramObjectPoint(i, i),
         DiagramObject.points,

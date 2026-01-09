@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, floats, integers, text
-from zepben.ewb import CurrentTransformerInfo, Ratio
+from zepben.ewb import CurrentTransformerInfo, Ratio, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
@@ -32,7 +32,7 @@ current_transformer_info_args = [*asset_info_args, "a", 1.1, 2, "b", 3, Ratio(4.
 
 
 def test_current_transformer_info_constructor_default():
-    cti = CurrentTransformerInfo()
+    cti = CurrentTransformerInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(cti)
     assert cti.accuracy_class is None

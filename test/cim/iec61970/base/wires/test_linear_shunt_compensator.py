@@ -5,6 +5,8 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats
+
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -23,7 +25,7 @@ linear_shunt_compensator_args = [*shunt_compensator_args, 1.1, 2.2, 3.3, 4.4]
 
 
 def test_linear_shunt_compensator_constructor_default():
-    lsc = LinearShuntCompensator()
+    lsc = LinearShuntCompensator(mrid=generate_id())
 
     verify_shunt_compensator_constructor_default(lsc)
     assert lsc.b0_per_section is None

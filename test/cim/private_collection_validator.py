@@ -17,8 +17,8 @@ K = TypeVar("K")
 _U = Union[UIdentifiedObject, UOther]
 
 
-def validate_unordered_1234567890(
-    create_it: Callable[[], TIdentifiedObject],
+def validate_unordered(
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str], UIdentifiedObject],
     get_all: property,  # Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]]
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -37,8 +37,8 @@ def validate_unordered_1234567890(
     _validate_unordered(create_it, create_other, get_all.fget, num, get_by_id, add, remove, clear)
 
 
-def validate_unordered_other_1234567890(
-    create_it: Callable[[], TIdentifiedObject],
+def validate_unordered_other(
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
     get_all: property,  # Callable[[TIdentifiedObject], Generator[UOther, None, None]]
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -59,8 +59,8 @@ def validate_unordered_other_1234567890(
     _validate_unordered_other(create_it, create_other, get_all.fget, num, get_by_key, add, remove, clear, get_key, key_to_str)
 
 
-def validate_ordered_1234567890(
-    create_it: Callable[[], TIdentifiedObject],
+def validate_ordered(
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str, int], UIdentifiedObject],
     get_all: property,  # Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]]
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -84,8 +84,8 @@ def validate_ordered_1234567890(
     _validate_ordered(create_it, create_other, get_all.fget, num, get_by_id, get_by_index, add, remove, clear, index_of)
 
 
-def validate_ordered_other_1234567890(
-    create_it: Callable[[], TIdentifiedObject],
+def validate_ordered_other(
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
     get_all: property,  # Callable[[TIdentifiedObject], Generator[UOther, None, None]]
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -110,7 +110,7 @@ def validate_ordered_other_1234567890(
 
 
 def _validate_unordered(
-    create_it: Callable[[], TIdentifiedObject],
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str], UIdentifiedObject],
     get_all: Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]],
     num: Callable[[TIdentifiedObject], int],
@@ -126,7 +126,7 @@ def _validate_unordered(
           class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
           signatures are stored in comments against the arguments.
     """
-    it = create_it()
+    it = create_it("test")
     other1 = create_other("1")
     other2 = create_other("2")
     other3 = create_other("3")
@@ -167,7 +167,7 @@ def _validate_unordered(
 #       signatures are stored in comments against the arguments.
 #
 def _validate_unordered_other(
-    create_it: Callable[[], TIdentifiedObject],
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
     get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]],
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -181,7 +181,7 @@ def _validate_unordered_other(
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
     """
-    it = create_it()
+    it = create_it("test")
     other1 = create_other(1)
     other2 = create_other(2)
     other3 = create_other(3)
@@ -227,7 +227,7 @@ def _validate_unordered_other(
 #       signatures are stored in comments against the arguments.
 #
 def _validate_ordered(
-    create_it: Callable[[], TIdentifiedObject],
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str, int], UIdentifiedObject],
     get_all: Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]],
     num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
@@ -244,7 +244,7 @@ def _validate_ordered(
 
     NOTE: Baked in index is expected to be 1-based, not 0-based.
     """
-    it = create_it()
+    it = create_it("test")
     other1 = create_other("1", 1)
     other2 = create_other("2", 2)
     other_auto = create_other("3", 0)
@@ -300,7 +300,7 @@ def _validate_ordered(
 
 
 def _validate_ordered_other(
-    create_it: Callable[[], TIdentifiedObject],
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
     get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]],
     num: Callable[[TIdentifiedObject], int],
@@ -312,7 +312,7 @@ def _validate_ordered_other(
     remove_at_index: Callable[[TIdentifiedObject, int], UOther],
     clear: Callable[[TIdentifiedObject], TIdentifiedObject],
 ):
-    it = create_it()
+    it = create_it("test")
     other1 = create_other(1)
     other2 = create_other(2)
     other3 = create_other(3)

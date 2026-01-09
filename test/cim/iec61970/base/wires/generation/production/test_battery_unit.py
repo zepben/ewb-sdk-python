@@ -9,22 +9,23 @@ from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
-from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.ewb import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode, generate_id
 
 battery_unit_kwargs = {
     **power_electronics_unit_kwargs,
     "battery_state": sampled_from(BatteryStateKind),
     "rated_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
     "stored_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-    "controls": lists(builds(BatteryControl), max_size=2)
+    "controls": lists(builds(BatteryControl, mrid=mrid_strategy), max_size=2)
 }
 
-battery_unit_args = [*power_electronics_unit_args, BatteryStateKind.full, 1, 2, [BatteryControl()]]
+battery_unit_args = [*power_electronics_unit_args, BatteryStateKind.full, 1, 2, [BatteryControl(mrid=generate_id())]]
 
 
 def test_battery_unit_constructor_default():
-    b = BatteryUnit()
+    b = BatteryUnit(mrid=generate_id())
 
     verify_power_electronics_unit_constructor_default(b)
     assert b.battery_state == BatteryStateKind.UNKNOWN
@@ -63,7 +64,7 @@ def test_battery_unit_constructor_args():
 
 
 def test_battery_control_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         BatteryUnit,
         lambda mrid: BatteryControl(mrid),
         BatteryUnit.controls,
@@ -76,8 +77,8 @@ def test_battery_control_collection():
 
 
 def test_get_battery_control_with_mode():
-    bu = BatteryUnit()
-    bc = BatteryControl()
+    bu = BatteryUnit(mrid=generate_id())
+    bc = BatteryControl(mrid=generate_id())
 
     bu.add_control(bc)
 

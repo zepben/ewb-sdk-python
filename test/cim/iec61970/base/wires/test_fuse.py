@@ -8,17 +8,18 @@ from cim.iec61970.base.wires.test_switch import verify_switch_constructor_defaul
     switch_kwargs, switch_args
 from hypothesis.strategies import builds
 
-from zepben.ewb import Fuse, ProtectionRelayFunction
+from util import mrid_strategy
+from zepben.ewb import Fuse, ProtectionRelayFunction, generate_id
 
 fuse_kwargs = {
     **switch_kwargs,
-    "function": builds(ProtectionRelayFunction)
+    "function": builds(ProtectionRelayFunction, mrid=mrid_strategy)
 }
-fuse_args = [*switch_args, ProtectionRelayFunction()]
+fuse_args = [*switch_args, ProtectionRelayFunction(mrid=generate_id())]
 
 
 def test_fuse_constructor_default():
-    f = Fuse()
+    f = Fuse(mrid=generate_id())
     verify_switch_constructor_default(f)
     assert f.function is None
 

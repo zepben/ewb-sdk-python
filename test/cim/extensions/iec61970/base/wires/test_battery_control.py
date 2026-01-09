@@ -8,7 +8,7 @@ from hypothesis.strategies import floats, sampled_from
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_regulating_control import regulating_control_kwargs, regulating_control_args, verify_regulating_control_constructor_default, \
     verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
-from zepben.ewb import BatteryControl, BatteryControlMode
+from zepben.ewb import BatteryControl, BatteryControlMode, generate_id
 
 battery_control_kwargs = {
     **regulating_control_kwargs,
@@ -22,7 +22,7 @@ battery_control_args = [*regulating_control_args, 1.1, 2.2, 3.3, BatteryControlM
 
 
 def test_battery_control_constructor_default():
-    bc = BatteryControl()
+    bc = BatteryControl(mrid=generate_id())
 
     verify_regulating_control_constructor_default(bc)
 

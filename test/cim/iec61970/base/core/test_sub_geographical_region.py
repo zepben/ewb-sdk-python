@@ -4,25 +4,27 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import Substation
+
+from util import mrid_strategy
+from zepben.ewb import Substation, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 sub_geographical_region_kwargs = {
     **identified_object_kwargs,
-    "geographical_region": builds(GeographicalRegion),
-    "substations": lists(builds(Substation), max_size=2)
+    "geographical_region": builds(GeographicalRegion, mrid=mrid_strategy),
+    "substations": lists(builds(Substation, mrid=mrid_strategy), max_size=2)
 }
 
-sub_geographical_region_args = [*identified_object_args, GeographicalRegion(), [Substation()]]
+sub_geographical_region_args = [*identified_object_args, GeographicalRegion(mrid=generate_id()), [Substation(mrid=generate_id())]]
 
 
 def test_sub_geographical_region_constructor_default():
-    sgr = SubGeographicalRegion()
+    sgr = SubGeographicalRegion(mrid=generate_id())
 
     verify_identified_object_constructor_default(sgr)
     assert not list(sgr.substations)
@@ -50,7 +52,7 @@ def test_sub_geographical_region_constructor_args():
 
 
 def test_substations_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         SubGeographicalRegion,
         lambda mrid: Substation(mrid),
         SubGeographicalRegion.substations,

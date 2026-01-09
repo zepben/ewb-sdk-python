@@ -43,14 +43,13 @@ Let's see how we create them:
 from zepben.ewb import EnergySource, AcLineSegment, Breaker
 
 # Create the energy source. Providing no ID will generate a UUID.
-source = EnergySource()
+source = EnergySource(mrid="source")
 
 # Create the conductor providing a specific ID.
-acls = AcLineSegment("aclineseg1")
+acls = AcLineSegment(mrid="aclineseg1")
 
-# Create a circuit breaker.
-# A UUID will be generated but we can give it a descriptive name.
-breaker = Breaker(name="my circuit breaker")
+# Create a circuit breaker with a descriptive name.
+breaker = Breaker(mrid="breaker", name="my circuit breaker")
 ```
 
 ## Creating Connectivity
@@ -69,31 +68,31 @@ Now, lets redo the above code sample this time also creating connectivity betwee
 from zepben.ewb import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
 
 # Create the energy source
-source = EnergySource()
+source = EnergySource(mrid="source")
 
 # Create the terminal for the energy source and associate it with the source
-source_t1 = Terminal(conducting_equipment=source)
+source_t1 = Terminal(mrid="source-t1", conducting_equipment=source)
 source.add_terminal(source_t1)
 
 # Create the conductor
-acls = AcLineSegment()
+acls = AcLineSegment(mrid="acls")
 
 # Create a terminal for each end of the conductor
 # and associate them with the conductor
-acls_t1 = Terminal(conducting_equipment=acls)
-acls_t2 = Terminal(conducting_equipment=acls)
+acls_t1 = Terminal(mrid="acls-t1", conducting_equipment=acls)
+acls_t2 = Terminal(mrid="acls-t2", conducting_equipment=acls)
 acls.add_terminal(acls_t1)
 acls.add_terminal(acls_t2)
 
 # Create a circuit breaker
-breaker = Breaker()
+breaker = Breaker(mrid="breaker")
 
 # Create a terminal for the breaker
-breaker_t1 = Terminal(conducting_equipment=breaker)
+breaker_t1 = Terminal(mrid="breaker-t1", conducting_equipment=breaker)
 
 # Now create a connectivity node to connect the source terminal
 # to the conductor's first terminal
-cn1 = ConnectivityNode()
+cn1 = ConnectivityNode(mrid="cn1")
 
 # Now associate the connectivity nodes to the terminals
 cn1.add_terminal(source_t1)
@@ -103,7 +102,7 @@ acls_t1.connectivity_node = cn1
 
 # Now create a connectivity node to connect the source terminal
 # to the conductor's first terminal
-cn2 = ConnectivityNode()
+cn2 = ConnectivityNode(mrid="cn2")
 
 # Now associate the connectivity nodes to the terminals
 cn2.add_terminal(acls_t2)
@@ -124,7 +123,7 @@ analytics you may be running when using the model.
 from zepben.ewb import Breaker
 
 # Example of setting normal and current switch states
-switch = Breaker()
+switch = Breaker(mrid="switch")
 switch.set_normally_open(True)
 switch.set_open(False)
 ```
@@ -217,19 +216,19 @@ containers.
 ```python
 from zepben.ewb import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
 
-region = GeographicalRegion()
-sub_region = SubGeographicalRegion(geographical_region=region)
+region = GeographicalRegion(mrid="COMPANY")
+sub_region = SubGeographicalRegion(mrid="BSP1", geographical_region=region)
 region.add_sub_geographical_region(sub_region)
 
-substation = Substation(sub_geographical_region=sub_region)
+substation = Substation(mrid="ZONE", sub_geographical_region=sub_region)
 
-sub_tx = PowerTransformer()
+sub_tx = PowerTransformer(mrid="tx1")
 sub_tx.add_container(substation)
 substation.add_equipment(sub_tx)
 
-feeder = Feeder(normal_energizing_substation=substation)
+feeder = Feeder(mrid="ZONE001", normal_energizing_substation=substation)
 
-feeder_cb = Breaker()
+feeder_cb = Breaker(mrid="ZONE001-CB")
 feeder_cb.add_container(feeder)
 feeder.add_equipment(this)
 ```

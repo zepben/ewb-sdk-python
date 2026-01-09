@@ -5,23 +5,25 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import CustomerAgreement, Customer, PricingStructure
+
+from util import mrid_strategy
+from zepben.ewb import CustomerAgreement, Customer, PricingStructure, generate_id
 
 from cim.iec61968.common.test_agreement import agreement_kwargs, verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 customer_agreement_kwargs = {
     **agreement_kwargs,
-    "customer": builds(Customer),
-    "pricing_structures": lists(builds(PricingStructure), max_size=2)
+    "customer": builds(Customer, mrid=mrid_strategy),
+    "pricing_structures": lists(builds(PricingStructure, mrid=mrid_strategy), max_size=2)
 }
 
-customer_agreement_args = [*agreement_args, Customer(), [PricingStructure()]]
+customer_agreement_args = [*agreement_args, Customer(mrid=generate_id()), [PricingStructure(mrid=generate_id())]]
 
 
 def test_customer_agreement_constructor_default():
-    ca = CustomerAgreement()
+    ca = CustomerAgreement(mrid=generate_id())
 
     verify_agreement_constructor_default(ca)
     assert not ca.customer
@@ -52,7 +54,7 @@ def test_customer_agreement_constructor_args():
 
 
 def test_pricing_structures_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         CustomerAgreement,
         lambda mrid: PricingStructure(mrid),
         CustomerAgreement.pricing_structures,

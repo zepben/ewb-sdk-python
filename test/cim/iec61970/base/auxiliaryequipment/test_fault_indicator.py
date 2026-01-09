@@ -6,6 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
 
 fault_indicator_kwargs = auxiliary_equipment_kwargs
@@ -13,7 +14,7 @@ fault_indicator_args = auxiliary_equipment_args
 
 
 def test_fault_indicator_constructor_default():
-    verify_auxiliary_equipment_constructor_default(FaultIndicator())
+    verify_auxiliary_equipment_constructor_default(FaultIndicator(mrid=generate_id()))
 
 
 @given(**fault_indicator_kwargs)

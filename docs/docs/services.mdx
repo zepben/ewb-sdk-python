@@ -36,11 +36,11 @@ will be present, which should be utilised to allow efficient querying of the typ
 from zepben.ewb import NetworkService, Breaker, Junction, IdentifiedObject
 service = NetworkService()
 
-breaker = Breaker()
+breaker = Breaker(mrid="breaker")
 service.add(breaker)
 
 # Note you can only add types that are intended for the corresponding service, for example, the following will fail on add:
-diagram = Diagram()
+diagram = Diagram(mrid="diagram")
 service.add(diagram)  # throws exception.
 ```
 
@@ -70,8 +70,8 @@ from zepben.ewb import NetworkService, Breaker, Junction, ConductingEquipment
 
 service = NetworkService()
 
-service.add(Breaker())
-service.add(Junction())
+service.add(Breaker(mrid="breaker"))
+service.add(Junction(mrid="junction"))
 
 # service.objects() can be used to get a generator over the objects in the service, and supports selecting by type.
 for obj in service.objects():  # generator over all objects in service
@@ -103,8 +103,8 @@ from zepben.ewb import NetworkService, Analog, Accumulator, Measurement
 
 service = NetworkService()
 
-amps = Analog(power_system_resource_mrid="ASWITCH")
-count = Accumulator(power_system_resource_mrid="ASWITCH")
+amps = Analog(mrid="amps", power_system_resource_mrid="ASWITCH")
+count = Accumulator(mrid="count", power_system_resource_mrid="ASWITCH")
 
 service.add(amps)
 service.add(count)
@@ -141,13 +141,13 @@ from zepben.ewb import DiagramService, Diagram, DiagramObject
 
 service = DiagramService()
 
-a_diagram = Diagram()
+a_diagram = Diagram(mrid="diagram")
 
-do1 = DiagramObject(diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
+do1 = DiagramObject(mrid="do1", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
 
-do2 = DiagramObject(diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
+do2 = DiagramObject(mrid="do2", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
 
-do3 = DiagramObject(diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
+do3 = DiagramObject(mrid="do3", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
 
 service.add(do1)
 service.add(do2)
@@ -186,10 +186,10 @@ from zepben.ewb import NetworkService, Feeder, Breaker, resolver
 
 service = NetworkService()
 
-feeder = Feeder("f")
+feeder = Feeder(mrid="f")
 service.add(feeder)
 
-switch = Breaker("b1")
+switch = Breaker(mrid="b1")
 service.add(switch)
 
 # As the switch is already added to the service, this will be resolved immediately.
@@ -197,7 +197,7 @@ service.resolve_or_defer_reference(resolver.ec_equipment(feeder), switch.mrid)
 print(feeder.equipment.contains(switch)) # true
 
 # Now if we try and resolve something not added it will be deferred
-junction = Junction("j1")
+junction = Junction(mrid="j1")
 service.resolve_or_defer_reference(resolver.ec_equipment(feeder), junction.mrid)
 print(feeder.equipment.contains(junction)) # false
 

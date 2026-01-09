@@ -6,6 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
 
 analog_kwargs = measurement_kwargs
@@ -13,7 +14,7 @@ analog_args = measurement_args
 
 
 def test_analog_constructor_default():
-    analog = Analog()
+    analog = Analog(mrid=generate_id())
     verify_measurement_constructor_default(analog)
 
     assert analog.positive_flow_in is None

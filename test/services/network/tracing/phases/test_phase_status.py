@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.ewb import Terminal, SinglePhaseKind, PhaseCode, NetworkStateOperators, NormalPhases, CurrentPhases
+from zepben.ewb import Terminal, SinglePhaseKind, PhaseCode, NetworkStateOperators, NormalPhases, CurrentPhases, generate_id
 
 
 def test_normal_and_current_phases():
-    terminal = Terminal(phases=PhaseCode.ABCN)
+    terminal = Terminal(mrid=generate_id(), phases=PhaseCode.ABCN)
     normal_phases = NetworkStateOperators.NORMAL.phase_status(terminal)
     current_phases = NetworkStateOperators.CURRENT.phase_status(terminal)
 
@@ -33,7 +33,7 @@ def test_normal_and_current_phases():
 
 
 def test_normal_and_current_phase_codes_three():
-    terminal = Terminal(phases=PhaseCode.ABCN)
+    terminal = Terminal(mrid=generate_id(), phases=PhaseCode.ABCN)
     normal_phases = NormalPhases(terminal)
     current_phases = CurrentPhases(terminal)
 
@@ -66,7 +66,7 @@ def test_normal_and_current_phase_codes_three():
 
 
 def test_normal_and_current_phase_codes_single():
-    terminal = Terminal(phases=PhaseCode.BC)
+    terminal = Terminal(mrid=generate_id(), phases=PhaseCode.BC)
     normal_phases = NormalPhases(terminal)
     current_phases = CurrentPhases(terminal)
 
@@ -93,7 +93,7 @@ def test_normal_and_current_phase_codes_single():
 
 
 def test_normal_and_current_phase_codes_none():
-    terminal = Terminal(phases=PhaseCode.NONE)
+    terminal = Terminal(mrid=generate_id(), phases=PhaseCode.NONE)
     normal_phases = NormalPhases(terminal)
     current_phases = CurrentPhases(terminal)
 

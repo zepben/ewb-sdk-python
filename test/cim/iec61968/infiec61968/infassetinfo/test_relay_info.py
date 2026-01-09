@@ -8,8 +8,8 @@ from hypothesis.strategies import text, lists, floats, booleans
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
-from cim.private_collection_validator import validate_ordered_other_1234567890
-from zepben.ewb import RelayInfo
+from cim.private_collection_validator import validate_ordered_other
+from zepben.ewb import RelayInfo, generate_id
 
 relay_info_kwargs = {
     **asset_info_kwargs,
@@ -23,7 +23,7 @@ relay_info_args = [*asset_info_args, "a", True, [0.1, 0.2, 0.3]]
 
 
 def test_relay_info_constructor_default():
-    ri = RelayInfo()
+    ri = RelayInfo(mrid=generate_id())
 
     verify_asset_info_constructor_default(ri)
     assert ri.curve_setting is None
@@ -56,7 +56,7 @@ def test_relay_info_constructor_args():
 
 
 def test_relay_info_reclose_delays():
-    validate_ordered_other_1234567890(
+    validate_ordered_other(
         RelayInfo,
         lambda i: float(i),
         RelayInfo.reclose_delays,

@@ -4,20 +4,22 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import builds, lists
-from zepben.ewb import Asset, Location, AssetOrganisationRole, PowerSystemResource
+
+from util import mrid_strategy
+from zepben.ewb import Asset, Location, AssetOrganisationRole, PowerSystemResource, generate_id
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 asset_kwargs = {
     **identified_object_kwargs,
-    "location": builds(Location),
-    "organisation_roles": lists(builds(AssetOrganisationRole), max_size=2),
-    "power_system_resources": lists(builds(PowerSystemResource), max_size=2)
+    "location": builds(Location, mrid=mrid_strategy),
+    "organisation_roles": lists(builds(AssetOrganisationRole, mrid=mrid_strategy), max_size=2),
+    "power_system_resources": lists(builds(PowerSystemResource, mrid=mrid_strategy), max_size=2)
 }
 
-asset_args = [*identified_object_args, Location(), [AssetOrganisationRole()], [PowerSystemResource()]]
+asset_args = [*identified_object_args, Location(mrid=generate_id()), [AssetOrganisationRole(mrid=generate_id())], [PowerSystemResource(mrid=generate_id())]]
 
 
 def verify_asset_constructor_default(a: Asset):
@@ -44,7 +46,7 @@ def verify_asset_constructor_args(a: Asset):
 
 
 def test_organisation_roles_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Asset,
         lambda mrid: AssetOrganisationRole(mrid),
         Asset.organisation_roles,
@@ -57,7 +59,7 @@ def test_organisation_roles_collection():
 
 
 def test_power_system_resources_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Asset,
         lambda mrid: PowerSystemResource(mrid),
         Asset.power_system_resources,

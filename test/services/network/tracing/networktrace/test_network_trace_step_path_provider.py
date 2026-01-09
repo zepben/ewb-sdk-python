@@ -11,8 +11,7 @@ from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetw
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.services.network.network_service import NetworkService
-from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut, \
-    ConductingEquipment
+from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
 class PathTerminal(Terminal):

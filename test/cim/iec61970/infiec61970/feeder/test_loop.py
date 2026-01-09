@@ -4,24 +4,26 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.ewb import Loop, Circuit, Substation
+
+from util import mrid_strategy
+from zepben.ewb import Loop, Circuit, Substation, generate_id
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 loop_kwargs = {
     **identified_object_kwargs,
-    "circuits": lists(builds(Circuit)),
-    "substations": lists(builds(Substation)),
-    "energizing_substations": lists(builds(Substation))
+    "circuits": lists(builds(Circuit, mrid=mrid_strategy)),
+    "substations": lists(builds(Substation, mrid=mrid_strategy)),
+    "energizing_substations": lists(builds(Substation, mrid=mrid_strategy))
 }
 
-loop_args = [*identified_object_args, [Circuit()], [Substation()], [Substation()]]
+loop_args = [*identified_object_args, [Circuit(mrid=generate_id())], [Substation(mrid=generate_id())], [Substation(mrid=generate_id())]]
 
 
 def test_loop_constructor_default():
-    loop = Loop()
+    loop = Loop(mrid=generate_id())
 
     verify_identified_object_constructor_default(loop)
     assert not list(loop.circuits)
@@ -56,7 +58,7 @@ def test_loop_constructor_args():
 
 
 def test_circuits_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Loop,
         lambda mrid: Circuit(mrid),
         Loop.circuits,
@@ -69,7 +71,7 @@ def test_circuits_collection():
 
 
 def test_substations_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Loop,
         lambda mrid: Substation(mrid),
         Loop.substations,
@@ -82,7 +84,7 @@ def test_substations_collection():
 
 
 def test_energizing_substations_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         Loop,
         lambda mrid: Substation(mrid),
         Loop.energizing_substations,

@@ -6,6 +6,8 @@ from collections import Counter
 
 from hypothesis import given
 from hypothesis.strategies import text
+
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
@@ -61,8 +63,8 @@ def test_get_or_add_names():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
-    j2 = Junction()
+    j1 = Junction(mrid=generate_id())
+    j2 = Junction(mrid=generate_id())
 
     n1 = nt.get_or_add_name("n", j1)
     n2 = nt.get_or_add_name("n", j2)
@@ -79,8 +81,8 @@ def test_names():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
-    j2 = Junction()
+    j1 = Junction(mrid=generate_id())
+    j2 = Junction(mrid=generate_id())
 
     n1a = nt.get_or_add_name("n1", j1)
     n1b = nt.get_or_add_name("n1", j2)
@@ -93,8 +95,8 @@ def test_get_names():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
-    j2 = Junction()
+    j1 = Junction(mrid=generate_id())
+    j2 = Junction(mrid=generate_id())
 
     n1a = nt.get_or_add_name("n1", j1)
     n1b = nt.get_or_add_name("n1", j2)
@@ -110,8 +112,8 @@ def test_removes_names():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
-    j2 = Junction()
+    j1 = Junction(mrid=generate_id())
+    j2 = Junction(mrid=generate_id())
 
     n1a = nt.get_or_add_name("n1", j1)
     n1b = nt.get_or_add_name("n1", j2)
@@ -130,8 +132,8 @@ def test_remove_name():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
-    j2 = Junction()
+    j1 = Junction(mrid=generate_id())
+    j2 = Junction(mrid=generate_id())
 
     n1a = nt.get_or_add_name("n1", j1)
     n1b = nt.get_or_add_name("n1", j2)
@@ -153,7 +155,7 @@ def test_clear_names():
     # noinspection PyArgumentList
     nt = NameType("nt")
 
-    j1 = Junction()
+    j1 = Junction(mrid=generate_id())
 
     n1 = nt.get_or_add_name("n1", j1)
     n2 = nt.get_or_add_name("n2", j1)

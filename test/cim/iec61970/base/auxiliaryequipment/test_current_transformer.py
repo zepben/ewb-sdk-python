@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import integers
-from zepben.ewb import CurrentTransformer, CurrentTransformerInfo
+from zepben.ewb import CurrentTransformer, CurrentTransformerInfo, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
@@ -20,7 +20,7 @@ current_transformer_args = [*sensor_args, 1]
 
 
 def test_current_transformer_constructor_default():
-    ct = CurrentTransformer()
+    ct = CurrentTransformer(mrid=generate_id())
 
     verify_sensor_constructor_default(ct)
     assert ct.core_burden is None

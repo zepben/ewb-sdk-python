@@ -6,8 +6,8 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.private_collection_validator import validate_unordered_other_1234567890
-from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id
+from cim.private_collection_validator import validate_unordered_other
+from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, generate_id
 
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
     verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_kwargs, per_length_impedance_args
@@ -23,7 +23,7 @@ per_length_phase_impedance_args = [*per_length_impedance_args, [PhaseImpedanceDa
 
 
 def test_per_length_phase_impedance_constructor_default():
-    plpi = PerLengthPhaseImpedance()
+    plpi = PerLengthPhaseImpedance(mrid=generate_id())
 
     verify_per_length_impedance_constructor_default(plpi)
     assert not list(plpi.data)
@@ -50,7 +50,7 @@ def test_per_length_phase_impedance_constructor_args():
 
 @pytest.mark.timeout(10000)
 def test_phase_impedance_data():
-    validate_unordered_other_1234567890(
+    validate_unordered_other(
         PerLengthPhaseImpedance,
         lambda it: PhaseImpedanceData(single_phase_kind_by_id(it), single_phase_kind_by_id(it + 1), it, it, it, it),
         PerLengthPhaseImpedance.data,
@@ -73,7 +73,7 @@ def test_diagonals_returns_only_diagonals():
     pid2 = PhaseImpedanceData(SinglePhaseKind.B, SinglePhaseKind.B)
     pid3 = PhaseImpedanceData(SinglePhaseKind.C, SinglePhaseKind.C)
 
-    plpi = PerLengthPhaseImpedance()
+    plpi = PerLengthPhaseImpedance(mrid=generate_id())
     plpi.add_data(pi1)
     plpi.add_data(pi2)
     plpi.add_data(pi3)

@@ -5,7 +5,7 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.ewb import NetworkService, NetworkCimWriter, NetworkServiceWriter, NetworkDatabaseTables, Circuit
+from zepben.ewb import NetworkService, NetworkCimWriter, NetworkServiceWriter, NetworkDatabaseTables, Circuit, generate_id
 
 
 class TestNetworkServiceWriter:
@@ -26,7 +26,7 @@ class TestNetworkServiceWriter:
         )
 
     def test_passes_objects_through_to_the_cim_writer(self):
-        circuit = Circuit()
+        circuit = Circuit(mrid=generate_id())
         self.network_service.add(circuit)
 
         # NOTE: the save method will fail due to the relaxed mock returning false for all save operations,

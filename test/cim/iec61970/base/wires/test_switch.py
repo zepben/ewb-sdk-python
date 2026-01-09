@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, floats
-from zepben.ewb import Switch, SinglePhaseKind, SwitchInfo
+from zepben.ewb import Switch, SinglePhaseKind, SwitchInfo, generate_id
 
 from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
@@ -56,7 +56,7 @@ def test_open_states():
 
 
 def _validate_open_phase(is_open, set_open):
-    s = Switch()
+    s = Switch(mrid=generate_id())
 
     s.set_normally_open(True)
     assert s.is_normally_open()
@@ -65,7 +65,7 @@ def _validate_open_phase(is_open, set_open):
 
     valid_phases = list(SinglePhaseKind)[1:6]
     for phase in valid_phases:
-        s = Switch()
+        s = Switch(mrid=generate_id())
 
         set_open(s, True, phase)
         for validate_phase in valid_phases:

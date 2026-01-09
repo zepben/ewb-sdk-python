@@ -7,13 +7,15 @@ import re
 from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
-from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection
+
+from util import mrid_strategy
+from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 power_electronics_connection_kwargs = {
     **regulating_cond_eq_kwargs,
@@ -48,17 +50,50 @@ power_electronics_connection_kwargs = {
     "inv_var_resp_q_at_v4": floats(min_value=-0.6, max_value=0.0),
     "inv_reactive_power_mode": booleans(),
     "inv_fix_reactive_power": floats(min_value=-1.0, max_value=1.0),
-    "power_electronics_units": lists(builds(BatteryUnit), max_size=2),
-    "power_electronics_connection_phases": lists(builds(PowerElectronicsConnectionPhase), max_size=2)
+    "power_electronics_units": lists(builds(BatteryUnit, mrid=mrid_strategy), max_size=2),
+    "power_electronics_connection_phases": lists(builds(PowerElectronicsConnectionPhase, mrid=mrid_strategy), max_size=2)
 }
 
-power_electronics_connection_args = [*regulating_cond_eq_args, 1, 2.2, 3.3, 4.4, 5.5, 6, 7, "1", 208, 51.9, 47.10, False,
-                                     211, 228, 248, 258, 0.15, 0.16, 0.17, 0.18, True, 219, 220, 221, 222, 0.23, 0.24, 0.25, 0.26, False,
-                                     0.27, [BatteryUnit(), BatteryUnit()], [PowerElectronicsConnectionPhase(), PowerElectronicsConnectionPhase()]]
+power_electronics_connection_args = [
+    *regulating_cond_eq_args,
+    1,
+    2.2,
+    3.3,
+    4.4,
+    5.5,
+    6,
+    7,
+    "1",
+    208,
+    51.9,
+    47.10,
+    False,
+    211,
+    228,
+    248,
+    258,
+    0.15,
+    0.16,
+    0.17,
+    0.18,
+    True,
+    219,
+    220,
+    221,
+    222,
+    0.23,
+    0.24,
+    0.25,
+    0.26,
+    False,
+    0.27,
+    [BatteryUnit(mrid=generate_id()), BatteryUnit(mrid=generate_id())],
+    [PowerElectronicsConnectionPhase(mrid=generate_id()), PowerElectronicsConnectionPhase(mrid=generate_id())]
+]
 
 
 def test_power_electronics_connection_constructor_default():
-    pec = PowerElectronicsConnection()
+    pec = PowerElectronicsConnection(mrid=generate_id())
 
     verify_regulating_cond_eq_constructor_default(pec)
     assert pec.max_i_fault is None
@@ -248,7 +283,7 @@ def test_power_electronics_connection_constructor_args():
 
 
 def test_power_electronics_units_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         PowerElectronicsConnection,
         lambda mrid: PowerElectronicsUnit(mrid),
         PowerElectronicsConnection.units,
@@ -261,7 +296,7 @@ def test_power_electronics_units_collection():
 
 
 def test_power_electronics_connection_phases_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         PowerElectronicsConnection,
         lambda mrid: PowerElectronicsConnectionPhase(mrid),
         PowerElectronicsConnection.phases,

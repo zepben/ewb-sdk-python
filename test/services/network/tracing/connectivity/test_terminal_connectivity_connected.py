@@ -6,7 +6,7 @@ from collections import Counter
 from typing import List, Tuple
 
 from zepben.ewb import NetworkService, PhaseCode, SinglePhaseKind as Phase, Terminal, ConnectivityNode, AcLineSegment, NominalPhasePath, \
-    TerminalConnectivityConnected
+    TerminalConnectivityConnected, generate_id
 
 
 class TestTerminalConnectivityConnected:
@@ -184,7 +184,7 @@ class TestTerminalConnectivityConnected:
         cn = self._get_next_connectivity_node()
 
         def create_terminal(phase_code: PhaseCode) -> Terminal:
-            terminal = Terminal(phases=phase_code)
+            terminal = Terminal(mrid=generate_id(), phases=phase_code)
             self._network_service.connect_by_mrid(terminal, cn.mrid)
             return terminal
 

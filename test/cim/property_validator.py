@@ -7,10 +7,10 @@ __all__ = ["validate_property_accessor"]
 
 
 def validate_property_accessor(t, info, prop):
-    obj = t()
+    obj = t("test")
     assert getattr(obj, prop.fget.__name__) is None
 
-    iobj = info()
+    iobj = info("info")
     setattr(obj, prop.fset.__name__, iobj)
     assert getattr(obj, prop.fget.__name__) is iobj
 

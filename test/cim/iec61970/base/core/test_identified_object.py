@@ -7,7 +7,7 @@ from typing import Tuple
 
 import pytest
 from hypothesis.strategies import uuids, text, lists, builds
-from zepben.ewb import IdentifiedObject
+from zepben.ewb import IdentifiedObject, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -31,7 +31,7 @@ identified_object_kwargs = {
 }
 
 # noinspection PyArgumentList
-identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType("nt1"), Junction())]]
+identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType("nt1"), Junction(mrid=generate_id()))]]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
@@ -64,7 +64,7 @@ def verify_identified_object_constructor_args(io: IdentifiedObject):
 
 
 def test_user_can_add_names_to_identified_object():
-    identified_object = IdentifiedObject()
+    identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
     name_type = NameType("type")
     assert identified_object.num_names() == 0
@@ -163,7 +163,7 @@ def test_clear_names_removes_all_names_from_the_identified_object_and_the_name_t
 
 
 def test_user_can_add_the_same_name_back_after_it_has_been_removed():
-    identified_object = IdentifiedObject()
+    identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
     name_type = NameType("type")
 
@@ -177,7 +177,7 @@ def test_user_can_add_the_same_name_back_after_it_has_been_removed():
 
 
 def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
-    identified_object = IdentifiedObject()
+    identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
     name_type = NameType("type")
 
@@ -195,7 +195,7 @@ def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
 
 
 def _create_multiple_base_names() -> Tuple[IdentifiedObject, NameType]:
-    identified_object = IdentifiedObject()
+    identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
     name_type = NameType("type")
 

@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import sampled_from
-from zepben.ewb import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind
+from zepben.ewb import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind, generate_id
 
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
     verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args
@@ -19,7 +19,7 @@ potential_transformer_args = [*sensor_args, PotentialTransformerKind.capacitiveC
 
 
 def test_potential_transformer_constructor_default():
-    vt = PotentialTransformer()
+    vt = PotentialTransformer(mrid=generate_id())
 
     verify_sensor_constructor_default(vt)
     assert vt.type == PotentialTransformerKind.UNKNOWN

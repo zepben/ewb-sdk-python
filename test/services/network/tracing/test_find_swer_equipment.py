@@ -6,7 +6,7 @@ from unittest.mock import call, patch
 
 import pytest
 
-from zepben.ewb import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators
+from zepben.ewb import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators, generate_id
 
 
 class TestFindSwerEquipment:
@@ -190,7 +190,7 @@ class TestFindSwerEquipment:
 
     @staticmethod
     def _make_bv(ce: ConductingEquipment, volts: int):
-        bv = BaseVoltage()
+        bv = BaseVoltage(mrid=generate_id())
         bv.nominal_voltage = volts
         ce.base_voltage = bv
 

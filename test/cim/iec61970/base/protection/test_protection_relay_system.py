@@ -5,23 +5,29 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists, sampled_from
-from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
+
+from util import mrid_strategy
+from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme, generate_id
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 protection_relay_system_kwargs = {
     **equipment_kwargs,
     "protection_kind": sampled_from(ProtectionKind),
-    "schemes": lists(builds(ProtectionRelayScheme))
+    "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy))
 }
 
-protection_relay_system_args = [*equipment_args, ProtectionKind.JDIFF, [ProtectionRelayScheme(), ProtectionRelayScheme(), ProtectionRelayScheme()]]
+protection_relay_system_args = [
+    *equipment_args,
+    ProtectionKind.JDIFF,
+    [ProtectionRelayScheme(mrid=generate_id()), ProtectionRelayScheme(mrid=generate_id()), ProtectionRelayScheme(mrid=generate_id())]
+]
 
 
 def test_protection_relay_system_constructor_default():
-    prs = ProtectionRelaySystem()
+    prs = ProtectionRelaySystem(mrid=generate_id())
 
     verify_equipment_constructor_default(prs)
     assert prs.protection_kind == ProtectionKind.UNKNOWN
@@ -52,7 +58,7 @@ def test_protection_relay_system_constructor_args():
 
 
 def test_schemes_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         ProtectionRelaySystem,
         lambda mrid: ProtectionRelayScheme(mrid),
         ProtectionRelaySystem.schemes,

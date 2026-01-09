@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 
-from zepben.ewb import TerminalConnectivityInternal, PhaseCode, PowerTransformer, Terminal
+from zepben.ewb import TerminalConnectivityInternal, PhaseCode, PowerTransformer, Terminal, generate_id
 
 
 class TestTerminalConnectivityInternal:
@@ -255,9 +255,9 @@ class TestTerminalConnectivityInternal:
 
     def _validate_tx_paths(self, primary: PhaseCode, secondary: PhaseCode, traced: PhaseCode = None):
         traced = traced or secondary
-        primary_terminal = Terminal(phases=primary)
-        secondary_terminal = Terminal(phases=secondary)
-        PowerTransformer(terminals=[primary_terminal, secondary_terminal])
+        primary_terminal = Terminal(mrid=generate_id(), phases=primary)
+        secondary_terminal = Terminal(mrid=generate_id(), phases=secondary)
+        PowerTransformer(mrid=generate_id(), terminals=[primary_terminal, secondary_terminal])
 
         if traced != PhaseCode.NONE:
             assert Counter([it.to_phase for it in self._connectivity.between(primary_terminal, secondary_terminal).nominal_phase_paths]) == \

@@ -4,21 +4,23 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds
-from zepben.ewb import RemoteControl, Control
+
+from util import mrid_strategy
+from zepben.ewb import RemoteControl, Control, generate_id
 
 from cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
     verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args
 
 remote_control_kwargs = {
     **remote_point_kwargs,
-    "control": builds(Control)
+    "control": builds(Control, mrid=mrid_strategy)
 }
 
-remote_control_args = [*remote_point_args, Control()]
+remote_control_args = [*remote_point_args, Control(mrid=generate_id())]
 
 
 def test_remote_control_constructor_default():
-    rc = RemoteControl()
+    rc = RemoteControl(mrid=generate_id())
 
     verify_remote_point_constructor_default(rc)
     assert not rc.control

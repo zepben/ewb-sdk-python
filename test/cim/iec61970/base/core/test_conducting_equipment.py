@@ -6,19 +6,21 @@ import sys
 
 import pytest
 from hypothesis.strategies import lists, builds
-from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal
+
+from util import mrid_strategy
+from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal, generate_id
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
-from cim.private_collection_validator import validate_ordered_1234567890
+from cim.private_collection_validator import validate_ordered
 
 conducting_equipment_kwargs = {
     **equipment_kwargs,
-    "base_voltage": builds(BaseVoltage),
-    "terminals": lists(builds(Terminal), max_size=2)
+    "base_voltage": builds(BaseVoltage, mrid=mrid_strategy),
+    "terminals": lists(builds(Terminal, mrid=mrid_strategy), max_size=2)
 }
 
-conducting_equipment_args = [*equipment_args, BaseVoltage(), [Terminal(), Terminal()]]
+conducting_equipment_args = [*equipment_args, BaseVoltage(mrid=generate_id()), [Terminal(mrid=generate_id()), Terminal(mrid=generate_id())]]
 
 
 def verify_conducting_equipment_constructor_default(ce: ConductingEquipment):
@@ -42,7 +44,7 @@ def verify_conducting_equipment_constructor_args(ce: ConductingEquipment):
 
 
 def test_terminals_collection():
-    validate_ordered_1234567890(
+    validate_ordered(
         ConductingEquipment,
         lambda mrid, sn: Terminal(mrid, sequence_number=sn),
         ConductingEquipment.terminals,
@@ -56,20 +58,20 @@ def test_terminals_collection():
     )
 
 def test_default_max_terminals_is_sys_maxsize():
-    assert ConductingEquipment().max_terminals == sys.maxsize
+    assert ConductingEquipment(mrid=generate_id()).max_terminals == sys.maxsize
 
 class SingleTerminalCE(ConductingEquipment):
     max_terminals = 1
 
 def test_exceeding_max_terminals_raises_exception():
-    ce = SingleTerminalCE()
-    ce.add_terminal(Terminal())
+    ce = SingleTerminalCE(mrid=generate_id())
+    ce.add_terminal(Terminal(mrid=generate_id()))
 
     with pytest.raises(ValueError):
-        ce.add_terminal(Terminal())
+        ce.add_terminal(Terminal(mrid=generate_id()))
 
 def test_adding_terminal_twice_wont_cause_max_terminals_to_raise_exception():
-    ce = SingleTerminalCE()
-    t = Terminal()
+    ce = SingleTerminalCE(mrid=generate_id())
+    t = Terminal(mrid=generate_id())
     ce.add_terminal(t)
     ce.add_terminal(t)

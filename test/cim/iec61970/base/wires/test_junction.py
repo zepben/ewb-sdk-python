@@ -6,6 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 junction_kwargs = connector_kwargs
@@ -13,7 +14,7 @@ junction_args = connector_args
 
 
 def test_junction_constructor_default():
-    verify_connector_constructor_default(Junction())
+    verify_connector_constructor_default(Junction(mrid=generate_id()))
 
 
 @given(**junction_kwargs)

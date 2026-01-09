@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, integers, sampled_from
-from zepben.ewb import SVCControlMode, StaticVarCompensator
+from zepben.ewb import SVCControlMode, StaticVarCompensator, generate_id
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
@@ -23,7 +23,7 @@ static_var_compensator_args = [*regulating_cond_eq_args, 1.0, -1.0, 2.0, SVCCont
 
 
 def test_static_var_compensator_constructor_default():
-    svc = StaticVarCompensator()
+    svc = StaticVarCompensator(mrid=generate_id())
     verify_regulating_cond_eq_constructor_default(svc)
     assert svc.capacitive_rating is None
     assert svc.inductive_rating is None

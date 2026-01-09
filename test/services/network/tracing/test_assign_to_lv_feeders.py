@@ -5,7 +5,8 @@
 from typing import Iterable, Type
 
 import pytest
-from zepben.ewb import Equipment, TestNetworkBuilder, BaseVoltage, LvFeeder, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, ConductingEquipment, Breaker
+from zepben.ewb import Equipment, TestNetworkBuilder, BaseVoltage, LvFeeder, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, \
+    ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, ConductingEquipment, Breaker, generate_id
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing
@@ -20,8 +21,8 @@ def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
 
 class TestAssignToLvFeeders:
 
-    bv_hv = BaseVoltage(nominal_voltage=11000)
-    bv_lv = BaseVoltage(nominal_voltage=400)
+    bv_hv = BaseVoltage(mrid=generate_id(), nominal_voltage=11000)
+    bv_lv = BaseVoltage(mrid=generate_id(), nominal_voltage=400)
 
     @staticmethod
     def base_voltage(ce: ConductingEquipment, voltage: BaseVoltage):
@@ -59,8 +60,8 @@ class TestAssignToLvFeeders:
 
     @pytest.mark.asyncio
     async def test_stops_at_hv_equipment(self):
-        bv_hv = BaseVoltage(nominal_voltage=11000)
-        bv_lv = BaseVoltage(nominal_voltage=400)
+        bv_hv = BaseVoltage(mrid=generate_id(), nominal_voltage=11000)
+        bv_lv = BaseVoltage(mrid=generate_id(), nominal_voltage=400)
 
         # noinspection PyArgumentList
         network_service = (TestNetworkBuilder()
@@ -80,8 +81,8 @@ class TestAssignToLvFeeders:
 
     @pytest.mark.asyncio
     async def test_includes_transformers(self):
-        bv_hv = BaseVoltage(nominal_voltage=11000)
-        bv_lv = BaseVoltage(nominal_voltage=400)
+        bv_hv = BaseVoltage(mrid=generate_id(), nominal_voltage=11000)
+        bv_lv = BaseVoltage(mrid=generate_id(), nominal_voltage=400)
 
         # noinspection PyArgumentList
         network_service = (TestNetworkBuilder()
@@ -102,8 +103,8 @@ class TestAssignToLvFeeders:
 
     @pytest.mark.asyncio
     async def test_only_powered_via_head_equipment(self):
-        bv_hv = BaseVoltage(nominal_voltage=11000)
-        bv_lv = BaseVoltage(nominal_voltage=400)
+        bv_hv = BaseVoltage(mrid=generate_id(), nominal_voltage=11000)
+        bv_lv = BaseVoltage(mrid=generate_id(), nominal_voltage=400)
 
         # noinspection PyArgumentList
         network_service = (TestNetworkBuilder()
@@ -300,7 +301,7 @@ class TestAssignToLvFeeders:
 
             b7: Breaker = network['b7']
 
-            feeder = Feeder()
+            feeder = Feeder(mrid=generate_id())
             lv_feeder8 = network['lvf8']
             operators.associate_energizing_feeder(feeder, lv_feeder8)
             lv_feeder9 = network['lvf9']
@@ -310,8 +311,8 @@ class TestAssignToLvFeeders:
 
             # We create an LV feeder to assign from b7 with its associated energizing feeder, which we will test is assigned to all LV feeders
             # in the dist substation site, not just the one on b5.
-            back_feed = Feeder()
-            lv_feeder = LvFeeder()
+            back_feed = Feeder(mrid=generate_id())
+            lv_feeder = LvFeeder(mrid=generate_id())
             operators.associate_energizing_feeder(back_feed, lv_feeder)
 
             await Tracing.assign_equipment_to_lv_feeders().run(
@@ -345,8 +346,8 @@ class TestAssignToLvFeeders:
                    .add_lv_feeder('b0')  # lvf1
                    ).network
 
-        normal_feeder = Feeder()
-        current_feeder = Feeder()
+        normal_feeder = Feeder(mrid=generate_id())
+        current_feeder = Feeder(mrid=generate_id())
         breaker = network['b0']
         lv_feeder = network['lvf1']
 

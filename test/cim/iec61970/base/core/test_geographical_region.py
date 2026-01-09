@@ -4,23 +4,26 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+
+from util import mrid_strategy
+from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 geographical_region_kwargs = {
     **identified_object_kwargs,
-    "sub_geographical_regions": lists(builds(SubGeographicalRegion), max_size=2)
+    "sub_geographical_regions": lists(builds(SubGeographicalRegion, mrid=mrid_strategy), max_size=2)
 }
 
-geographical_region_args = [*identified_object_args, [SubGeographicalRegion()]]
+geographical_region_args = [*identified_object_args, [SubGeographicalRegion(mrid=generate_id())]]
 
 
 def test_geographical_region_constructor_default():
-    gr = GeographicalRegion()
+    gr = GeographicalRegion(mrid=generate_id())
 
     verify_identified_object_constructor_default(gr)
     assert not list(gr.sub_geographical_regions)
@@ -44,7 +47,7 @@ def test_geographical_region_constructor_args():
 
 
 def test_sub_geographical_regions_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         GeographicalRegion,
         lambda mrid: SubGeographicalRegion(mrid),
         GeographicalRegion.sub_geographical_regions,

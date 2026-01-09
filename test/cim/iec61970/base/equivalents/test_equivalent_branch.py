@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.ewb import EquivalentBranch
+from zepben.ewb import EquivalentBranch, generate_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
@@ -34,7 +34,7 @@ equivalent_branch_args = [*equivalent_equipment_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6
 
 
 def test_equivalent_branch_constructor_default():
-    t = EquivalentBranch()
+    t = EquivalentBranch(mrid=generate_id())
 
     verify_equivalent_equipment_constructor_default(t)
     assert not t.negative_r12

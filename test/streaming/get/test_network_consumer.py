@@ -29,7 +29,7 @@ from zepben.ewb import NetworkConsumerClient, NetworkService, IdentifiedObject, 
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
     BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
     UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
-    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole
+    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole, generate_id
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
@@ -538,7 +538,7 @@ class TestNetworkConsumer:
         def responses(_):
             nio = Any()
             # noinspection PyUnresolvedReferences
-            nio.Pack(Diagram().to_pb())
+            nio.Pack(Diagram(mrid=generate_id()).to_pb())
             yield GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(other=nio)])
 
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [responses])])

@@ -5,22 +5,24 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.ewb import PricingStructure, Tariff
+
+from util import mrid_strategy
+from zepben.ewb import PricingStructure, Tariff, generate_id
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
-from cim.private_collection_validator import validate_unordered_1234567890
+from cim.private_collection_validator import validate_unordered
 
 pricing_structure_kwargs = {
     **document_kwargs,
-    "tariffs": lists(builds(Tariff), max_size=2),
+    "tariffs": lists(builds(Tariff, mrid=mrid_strategy), max_size=2),
 }
 
-pricing_structure_args = [*document_args, [Tariff()]]
+pricing_structure_args = [*document_args, [Tariff(mrid=generate_id())]]
 
 
 def test_pricing_structure_constructor_default():
-    ps = PricingStructure()
+    ps = PricingStructure(mrid=generate_id())
 
     verify_document_constructor_default(ps)
     assert not list(ps.tariffs)
@@ -47,7 +49,7 @@ def test_pricing_structure_constructor_args():
 
 
 def test_tariffs_collection():
-    validate_unordered_1234567890(
+    validate_unordered(
         PricingStructure,
         lambda mrid: Tariff(mrid),
         PricingStructure.tariffs,

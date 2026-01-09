@@ -7,8 +7,9 @@ from hypothesis.strategies import booleans, sampled_from, floats, builds, lists
 from cim.cim_creators import sampled_phase_code, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
-from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
+from cim.private_collection_validator import validate_unordered
+from util import mrid_strategy
+from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq, generate_id
 
 regulating_control_kwargs = {
     **power_system_resource_kwargs,
@@ -21,15 +22,28 @@ regulating_control_kwargs = {
     "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "rated_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "terminal": builds(Terminal),
+    "terminal": builds(Terminal, mrid=mrid_strategy),
     "ct_primary": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "min_target_deadband": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection), max_size=2)
+    "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, mrid=mrid_strategy), max_size=2)
 }
 
-regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, 5.5, Terminal(), 6.6,
-                           7.7,
-                           [PowerElectronicsConnection()]]
+regulating_control_args = [
+    *power_system_resource_args,
+    False,
+    RegulatingControlModeKind.voltage,
+    PhaseCode.ABC,
+    1.1,
+    2.2,
+    True,
+    3.3,
+    4.4,
+    5.5,
+    Terminal(mrid=generate_id()),
+    6.6,
+    7.7,
+    [PowerElectronicsConnection(mrid=generate_id())]
+]
 
 
 def verify_regulating_control_constructor_default(rc: RegulatingControl):
@@ -103,7 +117,7 @@ def verify_regulating_control_constructor_args(rc):
 
 def test_regulating_control_regulating_conducting_equipment():
     # noinspection PyArgumentList
-    validate_unordered_1234567890(
+    validate_unordered(
         RegulatingControl,
         lambda mrid: RegulatingCondEq(mrid),
         RegulatingControl.regulating_conducting_equipment,
