@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [1.1.0] - UNRELEASED
+## [1.2.0] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [1.1.0] - 2026-01-21
 ### Breaking Changes
 * Updated `EwbDataFilePaths` to be an abstract class that supports variants. Added `LocalEwbDataFilePaths` which is a local file system implementation of
   `EwbDataFilePaths`, and should be used in place of the old `EwbDataFilePaths`.
