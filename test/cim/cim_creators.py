@@ -53,6 +53,9 @@ from util import mrid_strategy
 from zepben.ewb import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 
 # @formatter:on
 
@@ -148,6 +151,19 @@ def create_ev_charging_unit(include_runtime: bool = True):
 #######################################
 # Extensions IEC61970 Base Protection #
 #######################################
+
+def create_directional_current_relay(include_runtime: bool = True):
+    return builds(
+        DirectionalCurrentRelay,
+        **create_protection_relay_function(include_runtime),
+        directional_characteristic_angle=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        polarizing_quantity_type=one_of(none(), sampled_from(PolarizingQuantityType)),
+        relay_element_phase=one_of(none(), sampled_from(PhaseCode)),
+        minimum_pickup_current=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        current_limit_1=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        inverse_time_flag=boolean_or_none(),
+        time_delay_1=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+    )
 
 def create_distance_relay(include_runtime: bool = True):
     return builds(
@@ -683,11 +699,12 @@ def create_usage_point(include_runtime: bool = True):
         **create_identified_object(include_runtime),
         usage_point_location=builds(Location, **create_identified_object(include_runtime)),
         is_virtual=booleans(),
-        connection_category=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        connection_category=text(alphabet=ALPHANUM, min_size=2, max_size=TEXT_MAX_SIZE),
         rated_power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         approved_inverter_capacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         equipment=lists(builds(EnergyConsumer, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        end_devices=lists(builds(Meter, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        end_devices=lists(builds(Meter, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        contacts=lists(builds(ContactDetails, **create_identified_object(include_runtime)), min_size=1)
     )
 
 
