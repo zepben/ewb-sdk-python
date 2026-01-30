@@ -58,7 +58,7 @@ class UsagePoint(IdentifiedObject):
     _end_devices: list[EndDevice] | None = None
     _contacts: list[ContactDetails] | None = None
 
-    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, **kwargs):
+    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
         super(UsagePoint, self).__init__(**kwargs)
         if equipment:
             for eq in equipment:
@@ -66,6 +66,9 @@ class UsagePoint(IdentifiedObject):
         if end_devices:
             for ed in end_devices:
                 self.add_end_device(ed)
+        if contacts:
+            for c in contacts:
+                self.add_contact(c)
 
     def num_equipment(self):
         """
