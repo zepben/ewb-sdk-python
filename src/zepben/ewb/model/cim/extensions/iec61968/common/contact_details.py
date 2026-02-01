@@ -50,13 +50,21 @@ class ContactDetails:
 
     _electronic_addresses: list[ElectronicAddress] | None = None
 
+    def __init__(self, phone_numbers: list[TelephoneNumber] = None, electronic_addresses: list[ElectronicAddress] = None):
+        for number in phone_numbers or []:
+            self.add_phone_number(number)
+
+        for email in electronic_addresses or []:
+            self.add_electronic_address(email)
+
+
     @property
     def phone_numbers(self) -> Generator[TelephoneNumber, None, None]:
         return ngen(self._phone_numbers)
 
     @property
     def num_phone_numbers(self) -> int:
-        """Get the number of entries in the [TelephoneNumber] collection."""
+        """Get the number of entries in the ``TelephoneNumber`` collection."""
         return nlen(self._phone_numbers)
 
     def add_phone_number(self, phone_number: TelephoneNumber) -> "ContactDetails":

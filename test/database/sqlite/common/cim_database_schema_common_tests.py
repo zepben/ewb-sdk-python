@@ -142,8 +142,5 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
             print(str(differences))
 
         assert not list(differences.missing_from_target()), "unexpected objects found in loaded service"
-        if differences.modifications():
-            print(sorted(list(service.objects()), key=lambda o: str(type(o))))
-            print(sorted(list(expected_service.objects()), key=lambda o: str(type(o))))
         assert not list(differences.modifications()), ("unexpected modifications", service, expected_service)
         assert not list(differences.missing_from_source()), "objects missing from loaded service"
