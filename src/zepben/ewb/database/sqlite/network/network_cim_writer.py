@@ -1153,10 +1153,13 @@ class NetworkCimWriter(BaseCimWriter):
         for it in usage_point.equipment:
             status = status and self._save_equipment_to_usage_point_association(it, usage_point)
 
+        for it in usage_point.contacts:
+            status = status and self._save_usage_point_contact_details(usage_point, it)
+
         return status and self._save_identified_object(table, insert, usage_point, "usage point")
 
     @db_wrapper(TableUsagePointsContactDetails)
-    def save_usage_point_contact_details(self, usage_point: UsagePoint, contact_details: ContactDetails, table, insert) -> bool:
+    def _save_usage_point_contact_details(self, usage_point: UsagePoint, contact_details: ContactDetails, table, insert) -> bool:
         insert.add_value(table.usage_point_mrid.query_index, usage_point.mrid)
 
         return self._save_contact_details(table, insert, contact_details, f"contact details [{contact_details.id}] for usage point {usage_point.mrid}")

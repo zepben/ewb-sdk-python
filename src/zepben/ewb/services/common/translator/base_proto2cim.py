@@ -67,7 +67,7 @@ def get_nullable(pb: Message, field: str) -> Optional[T]:
 @bind_to_cim
 def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
     cim.title = get_nullable(pb, 'title')
-    cim.created_date_time = get_nullable(pb, "createdDateTime")
+    cim.created_date_time = cdt.ToDatetime() if (cdt := get_nullable(pb, "createdDateTime")) else None
     cim.author_name = get_nullable(pb, 'authorName')
     cim.type = get_nullable(pb, 'type')
     cim.status = get_nullable(pb, 'status')

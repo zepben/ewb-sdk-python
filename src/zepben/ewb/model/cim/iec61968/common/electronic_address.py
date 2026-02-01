@@ -15,7 +15,7 @@ class ElectronicAddress:
     """
 
     email1: str | None = None
-    """Promary email address."""
+    """Primary email address."""
     is_primary: bool | None = None
     """[ZBEX] Whether this email is the primary address of the contact."""
     description: str | None = None

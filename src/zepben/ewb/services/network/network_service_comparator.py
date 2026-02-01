@@ -571,7 +571,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             UsagePoint.approved_inverter_capacity,
             UsagePoint.phase_code
         )
-        self._compare_id_reference_collections(diff, UsagePoint.contacts)
+        self._compare_indexed_value_collections(diff, UsagePoint.contacts)
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)
             self._compare_id_reference_collections(diff, UsagePoint.end_devices)
