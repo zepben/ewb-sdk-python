@@ -205,8 +205,14 @@ class UsagePoint(IdentifiedObject):
 
     def add_contact(self, contact: ContactDetails) -> UsagePoint:
         """Add a `ContactDetails` to this `UsagePoint`"""
-        if self._validate_reference(contact, self.get_equipment, f"A ContactDetails with ID {contact.id}"):
+        if self._validate_reference(
+            other=contact,
+            get_identifier=lambda it: it.id,
+            getter=self.get_contact,
+            type_description=lambda: f"A ContactDetails with ID {contact.id}",
+        ):
             return self
+
         if self._contacts is None:
             self._contacts = list()
         self._contacts.append(contact)

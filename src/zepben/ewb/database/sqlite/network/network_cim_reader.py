@@ -1389,7 +1389,7 @@ class NetworkCimReader(BaseCimReader):
         """
         usage_point_mrid = set_identifier(result_set.get_string(table.usage_point_mrid.query_index))
         contact_details_id = result_set.get_string(table.id.query_index)
-        set_identifier("$usagePointMrid-to-${contactDetailsId}")
+        set_identifier(f"{usage_point_mrid}-to-{contact_details_id}")
 
         usage_point = self._ensure_get(usage_point_mrid, UsagePoint)
         contact_details = ContactDetails(contact_details_id)
