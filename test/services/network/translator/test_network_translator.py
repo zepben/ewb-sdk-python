@@ -6,6 +6,7 @@ from typing import TypeVar
 
 import pytest
 
+from cim.cim_creators import create_directional_current_relay
 from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.cim_creators import *
 from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
@@ -55,6 +56,7 @@ types_to_test = {
     # Extensions IEC61970 Base Protection #
     #######################################
 
+    "create_directional_current_relay": create_directional_current_relay(),
     "create_distance_relay": create_distance_relay(),
     "create_protection_relay_scheme": create_protection_relay_scheme(),
     "create_protection_relay_system": create_protection_relay_system(),

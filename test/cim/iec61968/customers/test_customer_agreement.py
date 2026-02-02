@@ -47,10 +47,10 @@ def test_customer_agreement_constructor_args():
     ca = CustomerAgreement(*customer_agreement_args)
 
     verify_agreement_constructor_args(ca)
-    assert customer_agreement_args[-2:] == [
+    assert [
         ca.customer,
         list(ca.pricing_structures)
-    ]
+    ] == customer_agreement_args[-2:]
 
 
 def test_pricing_structures_collection():
