@@ -75,6 +75,21 @@ class NetworkDatabaseReader(BaseDatabaseReader):
     async def _post_load(self) -> bool:
         status = await super()._post_load()
 
+        #
+        # NOTE: We need to have the feeder head equipment assigned before we can set the feeder directions to prevent
+        #       tracing back into the zone substation in parallel feeders. Rather than splitting the feeder assignment
+        #       into two passes, we can just assign the equipment to feeders before we set the directions.
+        #
+        self._logger.info("Assigning equipment to feeders...")
+        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
+        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        self._logger.info("Equipment assigned to feeders.")
+
+        self._logger.info("Assigning equipment to LV feeders...")
+        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
+        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        self._logger.info("Equipment assigned to LV feeders.")
+
         self._logger.info("Applying feeder direction to network...")
         await self.set_feeder_direction.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
         await self.set_feeder_direction.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
@@ -90,16 +105,6 @@ class NetworkDatabaseReader(BaseDatabaseReader):
             )
 
         self._logger.info("Phasing applied to network.")
-
-        self._logger.info("Assigning equipment to feeders...")
-        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
-        self._logger.info("Equipment assigned to feeders.")
-
-        self._logger.info("Assigning equipment to LV feeders...")
-        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
-        self._logger.info("Equipment assigned to LV feeders.")
 
         self._logger.info("Validating that each equipment is assigned to a container...")
         self._validate_equipment_containers()

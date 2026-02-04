@@ -111,11 +111,11 @@ class TestNetworkDatabaseReader:
             call.service.unresolved_references(),
             call.service.unresolved_references().__iter__,
 
+            call.assign_to_feeders.run(self.service),
+            call.assign_to_lv_feeders.run(self.service),
             call.set_direction.run(self.service),
             call.set_phases.run(self.service),
             call.phase_inferrer.run(self.service),
-            call.assign_to_feeders.run(self.service),
-            call.assign_to_lv_feeders.run(self.service),
 
             # calls for _validate_equipment_containers()
             call.service.objects(Equipment),

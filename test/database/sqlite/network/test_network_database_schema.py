@@ -41,7 +41,7 @@ from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitT
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
-    NetworkTraceStep
+    NetworkTraceStep, TestNetworkBuilder
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
@@ -66,12 +66,12 @@ from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.ewb.services.common import resolver
 
-
 hypothesis_settings = dict(
     deadline=2000,
     suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow],
     max_examples=4
 )
+
 
 # FIXME: see Line [305]
 class PatchedNetworkTraceStepPath(NetworkTraceStep.Path):
@@ -701,6 +701,24 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
             service.resolve_or_defer_reference(resolver.rce_regulating_control(pec), "tcc")
 
         await self._validate_unresolved_failure(str(pec), "RegulatingControl tcc", add_deferred_reference)
+
+    async def test_assigns_feeders_in_parallel_correctly(self):
+        # This test is to ensure parallel feeders don't assign directions back through the feeder heads. This was seen in the wild when
+        # the feeder directions were set before the equipment was assigned, meaning no feeder heads were detected in the tracing.
+        ns = await (
+            TestNetworkBuilder()
+            .from_source()  # s0
+            .to_breaker()  # b1
+            .to_acls()  # c2
+            .to_breaker()  # b3
+            .to_source()  # s4
+            .add_feeder("b1", 2)
+            .add_feeder("b3", 1)
+            .build(apply_directions_from_sources=False)
+        )
+
+        # If the read from the database matches the test network we built, then the equipment is correctly assigned.
+        await self._validate_schema(ns)
 
     async def test_only_loads_street_address_fields_if_required(self):
         # This test is here to make sure the database reading correctly removes the parts of loaded street addresses that are not filled out.
