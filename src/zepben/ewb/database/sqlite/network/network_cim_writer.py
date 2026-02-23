@@ -5,7 +5,7 @@
 
 __all__ = ["NetworkCimWriter"]
 
-from typing import Optional, Callable, Type, TypeVar
+from typing import Optional, Type, TypeVar
 
 from zepben.ewb import IdentifiedObject
 from zepben.ewb.database.sql.sql_table import SqlTable
@@ -41,7 +41,7 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import TableEvChargingUnits
-from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelay
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import TableDistanceRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import \
     TableProtectionRelayFunctionThresholds
@@ -314,6 +314,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import 
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 TSqlTable = TypeVar('TSqlTable', bound=SqlTable)
+
 def db_wrapper(table: Type[TSqlTable]):
     def wrapper(func):
         def _inner(self, io: IdentifiedObject, *args, **kwargs):
@@ -374,8 +375,8 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.business_name.query_index, contact_details.business_name)
 
         status = self._save_contact_details_street_address(contact_details, contact_details.contact_address)
-        for it in contact_details.phone_numbers: status = status and self._save_contact_details_telephone_number(contact_details, it)
-        for it in contact_details.electronic_addresses: status = status and self._save_contact_details_electronic_address(contact_details, it)
+        status = status and all(self._save_contact_details_telephone_number(contact_details, it) for it in contact_details.phone_numbers)
+        status = status and all(self._save_contact_details_electronic_address(contact_details, it) for it in contact_details.electronic_addresses)
 
         return status and self._try_execute_single_update(insert, description)
 
@@ -397,7 +398,7 @@ class NetworkCimWriter(BaseCimWriter):
 
         insert.add_value(table.contact_details_id.query_index, contact_details.id)
 
-        return
+        return self._save_telephone_number(table, insert, phone_number, f"phone number for contact {contact_details.id}")
 
     ###############################
     # Extension IEC61968 Metering #
@@ -494,7 +495,7 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61970 Base Protection #
     ######################################
 
-    @db_wrapper(TableDirectionalCurrentRelay)
+    @db_wrapper(TableDirectionalCurrentRelays)
     def save_directional_current_relay(self, directional_current_relay: DirectionalCurrentRelay, table, insert) -> bool:
         """
         Write the :class:`DirectionalCurrentRelay` fields to :class:`TableDirectionalCurrentRelays`.
@@ -993,21 +994,23 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.postal_code.query_index, street_address.postal_code)
         insert.add_value(table.po_box.query_index, street_address.po_box)
 
-        self._insert_town_detail(table, insert, street_address.town_detail)
-        self._insert_street_detail(table, insert, street_address.street_detail)
+        if street_address.town_detail is not None:
+            self._insert_town_detail(table, insert, street_address.town_detail)
+        if street_address.street_detail is not None:
+            self._insert_street_detail(table, insert, street_address.street_detail)
 
         return self._try_execute_single_update(insert, description)
 
     @staticmethod
     def _insert_street_detail(table: TableStreetAddresses, insert: PreparedStatement, street_detail: Optional[StreetDetail]):
-        insert.add_value(table.building_name.query_index, street_detail.building_name if street_detail else None)
-        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification if street_detail else None)
-        insert.add_value(table.street_name.query_index, street_detail.name if street_detail else None)
-        insert.add_value(table.number.query_index, street_detail.number if street_detail else None)
-        insert.add_value(table.suite_number.query_index, street_detail.suite_number if street_detail else None)
-        insert.add_value(table.type.query_index, street_detail.type if street_detail else None)
-        insert.add_value(table.display_address.query_index, street_detail.display_address if street_detail else None)
-        insert.add_value(table.building_number.query_index, street_detail.building_number if street_detail else None)
+        insert.add_value(table.building_name.query_index, street_detail.building_name)
+        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification)
+        insert.add_value(table.street_name.query_index, street_detail.name)
+        insert.add_value(table.number.query_index, street_detail.number)
+        insert.add_value(table.suite_number.query_index, street_detail.suite_number)
+        insert.add_value(table.type.query_index, street_detail.type)
+        insert.add_value(table.display_address.query_index, street_detail.display_address)
+        insert.add_value(table.building_number.query_index, street_detail.building_number)
 
     def _save_telephone_number(self, table: TableTelephoneNumbers, insert: PreparedStatement, telephone_number: TelephoneNumber, description: str):
         insert.add_value(table.area_code.query_index, telephone_number.area_code)
@@ -1023,9 +1026,9 @@ class NetworkCimWriter(BaseCimWriter):
 
     @staticmethod
     def _insert_town_detail(table: TableTownDetails, insert: PreparedStatement, town_detail: Optional[TownDetail]):
-        insert.add_value(table.town_name.query_index, town_detail.name if town_detail else None)
-        insert.add_value(table.state_or_province.query_index, town_detail.state_or_province if town_detail else None)
-        insert.add_value(table.country.query_index, town_detail.country if town_detail else None)
+        insert.add_value(table.town_name.query_index, town_detail.name)
+        insert.add_value(table.state_or_province.query_index, town_detail.state_or_province)
+        insert.add_value(table.country.query_index, town_detail.country)
 
     #####################################
     # IEC61968 InfIEC61968 InfAssetInfo #
@@ -1150,11 +1153,8 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.phase_code.query_index, usage_point.phase_code.short_name)
 
         status = True
-        for it in usage_point.equipment:
-            status = status and self._save_equipment_to_usage_point_association(it, usage_point)
-
-        for it in usage_point.contacts:
-            status = status and self._save_usage_point_contact_details(usage_point, it)
+        status = status and all(self._save_equipment_to_usage_point_association(it, usage_point) for it in usage_point.equipment)
+        status = status and all(self._save_usage_point_contact_details(usage_point, it) for it in usage_point.contacts)
 
         return status and self._save_identified_object(table, insert, usage_point, "usage point")
 

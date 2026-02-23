@@ -364,8 +364,10 @@ def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> Optio
 ##############################
 
 @bind_to_cim
-def contact_details_to_cim(pb: PBContactDetails) -> ContactDetails:
+def contact_details_to_cim(pb: PBContactDetails, network_service: NetworkService) -> ContactDetails:
     cim = ContactDetails(
+        id=pb.id,
+        contact_address=street_address_to_cim(pb.contactAddress),
         contact_type=get_nullable(pb, 'contactType'),
         first_name=get_nullable(pb, 'firstName'),
         last_name=get_nullable(pb, 'lastName'),
@@ -377,7 +379,7 @@ def contact_details_to_cim(pb: PBContactDetails) -> ContactDetails:
         cim.add_phone_number(telephone_number_to_cim(it))
 
     for it in pb.electronicAddresses:
-        cim.add_electronic_address(electronic_address_to_cim(it))
+        cim.add_electronic_address(electronic_address_to_cim(it, network_service))
 
     return cim
 
@@ -474,10 +476,10 @@ def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkServic
 @add_to_network_or_none
 def directional_current_relay_to_cim(pb: PBDirectionalCurrentRelay, network_service: NetworkService) -> DirectionalCurrentRelay | None:
     cim = DirectionalCurrentRelay(
-        mrid=pb.mrid(),
+        mrid=pb.prf.psr.io.mRID,
         directional_characteristic_angle=get_nullable(pb, 'directionalCharacteristicAngle'),
         polarizing_quantity_type=PolarizingQuantityType(pb.polarizingQuantityType),
-        relay_element_phase=PhaseCode(pb.relayElementPhase),
+        relay_element_phase=phase_code_by_id(pb.relayElementPhase),
         minimum_pickup_current=get_nullable(pb, 'minimumPickupCurrent'),
         current_limit_1=get_nullable(pb, 'currentLimit1'),
         inverse_time_flag=get_nullable(pb, 'inverseTimeFlag'),
@@ -907,6 +909,7 @@ def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
         suite_number=get_nullable(pb, 'suiteNumber'),
         type=get_nullable(pb, 'type'),
         display_address=get_nullable(pb, 'displayAddress'),
+        building_number=get_nullable(pb, 'buildingNumber'),
     )
 
 def telephone_number_to_cim(pb: PBTelephoneNumber) -> TelephoneNumber | None:
@@ -1071,7 +1074,7 @@ def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Opt
     for mrid in pb.endDeviceMRIDs:
         network_service.resolve_or_defer_reference(resolver.end_devices(cim), mrid)
     for it in pb.contacts:
-        cim.add_contact(contact_details_to_cim(it))
+        cim.add_contact(contact_details_to_cim(it, network_service))
 
     identified_object_to_cim(pb.io, cim, network_service)
     return cim
@@ -1201,7 +1204,10 @@ def curve_data_to_cim(pb: PBCurveData) -> Optional[CurveData]:
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
     cim.in_service = pb.inService
     cim.normally_in_service = pb.normallyInService
-    cim.commissioned_date = get_nullable(pb, 'commissionedDate')
+    commissioned_date =  get_nullable(pb, 'commissionedDate')
+    if commissioned_date:
+        commissioned_date = commissioned_date.ToDatetime()
+    cim.commissioned_date = commissioned_date
 
     for mrid in pb.equipmentContainerMRIDs:
         network_service.resolve_or_defer_reference(resolver.containers(cim), mrid)

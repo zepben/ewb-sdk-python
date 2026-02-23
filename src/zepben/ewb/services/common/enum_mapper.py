@@ -30,8 +30,6 @@ class EnumMapper(Generic[TCimEnum, TProtoEnum]):
 
         cim_by_key = {self._extract_key_from_cim(it): it for it in cim_enum}
         pb_by_key = {self._extract_key_from_pb(it, pb_common_key): it for it in pb_enum.DESCRIPTOR.values}
-        print(cim_by_key)
-        print(pb_by_key)
 
         self._cim_to_proto = {cim: pb_by_key[key] for key, cim in cim_by_key.items()}
 

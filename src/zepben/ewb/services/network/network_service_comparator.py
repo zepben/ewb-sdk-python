@@ -218,12 +218,15 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
         self._compare_values(
             diff,
-            DirectionalCurrentRelay.directional_characteristic_angle,
             DirectionalCurrentRelay.polarizing_quantity_type,
             DirectionalCurrentRelay.relay_element_phase,
+            DirectionalCurrentRelay.inverse_time_flag,
+        )
+        self._compare_floats(
+            diff,
+            DirectionalCurrentRelay.directional_characteristic_angle,
             DirectionalCurrentRelay.minimum_pickup_current,
             DirectionalCurrentRelay.current_limit_1,
-            DirectionalCurrentRelay.inverse_time_flag,
             DirectionalCurrentRelay.time_delay_1,
         )
 
@@ -572,7 +575,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             UsagePoint.phase_code
         )
 
-        self._compare_indexed_value_collections(diff, UsagePoint.contacts)
+        self._compare_unordered_value_collection(diff, lambda it: it.id, UsagePoint.contacts)
 
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)

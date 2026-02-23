@@ -6,7 +6,7 @@
 __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb", "organisation_to_pb"]
 
 import inspect
-from typing import ParamSpec, TypeVar, Callable, Generator
+from typing import ParamSpec, TypeVar, Callable
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp

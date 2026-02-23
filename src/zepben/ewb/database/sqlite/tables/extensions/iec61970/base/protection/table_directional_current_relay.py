@@ -6,7 +6,7 @@ from zepben.ewb import TableProtectionRelayFunctions
 from zepben.ewb.database.sql.column import Type, Nullable, Column
 
 
-class TableDirectionalCurrentRelay(TableProtectionRelayFunctions):
+class TableDirectionalCurrentRelays(TableProtectionRelayFunctions):
     """
     A class representing the DirectionalCurrentRelay columns required for the database table.
 

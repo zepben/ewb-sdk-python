@@ -37,7 +37,7 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import TableEvChargingUnits
-from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelay
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import TableDistanceRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import \
     TableProtectionRelayFunctionThresholds
@@ -203,7 +203,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableClamps, self._reader.load_clamp),
             self._load_each(TableCuts, self._reader.load_cut),
             self._load_each(TableCurrentRelays, self._reader.load_current_relay),
-            self._load_each(TableDirectionalCurrentRelay, self._reader.load_directional_current_relay),
+            self._load_each(TableDirectionalCurrentRelays, self._reader.load_directional_current_relay),
             self._load_each(TableDistanceRelays, self._reader.load_distance_relay),
             self._load_each(TableVoltageRelays, self._reader.load_voltage_relay),
             self._load_each(TableProtectionRelayFunctionThresholds, self._reader.load_protection_relay_function_threshold),

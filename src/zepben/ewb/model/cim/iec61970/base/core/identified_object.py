@@ -257,4 +257,3 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
 
 T = TypeVar('T', )
-

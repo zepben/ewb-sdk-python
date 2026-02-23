@@ -27,7 +27,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_ev_charging_unit, create_tap_changer_control, create_distance_relay, create_voltage_relay, create_protection_relay_scheme, \
     create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info, \
     create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine, create_per_length_phase_impedance, \
-    create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut
+    create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut, create_directional_current_relay
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitTest, PowerTransformerInfo, \
@@ -41,7 +41,7 @@ from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitT
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
-    NetworkTraceStep, TestNetworkBuilder
+    NetworkTraceStep, DirectionalCurrentRelay, TestNetworkBuilder
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
@@ -187,7 +187,6 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
         await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
         await self._validate_schema(network)
-        # TODO: NetworkDatabaseTestSchema 238
 
     ##################################################
     # Extensions IEC61970 Base Generation Production #
@@ -202,6 +201,12 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     #######################################
     # Extensions IEC61970 Base Protection #
     #######################################
+
+    @settings(**hypothesis_settings)
+    @given(distance_relay=create_directional_current_relay(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
+    async def test_schema_distance_relay(self, directional_current_relay: DirectionalCurrentRelay):
+        await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, directional_current_relay))
 
     @settings(**hypothesis_settings)
     @given(distance_relay=create_distance_relay(False))

@@ -239,7 +239,11 @@ def test_contains(service: BaseService):
     service.add(breaker)
 
     assert breaker.mrid in service
+    assert service.get(breaker.mrid)
+
     assert "unknown" not in service
+    with pytest.raises(KeyError):
+        service.get("unknown")
 
 
 def test_unresolved_references_by_id(service: BaseService):

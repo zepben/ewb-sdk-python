@@ -34,7 +34,7 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import *
-from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelay
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_time_limits import *
@@ -133,8 +133,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
 
     @property
     def _included_tables(self) -> Generator[SqliteTable, None, None]:
-        for table in super()._included_tables:
-            yield table
+        yield from super()._included_tables
 
         yield TableAcLineSegments()
         yield TableAccumulators()
@@ -163,7 +162,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableCurrentTransformers()
         yield TableCurveData()
         yield TableCuts()
-        yield TableDirectionalCurrentRelay()
+        yield TableDirectionalCurrentRelays()
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()

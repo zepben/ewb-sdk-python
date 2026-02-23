@@ -321,7 +321,7 @@ from zepben.ewb.services.network.translator.network_enum_mappers import _map_bat
 
 
 def _get_or_none(getter, obj) -> Optional[Any]:
-    return getter(obj) if obj else None
+    return getter(obj) if obj is not None else None
 
 
 class CimTranslationException(Exception):
@@ -439,8 +439,9 @@ def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
 @bind_to_pb
 def directional_current_relay_to_pb(cim: DirectionalCurrentRelay) -> PBDirectionalCurrentRelay:
     return PBDirectionalCurrentRelay(
+        prf=protection_relay_function_to_pb(cim, include_asset_info=True),
         polarizingQuantityType=_map_polarizing_quantity_type.to_pb(cim.polarizing_quantity_type),
-        relayElementPhase=_map_phase_code(cim.relay_element_phase),
+        relayElementPhase=_map_phase_code.to_pb(cim.relay_element_phase),
         **set_or_null(
             directionalCharacteristicAngle=cim.directional_characteristic_angle,
             minimumPickupCurrent=cim.minimum_pickup_current,
@@ -800,7 +801,8 @@ def street_detail_to_pb(cim: StreetDetail) -> PBStreetDetail:
             number=cim.number,
             suiteNumber=cim.suite_number,
             type=cim.type,
-            displayAddress=cim.display_address
+            displayAddress=cim.display_address,
+            buildingNumber=cim.building_number,
         )
     )
 

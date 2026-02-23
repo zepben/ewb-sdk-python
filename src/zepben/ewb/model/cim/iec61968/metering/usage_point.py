@@ -199,9 +199,9 @@ class UsagePoint(IdentifiedObject):
         """Get the number of entries in the `ContactDetails` collection"""
         return nlen(self._contacts)
 
-    def get_contact(self, id: str) -> ContactDetails | None:
+    def get_contact(self, _id: str) -> ContactDetails:
         """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
-        return get_by_mrid(self._contacts, id)
+        return get_by_mrid(self._contacts, _id)
 
     def add_contact(self, contact: ContactDetails) -> UsagePoint:
         """Add a `ContactDetails` to this `UsagePoint`"""
@@ -218,3 +218,10 @@ class UsagePoint(IdentifiedObject):
         self._contacts.append(contact)
         return self
 
+    def remove_contact(self, contact: ContactDetails) -> UsagePoint:
+        self._contacts = safe_remove(self._contacts, contact)
+        return self
+
+    def clear_contacts(self) -> UsagePoint:
+        self._contacts = None
+        return self

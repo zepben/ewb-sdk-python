@@ -28,6 +28,8 @@ from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, Transf
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
     StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
     PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
@@ -159,6 +161,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     #######################################
     # Extensions IEC61970 Base Protection #
     #######################################
+
+    def test_compare_directional_current_relay(self):
+        self.validator.validate_property(DirectionalCurrentRelay.directional_characteristic_angle, DirectionalCurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(
+            DirectionalCurrentRelay.polarizing_quantity_type,
+            DirectionalCurrentRelay,
+            lambda _: PolarizingQuantityType.NEGATIVE_SEQUENCE_VOLTAGE,
+            lambda _: PolarizingQuantityType.QUADRATURE_VOLTAGE
+        )
+        self.validator.validate_property(DirectionalCurrentRelay.relay_element_phase, DirectionalCurrentRelay, lambda _: PhaseCode.A, lambda _: PhaseCode.B)
+        self.validator.validate_property(DirectionalCurrentRelay.minimum_pickup_current, DirectionalCurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(DirectionalCurrentRelay.current_limit_1, DirectionalCurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(DirectionalCurrentRelay.inverse_time_flag, DirectionalCurrentRelay, lambda _: True, lambda _: False)
+        self.validator.validate_property(DirectionalCurrentRelay.time_delay_1, DirectionalCurrentRelay, lambda _: 1.1, lambda _: 2.2)
 
     def test_compare_distance_relay(self):
         self._compare_protection_relay_function(DistanceRelay)

@@ -5,7 +5,8 @@
 
 __all__ = ['DirectionalCurrentRelay']
 
-from zepben.ewb import ProtectionRelayFunction, PhaseCode
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
+from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.zbex import zbex
 
@@ -21,10 +22,10 @@ class DirectionalCurrentRelay(ProtectionRelayFunction):
     """[ZBEX] The characteristic angle (in degrees) that defines the boundary between the operate and restrain regions of the directional element, relative 
     to the polarizing quantity. Often referred to as Maximum Torque Angle (MTA) or Relay Characteristic Angle (RCA)"""
 
-    polarizing_quantity_type: PolarizingQuantityType | None = None
+    polarizing_quantity_type: PolarizingQuantityType = PolarizingQuantityType.UNKNOWN
     """[ZBEX] Specifies the type of voltage to be used for polarization. This guides the selection/derivation of voltage from the VTs."""
 
-    relay_element_phase: PhaseCode | None = None
+    relay_element_phase: PhaseCode = PhaseCode.NONE
     """[ZBEX] The phase associated with this directional relay element. This helps in selecting the correct 'self-phase' or other phase-derived."""
 
     minimum_pickup_current: float | None = None

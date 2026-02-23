@@ -8,6 +8,7 @@ from hypothesis.strategies import builds, lists, booleans, text, integers, sampl
 
 from util import mrid_strategy
 from zepben.ewb import Location, Equipment, PhaseCode, generate_id
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
@@ -117,4 +118,17 @@ def test_end_devices_collection():
         UsagePoint.add_end_device,
         UsagePoint.remove_end_device,
         UsagePoint.clear_end_devices
+    )
+
+def test_contacts_collection():
+    validate_unordered_other_1234567890(
+        UsagePoint,
+        lambda _id: ContactDetails(_id),
+        UsagePoint.contacts,
+        UsagePoint.num_contacts,
+        UsagePoint.get_contact,
+        UsagePoint.add_contact,
+        UsagePoint.remove_contact,
+        UsagePoint.clear_contacts,
+        lambda it: it.id,
     )

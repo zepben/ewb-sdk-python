@@ -50,9 +50,15 @@ class ServiceDifferences(object):
         self._modifications[mrid] = difference
 
     def __str__(self) -> str:
-        return "Missing From Target:" + _indent_each(self._missing_from_target, self._source_lookup, self._source_name_type_lookup) + \
-               "\nMissing From Source:" + _indent_each(self._missing_from_source, self._target_lookup, self._target_name_type_lookup) + \
-               "\nModifications:" + ''.join(_indented_line("{!r}: {!r},".format(k, v)) for k, v in self._modifications.items())
+        return ("\nMissing From Target:" + _indent_each(self._missing_from_target, self._source_lookup, self._source_name_type_lookup) + \
+                "\nMissing From Source:" + _indent_each(self._missing_from_source, self._target_lookup, self._target_name_type_lookup) + \
+                "\nModifications:" +
+                    ''.join(_indented_line(f"{k}: {_detailed_modifications(v)},") for k, v in self._modifications.items()))
+
+def _detailed_modifications(diff: ObjectDifference) -> str:
+    return (f'{_indented_line(f"  source object: {str(diff.source)}")}'
+            f'{_indented_line(f"  target object: {str(diff.target)}")}'
+            f'{_indented_line(f"  {diff.differences}")}')
 
 
 def _indent_each(items: Iterable, obj_lookup, name_lookup) -> str:
@@ -60,7 +66,7 @@ def _indent_each(items: Iterable, obj_lookup, name_lookup) -> str:
 
 
 def _indented_line(line: Any) -> str:
-    return "\n   " + str(line)
+    return f"\n  {line}"
 
 
 def _lookup(it, obj_lookup, name_lookup):

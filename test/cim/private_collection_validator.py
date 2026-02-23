@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 from collections import Counter
-from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple
+from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any
 
 import pytest
 
@@ -132,8 +132,14 @@ def _validate_unordered(
     other3 = create_other("3")
     duplicate1 = create_other("1")
 
+    def _get_identifier(obj: Any) -> str:
+        try:
+            return obj.mrid
+        except AttributeError:
+            return obj.id
+
     expected_duplicate_errors = {
-        duplicate1: rf"An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {re.escape(str(it))}"
+        duplicate1: rf"An? (current )?{other1.__class__.__name__} with mRID {_get_identifier(other1)} already exists in {re.escape(str(it))}"
     }
 
     def validate_before_removal():

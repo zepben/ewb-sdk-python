@@ -5,8 +5,8 @@
 
 __all__ = ["ContactDetails"]
 
+from collections.abc import Hashable
 from typing import Generator, Any
-
 from zepben.ewb.util import CopyableUUID, ngen, nlen
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.zbex import zbex
@@ -57,6 +57,11 @@ class ContactDetails:
         for email in electronic_addresses or []:
             self.add_electronic_address(email)
 
+    def __str__(self):
+        return f"ContactDetails({self.id})"
+
+    def __hash__(self):
+        return hash((type(self), *(v for v in self.__dict__.values())))
 
     @property
     def phone_numbers(self) -> Generator[TelephoneNumber, None, None]:

@@ -24,6 +24,9 @@ from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import *
 
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import *
 
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import *
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import *
+
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
 
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import *
@@ -33,7 +36,9 @@ from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
 
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import *
 
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import *
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import *
@@ -73,12 +78,14 @@ from zepben.ewb.model.cim.iec61968.assets.structure import *
 
 from zepben.ewb.model.cim.iec61968.common.agreement import *
 from zepben.ewb.model.cim.iec61968.common.document import *
+from zepben.ewb.model.cim.iec61968.common.electronic_address import *
 from zepben.ewb.model.cim.iec61968.common.location import *
 from zepben.ewb.model.cim.iec61968.common.organisation import *
 from zepben.ewb.model.cim.iec61968.common.organisation_role import *
 from zepben.ewb.model.cim.iec61968.common.position_point import *
 from zepben.ewb.model.cim.iec61968.common.street_address import *
 from zepben.ewb.model.cim.iec61968.common.street_detail import *
+from zepben.ewb.model.cim.iec61968.common.telephone_number import *
 from zepben.ewb.model.cim.iec61968.common.town_detail import *
 
 from zepben.ewb.model.cim.iec61968.customers.customer import *

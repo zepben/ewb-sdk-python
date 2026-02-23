@@ -18,7 +18,7 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
-from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelay
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.wires.table_battery_controls import TableBatteryControls
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
 from zepben.ewb.database.sqlite.tables.iec61968.common.table_electronic_addresses import TableElectronicAddresses
@@ -362,7 +362,7 @@ class NetworkCimReader(BaseCimReader):
         #       just keep a local cache during load. In the future we might decide to store them in a public fashion in the service, but this
         #     is likely to only be when we want to author the `ContactDetails`, or reuse them between places and require a lookup.
         #
-        self._contact_details_by_id = {}
+        self._contact_details_by_id: dict[str, ContactDetails] = {}
 
     ##################################
     # Extensions IEC61968 Asset Info #
@@ -577,7 +577,7 @@ class NetworkCimReader(BaseCimReader):
     # Extensions IEC61970 Base Protection #
     #######################################
 
-    def load_directional_current_relay(self, table: TableDirectionalCurrentRelay, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_directional_current_relay(self, table: TableDirectionalCurrentRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
          * Create a [DirectionalCurrentRelay] and populate its fields from [TableDirectionalCurrentRelays].
          *
@@ -1120,9 +1120,9 @@ class NetworkCimReader(BaseCimReader):
     @staticmethod
     def _load_electronic_address(table: TableElectronicAddresses, result_set: ResultSet) -> ElectronicAddress:
         return ElectronicAddress(
-            result_set.get_string(table.email_1.query_index, on_none=None),
-            result_set.get_boolean(table.is_primary.query_index, on_none=None),
-            result_set.get_string(table.description.query_index, on_none=None),
+            email1=result_set.get_string(table.email_1.query_index, on_none=None),
+            is_primary=result_set.get_boolean(table.is_primary.query_index, on_none=None),
+            description=result_set.get_string(table.description.query_index, on_none=None),
         )
 
     def load_location(self, table: TableLocations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
@@ -1189,10 +1189,10 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_street_address(self, table: TableStreetAddresses, result_set: ResultSet) -> StreetAddress:
         return StreetAddress(
-            result_set.get_string(table.postal_code.query_index, on_none=None),
-            self._load_town_detail(table, result_set),
-            result_set.get_string(table.po_box.query_index, on_none=None),
-            self._load_street_detail(table, result_set)
+            postal_code=result_set.get_string(table.postal_code.query_index, on_none=None),
+            town_detail=self._load_town_detail(table, result_set),
+            po_box=result_set.get_string(table.po_box.query_index, on_none=None),
+            street_detail=self._load_street_detail(table, result_set)
         )
 
     @staticmethod
@@ -1213,23 +1213,23 @@ class NetworkCimReader(BaseCimReader):
     @staticmethod
     def _load_telephone_number(table: TableTelephoneNumbers, result_set: ResultSet) -> TelephoneNumber:
         return TelephoneNumber(
-            result_set.get_string(table.area_code.query_index, on_none=None),
-            result_set.get_string(table.city_code.query_index, on_none=None),
-            result_set.get_string(table.country_code.query_index, on_none=None),
-            result_set.get_string(table.dial_out.query_index, on_none=None),
-            result_set.get_string(table.extension.query_index, on_none=None),
-            result_set.get_string(table.international_prefix.query_index, on_none=None),
-            result_set.get_string(table.local_number.query_index, on_none=None),
-            result_set.get_boolean(table.is_primary.query_index, on_none=None),
-            result_set.get_string(table.description.query_index, on_none=None),
+            area_code=result_set.get_string(table.area_code.query_index, on_none=None),
+            city_code=result_set.get_string(table.city_code.query_index, on_none=None),
+            country_code=result_set.get_string(table.country_code.query_index, on_none=None),
+            dial_out=result_set.get_string(table.dial_out.query_index, on_none=None),
+            extension=result_set.get_string(table.extension.query_index, on_none=None),
+            international_prefix=result_set.get_string(table.international_prefix.query_index, on_none=None),
+            local_number=result_set.get_string(table.local_number.query_index, on_none=None),
+            is_primary=result_set.get_boolean(table.is_primary.query_index, on_none=None),
+            description=result_set.get_string(table.description.query_index, on_none=None),
         )
 
     @staticmethod
     def _load_town_detail(table: TableTownDetails, result_set: ResultSet) -> Optional[TownDetail]:
         td = TownDetail(
-            result_set.get_string(table.town_name.query_index, on_none=None),
-            result_set.get_string(table.state_or_province.query_index, on_none=None),
-            result_set.get_string(table.country.query_index, on_none=None),
+            name=result_set.get_string(table.town_name.query_index, on_none=None),
+            state_or_province=result_set.get_string(table.state_or_province.query_index, on_none=None),
+            country=result_set.get_string(table.country.query_index, on_none=None),
         )
 
         return td if not td.all_fields_null() else None
