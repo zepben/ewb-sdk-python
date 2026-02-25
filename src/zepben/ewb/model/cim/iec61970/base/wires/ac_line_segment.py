@@ -248,7 +248,7 @@ class AcLineSegment(Conductor):
             for it in self._phases:
                 if it == identifier:
                     return it
-                
+
         raise KeyError(identifier)
 
     def add_phase(self, phase: AcLineSegmentPhase) -> 'AcLineSegment':

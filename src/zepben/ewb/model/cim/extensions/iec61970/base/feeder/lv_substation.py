@@ -6,7 +6,7 @@ from typing import Generator, TYPE_CHECKING
 
 __all__ = ['LvSubstation']
 
-from zepben.ewb import ngen, nlen, safe_remove_by_id
+from zepben.ewb import ngen, nlen, safe_remove_by_id, get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
@@ -30,9 +30,9 @@ class LvSubstation(EquipmentContainer):
 
     @zbex
     @property
-    def normal_energizing_feeders(self) -> Generator['LvFeeder', None, None]:
+    def normal_energizing_feeders(self) -> Generator["Feeder", None, None]:
         """[ZBEX] The HV/MV feeders that normally energize this [LvSubstation]. The returned collection is read only."""
-        return ngen((self._normal_energized_lv_feeders_by_id or {}).values())
+        return ngen((self._normal_energizing_feeders_by_id or {}).values())
 
     def num_normal_energizing_feeders(self) -> int:
         """Get the number of entries in the normal [Feeder] collection."""
@@ -45,7 +45,7 @@ class LvSubstation(EquipmentContainer):
         :param mrid: the mRID of the required normal [Feeder]
         :returns: The [Feeder] with the specified [mRID] if it exists, otherwise null
         """
-        return self._normal_energizing_feeders_by_id.get(mrid)
+        return get_by_mrid(self._normal_energizing_feeders_by_id, mrid)
 
     def add_normal_energizing_feeder(self, feeder: 'Feeder') -> "LvSubstation":
         """
@@ -69,7 +69,7 @@ class LvSubstation(EquipmentContainer):
         :param feeder: the HV/MV feeder to disassociate from this [LvSubstation] in the normal state of the network.
         :returns: true if a matching feeder is removed from the collection.
         """
-        self._normal_energizing_feeders_by_id = safe_remove_by_id(self._normal_energized_lv_feeders_by_id, feeder)
+        self._normal_energizing_feeders_by_id = safe_remove_by_id(self._normal_energizing_feeders_by_id, feeder)
         return self
 
     def clear_normal_energizing_feeders(self) -> "LvSubstation":
@@ -97,13 +97,13 @@ class LvSubstation(EquipmentContainer):
         :param mrid: the mRID of the required normal [LvFeeder]
         :returns: The [LvFeeder] with the specified [mRID] if it exists, otherwise null
         """
-        return self._normal_energized_lv_feeders_by_id.get(mrid)
+        return get_by_mrid(self._normal_energized_lv_feeders_by_id, mrid)
 
     def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
         """
         :param lv_feeder: the [LvFeeder] to associate with this feeder in the normal state of the network.
         """
-        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvSubstation"):
+        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
             return self
 
         if self._normal_energized_lv_feeders_by_id is None:
@@ -141,14 +141,14 @@ class LvSubstation(EquipmentContainer):
         """
         return nlen(self._current_energizing_feeders_by_id or {})
 
-    def get_current_energizing_feeder(self, mrid: str) -> LvFeeder | None:
+    def get_current_energizing_feeder(self, mrid: str) -> 'Feeder | None':
         """
         Retrieve an energizing feeder using the current state of the network.
 
         :param mrid: the mRID of the required current [Feeder]
         :returns: The [Feeder] with the specified [mRID] if it exists, otherwise null
         """
-        return self._current_energizing_feeders_by_id.get(mrid)
+        return get_by_mrid(self._current_energizing_feeders_by_id, mrid)
 
     def add_current_energizing_feeder(self, feeder: 'Feeder') -> "LvSubstation":
         """
@@ -159,9 +159,9 @@ class LvSubstation(EquipmentContainer):
         """
         if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
             return self
-        if self._normal_energizing_feeders_by_id is None:
-            self._normal_energizing_feeders_by_id = dict()
-        self._normal_energizing_feeders_by_id[feeder.mrid] = feeder
+        if self._current_energizing_feeders_by_id is None:
+            self._current_energizing_feeders_by_id = dict()
+        self._current_energizing_feeders_by_id[feeder.mrid] = feeder
         return self
 
     def remove_current_energizing_feeder(self, feeder: 'Feeder') -> "LvSubstation":
@@ -191,5 +191,5 @@ class LvSubstation(EquipmentContainer):
         from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 
         for lv_feeder in self.normal_energized_lv_feeders:
-            if (it := lv_feeder.normal_head_terminal) is not None and isinstance(it, Switch):
+            if (it := lv_feeder.normal_head_terminal) is not None and isinstance(it.conducting_equipment, Switch):
                 yield lv_feeder
