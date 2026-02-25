@@ -546,7 +546,7 @@ def create_street_address():
 def create_street_detail():
     return builds(
         StreetDetail,
-        building_name=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        building_name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         floor_identification=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         name=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         number=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
@@ -560,7 +560,7 @@ def create_street_detail():
 def create_telephone_number():
     return builds(
         TelephoneNumber,
-        area_code=one_of(none(), text(alphabet=ALPHANUM, max_size=3)),
+        area_code=text(alphabet=ALPHANUM, max_size=3),
         city_code=one_of(none(), text(alphabet=ALPHANUM, max_size=2)),
         dial_out=one_of(none(), text(alphabet=ALPHANUM, max_size=3)),
         extension=one_of(none(), text(alphabet=ALPHANUM, max_size=4)),
@@ -575,8 +575,8 @@ def create_town_detail():
     return builds(
         TownDetail,
         name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        state_or_province=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        country=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        state_or_province=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+        country=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
     )
 
 

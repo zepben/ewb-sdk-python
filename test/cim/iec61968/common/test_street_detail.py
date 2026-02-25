@@ -15,7 +15,7 @@ street_detail_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "suite_number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "street_type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+    "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "display_address": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
 }
 
@@ -35,7 +35,7 @@ def test_street_detail_constructor_default():
 
 
 @given(**street_detail_kwargs)
-def test_street_detail_constructor_kwargs(building_name, floor_identification, name, number, suite_number, street_type, display_address, **kwargs):
+def test_street_detail_constructor_kwargs(building_name, floor_identification, name, number, suite_number, type, display_address, **kwargs):
     assert not kwargs
 
     sd = StreetDetail(
@@ -44,7 +44,7 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
         name=name,
         number=number,
         suite_number=suite_number,
-        type=street_type,
+        type=type,
         display_address=display_address
     )
 
@@ -53,7 +53,7 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
     assert sd.name == name
     assert sd.number == number
     assert sd.suite_number == suite_number
-    assert sd.type == street_type
+    assert sd.type == type
     assert sd.display_address == display_address
 
 

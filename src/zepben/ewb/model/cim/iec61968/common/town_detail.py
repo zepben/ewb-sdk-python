@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class TownDetail(object):
+class TownDetail:
     """
     Town details, in the context of address.
     """

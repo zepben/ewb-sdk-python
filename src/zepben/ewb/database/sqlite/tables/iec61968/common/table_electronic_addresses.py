@@ -22,5 +22,5 @@ class TableElectronicAddresses(SqliteTable, ABC):
     def __init__(self):
         super().__init__()
         self.email_1: Column = self._create_column("email_1", Type.STRING, Nullable.NULL)
-        self.is_primary: Column = self._create_column("is_primary", Type.STRING)
+        self.is_primary: Column = self._create_column("is_primary", Type.BOOLEAN)
         self.description: Column = self._create_column("description", Type.STRING, Nullable.NULL)

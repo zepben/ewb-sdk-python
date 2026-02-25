@@ -18,7 +18,7 @@ from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumbe
 
 
 @zbex
-@dataclass
+@dataclass(slots=True)
 class ContactDetails:
     """[ZBEX] The details required to contact a person or company."""
 
@@ -61,7 +61,7 @@ class ContactDetails:
         return f"ContactDetails({self.id})"
 
     def __hash__(self):
-        return hash((type(self), *(v for v in self.__dict__.values())))
+        return hash((type(self), *(getattr(self, s ) for s in self.__slots__)))
 
     @property
     def phone_numbers(self) -> Generator[TelephoneNumber, None, None]:
@@ -154,16 +154,16 @@ class ContactDetails:
         #       ``IdentifiedObject``, so our other helpers don't support it.
         if not isinstance(other, ContactDetails):
             return False
-        return not any((
-            self.is_primary != other.is_primary,
-            self.id != other.id,
-            self.contact_address != other.contact_address,
-            self.contact_type != other.contact_type,
-            self.first_name != other.first_name,
-            self.last_name != other.last_name,
-            self.preferred_contact_method != other.preferred_contact_method,
-            self.business_name != other.business_name,
-            self._phone_numbers != other._phone_numbers,
-            self._electronic_addresses != other._electronic_addresses,
+        return all((
+            self.is_primary == other.is_primary,
+            self.id == other.id,
+            self.contact_address == other.contact_address,
+            self.contact_type == other.contact_type,
+            self.first_name == other.first_name,
+            self.last_name == other.last_name,
+            self.preferred_contact_method == other.preferred_contact_method,
+            self.business_name == other.business_name,
+            self._phone_numbers == other._phone_numbers,
+            self._electronic_addresses == other._electronic_addresses,
         ))
     
