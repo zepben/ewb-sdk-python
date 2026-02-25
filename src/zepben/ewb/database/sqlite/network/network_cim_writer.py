@@ -1018,6 +1018,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.country_code.query_index, telephone_number.country_code)
         insert.add_value(table.dial_out.query_index, telephone_number.dial_out)
         insert.add_value(table.extension.query_index, telephone_number.extension)
+        insert.add_value(table.international_prefix.query_index, telephone_number.international_prefix)
         insert.add_value(table.local_number.query_index, telephone_number.local_number)
         insert.add_value(table.is_primary.query_index, telephone_number.is_primary)
         insert.add_value(table.description.query_index, telephone_number.description)

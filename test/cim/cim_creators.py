@@ -93,7 +93,7 @@ def create_relay_info(include_runtime: bool = True):
 def create_contact_details():
     return builds(
         ContactDetails,
-        id=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        id=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE, min_size=1),
         contact_address=create_street_address(),
         contact_type=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         first_name=one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
@@ -744,7 +744,7 @@ def create_usage_point(include_runtime: bool = True):
         approved_inverter_capacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         equipment=lists(builds(EnergyConsumer, **create_identified_object(include_runtime)), max_size=2),
         end_devices=lists(builds(Meter, **create_identified_object(include_runtime)), max_size=2),
-        contacts=lists(create_contact_details())
+        contacts=lists(create_contact_details(), max_size=2)
     )
 
 

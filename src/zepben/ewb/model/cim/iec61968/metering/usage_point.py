@@ -201,7 +201,10 @@ class UsagePoint(IdentifiedObject):
 
     def get_contact(self, _id: str) -> ContactDetails:
         """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
-        return get_by_mrid(self._contacts, _id)
+        try:
+            return next((it for it in self.contacts if it.id == _id))
+        except StopIteration:
+            raise KeyError(_id)
 
     def add_contact(self, contact: ContactDetails) -> UsagePoint:
         """Add a `ContactDetails` to this `UsagePoint`"""
