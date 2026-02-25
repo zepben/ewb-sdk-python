@@ -8,9 +8,12 @@ from __future__ import annotations
 __all__ = ['EquipmentContainerStateOperators', 'NormalEquipmentContainerStateOperators', 'CurrentEquipmentContainerStateOperators']
 
 from abc import abstractmethod
-from typing import Generator, TYPE_CHECKING
+from functools import singledispatchmethod
+from typing import Generator, TYPE_CHECKING, overload
 
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder import lv_substation
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.services.network.tracing.networktrace.operators import StateOperator
@@ -30,10 +33,9 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Get the collection of equipment associated with the given container.
 
-        `container` The container for which to get the associated equipment.
-        Returns A collection of equipment in the specified container.
+        :param container: The container for which to get the associated equipment.
+        :returns: A collection of equipment in the specified container.
         """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -41,32 +43,72 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Retrieves a collection of containers associated with the given equipment.
 
-        `equipment` The equipment for which to get the associated containers.
-        Returns A collection of containers that contain the specified equipment.
+        :param equipment: The equipment for which to get the associated containers.
+        :returns: A collection of containers that contain the specified equipment.
         """
-        pass
 
     @staticmethod
     @abstractmethod
+    @overload
     def get_energizing_feeders(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
         """
         Retrieves a collection of feeders that energize the given LV feeder.
 
-        `lvFeeder` The LV feeder for which to get the energizing feeders.
-        Returns A collection of feeders that energize the given LV feeder.
+        :param lv_feeder: The LV feeder for which to get the energizing feeders.
+        :returns: A collection of feeders that energize the given LV feeder.
         """
-        pass
 
     @staticmethod
     @abstractmethod
+    @overload
+    def get_energizing_feeders(lv_substation: LvSubstation) -> Generator[Feeder, None, None]:
+        """
+        Retrieves a collection of feeders that energize the given ``LvSubstation``.
+
+        :param lv_substation: The ``LvSubstation ``for which to get the energizing feeders.
+        :returns: A collection of feeders that energize the given ``LvSubstation``.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_energizing_lv_substation(lv_feeder: LvFeeder) -> LvSubstation | None:
+        """  # TODO: jvmsdk docs are wrong
+        Retrieves the energizing ``LvSubstation`` that energizes the given ``LvFeeder``.
+
+        :param lv_feeder: The Lv Feeder for which to get the energizing ``LvSubstation``.
+        :returns: The ``LvSubstation`` that energizes the given ``LvFeeder``.
+        """
+
+    @staticmethod
+    @abstractmethod
+    @overload
     def get_energized_lv_feeders(feeder: Feeder) -> Generator[LvFeeder, None, None]:
         """
         Retrieves a collection of LV feeders energized by the given feeder.
 
-        `feeder` The feeder for which to get the energized LV feeders.
-        Returns A collection of LV feeders energized by the given feeder.
+        :param feeder: The feeder for which to get the energized LV feeders.
+        :returns: A collection of LV feeders energized by the given feeder.
         """
-        pass
+
+    @staticmethod
+    @abstractmethod
+    @overload
+    def get_energized_lv_feeders(lv_substation: LvSubstation) -> Generator[LvFeeder, None, None]:
+        """
+        Retrieves a collection of LV feeders energized by the given ``LvSubstation``.
+
+        :param lv_substation: The ``LvSubstation`` for which to get the energized LV feeders.
+        :returns: A collection of LV feeders energized by the given ``LvSubstation``.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_energized_lv_substations(feeder: Feeder) -> Generator[LvSubstation, None, None]:
+        """
+        Retrieves a collection of ``LvSubstation``s energized by the given feeder.
+        :param feeder: The feeder for which to get the energized ``LvSubstation``s.
+        :returns: A collection of ``LvSubstation``s energized by the given feeder.
+        """
 
     @staticmethod
     @abstractmethod
@@ -74,10 +116,9 @@ class EquipmentContainerStateOperators(StateOperator):
         """
          Adds the specified equipment to the given container.
 
-         `equipment` The equipment to add to the container.
-         `container` The container to which the equipment will be added.
+         :param equipment: The equipment to add to the container.
+         :param container: The container to which the equipment will be added.
         """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -85,18 +126,17 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Adds the specified container to the given equipment.
 
-        `container` The container to add to the equipment.
-        `equipment` The equipment to which the container will be added.
+        :param container: The container to add to the equipment.
+        :param equipment: The equipment to which the container will be added.
         """
-        pass
 
     @classmethod
     def associate_equipment_and_container(cls, equipment: Equipment, container: EquipmentContainer):
         """
         Establishes a bidirectional association between the specified equipment and container.
 
-        `equipment` The equipment to associate with the container.
-        `container` The container to associate with the equipment.
+        :param equipment: The equipment to associate with the container.
+        :param container: The container to associate with the equipment.
         """
         cls.add_equipment_to_container(equipment, container)
         cls.add_container_to_equipment(container, equipment)
@@ -107,10 +147,9 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Removes the specified equipment from the given container.
 
-        `equipment` The equipment to remove from the container.
-        `container` The container from which the equipment will be removed.
+        :param equipment: The equipment to remove from the container.
+        :param container: The container from which the equipment will be removed.
         """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -118,18 +157,17 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Removes the specified container from the given equipment.
 
-        `container` The container to remove from the equipment.
-        `equipment` The equipment from which the container will be removed.
+        :param container: The container to remove from the equipment.
+        :param equipment: The equipment from which the container will be removed.
         """
-        pass
 
     @classmethod
     def disassociate_equipment_and_container(cls, equipment: Equipment, container: EquipmentContainer):
         """
         Remove a bidirectional association between the specified equipment and container.
 
-        `equipment` The equipment to disassociate with the container.
-        `container` The container to disassociate with the equipment.
+        :param equipment: The equipment to disassociate with the container.
+        :param container: The container to disassociate with the equipment.
         """
         cls.remove_equipment_from_container(equipment, container)
         cls.remove_container_from_equipment(container, equipment)
@@ -140,10 +178,9 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Adds the specified energizing feeder to the given lvFeeder.
 
-        `feeder` The energizing feeder to add to the lvFeeder.
-        `lvFeeder` The lvFeeder to which the feeder will be added.
+        :param feeder: The energizing feeder to add to the lvFeeder.
+        :param lv_feeder: The lvFeeder to which the feeder will be added.
         """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -151,21 +188,76 @@ class EquipmentContainerStateOperators(StateOperator):
         """
         Adds the specified energized lvFeeder to the given feeder.
 
-        `lvFeeder` The energized lvFeeder to add to the feeder.
-        `feeder` The feeder to which the lvFeeder will be added.
+        :param lv_feeder: The energized lvFeeder to add to the feeder.
+        :param feeder: The feeder to which the lvFeeder will be added.
         """
-        pass
+
+    @staticmethod
+    @abstractmethod
+    def add_energizing_feeder_to_lv_substation(feeder: Feeder, lv_substation: LvSubstation):
+        """
+        Adds the specified energizing ``feeder`` to the given ``lv_substation``.
+
+        :param feeder: The energizing ``feeder`` to add to the ``lv_substation``.
+        :param lv_substation: The ``lv_substation`` to which the ``feeder`` will be added.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def add_energized_lv_substation_to_feeder(lv_substation: LvSubstation, feeder: Feeder):
+        """
+        Adds the specified energized ``lv_substation`` to the given ``feeder``.
+
+        :param lv_substation: The ``lv_substation`` to which the ``feeder`` will be added.
+        :param feeder: The ``feeder`` to which the ``lv_substation`` will be added.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def add_energizing_lv_substation_to_lv_feeder(lv_substation: LvSubstation, lv_feeder: LvFeeder):
+        """
+        Adds the specified ``lv_substation`` to the given ``lv_feeder``.
+
+        :param lv_substation: The energizing ``lv_substation`` to add to the ``lv_feeder``.
+        :param lv_feeder: The ``lv_feeder`` to add to the ``lv_substation``.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def add_energized_lv_feeder_to_lv_substation(lv_feeder: LvFeeder, lv_substation: LvSubstation):
+        """
+        Adds the specified ``lv_feeder`` to the given ``lv_substation``.
+
+        :param lv_feeder: The ``lv_feeder`` to which the ``lv_substation`` will be added.
+        :param lv_substation: The ``lv_substation`` to which the ``lv_feeder`` will be added.
+        """
 
     @classmethod
-    def associate_energizing_feeder(cls, feeder: Feeder, lv_feeder: LvFeeder):
+    def associate_energizing_feeder(cls, feeder: Feeder, other: LvFeeder | LvSubstation):
         """
-        Establishes a bidirectional association between the specified feeder and LV feeder.
+        Establishes a bidirectional association between the specified feeder and LV feeder or LV substation.
 
-        `feeder` The feeder energizing the lv feeder.
-        `lvFeeder` The lv feeder energized by the feeder.
+        :param feeder: The feeder energizing the lv feeder.
+        :param other: The lv feeder or substation energized by the feeder.
         """
-        cls.add_energizing_feeder_to_lv_feeder(feeder, lv_feeder)
-        cls.add_energizing_lv_feeder_to_feeder(lv_feeder, feeder)
+        if isinstance(other, LvFeeder):
+            cls.add_energizing_feeder_to_lv_feeder(feeder, other)
+            cls.add_energizing_lv_feeder_to_feeder(other, feeder)
+        elif isinstance(other, LvSubstation):
+            cls.add_energizing_feeder_to_lv_substation(feeder, other)
+            cls.add_energized_lv_substation_to_feeder(other, feeder)
+        else:
+            raise TypeError('`other` must be either LvFeeder or LvSubstation.')
+
+    @classmethod
+    def associate_energizing_lv_substation(cls, lv_feeder: LvFeeder, lv_substation: LvSubstation):
+        """
+        Establishes a bidirectional association between the specified ``lv_feeder`` and ``lv_substation``.
+        :param lv_feeder: The ``LvFeeder`` energized by ``LvSubstation``.
+        :param lv_substation: The ``LvSubstation`` energizing ``LvFeeder``.
+        """
+        cls.add_energizing_lv_substation_to_lv_feeder(lv_substation, lv_feeder)
+        cls.add_energized_lv_feeder_to_lv_substation(lv_feeder, lv_substation)
 
 
 class NormalEquipmentContainerStateOperators(EquipmentContainerStateOperators):
@@ -181,13 +273,43 @@ class NormalEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     def get_containers(equipment: Equipment) -> Generator[EquipmentContainer, None, None]:
         return equipment.containers
 
+    @singledispatchmethod
     @staticmethod
     def get_energizing_feeders(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
+        raise NotImplementedError()
+
+    @get_energizing_feeders.register
+    @staticmethod
+    def _(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
         return lv_feeder.normal_energizing_feeders
 
+    @get_energizing_feeders.register
+    @staticmethod
+    def _(lv_substation: LvSubstation) -> Generator[Feeder, None, None]:
+        return lv_substation.normal_energizing_feeders
+
+    @staticmethod
+    def get_energizing_lv_substation(lv_feeder: LvFeeder) -> LvSubstation | None:
+        return lv_feeder.normal_energizing_lv_substation
+
+    @singledispatchmethod
     @staticmethod
     def get_energized_lv_feeders(feeder: Feeder) -> Generator[LvFeeder, None, None]:
+        raise NotImplementedError()
+
+    @get_energized_lv_feeders.register
+    @staticmethod
+    def _(feeder: Feeder) -> Generator[LvFeeder, None, None]:
         return feeder.normal_energized_lv_feeders
+
+    @get_energized_lv_feeders.register
+    @staticmethod
+    def _(lv_substation: LvSubstation) -> Generator[LvFeeder, None, None]:
+        return lv_substation.normal_energized_lv_feeders
+
+    @staticmethod
+    def get_energized_lv_substations(feeder: Feeder) -> Generator[LvSubstation, None, None]:
+        return feeder.normal_energized_lv_substations
 
     @staticmethod
     def add_equipment_to_container(equipment: Equipment, container: EquipmentContainer):
@@ -213,6 +335,22 @@ class NormalEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     def add_energizing_lv_feeder_to_feeder(lv_feeder: LvFeeder, feeder: Feeder):
         feeder.add_normal_energized_lv_feeder(lv_feeder)
 
+    @staticmethod
+    def add_energizing_feeder_to_lv_substation(feeder: Feeder, lv_substation: LvSubstation):
+        lv_substation.add_normal_energizing_feeder(feeder)
+
+    @staticmethod
+    def add_energized_lv_substation_to_feeder(lv_substation: LvSubstation, feeder: Feeder):
+        feeder.add_normal_energized_lv_substation(lv_substation)
+
+    @staticmethod
+    def add_energizing_lv_substation_to_lv_feeder(lv_substation: LvSubstation, lv_feeder: LvFeeder):
+        lv_feeder.normal_energizing_lv_substation = lv_substation
+
+    @staticmethod
+    def add_energized_lv_feeder_to_lv_substation(lv_feeder: LvFeeder, lv_substation: LvSubstation):
+        lv_substation.add_normal_energized_lv_feeder(lv_feeder)
+
 
 class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     """
@@ -227,13 +365,43 @@ class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     def get_containers(equipment: Equipment) -> Generator[EquipmentContainer, None, None]:
         return equipment.current_containers
 
+    @singledispatchmethod
     @staticmethod
     def get_energizing_feeders(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
+        raise NotImplementedError()
+
+    @get_energizing_feeders.register
+    @staticmethod
+    def _(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
         return lv_feeder.current_energizing_feeders
 
+    @get_energizing_feeders.register
     @staticmethod
-    def get_energized_lv_feeders(feeder: Feeder) -> Generator[LvFeeder, None, None]:
+    def _(lv_substation: LvSubstation) -> Generator[Feeder, None, None]:
+        return lv_substation.current_energizing_feeders
+
+    @staticmethod
+    def get_energizing_lv_substation(lv_feeder: LvFeeder) -> LvSubstation | None:
+        return lv_feeder.normal_energizing_lv_substation
+
+    @singledispatchmethod
+    @staticmethod
+    def get_energized_lv_feeders(feeder: Feeder | LvSubstation) -> Generator[LvFeeder, None, None]:
+        raise NotImplementedError()
+
+    @get_energized_lv_feeders.register
+    @staticmethod
+    def _(feeder: Feeder) -> Generator[LvFeeder, None, None]:
         return feeder.current_energized_lv_feeders
+
+    @get_energized_lv_feeders.register
+    @staticmethod
+    def _(lv_substation: LvSubstation) -> Generator[LvFeeder, None, None]:
+        return lv_substation.normal_energized_lv_feeders
+
+    @staticmethod
+    def get_energized_lv_substations(feeder: Feeder) -> Generator[LvSubstation, None, None]:
+        return feeder.current_energized_lv_substations
 
     @staticmethod
     def add_equipment_to_container(equipment: Equipment, container: EquipmentContainer):
@@ -258,6 +426,22 @@ class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     @staticmethod
     def add_energizing_lv_feeder_to_feeder(lv_feeder: LvFeeder, feeder: Feeder):
         feeder.add_current_energized_lv_feeder(lv_feeder)
+
+    @staticmethod
+    def add_energizing_feeder_to_lv_substation(feeder: Feeder, lv_substation: LvSubstation):
+        lv_substation.add_current_energizing_feeder(feeder)
+
+    @staticmethod
+    def add_energized_lv_substation_to_feeder(lv_substation: LvSubstation, feeder: Feeder):
+        feeder.add_current_energized_lv_substation(lv_substation)
+
+    @staticmethod
+    def add_energizing_lv_substation_to_lv_feeder(lv_substation: LvSubstation, lv_feeder: LvFeeder):
+        lv_feeder.normal_energizing_lv_substation = lv_substation
+
+    @staticmethod
+    def add_energized_lv_feeder_to_lv_substation(lv_feeder: LvFeeder, lv_substation: LvSubstation):
+        lv_substation.add_normal_energized_lv_feeder(lv_feeder)
 
 
 EquipmentContainerStateOperators.NORMAL = NormalEquipmentContainerStateOperators

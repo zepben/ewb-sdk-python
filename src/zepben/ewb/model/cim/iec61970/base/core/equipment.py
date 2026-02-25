@@ -10,11 +10,12 @@ __all__ = ['Equipment']
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
-from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
+from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
@@ -60,7 +61,7 @@ class Equipment(PowerSystemResource):
                 self.add_current_container(cf)
 
     @property
-    def sites(self) -> Generator[Site, None, None]:
+    def sites(self) -> Generator['Site', None, None]:
         """
         The `Site`s this equipment belongs to.
         """
@@ -97,6 +98,13 @@ class Equipment(PowerSystemResource):
         The normal `LvFeeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, LvFeeder))
+
+    @property
+    def normal_lv_substations(self) -> Generator[LvSubstation, None, None]:
+        """
+        The normal `LvSubstation's this equipment belongs to.
+        """
+        return ngen(_of_type(self._equipment_containers, LvSubstation))
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
@@ -142,7 +150,7 @@ class Equipment(PowerSystemResource):
         """
         Returns The number of `Site`s associated with this `Equipment`
         """
-        return len(list(_of_type(self._equipment_containers, Site)))
+        return len(list(self.sites))
 
     def num_normal_feeders(self) -> int:
         """

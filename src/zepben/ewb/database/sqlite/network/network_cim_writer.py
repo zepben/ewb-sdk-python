@@ -37,6 +37,8 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_hv_customers import TableHvCustomers
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_lv_substations import TableLvSubstations
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import TableSites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
@@ -126,6 +128,7 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.protection.table_current_re
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_controls import TableRemoteControls
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_points import TableRemotePoints
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_sources import TableRemoteSources
+from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segment_phases import TableAcLineSegmentPhases
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
@@ -179,9 +182,11 @@ from zepben.ewb.database.sqlite.tables.iec61970.infiec61970.feeder.table_circuit
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
@@ -263,6 +268,7 @@ from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteContro
 from zepben.ewb.model.cim.iec61970.base.scada.remote_point import RemotePoint
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
@@ -423,6 +429,19 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61970 Base Core #
     ################################
 
+    def save_hv_customer(self, hv_customer: HvCustomer) -> bool:
+        """
+        Save the :class:`HvCustomer` fields to :class:`TableHvCustomers`.
+
+        :param hv_customer: The :class:`HvCustomer` instance to write to the database.
+        :return: True if the :class:`HvCustomer` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableHvCustomers)
+        insert = self._database_tables.get_insert(TableHvCustomers)
+
+        return self._save_equipment_container(table, insert, hv_customer, "hv customer")
+
     def save_site(self, site: Site) -> bool:
         """
         Save the :class:`Site` fields to :class:`TableSites`.
@@ -471,8 +490,22 @@ class NetworkCimWriter(BaseCimWriter):
         insert = self._database_tables.get_insert(TableLvFeeders)
 
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
+        insert.add_value(table.lv_substation_mrid.query_index, self._mrid_or_none(lv_feeder.normal_energizing_lv_substation))
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv feeder")
+
+    def save_lv_substation(self, lv_substation: LvSubstation) -> bool:
+        """
+        Save the :class:`LvSubstation` fields to :class:`TableLvSubstations`.
+
+        :param lv_substation: The :class:`LvSubstation` instance to write to the database.
+        :return: True if the :class:`LvSubstation` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableLvSubstations)
+        insert = self._database_tables.get_insert(TableLvSubstations)
+
+        return self._save_equipment_container(table, insert, lv_substation, "lv substation")
 
     #################################################
     # Extension IEC61970 Base Generation Production #
@@ -853,6 +886,12 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_wire_info(self, table: TableWireInfo, insert: PreparedStatement, wire_info: WireInfo, description: str) -> bool:
         insert.add_value(table.rated_current.query_index, wire_info.rated_current)
         insert.add_value(table.material.query_index, wire_info.material.short_name)
+        insert.add_value(table.size_description.query_index, wire_info.size_description)
+        insert.add_value(table.strand_count.query_index, wire_info.strand_count)
+        insert.add_value(table.core_strand_count.query_index, wire_info.core_strand_count)
+        insert.add_value(table.insulated.query_index, wire_info.insulated)
+        insert.add_value(table.insulation_material.query_index, wire_info.insulation_material.short_name)
+        insert.add_value(table.insulation_thickness.query_index, wire_info.insulation_thickness)
 
         return self._save_asset_info(table, insert, wire_info, description)
 
@@ -1700,6 +1739,24 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_conductor(table, insert, ac_line_segment, "AC line segment")
 
+    def save_ac_line_segment_phase(self, ac_line_segment_phase: AcLineSegmentPhase) -> bool:
+        """
+        Save the :class:`AcLineSegmentPhase` fields to :class:`TableAcLineSegmentPhases`.
+
+        :param ac_line_segment_phase: The :class:`AcLineSegmentPhase` instance to write to the database.
+        :return: True if the :class:`AcLineSegmentPhase` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableAcLineSegmentPhases)
+        insert = self._database_tables.get_insert(TableAcLineSegmentPhases)
+
+        insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(ac_line_segment_phase.ac_line_segment))
+        insert.add_value(table.phase.query_index, ac_line_segment_phase.phase.name)
+        insert.add_value(table.sequence_number.query_index, ac_line_segment_phase.sequence_number)
+        insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(ac_line_segment_phase.asset_info))
+
+        return self._save_power_system_resource(table, insert, ac_line_segment_phase, "AC line segment phase")
+
     def save_breaker(self, breaker: Breaker) -> bool:
         """
         Save the :class:`Breaker` fields to :class:`TableBreakers`.
@@ -2353,6 +2410,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.nom_u.query_index, shunt_compensator.nom_u)
         insert.add_value(table.phase_connection.query_index, shunt_compensator.phase_connection.short_name)
         insert.add_value(table.sections.query_index, shunt_compensator.sections)
+        insert.add_value(table.grounding_terminal_mrid.query_index, self._mrid_or_none(shunt_compensator.grounding_terminal))
 
         return self._save_regulating_cond_eq(table, insert, shunt_compensator, description)
 
@@ -2676,4 +2734,4 @@ class NetworkCimWriter(BaseCimWriter):
 
     @staticmethod
     def _should_export_container_contents(ec: EquipmentContainer) -> bool:
-        return isinstance(ec, Site) or isinstance(ec, Substation) or isinstance(ec, Circuit)
+        return isinstance(ec, (Site, Substation, Circuit, HvCustomer, LvSubstation))

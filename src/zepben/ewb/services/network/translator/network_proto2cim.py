@@ -36,9 +36,11 @@ from typing import Optional
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.common.ContactDetails_pb2 import ContactDetails as PBContactDetails
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.core.HvCustomer_pb2 import HvCustomer as PBHvCustomer
 from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvSubstation_pb2 import LvSubstation as PBLvSubstation
 from zepben.protobuf.cim.extensions.iec61970.base.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay as PBDistanceRelay
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DirectionalCurrentRelay_pb2 import DirectionalCurrentRelay as PBDirectionalCurrentRelay
@@ -122,6 +124,7 @@ from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteCont
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
+from zepben.protobuf.cim.iec61970.base.wires.AcLineSegmentPhase_pb2 import AcLineSegmentPhase as PBAcLineSegmentPhase
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp as PBClamp
@@ -178,9 +181,11 @@ from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import Cont
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
@@ -208,6 +213,7 @@ from zepben.ewb.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import *
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_material_kind import *
 from zepben.ewb.model.cim.iec61968.assets.asset import *
 from zepben.ewb.model.cim.iec61968.assets.asset_container import *
@@ -278,6 +284,7 @@ from zepben.ewb.model.cim.iec61970.base.scada.remote_control import *
 from zepben.ewb.model.cim.iec61970.base.scada.remote_point import *
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import *
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import *
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import *
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import *
@@ -411,6 +418,15 @@ def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network
 
 @bind_to_cim
 @add_to_network_or_none
+def hv_customer_to_cim(pb: PBHvCustomer, network_service: NetworkService) -> HvCustomer:
+    # noinspection PyUnresolvedReferences
+    cim = HvCustomer(mrid=pb.mrid())
+
+    equipment_container_to_cim(pb.ec, cim, network_service)
+    return cim
+
+@bind_to_cim
+@add_to_network_or_none
 def site_to_cim(pb: PBSite, network_service: NetworkService) -> Optional[Site]:
     # noinspection PyUnresolvedReferences
     cim = Site(mrid=pb.mrid())
@@ -451,6 +467,23 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
         network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
     for mrid in pb.currentlyEnergizingFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.current_energizing_feeders(cim), mrid)
+    network_service.resolve_or_defer_reference(resolver.normal_energizing_lv_substations(cim), pb.normalEnergizingLvSubstationMRID)
+
+    equipment_container_to_cim(pb.ec, cim, network_service)
+    return cim
+
+
+@bind_to_cim
+@add_to_network_or_none
+def lv_substation_to_cim(pb: PBLvSubstation, network_service: NetworkService) -> LvSubstation:
+    # noinspection PyUnresolvedReferences
+    cim = LvSubstation(mrid=pb.mrid())
+    for mrid in pb.normalEnergizingFeederMRIDs:
+        network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
+    for mrid in pb.currentEnergizingFeederMRIDs:
+        network_service.resolve_or_defer_reference(resolver.current_energizing_feeders(cim), mrid)
+    for mrid in pb.normalEnergizedLvFeederMRIDs:
+        network_service.resolve_or_defer_reference(resolver.normal_energized_lv_feeders(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim
@@ -788,6 +821,12 @@ def transformer_test_to_cim(pb: PBTransformerTest, cim: TransformerTest, network
 def wire_info_to_cim(pb: PBWireInfo, cim: WireInfo, network_service: NetworkService):
     cim.rated_current = get_nullable(pb, 'ratedCurrent')
     cim.material = WireMaterialKind(pb.material)
+    cim.size_description = get_nullable(pb, 'sizeDescription')
+    cim.strand_count = get_nullable(pb, 'strandCount')
+    cim.core_strand_count = get_nullable(pb, 'coreStrandCount')
+    cim.insulated = get_nullable(pb, 'insulated')
+    cim.insulation_material = WireInsulationKind(pb.insulationMaterial)
+    cim.insulation_thickness_u = get_nullable(pb, 'insulationThickness')
 
     asset_info_to_cim(pb.ai, cim, network_service)
 
@@ -1237,6 +1276,10 @@ def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Fee
         network_service.resolve_or_defer_reference(resolver.normal_energized_lv_feeders(cim), mrid)
     for mrid in pb.currentlyEnergizedLvFeedersMRIDs:
         network_service.resolve_or_defer_reference(resolver.current_energized_lv_feeders(cim), mrid)
+    for mrid in pb.normalEnergizedLvSubstationMRIDs:
+        network_service.resolve_or_defer_reference(resolver.normal_energized_lv_substations(cim), mrid)
+    for mrid in pb.currentlyEnergizedLvSubstationMRIDs:
+        network_service.resolve_or_defer_reference(resolver.current_energized_lv_substations(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim
@@ -1546,10 +1589,24 @@ def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService)
         network_service.resolve_or_defer_reference(resolver.cuts(cim), mrid)
     for mrid in pb.clampMRIDs:
         network_service.resolve_or_defer_reference(resolver.clamps(cim), mrid)
+    for mrid in pb.phaseMRIDs:
+        network_service.resolve_or_defer_reference(resolver.phases(cim), mrid)
 
     conductor_to_cim(pb.cd, cim, network_service)
     return cim
 
+@bind_to_cim
+@add_to_network_or_none
+def ac_line_segment_phase_to_cim(pb: PBAcLineSegmentPhase, network_service: NetworkService) -> AcLineSegmentPhase:
+    # noinspection PyUnresolvedReferences
+    cim = AcLineSegmentPhase(mrid=pb.mrid())
+    network_service.resolve_or_defer_reference(resolver.ac_line_segment(cim), pb.acLineSegmentMRID)
+    cim.phase = SinglePhaseKind(pb.phase)
+    cim.sequence_number = get_nullable(pb, "sequenceNumber")
+    # noinspection PyUnresolvedReferences
+    network_service.resolve_or_defer_reference(resolver.asset_info(cim), pb.asset_info_mrid())
+    power_system_resource_to_cim(pb.psr, cim, network_service)
+    return cim
 
 @bind_to_cim
 @add_to_network_or_none
@@ -2116,6 +2173,7 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
     cim.grounded = get_nullable(pb, 'grounded')
     cim.nom_u = get_nullable(pb, 'nomU')
     cim.phase_connection = PhaseShuntConnectionKind(pb.phaseConnection)
+    network_service.resolve_or_defer_reference(resolver.terminal(cim), pb.groundingTerminalMRID)
 
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
 

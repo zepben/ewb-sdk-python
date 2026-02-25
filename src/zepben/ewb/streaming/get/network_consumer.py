@@ -32,6 +32,7 @@ from zepben.ewb import NetworkService, IdentifiedObject, Organisation, Location,
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
@@ -212,7 +213,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_terminals_for_connectivity_node(node)
 
-    async def get_network_hierarchy(self) -> GrpcResult[NetworkHierarchy]:
+    async def get_network_hierarchy(
+        self
+    ) -> GrpcResult[NetworkHierarchy]:
         """
         Retrieve the network hierarchy
 
@@ -495,7 +498,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             self._to_map(response.substations, Substation),
             self._to_map(response.feeders, Feeder),
             self._to_map(response.circuits, Circuit),
-            self._to_map(response.loops, Loop)
+            self._to_map(response.loops, Loop),
+            self._to_map(response.lvSubstations, LvSubstation),
+            self._to_map(response.lvFeeders, LvFeeder),
         )
 
         return self.__network_hierarchy

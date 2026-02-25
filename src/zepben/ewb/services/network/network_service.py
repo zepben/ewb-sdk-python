@@ -10,6 +10,7 @@ __all__ = ["connect", "connected_terminals", "connected_equipment", "NetworkServ
 import itertools
 import logging
 from enum import Enum
+from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 
@@ -300,3 +301,28 @@ class NetworkService(BaseService):
     @property
     def lv_feeder_start_points(self) -> Set[ConductingEquipment]:
         return {it.normal_head_terminal.conducting_equipment for it in self.objects(LvFeeder) if it.normal_head_terminal}
+
+    @singledispatchmethod
+    def connected_terminals(self, terminal: Terminal, phases: List[SinglePhaseKind] = None) -> List[ConnectivityResult]:
+        """
+        Find the connected [Terminal]s for the specified [terminal] using only the specified [phases].
+
+        :param terminal: terminal The [Terminal] to process.
+        :param phases: A collection of [SinglePhaseKind] specifying which phases should be used for the connectivity check. If omitted,
+                       all valid phases will be used.
+        :returns: A list of [ConnectivityResult] specifying the connections between [terminal] and the connected [Terminal]s
+        """
+        if phases is None:
+            phases = terminal.phases.single_phases
+        return TerminalConnectivityConnected().connected_terminals(terminal, phases)
+
+    @connected_terminals.register
+    def _(self, terminal: Terminal, phase_code: PhaseCode):
+        """
+        Find the connected [Terminal]s for the specified [terminal] using only the phases of the specified [phaseCode].
+
+        :param terminal: The [Terminal] to process.
+        :param phase_code: The [PhaseCode] specifying which phases should be used for the connectivity check.
+        :returns: A list of [ConnectivityResult] specifying the connections between [terminal] and the connected [Terminal]s
+        """
+        self.connected_terminals(terminal, phase_code.single_phases)

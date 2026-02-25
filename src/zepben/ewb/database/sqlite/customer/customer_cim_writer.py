@@ -96,6 +96,8 @@ class CustomerCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TablePricingStructures)
         insert = self._database_tables.get_insert(TablePricingStructures)
 
+        insert.add_value(table.code.query_index, pricing_structure.code)
+
         status = True
         for it in pricing_structure.tariffs:
             status = all([status, self._save_pricing_structure_to_tariff_association(pricing_structure, it)])

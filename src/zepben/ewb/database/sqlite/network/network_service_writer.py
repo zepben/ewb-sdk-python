@@ -10,9 +10,11 @@ from zepben.ewb.database.sqlite.network.network_cim_writer import NetworkCimWrit
 from zepben.ewb.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
@@ -62,6 +64,7 @@ from zepben.ewb.model.cim.iec61970.base.protection.current_relay import CurrentR
 from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
@@ -145,6 +148,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Feeder, self._writer.save_feeder),
             self._save_each_object(GeographicalRegion, self._writer.save_geographical_region),
             self._save_each_object(Site, self._writer.save_site),
+            self._save_each_object(HvCustomer, self._writer.save_hv_customer),
             self._save_each_object(SubGeographicalRegion, self._writer.save_sub_geographical_region),
             self._save_each_object(Substation, self._writer.save_substation),
             self._save_each_object(Terminal, self._writer.save_terminal),
@@ -153,6 +157,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(PhotoVoltaicUnit, self._writer.save_photo_voltaic_unit),
             self._save_each_object(PowerElectronicsWindUnit, self._writer.save_power_electronics_wind_unit),
             self._save_each_object(AcLineSegment, self._writer.save_ac_line_segment),
+            self._save_each_object(AcLineSegmentPhase, self._writer.save_ac_line_segment_phase),
             self._save_each_object(Breaker, self._writer.save_breaker),
             self._save_each_object(LoadBreakSwitch, self._writer.save_load_break_switch),
             self._save_each_object(BusbarSection, self._writer.save_busbar_section),
@@ -179,6 +184,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Circuit, self._writer.save_circuit),
             self._save_each_object(Loop, self._writer.save_loop),
             self._save_each_object(LvFeeder, self._writer.save_lv_feeder),
+            self._save_each_object(LvSubstation, self._writer.save_lv_substation),
             self._save_each_object(Analog, self._writer.save_analog),
             self._save_each_object(Accumulator, self._writer.save_accumulator),
             self._save_each_object(Discrete, self._writer.save_discrete),

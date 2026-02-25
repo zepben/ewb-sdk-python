@@ -6,7 +6,7 @@ from typing import TypeVar
 
 import pytest
 
-from cim.cim_creators import create_directional_current_relay
+from cim.cim_creators import create_directional_current_relay, create_hv_customer, create_ac_line_segment_phase, create_lv_substation
 from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.cim_creators import *
 from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
@@ -41,6 +41,7 @@ types_to_test = {
     # Extensions IEC61970 Base Core #
     #################################
 
+    "create_hv_customer": create_hv_customer(),
     "create_site": create_site(),
 
     ###################################
@@ -49,6 +50,7 @@ types_to_test = {
 
     "create_loop": create_loop(),
     "create_lv_feeder": create_lv_feeder(),
+    "create_lv_substation": create_lv_substation(),
 
     ##################################################
     # Extensions IEC61970 Base Generation Production #
@@ -188,6 +190,7 @@ types_to_test = {
     #######################
 
     "create_ac_line_segment": create_ac_line_segment(),
+    "create_ac_line_segment_phase": create_ac_line_segment_phase(),
     "create_breaker": create_breaker(),
     "create_busbar_section": create_busbar_section(),
     "create_clamp": create_clamp(),

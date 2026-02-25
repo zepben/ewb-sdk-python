@@ -8,9 +8,10 @@ from __future__ import annotations
 __all__ = ["AssignToLvFeeders"]
 
 from functools import singledispatchmethod
-from typing import Collection, List, Generator, TypeVar, Dict, Set, Type, TYPE_CHECKING
+from typing import Collection, List, Generator, TypeVar, Dict, Set, Type, TYPE_CHECKING, Iterable
 
-from zepben.ewb import Switch, ProtectedSwitch, PowerElectronicsConnection, Terminal, ConductingEquipment, AuxiliaryEquipment, LvFeeder
+from zepben.ewb import Switch, ProtectedSwitch, PowerElectronicsConnection, Terminal, ConductingEquipment, AuxiliaryEquipment, LvFeeder, Feeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.services.network.network_service import NetworkService
 from zepben.ewb.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
 from zepben.ewb.services.network.tracing.networktrace.conditions.conditions import stop_at_open
@@ -171,12 +172,25 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if found_lv_feeder:
 
             for it in (found_lv_feeders := list(self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points))):
-                # Energize the LV feeders that we are processing by the energizing feeders of what we found
+                # Energize the LV feeders we are processing by the energizing feeders of what we found.
                 self._feeder_energizes(self.network_state_operators.get_energizing_feeders(it), lv_feeders_to_assign)
 
             for it in lv_feeders_to_assign:
                 # Energize the LV feeders we found by the energizing feeders we are processing
                 self._feeder_energizes(self.network_state_operators.get_energizing_feeders(it), found_lv_feeders)
+
+            def found_lv_substations() -> Generator[LvSubstation, None, None]:
+                for lvf in found_lv_feeders:
+                    if it := lvf.normal_energizing_lv_substation:
+                        yield it
+                for lvf in lv_feeders_to_assign:
+                    if it := lvf.normal_energizing_lv_substation:
+                        yield it
+
+            for substation in found_lv_substations():
+                for feeder in found_lv_feeders:
+                    if it := self.network_state_operators.get_energizing_feeders(feeder):
+                        self._lv_substation_energized_by(substation, it)
 
         aux_equip_for_this_terminal = terminal_to_aux_equipment.get(step_path.to_terminal, {})
 
@@ -190,8 +204,8 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             self._associate_power_electronic_units(lv_feeders_to_assign, to_equip)
 
     def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Set[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
-        if sites := list(ce.sites):
-            for site in sites:
+        if sites_and_substations := (list(ce.sites) + list(ce.normal_lv_substations)):
+            for site in sites_and_substations:
                 for feeder in site.find_lv_feeders(lv_feeder_start_points, self.network_state_operators):
                     yield feeder
         else:
@@ -200,3 +214,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
     def _lv_feeders_from_terminal(self, terminal: Terminal) -> List[LvFeeder]:
         return list(terminal.conducting_equipment.lv_feeders(self.network_state_operators))
+
+    def _lv_substation_energized_by(self, lv_substation: LvSubstation, feeders: Iterable[Feeder]):
+        for it in feeders:
+            self.network_state_operators.associate_energizing_feeder(it, lv_substation)

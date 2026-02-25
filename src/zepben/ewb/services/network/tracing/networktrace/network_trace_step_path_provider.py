@@ -10,7 +10,6 @@ __all__ = ['NetworkTraceStepPathProvider']
 import sys
 from typing import Generator, Optional, Callable, Iterable, List, Union, Type, TYPE_CHECKING
 
-from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
@@ -19,9 +18,10 @@ from zepben.ewb.services.network.tracing.connectivity.terminal_connectivity_conn
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 if TYPE_CHECKING:
+    from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
-PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path]]
+PathFactory = Callable[['Terminal', AcLineSegment], Optional[NetworkTraceStep.Path]]
 
 
 class NetworkTraceStepPathProvider:
@@ -75,7 +75,7 @@ class NetworkTraceStepPathProvider:
         phase_paths = set(p.to_phase for p in path.nominal_phase_paths)
         next_from_terminal = path.to_terminal
 
-        def path_factory(next_terminal: Terminal, traversed: AcLineSegment):
+        def path_factory(next_terminal: 'Terminal', traversed: AcLineSegment):
             next_paths = TerminalConnectivityConnected().terminal_connectivity(next_from_terminal, next_terminal, phase_paths)
             if next_paths.nominal_phase_paths:
                 return NetworkTraceStep.Path(next_from_terminal, next_terminal, traversed, set(next_paths.nominal_phase_paths))
@@ -241,7 +241,7 @@ class NetworkTraceStepPathProvider:
     def _acls_traverse_from_terminal(
         self,
         acls: AcLineSegment,
-        from_terminal: Terminal,
+        from_terminal: 'Terminal',
         length_from_t1: float,
         towards_segment_t2: bool,
         can_stop_at_cut_at_same_position: bool,
@@ -336,7 +336,7 @@ class NetworkTraceStepPathProvider:
 
 
 def seq_term_map_to_path(
-    terms: Union[Terminal, Iterable[Terminal]],
+    terms: Union['Terminal', Iterable['Terminal']],
     path_factory: PathFactory,
     traversed_acls: AcLineSegment = None
 ) -> Generator[NetworkTraceStep.Path, None, None]:

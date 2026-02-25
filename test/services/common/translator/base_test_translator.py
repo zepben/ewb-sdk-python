@@ -9,9 +9,11 @@ from hypothesis import given
 from hypothesis.strategies import SearchStrategy
 
 from zepben.ewb import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
-    TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable, NetworkService, CustomerService, DiagramService
+    TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable, NetworkService, CustomerService, DiagramService, Feeder, LvFeeder
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
+
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -111,8 +113,17 @@ def _remove_unsent_references(cim: T):
     if isinstance(cim, OperationalRestriction):
         cim.clear_equipment()
 
+    if isinstance(cim, Feeder):
+        cim.clear_current_equipment()
+
     if isinstance(cim, ConnectivityNode):
         cim.clear_terminals()
+
+    if isinstance(cim, LvFeeder):
+        cim.clear_current_equipment()
+
+    if isinstance(cim, LvSubstation):
+        cim.clear_current_equipment()
 
 
 def _add_with_unresolved_references(service: BaseService, cim: T) -> T:

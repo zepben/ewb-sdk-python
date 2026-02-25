@@ -12,6 +12,7 @@ from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionKind_pb2 
 from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControlMode_pb2 import BatteryControlMode as PBBatteryControlMode
 from zepben.protobuf.cim.extensions.iec61970.base.wires.TransformerCoolingType_pb2 import TransformerCoolingType as PBTransformerCoolingType
 from zepben.protobuf.cim.extensions.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
+from zepben.protobuf.cim.iec61968.assetinfo.WireInsulationKind_pb2 import WireInsulationKind as PBWireInsulationKind
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
@@ -36,6 +37,7 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind im
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_material_kind import WireMaterialKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -82,3 +84,4 @@ _map_unit_symbol = EnumMapper(UnitSymbol, PBUnitSymbol)
 _map_vector_group = EnumMapper(VectorGroup, PBVectorGroup)
 _map_winding_connection = EnumMapper(WindingConnection, PBWindingConnection)
 _map_wire_material_kind = EnumMapper(WireMaterialKind, PBWireMaterialKind)
+_map_wire_insulation_kind = EnumMapper(WireInsulationKind, PBWireInsulationKind)

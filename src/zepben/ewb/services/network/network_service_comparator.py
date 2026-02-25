@@ -8,9 +8,11 @@ from typing import Callable, Optional, Any
 from zepben.ewb import BatteryControl, PanDemandResponseFunction, StaticVarCompensator
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
@@ -74,6 +76,7 @@ from zepben.ewb.model.cim.iec61970.base.protection.current_relay import CurrentR
 from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
@@ -177,6 +180,9 @@ class NetworkServiceComparator(BaseServiceComparator):
     # Extensions IEC61970 Base Core #
     #################################
 
+    def _compare_hv_customer(self, source: HvCustomer, target: HvCustomer) -> ObjectDifference:
+        return self._compare_equipment_container(ObjectDifference(source, target))
+
     def _compare_site(self, source: Site, target: Site) -> ObjectDifference:
         return self._compare_equipment_container(ObjectDifference(source, target))
 
@@ -196,9 +202,19 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_id_references(diff, LvFeeder.normal_head_terminal)
         self._compare_id_reference_collections(diff, LvFeeder.normal_energizing_feeders)
+        self._compare_id_reference_collections(diff, LvFeeder.current_energizing_feeders)
+        self._compare_id_references(diff, LvFeeder.normal_energizing_lv_substation)
         if self._options.compare_feeder_equipment:
             self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
-        self._compare_id_reference_collections(diff, LvFeeder.current_energizing_feeders)
+
+        return self._compare_equipment_container(diff)
+
+    def _compare_lv_substation(self, source: LvSubstation, target: LvSubstation) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_reference_collections(diff, LvSubstation.normal_energizing_feeders)
+        self._compare_id_reference_collections(diff, LvSubstation.current_energizing_feeders)
+        self._compare_id_reference_collections(diff, LvSubstation.normal_energized_lv_feeders)
 
         return self._compare_equipment_container(diff)
 
@@ -429,7 +445,20 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_identified_object(diff)
 
     def _compare_wire_info(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, WireInfo.rated_current, WireInfo.material)
+        self._compare_values(
+            diff,
+            WireInfo.rated_current,
+            WireInfo.material,
+            WireInfo.size_description,
+            WireInfo.strand_count,
+            WireInfo.core_strand_count,
+            WireInfo.insulated,
+            WireInfo.insulation_material,
+        )
+        self._compare_floats(
+            diff,
+            WireInfo.insulation_thickness,
+        )
 
         return self._compare_asset_info(diff)
 
@@ -688,9 +717,11 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_id_references(diff, Feeder.normal_head_terminal, Feeder.normal_energizing_substation)
         self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_feeders)
+        self._compare_id_reference_collections(diff, Feeder.current_energized_lv_feeders)
+        self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_substations)
+        self._compare_id_reference_collections(diff, Feeder.current_energized_lv_substations)
         if self._options.compare_feeder_equipment:
             self._compare_id_reference_collections(diff, Feeder.current_equipment)
-        self._compare_id_reference_collections(diff, Feeder.current_energized_lv_feeders)
 
         return self._compare_equipment_container(diff)
 
@@ -871,8 +902,17 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_references(diff, AcLineSegment.per_length_impedance)
         self._compare_id_reference_collections(diff, AcLineSegment.cuts)
         self._compare_id_reference_collections(diff, AcLineSegment.clamps)
+        self._compare_id_reference_collections(diff, AcLineSegment.phases)
 
         return self._compare_conductor(diff)
+
+    def _compare_ac_line_segment_phase(self, source: AcLineSegmentPhase, target: AcLineSegmentPhase) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, AcLineSegmentPhase.ac_line_segment)
+        self._compare_values(diff, AcLineSegmentPhase.phase, AcLineSegmentPhase.sequence_number)
+
+        return self._compare_power_system_resource(diff)
 
     def _compare_breaker(self, source: Breaker, target: Breaker) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -1216,6 +1256,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_values(diff, ShuntCompensator.grounded, ShuntCompensator.nom_u, ShuntCompensator.phase_connection)
         self._compare_floats(diff, ShuntCompensator.sections)
         self._compare_id_references(diff, ShuntCompensator.shunt_compensator_info)
+        self._compare_id_references(diff, ShuntCompensator.grounding_terminal)
 
         return self._compare_regulating_cond_eq(diff)
 

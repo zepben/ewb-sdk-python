@@ -30,10 +30,13 @@ __all__ = [
 
 from typing import Callable, Optional
 
+from hypothesis import Phase
+
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
@@ -89,6 +92,7 @@ from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
@@ -205,6 +209,11 @@ cut_to_acls_resolver = ReferenceResolver(Cut, AcLineSegment, lambda t, r: setatt
 acls_to_clamp_resolver = ReferenceResolver(AcLineSegment, Clamp, lambda t, r: t.add_clamp(r))
 clamp_to_acls_resolver = ReferenceResolver(Clamp, AcLineSegment, lambda t, r: setattr(t, 'ac_line_segment', r))
 
+acls_to_acls_phase_resolver = ReferenceResolver(AcLineSegment, AcLineSegmentPhase, lambda t, r: t.add_phase(r))
+acls_phase_to_acls_resolver = ReferenceResolver(AcLineSegmentPhase, AcLineSegmentPhase, lambda t, r: setattr(t, 'ac_line_segment', r))
+
+acls_phase_to_wire_info_resolver = ReferenceResolver(AcLineSegmentPhase, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
+
 asset_to_asset_org_role_resolver = ReferenceResolver(Asset, AssetOrganisationRole, lambda t, r: t.add_organisation_role(r))
 asset_to_location_resolver = ReferenceResolver(Asset, Location, lambda t, r: setattr(t, 'location', r))
 
@@ -223,6 +232,8 @@ prf_to_relay_info_resolver = ReferenceResolver(ProtectionRelayFunction, RelayInf
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 shunt_compensator_to_shunt_compensator_info_resolver = ReferenceResolver(ShuntCompensator, ShuntCompensatorInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+shunt_compensator_to_terminal_resolver = ReferenceResolver(ShuntCompensator, Terminal, lambda t, r: setattr(t, 'grounding_terminal', r))
 
 switch_to_switch_info_resolver = ReferenceResolver(Switch, SwitchInfo, lambda t, r: setattr(t, 'asset_info', r))
 
@@ -271,6 +282,9 @@ feeder_to_nes_resolver = ReferenceResolver(Feeder, Substation, lambda t, r: seta
 feeder_to_nht_resolver = ReferenceResolver(Feeder, Terminal, lambda t, r: setattr(t, 'normal_head_terminal', r))
 feeder_to_nelvf_resolver = ReferenceResolver(Feeder, LvFeeder, lambda t, r: t.add_normal_energized_lv_feeder(r))
 feeder_to_celvf_resolver = ReferenceResolver(Feeder, LvFeeder, lambda t, r: t.add_current_energized_lv_feeder(r))
+
+lvs_to_nelvf_resolver = ReferenceResolver(LvSubstation, LvFeeder, lambda t, r: t.add_normal_energized_lv_feeder(r))
+lvf_to_nelvs_resolver = ReferenceResolver(LvFeeder, LvSubstation, lambda t, r: setattr(t, 'normal_energizing_lv_substation', r))
 
 gr_to_sgr_resolver = ReferenceResolver(GeographicalRegion, SubGeographicalRegion, lambda t, r: t.add_sub_geographical_region(r))
 
@@ -324,6 +338,11 @@ loop_to_esub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_e
 lvfeeder_to_nht_resolver = ReferenceResolver(LvFeeder, Terminal, lambda t, r: setattr(t, 'normal_head_terminal', r))
 lvfeeder_to_nef_resolver = ReferenceResolver(LvFeeder, Feeder, lambda t, r: t.add_normal_energizing_feeder(r))
 lvfeeder_to_cef_resolver = ReferenceResolver(LvFeeder, Feeder, lambda t, r: t.add_current_energizing_feeder(r))
+
+lvs_to_nef_resolver = ReferenceResolver(LvSubstation, Feeder, lambda t, r: t.add_normal_energizing_feeder(r))
+lvs_to_cef_resolver = ReferenceResolver(LvSubstation, Feeder, lambda t, r: t.add_current_energizing_feeder(r))
+feeder_to_nelvs_resolver = ReferenceResolver(Feeder, LvSubstation, lambda t, r: t.add_normal_energized_lv_substation(r))
+feeder_to_celvs_resolver = ReferenceResolver(Feeder, LvSubstation, lambda t, r: t.add_current_energized_lv_substation(r))
 
 pec_to_pecphase_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsConnectionPhase, lambda t, r: t.add_phase(r))
 pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase,

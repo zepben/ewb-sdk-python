@@ -82,6 +82,8 @@ def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -
     for mrid in pb.tariffMRIDs:
         service.resolve_or_defer_reference(resolver.tariffs(cim), mrid)
 
+    cim.code = get_nullable(pb, 'code')
+
     document_to_cim(pb.doc, cim, service)
     return cim if service.add(cim) else None
 

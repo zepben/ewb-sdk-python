@@ -31,6 +31,11 @@ class IncludedEnergizingContainers(Enum):
     Energizing feeders and substations should be included.
     """
 
+    LV_SUBSTATIONS = 3
+    """
+    Energizing LV substations should be included.
+    """
+
     @property
     def short_name(self):
         return str(self)[29:]

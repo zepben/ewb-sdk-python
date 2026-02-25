@@ -8,6 +8,8 @@ from unittest.mock import create_autospec
 from util import import_submodules, all_subclasses
 from zepben.ewb import TableEquipmentEquipmentContainers, PreparedStatement, NetworkDatabaseTables, NetworkCimWriter, EquipmentContainer, Site, Substation, \
     Circuit, Feeder, LvFeeder, Junction, generate_id
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
 
 def test_only_exports_equipment_for_expected_equipment_containers():
@@ -26,7 +28,7 @@ def test_only_exports_equipment_for_expected_equipment_containers():
     _ = import_submodules('zepben.ewb.model.cim')
     all_equipment_container_classes = all_subclasses(EquipmentContainer, 'zepben.ewb.model.cim')
 
-    should_export = [Site(mrid="site"), Substation(mrid="substation"), Circuit(mrid="circuit")]
+    should_export = [Site(mrid="site"), Substation(mrid="substation"), Circuit(mrid="circuit"), HvCustomer(mrid="hv_customer"), LvSubstation(mrid="lv_substation")]
     should_ignore = [Feeder(mrid="feeder"), LvFeeder(mrid="lv_feeder")]
 
     assert {it.__class__ for it in (should_export + should_ignore)} == all_equipment_container_classes, "Should be checking all EquipmentContainer subclasses"
