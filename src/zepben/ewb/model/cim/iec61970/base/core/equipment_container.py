@@ -231,9 +231,15 @@ class EquipmentContainer(ConnectivityNodeContainer):
         if state_operator is None:
             state_operator = NetworkStateOperators.NORMAL
 
+        seen: set = set()
         for it in state_operator.get_equipment(self):
             if isinstance(it, ConductingEquipment):
                 for t in it.terminals:
                     for ct in NetworkService.connected_terminals(t):
-                        if (to := ct.to_equip) and to.get_container(self.mrid) is None:
-                            yield ct.from_terminal
+                        if to := ct.to_equip:
+                            try:
+                                to.get_container(self.mrid)
+                            except KeyError:
+                                if t not in seen:
+                                    seen.add(ct.from_terminal)
+                                    yield ct.from_terminal

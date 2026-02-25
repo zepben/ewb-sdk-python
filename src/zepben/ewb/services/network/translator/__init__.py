@@ -393,7 +393,7 @@ ProtectionRelayFunction.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 Switch.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 VoltageRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
-AcLineSegmentPhase.asset_info_mrid = lambda self: self.psr.asset_info_mrid()
+AcLineSegmentPhase.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

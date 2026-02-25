@@ -30,9 +30,9 @@ class LvSubstation(EquipmentContainer):
 
     @zbex
     @property
-    def normal_energizing_feeders(self) -> Generator['Feeder', None, None]:
+    def normal_energizing_feeders(self) -> Generator['LvFeeder', None, None]:
         """[ZBEX] The HV/MV feeders that normally energize this [LvSubstation]. The returned collection is read only."""
-        return ngen(self._normal_energized_lv_feeders_by_id or {}.values())
+        return ngen((self._normal_energized_lv_feeders_by_id or {}).values())
 
     def num_normal_energizing_feeders(self) -> int:
         """Get the number of entries in the normal [Feeder] collection."""
@@ -45,7 +45,7 @@ class LvSubstation(EquipmentContainer):
         :param mrid: the mRID of the required normal [Feeder]
         :returns: The [Feeder] with the specified [mRID] if it exists, otherwise null
         """
-        return self._normalEnergizingFeedersById.get(mrid)
+        return self._normal_energizing_feeders_by_id.get(mrid)
 
     def add_normal_energizing_feeder(self, feeder: 'Feeder') -> "LvSubstation":
         """
@@ -84,7 +84,7 @@ class LvSubstation(EquipmentContainer):
     @zbex
     @property
     def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        return ngen(self._normal_energized_lv_feeders_by_id or {}.values())
+        return ngen((self._normal_energized_lv_feeders_by_id or {}).values())
 
     def num_normal_energized_lv_feeders(self) -> int:
         """Get the number of entries in the normal [LvFeeder] collection."""
@@ -133,7 +133,7 @@ class LvSubstation(EquipmentContainer):
         """
         [ZBEX] The HV/MV feeders that currently energize this LV substation. The returned collection is read only.
         """
-        return ngen(self._current_energizing_feeders_by_id or {}.values())
+        return ngen((self._current_energizing_feeders_by_id or {}).values())
 
     def num_current_energizing_feeders(self) -> int:
         """
@@ -162,6 +162,7 @@ class LvSubstation(EquipmentContainer):
         if self._normal_energizing_feeders_by_id is None:
             self._normal_energizing_feeders_by_id = dict()
         self._normal_energizing_feeders_by_id[feeder.mrid] = feeder
+        return self
 
     def remove_current_energizing_feeder(self, feeder: 'Feeder') -> "LvSubstation":
         """

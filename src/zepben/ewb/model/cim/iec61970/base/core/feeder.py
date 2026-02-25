@@ -9,6 +9,7 @@ __all__ = ["Feeder"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
+from zepben.ewb import get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import ngen, nlen, safe_remove_by_id
@@ -110,12 +111,7 @@ class Feeder(EquipmentContainer):
         :returns: The `Equipment` with the specified `mrid` if it exists
         :raises: `KeyError` if `mrid` wasn't present.
         """
-        if not self._current_equipment:
-            raise KeyError(mrid)
-        try:
-            return self._current_equipment[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return get_by_mrid(self._current_equipment, mrid)
 
     def add_current_equipment(self, equipment: Equipment) -> Feeder:
         """
@@ -171,12 +167,7 @@ class Feeder(EquipmentContainer):
         :returns: A matching `LvFeeder` that is energized by this `Feeder` in the normal state of the network.
         :raise sA `KeyError` if no matching `LvFeeder` was found.
         """
-        if not self._normal_energized_lv_feeders:
-            raise KeyError(mrid)
-        try:
-            return self._normal_energized_lv_feeders[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return get_by_mrid(self._normal_energized_lv_feeders, mrid)
 
     def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
         """
@@ -233,12 +224,7 @@ class Feeder(EquipmentContainer):
         :return: A matching `LvFeeder` that is energized by this `Feeder` in the current state of the network.
         :raises: A `KeyError` if no matching `LvFeeder` was found.
         """
-        if not self._current_energized_lv_feeders:
-            raise KeyError(mrid)
-        try:
-            return self._current_energized_lv_feeders[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
+        return get_by_mrid(self._current_energized_lv_feeders, mrid)
 
     def add_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
         """
@@ -291,7 +277,7 @@ class Feeder(EquipmentContainer):
         :param mrid: the mRID of the required normal [LvSubstation]
         :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
         """
-        return self._normal_energized_lv_substations.get(mrid)
+        return get_by_mrid(self._normal_energized_lv_substations, mrid)
 
     def add_normal_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
         """
@@ -344,7 +330,7 @@ class Feeder(EquipmentContainer):
         :param mrid: the mRID of the required current [LvSubstation]
         :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
         """
-        return self._current_energized_lv_substations.get(mrid)
+        return get_by_mrid(self._current_energized_lv_substations, mrid)
 
     def add_current_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
         """

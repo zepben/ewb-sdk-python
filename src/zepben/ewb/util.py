@@ -65,6 +65,10 @@ def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) ->
     """
     if not collection:
         raise KeyError(mrid)
+
+    if isinstance(collection, dict):
+        return collection[mrid]
+
     for io in collection:
         if io.mrid == mrid:
             return io

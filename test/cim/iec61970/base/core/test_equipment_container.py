@@ -4,6 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Generator, Type
 
+import pytest
+
 from hypothesis.strategies import builds, lists
 
 from cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
@@ -120,8 +122,9 @@ def test_current_lv_feeders():
     assert set(equipment_container.current_lv_feeders()) == {lv_fdr1, lv_fdr2, lv_fdr3}
 
 
-def test_detects_edge_terminals_correctly():
-    network = (
+@pytest.mark.asyncio
+async def test_detects_edge_terminals_correctly():
+    network = await (
         TestNetworkBuilder()
         .from_power_transformer()   # tx0
         .to_busbar_section()        # bbs1
@@ -140,18 +143,54 @@ def test_detects_edge_terminals_correctly():
         .add_lv_feeder("b6")        # lvf13
         .add_lv_substation(["tx4", "bbs5", "b6"])  # lvs14
         .add_substation(["tx0", "bbs1", "b2", "b9"])  # sub15
-    ).network
+        .build()
+    )
 
     feeder = network['fdr11']
     lvf_tx = network['lvf12']
-    lvf8 = network['lvf13']
+    lvf_b = network['lvf13']
     lv_sub = network['lvs14']
     sub = network['sub15']
+
+    assert list(edge_equip_mrids(feeder)) == ["b2"]
+    assert list(edge_equip_mrids(lvf_tx)) == ["tx4", "b6"]
+    assert list(edge_equip_mrids(lvf_b)) == ["b6"]
+    assert list(edge_equip_mrids(lv_sub)) == ["tx4", "b6"]
+    assert list(edge_equip_mrids(sub)) == ["b2", "b9"]
+
+    assert list(edge_equip_mrids(feeder, NetworkStateOperators.CURRENT)) == ["b2"]
+    assert list(edge_equip_mrids(lvf_tx, NetworkStateOperators.CURRENT)) == ["tx4", "b6"]
+    assert list(edge_equip_mrids(lvf_b, NetworkStateOperators.CURRENT)) == ["b6"]
+    assert list(edge_equip_mrids(lv_sub, NetworkStateOperators.CURRENT)) == ["tx4", "b6"]
+    assert list(edge_equip_mrids(sub, NetworkStateOperators.CURRENT)) == ["b2", "b9"]
+
+
+@pytest.mark.asyncio
+async def test_detects_edge_terminals_for_open_switch():
+    network = await (TestNetworkBuilder()
+        .from_power_transformer()
+        .to_busbar_section()
+        .to_breaker()
+        .to_acls()
+        .branch_from("tx0", 1)
+        .to_acls()
+        .to_breaker(is_normally_open=True, is_open=True)
+        .to_acls()
+        .branch_from("bbs1")
+        .to_acls()
+        .to_breaker()
+        .to_acls()
+        .add_substation(["tx0", "bbs1", "b2", "c4", "b5", "c7"])
+        .build()
+    )
+
+    sub = network['sub10']
 
     assert list(edge_equip_mrids(sub)) == ['b2', 'b5', 'c7']
     assert list(edge_equip_mrids(sub, NetworkStateOperators.CURRENT)) == ['b2', 'b5', 'c7']
 
 def edge_equip_mrids(ec: EquipmentContainer, state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL) -> Generator[str, None, None]:
+    print("\n\nedge_terminals", list(ec.edge_terminals(state_operators)))
     for t in ec.edge_terminals(state_operators):
         if (it := t.conducting_equipment) is not None:
             yield it.mrid

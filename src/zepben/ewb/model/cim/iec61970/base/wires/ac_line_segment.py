@@ -42,9 +42,9 @@ class AcLineSegment(Conductor):
     per_length_impedance: 'PerLengthImpedance | None' = None
     """A `zepben.ewb.model.cim.iec61970.base.wires.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: List['Cut'] | None= None
-    _clamps: List['Clamp'] | None = None
-    _phases: List['AcLineSegmentPhase'] | None = None
+    _cuts: list['Cut'] | None= None
+    _clamps: list['Clamp'] | None = None
+    _phases: list['AcLineSegmentPhase'] | None = None
 
     @property
     def per_length_sequence_impedance(self) -> Optional['PerLengthSequenceImpedance']:

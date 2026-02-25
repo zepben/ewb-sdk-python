@@ -151,7 +151,8 @@ def create_lv_feeder(include_runtime: bool = True):
     runtime = {
         "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
         "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
-        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2)
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "normal_energizing_lv_substation": builds(LvSubstation, **create_identified_object(include_runtime)),
     } if include_runtime else {}
 
     return builds(
@@ -159,7 +160,6 @@ def create_lv_feeder(include_runtime: bool = True):
         # Only include equipment if we are processing runtime as we don't write equipment to the database for LvFeeder.
         **create_equipment_container(include_runtime, add_equipment=include_runtime),
         normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
-        normal_energizing_lv_substation=builds(LvSubstation, **create_identified_object(include_runtime)),
         **runtime
     )
 
@@ -1279,7 +1279,7 @@ def create_ac_line_segment_phase(include_runtime: bool = True):
         **create_power_system_resource(include_runtime),
         ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime)),
         phase=sampled_single_phase_kind(),
-        sequence_number=integers(min_value=0),
+        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER),
     )
 
 

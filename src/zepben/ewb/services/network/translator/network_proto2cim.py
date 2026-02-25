@@ -1601,7 +1601,7 @@ def ac_line_segment_phase_to_cim(pb: PBAcLineSegmentPhase, network_service: Netw
     # noinspection PyUnresolvedReferences
     cim = AcLineSegmentPhase(mrid=pb.mrid())
     network_service.resolve_or_defer_reference(resolver.ac_line_segment(cim), pb.acLineSegmentMRID)
-    cim.phase = SinglePhaseKind(pb.phase)
+    cim.phase = single_phase_kind_by_id(pb.phase)
     cim.sequence_number = get_nullable(pb, "sequenceNumber")
     # noinspection PyUnresolvedReferences
     network_service.resolve_or_defer_reference(resolver.asset_info(cim), pb.asset_info_mrid())

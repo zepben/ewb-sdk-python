@@ -15,7 +15,7 @@ from zepben.ewb import MetadataCollection, NetworkService, DiagramService, Custo
     PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
     Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    generate_id
+    generate_id, LinearShuntCompensator
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -150,6 +150,8 @@ class SchemaNetworks:
             for it in filled.normal_energizing_feeders:
                 it.add_normal_energized_lv_feeder(filled)
                 service.add(it)
+            if filled.normal_energizing_lv_substation:
+                service.add(filled.normal_energizing_lv_substation)
 
         ##################################################
         # Extensions IEC61970 Base Generation Production #
@@ -511,6 +513,10 @@ class SchemaNetworks:
 
         if isinstance(filled, Fuse):
             service.add(filled.function)
+
+        if isinstance(filled, LinearShuntCompensator):
+            if filled.grounding_terminal:
+                service.add(filled.grounding_terminal)
 
         if isinstance(filled, PowerElectronicsConnection):
             for it in filled.units:

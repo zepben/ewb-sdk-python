@@ -139,6 +139,11 @@ class ReferenceResolver(object):
 
 @dataclass(frozen=True, eq=False, slots=True)
 class BoundReferenceResolver(object):
+    """
+    :var from_obj: Identified object from which to resolve the reference.
+    :var resolver: Reference resolver to use.
+    :var reverse_resolver: Reference resolver to use for the reverse.
+    """
     from_obj: IdentifiedObject
     resolver: ReferenceResolver
     reverse_resolver: Optional[ReferenceResolver]
