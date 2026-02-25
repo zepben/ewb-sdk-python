@@ -233,32 +233,23 @@ class AcLineSegment(Conductor):
         """
         return nlen(self._phases)
 
-    @singledispatchmethod
     def get_phase(self, identifier: 'str | SinglePhaseKind') -> 'AcLineSegmentPhase | None':
-        raise NotImplementedError()
-
-    @get_phase.register
-    def _(self, mrid: str) -> 'AcLineSegmentPhase | None':
         """
         The individual phase models for this AcLineSegment.
 
-        :param mrid: the mRID of the required [AcLineSegmentPhase]
+        :param identifier: the mRID or ``SinglePhaseKind`` of the required [AcLineSegmentPhase]
         :returns: The [AcLineSegmentPhase] with the specified [mRID] if it exists, otherwise null
         """
-        if self._phases is not None:
-            return get_by_mrid(self._phases, mrid)
+        if isinstance(identifier, str):
+            if self._phases is not None:
+                return get_by_mrid(self._phases, identifier)
 
-    @get_phase.register
-    def _(self, phase: SinglePhaseKind) -> 'AcLineSegmentPhase | None':
-        """
-        The individual phase models for this AcLineSegment.
-
-        :param phase: the phase of the required [AcLineSegmentPhase]
-        :returns: The [AcLineSegmentPhase] with the specified [phase] if it exists, otherwise null
-        """
-        for it in self._phases:
-            if it == phase:
-                return it
+        elif isinstance(identifier, SinglePhaseKind):
+            for it in self._phases:
+                if it == identifier:
+                    return it
+                
+        raise KeyError(identifier)
 
     def add_phase(self, phase: AcLineSegmentPhase) -> 'AcLineSegment':
         """

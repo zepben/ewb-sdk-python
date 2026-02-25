@@ -215,7 +215,7 @@ acls_to_clamp_resolver = ReferenceResolver(AcLineSegment, Clamp, lambda t, r: t.
 clamp_to_acls_resolver = ReferenceResolver(Clamp, AcLineSegment, lambda t, r: setattr(t, 'ac_line_segment', r))
 
 acls_to_acls_phase_resolver = ReferenceResolver(AcLineSegment, AcLineSegmentPhase, lambda t, r: t.add_phase(r))
-acls_phase_to_acls_resolver = ReferenceResolver(AcLineSegmentPhase, AcLineSegmentPhase, lambda t, r: setattr(t, 'ac_line_segment', r))
+acls_phase_to_acls_resolver = ReferenceResolver(AcLineSegmentPhase, AcLineSegment, lambda t, r: setattr(t, 'ac_line_segment', r))
 
 acls_phase_to_wire_info_resolver = ReferenceResolver(AcLineSegmentPhase, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
 
