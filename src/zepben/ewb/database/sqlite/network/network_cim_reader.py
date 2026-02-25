@@ -2056,7 +2056,7 @@ class NetworkCimReader(BaseCimReader):
         ac_line_segment_phase.phase = SinglePhaseKind[result_set.get_string(table.phase.query_index)]
         ac_line_segment_phase.sequence_number = result_set.get_int(table.sequence_number.query_index)
 
-        return self._load_power_system_resource(ac_line_segment_phase, table, result_set)
+        return self._load_power_system_resource(ac_line_segment_phase, table, result_set) and self._add_or_throw(ac_line_segment_phase)
 
     def load_breaker(self, table: TableBreakers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """

@@ -24,6 +24,7 @@ from zepben.ewb.model.cim.iec61970.base.core.geographical_region import Geograph
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
@@ -481,6 +482,11 @@ class SchemaNetworks:
             for it in filled.clamps:
                 it.ac_line_segment = filled
                 service.add(it)
+
+        if isinstance(filled, AcLineSegmentPhase):
+            service.add(filled.ac_line_segment)
+            if filled.asset_info is not None:
+                service.add(filled.asset_info)
 
         if isinstance(filled, Clamp):
             filled.ac_line_segment.add_clamp(filled)

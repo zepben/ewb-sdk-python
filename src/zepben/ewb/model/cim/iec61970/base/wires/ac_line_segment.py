@@ -269,7 +269,7 @@ class AcLineSegment(Conductor):
         if self._phases is None:
             self._phases = list()
         self._phases.append(phase)
-        self._phases.sort(key=lambda it: it.sequence_number)
+        self._phases.sort(key=lambda it: getattr(it, 'sequence_number') or 0)
         return self
 
     def remove_phase(self, phase: AcLineSegmentPhase) -> 'AcLineSegment':
@@ -300,3 +300,4 @@ class AcLineSegment(Conductor):
         for it in self._phases:
             if it.phase == phase:
                 return it.asset_info
+        return self.wire_info

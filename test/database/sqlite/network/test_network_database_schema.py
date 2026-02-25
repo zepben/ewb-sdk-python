@@ -27,7 +27,8 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_ev_charging_unit, create_tap_changer_control, create_distance_relay, create_voltage_relay, create_protection_relay_scheme, \
     create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info, \
     create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine, create_per_length_phase_impedance, \
-    create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut, create_directional_current_relay
+    create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut, create_directional_current_relay, \
+    create_hv_customer, create_lv_substation, create_ac_line_segment_phase
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitTest, PowerTransformerInfo, \
@@ -41,7 +42,8 @@ from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitT
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
-    NetworkTraceStep, DirectionalCurrentRelay, TestNetworkBuilder
+    NetworkTraceStep, DirectionalCurrentRelay, TestNetworkBuilder, LvSubstation
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
@@ -56,6 +58,7 @@ from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubG
 from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
 from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
 from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
@@ -164,6 +167,12 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     #################################
 
     @settings(**hypothesis_settings)
+    @given(hv_customer=create_hv_customer(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
+    async def test_schema_hv_customer(self, hv_customer: HvCustomer):
+        await self._validate_schema(SchemaNetworks().network_services_of(HvCustomer, hv_customer))
+
+    @settings(**hypothesis_settings)
     @given(site=create_site(False))
     @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_site(self, site: Site):
@@ -186,6 +195,15 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         network = SchemaNetworks().network_services_of(LvFeeder, lv_feeder)
         await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
         await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
+        await self._validate_schema(network)
+
+    @settings(**hypothesis_settings)
+    @given(lv_substation=create_lv_substation(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
+    async def test_lv_substation(self, lv_substation: LvSubstation):
+        network = SchemaNetworks().network_services_of(LvSubstation, lv_substation)
+        await Tracing().assign_equipment_to_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing().assign_equipment_to_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
         await self._validate_schema(network)
 
     ##################################################
@@ -570,6 +588,12 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
     async def test_schema_ac_line_segment(self, ac_line_segment: AcLineSegment):
         await self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, ac_line_segment))
+
+    @settings(**hypothesis_settings)
+    @given(ac_line_segment_phase=create_ac_line_segment_phase(False))
+    @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
+    async def test_schema_ac_line_segment_phase(self, ac_line_segment_phase: AcLineSegmentPhase):
+        await self._validate_schema(SchemaNetworks().network_services_of(AcLineSegmentPhase, ac_line_segment_phase))
 
     @settings(**hypothesis_settings)
     @given(breaker=create_breaker(False))
