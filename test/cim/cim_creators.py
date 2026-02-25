@@ -166,9 +166,9 @@ def create_lv_feeder(include_runtime: bool = True):
 
 def create_lv_substation(include_runtime: bool = True):
     runtime = {
-        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2),
+        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
         "normal_energized_lv_feeder": builds(LvFeeder, **create_identified_object(include_runtime)),
     }
 

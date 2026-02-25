@@ -167,7 +167,7 @@ class Feeder(EquipmentContainer):
         """
         Energized LvFeeder in the normal state of the network.
 
-        :param mri:d: The mrid of the `LvFeeder`.
+        :param mrid: The mrid of the `LvFeeder`.
         :returns: A matching `LvFeeder` that is energized by this `Feeder` in the normal state of the network.
         :raise sA `KeyError` if no matching `LvFeeder` was found.
         """
@@ -182,7 +182,7 @@ class Feeder(EquipmentContainer):
         """
         Associate this `Feeder` with an `LvFeeder` in the normal state of the network.
 
-        :param lv_feede:r: the LV feeder to associate with this feeder in the normal state of the network.
+        :param lv_feeder: the LV feeder to associate with this feeder in the normal state of the network.
         :return: This `Feeder` for fluent use.
         """
         if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
@@ -195,7 +195,7 @@ class Feeder(EquipmentContainer):
         """
         Disassociate this `Feeder` from an `LvFeeder` in the normal state of the network.
 
-        :param lv_feede:r: the LV feeder to disassociate from this feeder in the normal state of the network.
+        :param lv_feeder: the LV feeder to disassociate from this feeder in the normal state of the network.
         :return: This `Feeder` for fluent use.
         :raises: A `ValueError` if `lv_feeder` is not found in the normal energized lv feeders collection.
         """
@@ -229,7 +229,7 @@ class Feeder(EquipmentContainer):
         """
         Energized LvFeeder in the current state of the network.
 
-        :param mri:d: The mrid of the `LvFeeder`.
+        :param mrid: The mrid of the `LvFeeder`.
         :return: A matching `LvFeeder` that is energized by this `Feeder` in the current state of the network.
         :raises: A `KeyError` if no matching `LvFeeder` was found.
         """
@@ -244,7 +244,7 @@ class Feeder(EquipmentContainer):
         """
         Associate this `Feeder` with an `LvFeeder` in the current state of the network.
 
-        :param lv_feede:r: the LV feeder to associate with this feeder in the current state of the network.
+        :param lv_feeder: the LV feeder to associate with this feeder in the current state of the network.
         :return: This `Feeder` for fluent use.
         """
         if self._validate_reference(lv_feeder, self.get_current_energized_lv_feeder, "An LvFeeder"):
@@ -276,7 +276,7 @@ class Feeder(EquipmentContainer):
     @zbex
     @property
     def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._normal_energized_lv_substations or {}.values())
+        return ngen((self._normal_energized_lv_substations or {}).values())
 
     def num_normal_energized_lv_substations(self) -> int:
         """
@@ -288,7 +288,7 @@ class Feeder(EquipmentContainer):
         """
         Retrieve an energized LvSubstation using the normal state of the network.
 
-        :param mRID: the mRID of the required normal [LvSubstation]
+        :param mrid: the mRID of the required normal [LvSubstation]
         :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
         """
         return self._normal_energized_lv_substations.get(mrid)
@@ -297,7 +297,7 @@ class Feeder(EquipmentContainer):
         """
         Associate this [Feeder] with a [LvSubstation] in the normal state of the network.
 
-        :param lvSubstation: the [LvSubstation] to associate with this LV feeder in the normal state of the network.
+        :param lv_substation: the [LvSubstation] to associate with this LV feeder in the normal state of the network.
         :returns: This [Feeder] for fluent use.
         """
         if self._validate_reference(lv_substation, self.get_normal_energized_lv_substation, "An LvSubstation"):
@@ -329,7 +329,7 @@ class Feeder(EquipmentContainer):
     @zbex
     @property
     def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._current_energized_lv_substations or {}.values())
+        return ngen((self._current_energized_lv_substations or {}).values())
 
     def num_current_energized_lv_substations(self) -> int:
         """
@@ -341,7 +341,7 @@ class Feeder(EquipmentContainer):
         """
         Retrieve an energized LvSubstation using the current state of the network.
 
-        :param mRID: the mRID of the required current [LvSubstation]
+        :param mrid: the mRID of the required current [LvSubstation]
         :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
         """
         return self._current_energized_lv_substations.get(mrid)
@@ -350,7 +350,7 @@ class Feeder(EquipmentContainer):
         """
         Associate this [Feeder] with a [LvSubstation] in the current state of the network.
 
-        :param lvSubstation: the [LvSubstation] to associate with this LV feeder in the current state of the network.
+        :param lv_substation: the [LvSubstation] to associate with this LV feeder in the current state of the network.
         :returns: This [Feeder] for fluent use.
         """
         if self._validate_reference(lv_substation, self.get_current_energized_lv_substation, "An LvSubstation"):

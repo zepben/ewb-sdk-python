@@ -23,8 +23,6 @@ __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_te
            "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info", "cut_ac_line_segment", "cuts",
            "clamp_ac_line_segment", "clamps"]
 
-from functools import singledispatchmethod
-
 from zepben.ewb import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEquipment, PowerTransformer, Pole, Streetlight, ConnectivityNode, \
     Control, Customer, CustomerAgreement, Equipment, EquipmentContainer, EnergyConsumer, EnergySource, \
     EnergySourcePhase, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PricingStructure, RemoteControl, RemoteSource, Substation, \
@@ -313,10 +311,16 @@ def normal_energized_loops(substation: Substation) -> BoundReferenceResolver:
     return BoundReferenceResolver(substation, sub_to_eloop_resolver, loop_to_esub_resolver)
 
 
-@singledispatchmethod
-def normal_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(feeder, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
+def normal_energized_lv_feeders(other: Feeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, Feeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_nef_resolver, lvf_to_nelvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
+
 
 def current_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
@@ -333,34 +337,26 @@ def current_energized_lv_substations(feeder: Feeder) -> BoundReferenceResolver:
     return BoundReferenceResolver(feeder, feeder_to_celvs_resolver, lvs_to_cef_resolver)
 
 
-@normal_energized_lv_feeders.register
-def normal_energized_lv_feeders(lv_substation: LvSubstation) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_substation, lvs_to_nef_resolver, lvf_to_nelvs_resolver)
+def normal_energizing_feeders(other: LvFeeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, LvFeeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_nef_resolver, feeder_to_nelvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
 
 
-@singledispatchmethod
-def normal_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_feeder, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
-
-
-@normal_energizing_feeders.register
-def normal_energizing_feeders(lv_substation: LvSubstation) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_substation, lvs_to_nef_resolver, feeder_to_nelvs_resolver)
-
-
-@singledispatchmethod
-def current_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_feeder, lvfeeder_to_cef_resolver, feeder_to_celvf_resolver)
-
-
-@current_energizing_feeders.register
-def current_energizing_feeders(lv_substation: LvSubstation) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_substation, lvs_to_cef_resolver, feeder_to_celvs_resolver)
+def current_energizing_feeders(other: LvFeeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, LvFeeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvfeeder_to_cef_resolver, feeder_to_celvf_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_cef_resolver, feeder_to_celvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
 
 
 def normal_energizing_lv_substations(lv_feeder: LvFeeder) -> BoundReferenceResolver:

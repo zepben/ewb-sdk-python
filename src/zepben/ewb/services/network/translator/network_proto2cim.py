@@ -826,7 +826,7 @@ def wire_info_to_cim(pb: PBWireInfo, cim: WireInfo, network_service: NetworkServ
     cim.core_strand_count = get_nullable(pb, 'coreStrandCount')
     cim.insulated = get_nullable(pb, 'insulated')
     cim.insulation_material = WireInsulationKind(pb.insulationMaterial)
-    cim.insulation_thickness_u = get_nullable(pb, 'insulationThickness')
+    cim.insulation_thickness = get_nullable(pb, 'insulationThickness')
 
     asset_info_to_cim(pb.ai, cim, network_service)
 
