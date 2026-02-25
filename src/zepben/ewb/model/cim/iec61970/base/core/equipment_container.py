@@ -215,7 +215,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
                         for lv_feeder in ce.lv_feeders(state_operators):
                             yield lv_feeder
 
-    def edge_terminals(self, state_operator: 'NetworkStateOperators' = None) -> Generator['Terminal', None, None]:
+    def edge_terminals(self, state_operator: 'Type[NetworkStateOperators]' = None) -> Generator['Terminal', None, None]:
         """
         Retrieve all terminals that are located on the edge of this EquipmentContainer. This is determined by any terminal that connects to another terminal on a
         ConductingEquipment that is not a member of this EquipmentContainer. This will explicitly exclude equipment with only one terminal that do not
@@ -235,5 +235,5 @@ class EquipmentContainer(ConnectivityNodeContainer):
             if isinstance(it, ConductingEquipment):
                 for t in it.terminals:
                     for ct in NetworkService.connected_terminals(t):
-                        if (to := ct.to) and to.get_container(self.mrid) is None:
+                        if (to := ct.to_equip) and to.get_container(self.mrid) is None:
                             yield ct.from_terminal

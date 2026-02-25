@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Generator, Type
+
 from hypothesis.strategies import builds, lists
 
 from cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
@@ -9,7 +11,7 @@ from cim.iec61970.base.core.test_connectivity_node_container import connectivity
     verify_connectivity_node_container_constructor_args, connectivity_node_container_args
 from cim.private_collection_validator import validate_unordered
 from util import mrid_strategy
-from zepben.ewb import EquipmentContainer, Equipment, LvFeeder, Substation, generate_id
+from zepben.ewb import EquipmentContainer, Equipment, LvFeeder, Substation, generate_id, TestNetworkBuilder, NetworkStateOperators
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 equipment_container_kwargs = {
@@ -116,3 +118,40 @@ def test_current_lv_feeders():
 
     assert set(equipment_container.normal_lv_feeders()) == set()
     assert set(equipment_container.current_lv_feeders()) == {lv_fdr1, lv_fdr2, lv_fdr3}
+
+
+def test_detects_edge_terminals_correctly():
+    network = (
+        TestNetworkBuilder()
+        .from_power_transformer()   # tx0
+        .to_busbar_section()        # bbs1
+        .to_breaker()               # b2  edge of substation, feeder
+        .to_acls()                  # c3
+        .to_power_transformer()     # tx4 edge of feeder, lv substation, tx4 lv feeder
+        .to_busbar_section()        # bbs5
+        .to_breaker()               # b6  edge of lv substation, tx4 lv feeder, b6 lv feeder
+        .to_acls()                  # c7
+        .to_energy_consumer()       # ec8
+        .branch_from("tx0")
+        .to_breaker()               # b9 edge of substation
+        .to_acls()                  # c10
+        .add_feeder("b2")           # fdr11
+        .add_lv_feeder("tx4")       # lvf12
+        .add_lv_feeder("b6")        # lvf13
+        .add_lv_substation(["tx4", "bbs5", "b6"])  # lvs14
+        .add_substation(["tx0", "bbs1", "b2", "b9"])  # sub15
+    ).network
+
+    feeder = network['fdr11']
+    lvf_tx = network['lvf12']
+    lvf8 = network['lvf13']
+    lv_sub = network['lvs14']
+    sub = network['sub15']
+
+    assert list(edge_equip_mrids(sub)) == ['b2', 'b5', 'c7']
+    assert list(edge_equip_mrids(sub, NetworkStateOperators.CURRENT)) == ['b2', 'b5', 'c7']
+
+def edge_equip_mrids(ec: EquipmentContainer, state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL) -> Generator[str, None, None]:
+    for t in ec.edge_terminals(state_operators):
+        if (it := t.conducting_equipment) is not None:
+            yield it.mrid

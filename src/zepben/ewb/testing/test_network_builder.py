@@ -3,11 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from logging import Logger
-from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
+from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol, Iterable
 
 from zepben.ewb import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Terminal, LvFeeder,
-                        PowerTransformer, EnergyConsumer, PowerElectronicsConnection, Clamp, Cut)
+                        PowerTransformer, EnergyConsumer, PowerElectronicsConnection, Clamp, Cut, Substation)
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
@@ -617,6 +618,18 @@ class TestNetworkBuilder:
         self._create_lv_feeder(mrid, self.network.get(head_mrid, ConductingEquipment), sequence_number)
         return self
 
+    def add_lv_substation(self, equipment_mrids: List[str], mrid: Optional[str] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new LvSubstation containing the specified equipment.
+
+        :param equipment_mrids: The mRID's of the equipment to add to the lv_substation
+        :param mrid: Optional mRID for the new `LvSubstation`.
+        :return: This [TestNetworkBuilder] to allow for fluent use.
+        """
+
+        self._create_lv_substation(mrid, equipment_mrids)
+        return self
+
     def add_site(self, equipment_mrids: List[str], mrid: Optional[str] = None) -> 'TestNetworkBuilder':
         """
         Create a new Site containing the specified equipment.
@@ -634,6 +647,18 @@ class TestNetworkBuilder:
             ce.add_container(site)
         self.network.add(site)
 
+        return self
+
+    def add_substation(self, equipment_mrids: List[str], mrid: Optional[str] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new Substation containing the specified equipment.
+
+        :param equipment_mrids: The mRID's of the equipment to add to the substation
+        :param mrid: Optional mRID for the new `Substation`.
+        :return: This [TestNetworkBuilder] to allow for fluent use.
+        """
+
+        self._create_substation(mrid, equipment_mrids)
         return self
 
     async def build(self, apply_directions_from_sources: bool = True, debug_logger: Logger = None) -> NetworkService:
@@ -809,6 +834,32 @@ class TestNetworkBuilder:
 
         self.network.add(lvf)
         return lvf
+
+    def _create_lv_substation(self, mrid: str | None, equipment_mrids: Iterable[str]) -> LvSubstation:
+        lvs = LvSubstation(
+            mrid=self._next_id(mrid, "lvs"),
+        )
+
+        for mrid in equipment_mrids:
+            it = self.network.get(mrid)
+            lvs.add_equipment(it)
+            lvs.add_current_equipment(it)
+            it.add_container(lvs)
+            it.add_current_container(lvs)
+        self.network.add(lvs)
+        return lvs
+
+    def _create_substation(self, mrid: str | None, equipment_mrids: Iterable[str]) -> Substation:
+        sub = Substation(
+            mrid=self._next_id(mrid, "sub"),
+        )
+
+        for mrid in equipment_mrids:
+            it = self.network.get(mrid)
+            sub.add_equipment(it)
+            it.add_container(sub)
+        self.network.add(sub)
+        return sub
 
     def _add_terminal(self, ce: ConductingEquipment, sn: int, nominal_phases: PhaseCode):
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
