@@ -10,7 +10,7 @@ __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast, overload
 
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
@@ -67,9 +67,20 @@ MAX_64_BIT_INTEGER = 9223372036854775807
 
 
 @dataclass(slots=True)
-class NetworkResult(object):
+class NetworkResult:
     network_service: Optional[NetworkService]
     failed: Set[str] = set()
+
+@dataclass(slots=True)
+class GetNetworkHierarchyConfig:
+    include_geographical_regions: bool = True,
+    include_sub_geographical_regions: bool = True,
+    include_substations: bool = True,
+    include_feeders: bool = True,
+    include_circuits: bool = True,
+    include_loops: bool = True,
+    include_lv_substations: bool = False,
+    include_lv_feeders: bool = False,
 
 
 _map_include_energizing_containers = EnumMapper(IncludedEnergizingContainers, PBIncludedEnergizingContainers)
@@ -213,18 +224,27 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_terminals_for_connectivity_node(node)
 
-    async def get_network_hierarchy(
-        self
-    ) -> GrpcResult[NetworkHierarchy]:
+
+    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[MultiObjectResult]:
+
         """
         Retrieve the network hierarchy
 
         Parameters
             - `service` - The :class:`NetworkService` to store fetched objects in.
 
+        :key include_geographical_regions:
+        :key include_sub_geographical_regions:
+        :key include_substations:
+        :key include_feeders:
+        :key include_circuits:
+        :key include_loops:
+        :key include_lv_substations:
+        :key include_lv_feeders:
+
         Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
         """
-        return await self._get_network_hierarchy()
+        return await self._get_network_hierarchy(GetNetworkHierarchyConfig(**kwargs))
 
     async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
@@ -336,11 +356,11 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _get_terminals_for_connectivity_node(self, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(lambda: self._process_terminals_for_connectivity_node(node))
 
-    async def _get_network_hierarchy(self) -> GrpcResult[NetworkHierarchy]:
+    async def _get_network_hierarchy(self, config: GetNetworkHierarchyConfig = GetNetworkHierarchyConfig()) -> GrpcResult[NetworkHierarchy]:
         if self.__network_hierarchy:
             # noinspection PyArgumentList
             return GrpcResult(self.__network_hierarchy)
-        return await self.try_rpc(lambda: self._handle_network_hierarchy())
+        return await self.try_rpc(lambda: self._handle_network_hierarchy(config))
 
     async def _get_equipment_container(
         self,
@@ -488,19 +508,19 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-    async def _handle_network_hierarchy(self):
+    async def _handle_network_hierarchy(self, config: GetNetworkHierarchyConfig):
         response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest(), timeout=self.timeout)
 
         # noinspection PyArgumentList
         self.__network_hierarchy = NetworkHierarchy(
-            self._to_map(response.geographicalRegions, GeographicalRegion),
-            self._to_map(response.subGeographicalRegions, SubGeographicalRegion),
-            self._to_map(response.substations, Substation),
-            self._to_map(response.feeders, Feeder),
-            self._to_map(response.circuits, Circuit),
-            self._to_map(response.loops, Loop),
-            self._to_map(response.lvSubstations, LvSubstation),
-            self._to_map(response.lvFeeders, LvFeeder),
+            self._to_map(response.geographicalRegions, GeographicalRegion) if config.include_geographical_regions else None,
+            self._to_map(response.subGeographicalRegions, SubGeographicalRegion) if config.include_sub_geographical_regions else None,
+            self._to_map(response.substations, Substation) if config.include_substations else None,
+            self._to_map(response.feeders, Feeder) if config.include_feeders else None,
+            self._to_map(response.circuits, Circuit) if config.include_circuits else None,
+            self._to_map(response.loops, Loop) if config.include_loops else None,
+            self._to_map(response.lvSubstations, LvSubstation) if config.include_lv_substations else None,
+            self._to_map(response.lvFeeders, LvFeeder) if config.include_lv_feeders else None,
         )
 
         return self.__network_hierarchy
@@ -689,6 +709,7 @@ _nio_type_to_cim = {
     # Extensions IEC61970 Base Core #
     #################################
 
+    "hvCustomer": HvCustomer,
     "site": Site,
 
     ###################################
@@ -697,6 +718,7 @@ _nio_type_to_cim = {
 
     "loop": Loop,
     "lvFeeder": LvFeeder,
+    "lvSubstation": LvSubstation,
 
     ##################################################
     # Extensions IEC61970 Base Generation Production #
@@ -836,6 +858,7 @@ _nio_type_to_cim = {
     #######################
 
     "acLineSegment": AcLineSegment,
+    "acLineSegmentPhase": AcLineSegmentPhase,
     "breaker": Breaker,
     "busbarSection": BusbarSection,
     "clamp": Clamp,

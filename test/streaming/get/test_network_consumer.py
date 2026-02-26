@@ -13,9 +13,10 @@ from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
+from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumer
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetEquipmentForRestrictionRequest, \
     GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, IncludedEnergizedContainers as PBIncludedEnergizedContainers, \
-    NetworkState as PBNetworkState
+    NetworkState as PBNetworkState, GetNetworkHierarchyRequest
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
@@ -29,7 +30,7 @@ from zepben.ewb import NetworkConsumerClient, NetworkService, IdentifiedObject, 
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
     BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
     UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
-    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole, generate_id
+    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole, generate_id, GrpcResult, NetworkHierarchy, MultiObjectResult, LvSubstation
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
@@ -166,10 +167,92 @@ class TestNetworkConsumer:
         async def client_test():
             hierarchy = (await self.client.get_network_hierarchy()).throw_on_error().value
 
-            _validate_hierarchy(hierarchy, expected_ns)
-            _validate_hierarchy(hierarchy, self.service)
+            try:
+                _validate_hierarchy(hierarchy, expected_ns)
+                _validate_hierarchy(hierarchy, self.service)
+            except Exception:
+                pytest.fail()
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(expected_ns)))])
+
+    async def _test_filtered_get_network_hierarchy(self, service: NetworkService, **_filter: bool):
+        (_filters := dict(
+            include_geographical_regions=False,
+            include_sub_geographical_regions=False,
+            include_substations=False,
+            include_feeders=False,
+            include_circuits=False,
+            include_loops=False,
+            include_lv_substations=False,
+            include_lv_feeders=False,
+        )).update(_filter)
+
+        async def client_test():
+            hierarchy = (await self.client.get_network_hierarchy(**_filters)).throw_on_error().value
+
+            try:
+                _validate_hierarchy(hierarchy, service)
+                _validate_hierarchy(hierarchy, self.service)
+            except AssertionError:
+                pytest.fail()
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(service)))])
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_geographical_regions(self):
+        ns = NetworkService()
+        ns.add(GeographicalRegion(mrid="g1"))
+        ns.add(GeographicalRegion(mrid="g2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_geographical_regions=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_sub_geographical_regions(self):
+        ns = NetworkService()
+        ns.add(SubGeographicalRegion(mrid="sg1"))
+        ns.add(SubGeographicalRegion(mrid="sg2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_sub_geographical_regions=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_substations(self):
+        ns = NetworkService()
+        ns.add(Substation(mrid="s1"))
+        ns.add(Substation(mrid="s2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_substations=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_feeders(self):
+        ns = NetworkService()
+        ns.add(Feeder(mrid="f1"))
+        ns.add(Feeder(mrid="f2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_feeders=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_circuits(self):
+        ns = NetworkService()
+        ns.add(Circuit(mrid="c1"))
+        ns.add(Circuit(mrid="c2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_circuits=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_loops(self):
+        ns = NetworkService()
+        ns.add(Loop(mrid="l1"))
+        ns.add(Loop(mrid="l2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_loops=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_lv_substations(self):
+        ns = NetworkService()
+        ns.add(LvSubstation(mrid="lvs1"))
+        ns.add(LvSubstation(mrid="lvs2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_lv_substations=True)
+
+    @pytest.mark.asyncio
+    async def test_can_optionally_retrieve_lv_feeders(self):
+        ns = NetworkService()
+        ns.add(LvFeeder(mrid="lvf1"))
+        ns.add(LvFeeder(mrid="lvf2"))
+        await self._test_filtered_get_network_hierarchy(ns, include_lv_feeders=True)
 
     @pytest.mark.asyncio
     async def test_get_network_hierarchy_is_cached(self):
@@ -275,10 +358,11 @@ class TestNetworkConsumer:
         async def client_test():
             mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
 
+            # lvf5 wont be in the collection of returned objects as its part of the network hierarchy already
             assert self.service.len_of() == 16
-            assert len(mor.objects) == 16
-            assert len({"lvf5", "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
-                        "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
+            assert len(mor.objects) == 15
+            assert len({"tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
+                        "b2-t2", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
             assert "tx4" not in mor.objects
             with pytest.raises(KeyError):
                 self.service.get("tx4")
@@ -290,10 +374,9 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeders_with_open_point))),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses])
+                StreamGrpc('getIdentifiedObjects', [object_responses]),
             ]
         )
 
@@ -337,10 +420,9 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_pole))),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_pole)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses])
+                StreamGrpc('getIdentifiedObjects', [object_responses]),
             ]
         )
 
@@ -599,6 +681,10 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
         nio = NetworkIdentifiedObject(feeder=obj.to_pb())
     elif isinstance(obj, Location):
         nio = NetworkIdentifiedObject(location=obj.to_pb())
+    elif isinstance(obj, LvFeeder):
+        nio = NetworkIdentifiedObject(lvFeeder=obj.to_pb())
+    elif isinstance(obj, LvSubstation):
+        nio = NetworkIdentifiedObject(lvSubstation=obj.to_pb())
     elif isinstance(obj, OverheadWireInfo):
         nio = NetworkIdentifiedObject(overheadWireInfo=obj.to_pb())
     elif isinstance(obj, PerLengthSequenceImpedance):
@@ -708,21 +794,27 @@ def _create_hierarchy_response(service: NetworkService) -> GetNetworkHierarchyRe
         substations=list(map(lambda it: it.to_pb(), service.objects(Substation))),
         feeders=list(map(lambda it: it.to_pb(), service.objects(Feeder))),
         circuits=list(map(lambda it: it.to_pb(), service.objects(Circuit))),
-        loops=list(map(lambda it: it.to_pb(), service.objects(Loop)))
+        loops=list(map(lambda it: it.to_pb(), service.objects(Loop))),
+        lvSubstations=list(map(lambda it: it.to_pb(), service.objects(LvSubstation))),
+        lvFeeders=list(map(lambda it: it.to_pb(), service.objects(LvFeeder))),
     )
 
 
 def _validate_hierarchy(hierarchy, service):
-    assert hierarchy.geographical_regions.keys() == {it.mrid for it in service.objects(GeographicalRegion)}
-    assert hierarchy.sub_geographical_regions.keys() == {it.mrid for it in service.objects(SubGeographicalRegion)}
-    assert hierarchy.substations.keys() == {it.mrid for it in service.objects(Substation)}
-    assert hierarchy.feeders.keys() == {it.mrid for it in service.objects(Feeder)}
-    assert hierarchy.circuits.keys() == {it.mrid for it in service.objects(Circuit)}
-    assert hierarchy.loops.keys() == {it.mrid for it in service.objects(Loop)}
+    assert (hierarchy.geographical_regions or {}).keys() == {it.mrid for it in service.objects(GeographicalRegion)}
+    assert (hierarchy.sub_geographical_regions or {}).keys() == {it.mrid for it in service.objects(SubGeographicalRegion)}
+    assert (hierarchy.substations or {}).keys() == {it.mrid for it in service.objects(Substation)}
+    assert (hierarchy.feeders or {}).keys() == {it.mrid for it in service.objects(Feeder)}
+    assert (hierarchy.circuits or {}).keys() == {it.mrid for it in service.objects(Circuit)}
+    assert (hierarchy.loops or {}).keys() == {it.mrid for it in service.objects(Loop)}
+    assert (hierarchy.lv_substations or {}).keys() == {it.mrid for it in service.objects(LvSubstation)}
+    assert (hierarchy.lv_feeders or {}).keys() == {it.mrid for it in service.objects(LvFeeder)}
 
 
-def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
+def _create_object_responses(
+    ns: NetworkService,
+    mrids: Optional[Iterable[str]] = None
+) -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
     valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:
