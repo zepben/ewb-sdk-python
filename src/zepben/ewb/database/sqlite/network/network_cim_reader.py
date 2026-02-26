@@ -2050,11 +2050,13 @@ class NetworkCimReader(BaseCimReader):
         :raises SqlException: For any errors encountered reading from the database.
         """
         ac_line_segment_phase = AcLineSegmentPhase(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
-        ac_line_segment_phase.asset_info = self._ensure_get(result_set.get_string(table.wire_info_mrid.query_index), WireInfo)
-        ac_line_segment_phase.ac_line_segment = self._ensure_get(result_set.get_string(table.ac_line_segment_mrid.query_index), AcLineSegment)
-        ac_line_segment_phase.ac_line_segment.add_phase(ac_line_segment_phase)
+        ac_line_segment_phase.asset_info = self._ensure_get(result_set.get_string(table.wire_info_mrid.query_index, on_none=None), WireInfo)
+        ac_line_segment = self._ensure_get(result_set.get_string(table.ac_line_segment_mrid.query_index, on_none=None), AcLineSegment)
+        if ac_line_segment is not None:
+            ac_line_segment.add_phase(ac_line_segment_phase)
+            ac_line_segment_phase.ac_line_segment = ac_line_segment
         ac_line_segment_phase.phase = SinglePhaseKind[result_set.get_string(table.phase.query_index)]
-        ac_line_segment_phase.sequence_number = result_set.get_int(table.sequence_number.query_index)
+        ac_line_segment_phase.sequence_number = result_set.get_int(table.sequence_number.query_index, on_none=None)
 
         return self._load_power_system_resource(ac_line_segment_phase, table, result_set) and self._add_or_throw(ac_line_segment_phase)
 

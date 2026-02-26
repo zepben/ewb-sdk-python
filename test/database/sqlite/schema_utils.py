@@ -484,9 +484,10 @@ class SchemaNetworks:
                 service.add(it)
 
         if isinstance(filled, AcLineSegmentPhase):
-            service.add(filled.ac_line_segment)
             if filled.asset_info is not None:
                 service.add(filled.asset_info)
+            filled.ac_line_segment.add_phase(filled)
+            service.add(filled.ac_line_segment)
 
         if isinstance(filled, Clamp):
             filled.ac_line_segment.add_clamp(filled)
