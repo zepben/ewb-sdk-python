@@ -4,12 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, Callable
 
-from zepben.ewb import NetworkStateOperators, FeederDirection, SinglePhaseKind, Switch, PowerTransformer
+from zepben.ewb import NetworkStateOperators, FeederDirection, SinglePhaseKind, Switch, PowerTransformer, stop_on_shunt_compensator_ground
 from zepben.ewb.services.network.tracing.networktrace.conditions.conditions import limit_equipment_steps
 from zepben.ewb.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
 from zepben.ewb.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.shunt_compensator_condition import _ShuntCompensatorCondition
 
 
 class TestCondition:
@@ -58,3 +59,7 @@ class TestCondition:
         assert isinstance(condition, EquipmentTypeStepLimitCondition)
         assert condition.limit == 1
         assert condition.equipment_type is PowerTransformer
+
+    def test_stop_on_shunt_compensator_ground_condition(self):
+        condition = stop_on_shunt_compensator_ground()
+        assert isinstance(condition, _ShuntCompensatorCondition._StopOnGround)

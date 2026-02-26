@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-__all__ = ['upstream', 'downstream', 'with_direction', 'limit_equipment_steps', 'stop_at_open']
+__all__ = ['upstream', 'downstream', 'with_direction', 'limit_equipment_steps', 'stop_at_open', 'stop_on_shunt_compensator_ground']
 
 from typing import TYPE_CHECKING, TypeVar, Type, Callable
 
@@ -13,6 +13,7 @@ from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDi
 from zepben.ewb.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.shunt_compensator_condition import _ShuntCompensatorCondition
 
 T = TypeVar('T')
 
@@ -71,3 +72,12 @@ def limit_equipment_steps(limit: int, equipment_type: Type[ConductingEquipment] 
 
 def stop_at_open():
     return lambda state_operator: state_operator.stop_at_open()
+
+def stop_on_shunt_compensator_ground() -> QueueCondition[NetworkTraceStep[T]]:
+    """
+    Creates a `NetworkTrace` condition that stops tracing a path if it attempts to traverse a `ShuntCompensator` using its grounding terminal.
+
+    :return: A `NetworkTraceQueueCondition` that results in not queueing when a path attempts to traverse a `ShuntCompensator` using its grounding terminal.
+    """
+    # noinspection PyProtectedMember
+    return _ShuntCompensatorCondition._StopOnGround()

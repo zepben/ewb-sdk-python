@@ -5,9 +5,9 @@
 
 __all__ = ["TerminalConnectivityInternal"]
 
-from typing import Set, Optional
+from typing import Set, Optional, Iterable, cast
 
-from zepben.ewb import Terminal, PowerTransformer, SinglePhaseKind, ConnectivityResult, NominalPhasePath
+from zepben.ewb import Terminal, PowerTransformer, SinglePhaseKind, ConnectivityResult, NominalPhasePath, ShuntCompensator
 from zepben.ewb.services.network.tracing.connectivity.transformer_phase_paths import transformer_phase_paths
 
 
@@ -36,29 +36,43 @@ class TerminalConnectivityInternal:
             include_phases = set(terminal.phases.single_phases)
 
         if isinstance(terminal.conducting_equipment, PowerTransformer):
-            return self._transformer_terminal_connectivity(terminal, other_terminal, include_phases)
-
-        return self._straight_terminal_connectivity(terminal, other_terminal, include_phases)
-
-    @staticmethod
-    def _transformer_terminal_connectivity(
-        terminal: Terminal,
-        other_terminal: Terminal,
-        include_phases: Set[SinglePhaseKind]
-    ) -> ConnectivityResult:
-        paths = [it for it in transformer_phase_paths.get(terminal.phases, {}).get(other_terminal.phases, [])
-                 if (it.from_phase in include_phases) or (it.from_phase == SinglePhaseKind.NONE)]
+            paths = self._find_transformer_phase_paths(terminal, other_terminal, include_phases)
+        elif isinstance(terminal.conducting_equipment, ShuntCompensator):
+            paths = self._find_shunt_compensator_phase_paths(terminal, other_terminal, include_phases)
+        else:
+            paths = self._find_straight_phase_paths(terminal, other_terminal, include_phases)
 
         return ConnectivityResult(terminal, other_terminal, paths)
 
     @staticmethod
-    def _straight_terminal_connectivity(
+    def _find_transformer_phase_paths(
         terminal: Terminal,
         other_terminal: Terminal,
         include_phases: Set[SinglePhaseKind]
-    ) -> ConnectivityResult:
-        # noinspection PyArgumentList
-        paths = [NominalPhasePath(it, it) for it in set(terminal.phases.single_phases).intersection(set(other_terminal.phases.single_phases))
-                 if it in include_phases]
+    ) -> Iterable[NominalPhasePath]:
+        return [it for it in transformer_phase_paths.get(terminal.phases, {}).get(other_terminal.phases, [])
+                if (it.from_phase in include_phases) or (it.from_phase == SinglePhaseKind.NONE)]
 
-        return ConnectivityResult(terminal, other_terminal, paths)
+    def _find_shunt_compensator_phase_paths(
+        self,
+        terminal: Terminal,
+        other_terminal: Terminal,
+        include_phases: Set[SinglePhaseKind]
+    ) -> Iterable[NominalPhasePath]:
+        grounding_terminal = cast(ShuntCompensator, terminal.conducting_equipment).grounding_terminal
+
+        if grounding_terminal == terminal:
+            return [NominalPhasePath(SinglePhaseKind.NONE, it) for it in other_terminal.phases.single_phases]
+        elif grounding_terminal == other_terminal:
+            return [NominalPhasePath(SinglePhaseKind.NONE, SinglePhaseKind.N)]
+        else:
+            return self._find_straight_phase_paths(terminal, other_terminal, include_phases)
+
+    @staticmethod
+    def _find_straight_phase_paths(
+        terminal: Terminal,
+        other_terminal: Terminal,
+        include_phases: Set[SinglePhaseKind]
+    ) -> Iterable[NominalPhasePath]:
+        return [NominalPhasePath(it, it) for it in set(terminal.phases.single_phases).intersection(set(other_terminal.phases.single_phases))
+                if it in include_phases]

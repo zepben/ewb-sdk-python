@@ -3,17 +3,30 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from traceback import print_tb
-from typing import TypeVar, Type, Set, Any
+from typing import TypeVar, Type, Set, Any, cast, Callable
 
 from hypothesis import given
 from hypothesis.strategies import SearchStrategy
-
-from zepben.ewb import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
-    TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable, NetworkService, CustomerService, DiagramService, Feeder, LvFeeder
-from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 
-from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
+from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
+from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_name_types import TableNameTypes
+from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_names import TableNames
+from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
+from zepben.ewb.database.sqlite.tables.table_metadata_data_sources import TableMetadataDataSources
+from zepben.ewb.database.sqlite.tables.table_version import TableVersion
+from zepben.ewb.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
+from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.ewb.services.common.base_service import BaseService
+from zepben.ewb.services.common.base_service_comparator import BaseServiceComparator
+from zepben.ewb.services.common.reference_resolvers import shunt_compensator_to_terminal_resolver, UnresolvedReference
+from zepben.ewb.services.customer.customers import CustomerService
+from zepben.ewb.services.diagram.diagrams import DiagramService
+from zepben.ewb.services.network.network_service import NetworkService
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -102,6 +115,7 @@ def validate_service_translations(
             print(diffs)
         assert not diffs
 
+
 def _format_validation_error(description: str, classes: Set[str]) -> str:
     return f"\n{description}: {classes}\n" if classes else ""
 
@@ -114,28 +128,45 @@ def _remove_unsent_references(cim: T):
     if isinstance(cim, OperationalRestriction):
         cim.clear_equipment()
 
-    if isinstance(cim, Feeder):
-        cim.clear_current_equipment()
-
     if isinstance(cim, ConnectivityNode):
         cim.clear_terminals()
-
-    if isinstance(cim, LvFeeder):
-        cim.clear_current_equipment()
-
-    if isinstance(cim, LvSubstation):
-        cim.clear_current_equipment()
 
 
 def _add_with_unresolved_references(service: BaseService, cim: T) -> T:
     # We need to convert the populated item before we check the differences so we can complete the unresolved references.
     # noinspection PyUnresolvedReferences
     converted_cim = service.add_from_pb(cim.to_pb())
-    for ref in service.unresolved_references():
+
+    def resolve(unresolved_reference: UnresolvedReference):
+        _, to_mrid, resolver, _ = unresolved_reference
         try:
-            service.add(ref.resolver.to_class(ref.to_mrid))
+            io = unresolved_reference.resolver.to_class(unresolved_reference.to_mrid)
+
+            # Special case for the shunt compensator grounding terminal which must have phase N.
+            if resolver is shunt_compensator_to_terminal_resolver:
+                cast(Terminal, io).phases = PhaseCode.N
+
+            service.add(io)
         except Exception as e:
             # If this fails you need to add a concrete type mapping to the abstractCreators map at the top of this class.
-            assert False, f"Failed to create unresolved reference for {ref.resolver.to_class.__name__}. {e}"
+            raise TypeError(f"Failed to create unresolved reference for {resolver.to_class}.", e)
+
+    def resolve_all(predicate: Callable[[UnresolvedReference], bool]):
+        # Collect to a list to prevent hte underlying collection changing as we iterate.
+        for it in [ref for ref in service.unresolved_references() if predicate(ref)]:
+            resolve(it)
+
+    #
+    # NOTE: We need a special case to exclude any `ShuntCompensator.groundingTerminal` resolvers to ensure it is added after any other
+    #       terminals, to prevent assigning incorrect sequence numbers when we create unresolved terminals. This is complicated by
+    #       having a matching resolver being added in the `ConductingEquipment.terminals` that also needs to be delayed.
+    #
+    delay_ids = {it.to_mrid for it in service.unresolved_references() if it.resolver is shunt_compensator_to_terminal_resolver}
+    if delay_ids:
+        resolve_all(lambda it: it.to_mrid not in delay_ids)
+        # Make sure we resolve the `grounding_terminal` reference before its matching the `terminals` one, otherwise we will end up with the wrong phases.
+        resolve_all(lambda it: it.resolver is shunt_compensator_to_terminal_resolver)
+
+    resolve_all(lambda _: True)
 
     return converted_cim

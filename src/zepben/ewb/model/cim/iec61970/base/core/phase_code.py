@@ -199,4 +199,8 @@ _PHASE_CODE_VALUES = list(PhaseCode.__members__.values())
 
 # The IDE is detecting `it` as a `SinglePhaseKind` rather than a `PhaseCode`
 # noinspection PyUnresolvedReferences
-_PHASE_CODE_BY_PHASES = {frozenset(it.single_phases): it for it in PhaseCode}
+_PHASE_CODE_BY_PHASES = {
+    k: v for k, v in
+    [(frozenset(it.single_phases), it) for it in PhaseCode] +
+    [(frozenset(it.single_phases + [SinglePhaseKind.NONE]), it) for it in PhaseCode]
+}

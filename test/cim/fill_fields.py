@@ -75,7 +75,7 @@ from util import mrid_strategy
 from zepben.ewb import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none, just, \
-    lists as hypo_lists, floats as hypo_floats
+    lists as hypo_lists, floats as hypo_floats, composite
 
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
@@ -2193,14 +2193,47 @@ def series_compensator_kwargs(include_runtime: bool = True):
 
 
 def shunt_compensator_kwargs(include_runtime: bool):
+    #
+    # NOTE: Grounding terminal must have phase N, so we need to fiddle with the terminals. Since we can't reference other strategies via
+    #       Hypothesis, we need to build our own to deal with the terminals. To do this, we replace the original `terminals` strategy
+    #       with our wrapper, which will call the original.
+    #
+    regulating_cond_eq = regulating_cond_eq_kwargs(include_runtime)
+    original_terminals_strategy = regulating_cond_eq["terminals"]
+
+    last_terminal = None
+
+    @composite
+    def terminals_wrapper(draw):
+        """
+        A custom strategy that calls the original `terminals` strategy, but stores the generated terminals so we can pick the last later.
+        """
+        nonlocal last_terminal
+        terminals = draw(original_terminals_strategy)
+        last_terminal = terminals[-1]
+        return terminals
+
+    # noinspection PyUnusedLocal
+    @composite
+    def last_terminal_with_n(draw):
+        """
+        A custom strategy that returns the last terminal generated, replacing its phases with N.
+        """
+        last_terminal.phases = PhaseCode.N
+
+        return last_terminal
+
+    # Replace the standard `terminals` strategy with our wrapper, so we can reuse a terminal as the `grounding_terminal`.
+    regulating_cond_eq["terminals"] = terminals_wrapper()
+
     return {
-        **regulating_cond_eq_kwargs(include_runtime),
+        **regulating_cond_eq,
         "asset_info": builds(ShuntCompensatorInfo, **identified_object_kwargs(include_runtime)),
         "grounded": booleans(),
         "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         "phase_connection": sampled_phase_shunt_connection_kind(),
         "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "grounding_terminal": builds(Terminal, **identified_object_kwargs(include_runtime)),
+        "grounding_terminal": last_terminal_with_n(),
     }
 
 

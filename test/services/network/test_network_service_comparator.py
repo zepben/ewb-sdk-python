@@ -1541,7 +1541,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: ShuntCompensatorInfo(mrid="asci1"),
             lambda _: ShuntCompensatorInfo(mrid="asci2"),
         )
-        self.validator.validate_property(ShuntCompensator.grounding_terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_property(
+            ShuntCompensator.grounding_terminal,
+            creator,
+            lambda _: Terminal(mrid="t1", phases=PhaseCode.N),
+            lambda _: Terminal(mrid="t2", phases=PhaseCode.N),
+            expected_differences = {"terminals"}, # The terminals should be different as setting the groundingTerminal also adds the terminal.
+        )
 
     def test_compare_static_var_compensator(self):
         self._compare_conducting_equipment(StaticVarCompensator)
