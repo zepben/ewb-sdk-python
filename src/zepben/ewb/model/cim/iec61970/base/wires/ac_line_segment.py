@@ -264,12 +264,12 @@ class AcLineSegment(Conductor):
         if phase.ac_line_segment is None:
             phase.ac_line_segment = self
 
-        require(phase.ac_line_segment is self, lambda: f"${phase} `acLineSegment` property references ${phase.ac_line_segment}, expected ${self}.")
+        require(phase.ac_line_segment is self, lambda: f"${phase} `ac_line_segment` property references ${phase.ac_line_segment}, expected ${self}.")
 
         if self._phases is None:
             self._phases = list()
         self._phases.append(phase)
-        self._phases.sort(key=lambda it: getattr(it, 'sequence_number') or 0)
+        self._phases.sort(key=lambda it: it.sequence_number or 0)
         return self
 
     def remove_phase(self, phase: AcLineSegmentPhase) -> 'AcLineSegment':

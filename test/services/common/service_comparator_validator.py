@@ -139,7 +139,7 @@ class ServiceComparatorValidator(object):
         self,
         prop: Property,
         add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        creator: Type[TIdentifiedObject],
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
