@@ -15,25 +15,21 @@ class PolarizingQuantityType(Enum):
     """
     [ZBEX] Defines the type of polarizing quantity used by the directional relay. This informs how the relay
     determines the reference voltage from the Voltage transformers associated with its parent ProtectionEquipment.
+
+    :var UNKNOWN: [ZBEX] Type is unknown.
+    :var SELF_PHASE_VOLTAGE: [ZBEX] Uses the voltage of the same phase as the current element (e.g., Va for an Ia element).
+    :var QUADRATURE_VOLTAGE: [ZBEX] Uses a quadrature voltage (e.g., Vbc for an Ia element, specific convention applies.
+    :var ZERO_SEQUENCE_VOLTAGE: [ZBEX] Uses the zero sequence voltage (Vo), derived from three phase voltages.
+    :var NEGATIVE_SEQUENCE_VOLTAGE: [ZBEX] Uses the negative sequence voltage (V2), derived from three phase voltages.
+    :var POSITIVE_SEQUENCE_VOLTAGE: [ZBEX] Uses the positive sequence voltage (V1), derived from three phase voltages.
     """
 
     UNKNOWN = 0
-    """[ZBEX] Type is unknown."""
-
     SELF_PHASE_VOLTAGE = 1
-    """[ZBEX] Uses the voltage of the same phase as the current element (e.g., Va for an Ia element)."""
-
     QUADRATURE_VOLTAGE = 2
-    """[ZBEX] Uses a quadrature voltage (e.g., Vbc for an Ia element, specific convention applies."""
-
     ZERO_SEQUENCE_VOLTAGE = 3
-    """[ZBEX] Uses the zero sequence voltage (Vo), derived from three phase voltages."""
-
     NEGATIVE_SEQUENCE_VOLTAGE = 4
-    """[ZBEX] Uses the negative sequence voltage (V2), derived from three phase voltages."""
-
     POSITIVE_SEQUENCE_VOLTAGE = 5
-    """[ZBEX] Uses the positive sequence voltage (V1), derived from three phase voltages."""
 
     @property
     def short_name(self):

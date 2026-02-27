@@ -81,7 +81,7 @@ class Feeder(EquipmentContainer):
         """
         Contained `Equipment` using the current state of the network.
         """
-        return ngen(self._current_equipment.values() if self._current_equipment is not None else None)
+        return ngen(self._current_equipment)
 
     def num_current_equipment(self):
         """
@@ -142,7 +142,7 @@ class Feeder(EquipmentContainer):
         """
         The LV feeders that are normally energized by this feeder.
         """
-        return ngen(self._normal_energized_lv_feeders.values() if self._normal_energized_lv_feeders is not None else None)
+        return ngen(self._normal_energized_lv_feeders)
 
     def num_normal_energized_lv_feeders(self) -> int:
         """
@@ -203,7 +203,7 @@ class Feeder(EquipmentContainer):
         """
         The LV feeders that are currently energized by this feeder.
         """
-        return ngen(self._current_energized_lv_feeders.values() if self._current_energized_lv_feeders is not None else self._current_energized_lv_feeders)
+        return ngen(self._current_energized_lv_feeders)
 
     def num_current_energized_lv_feeders(self) -> int:
         """

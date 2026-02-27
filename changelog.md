@@ -26,6 +26,7 @@
 * `Agreement` now supports `validity_interval`, the date and time interval the agreement is valid (from going into effect to termination).
 * `StreetDetail` now supports extension `building_number`, the number of the building.
 * `TownDetail` now supports `country`, the name of the country.
+* `ngen()` now directly accepts `dict()`s and will return a generator of the `values()` or `None` if `collection is None`
 
 ### Fixes
 * Reordered the feeder equipment and direction assignment on database read to prevent parallel feeders from tracing back into the zone substation.

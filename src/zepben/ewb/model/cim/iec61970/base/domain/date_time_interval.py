@@ -15,9 +15,13 @@ from zepben.ewb import require
 class DateTimeInterval:
     """
     Interval between two date and time points, where the interval includes the start time but excludes end time.
+
+    :var start: Start date and time of this interval. The start date and time is included in the defined interval.
+    :var end: End date and time of this interval. The end date and time where the interval is defined up to, but excluded.
     """
     start: datetime | None = None
     """Start date and time of this interval. The start date and time is included in the defined interval."""
+
     end: datetime | None = None
     """End date and time of this interval. The end date and time where the interval is defined up to, but excluded."""
 

@@ -12,11 +12,17 @@ from dataclasses import dataclass
 class ElectronicAddress:
     """
     Electronic address information.
+
+    :var email1: Primary email address.
+    :var is_primary: [ZBEX] Whether this email is the primary address of the contact.
+    :var description: [ZBEX] A description for this email, e.g: work, personal.
     """
 
     email1: str | None = None
     """Primary email address."""
+
     is_primary: bool | None = None
     """[ZBEX] Whether this email is the primary address of the contact."""
+
     description: str | None = None
     """[ZBEX] A description for this email, e.g: work, personal."""

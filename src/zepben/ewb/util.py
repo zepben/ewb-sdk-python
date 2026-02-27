@@ -125,8 +125,11 @@ def nlen(sized: Optional[Sized]) -> int:
     return 0 if sized is None else len(sized)
 
 
-def ngen(collection: Optional[Iterable[T]]) -> Generator[T, None, None]:
-    yield from collection or {}
+def ngen(collection: dict[str, T] | Iterable[T] | None) -> Generator[T, None, None]:
+    if isinstance(collection, dict):
+        yield from (collection if collection else {}).values()
+    else:
+        yield from collection or {}
 
 
 def is_none_or_empty(sized: Optional[Sized]) -> bool:

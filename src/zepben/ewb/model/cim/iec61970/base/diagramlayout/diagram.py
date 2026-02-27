@@ -49,7 +49,7 @@ class Diagram(IdentifiedObject):
         """
         The diagram objects belonging to this diagram.
         """
-        return ngen(self._diagram_objects.values() if self._diagram_objects is not None else None)
+        return ngen(self._diagram_objects)
 
     def get_diagram_object(self, mrid: str) -> DiagramObject:
         """
