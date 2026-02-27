@@ -52,77 +52,41 @@ class WireInsulationKind(Enum):
      """
 
     UNKNOWN = 0
-
     asbestosAndVarnishedCambric = 1
-
     beltedPilc = 2
-
     butyl = 3
-
     crosslinkedPolyethylene = 4
-
     ethylenePropyleneRubber = 5
-
     highMolecularWeightPolyethylene = 6
-
     highPressureFluidFilled = 7
-
     lowCapacitanceRubber = 8
-
     oilPaper = 9
-
     other = 10
-
     ozoneResistantRubber = 11
-
     rubber = 12
-
     siliconRubber = 13
-
     treeResistantHighMolecularWeightPolyethylene = 14
-
     treeRetardantCrosslinkedPolyethylene = 15
-
     unbeltedPilc = 16
-
     varnishedCambricCloth = 17
-
     varnishedDacronGlass = 18
-
     crosslinkedPolyethyleneWithHelicallyWoundCopperScreen = 19
-
     crosslinkedPolyethyleneWithWavewoundAluminiumScreen = 20
-
     doubleInsulatedNeutralScreened = 21
-
     doubleWireArmour = 22
-
     doubleWireArmourWithPolyvinylChlorideSheath = 23
-
     ethylenePropyleneRubberStrandedCopperConductor = 24
-
     ethylenePropyleneRubberWithHelicallyWoundCopperScreen = 25
-
     NONE = 26
-
     paperWithLeadAlloySheath = 27
-
     paperWithLeadAlloySheathAndPvcOuterSheathScreenedHochstadterConstruction = 28
-
     paperWithLeadAlloySheathSingleWireArmoured = 29
-
     paperWithLeadAlloySheathSingleWireArmouredBeltedConstruction = 30
-
     paperWithLeadAlloySheathSingleWireArmouredHessianServed = 31
-
     paperWithLeadAlloySheathSingleWireArmouredWithHighDensityPoluethyleneScreen = 32
-
     paperWithLeadAlloySheathSingleWireArmouredWithWavewoundAluminiumScreen = 33
-
     polyvinylChloride = 34
-
     polyvinylChlorideWithPolyvinylChlorideScreen = 35
-
     polyvinylChlorideWithWavewoundCopperScreen = 36
 
     @property

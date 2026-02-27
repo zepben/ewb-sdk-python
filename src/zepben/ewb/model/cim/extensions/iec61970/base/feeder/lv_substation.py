@@ -14,14 +14,14 @@ from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFee
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
-
 @zbex
 class LvSubstation(EquipmentContainer):
     """
-    [ZBEX] a collection of equipment for purposes other than generation or utilization, through which electric energy in bulk is passed for the distribution of energy to low voltage network.
-    @property normal_energizing_feeders [ZBEX] the feeders that nominally energize the substation. also used for naming purposes.
-    @property normal_energized_lv_feeders [ZBEX] the lv_feeders that are nominally energized by this lv_substation. also used for naming purposes.
-    @property current_energizing_feeders [ZBEX] the feeders that currently energize the substation. also used for naming purposes.
+    [ZBEX] a collection of equipment for purposes other than generation or utilization, through which electric energy in bulk is passed for the distribution of
+    energy to low voltage network.
+    :var normal_energizing_feeders: [ZBEX] the feeders that normally energize the substation. also used for naming purposes.
+    :var normal_energized_lv_feeders: [ZBEX] the lv_feeders that are normally energized by this lv_substation. also used for naming purposes.
+    :var current_energizing_feeders: [ZBEX] the feeders that currently energize the substation. also used for naming purposes.
     """
 
     _normal_energizing_feeders_by_id: dict[str | None, 'Feeder'] | None = None
@@ -31,12 +31,12 @@ class LvSubstation(EquipmentContainer):
     @zbex
     @property
     def normal_energizing_feeders(self) -> Generator["Feeder", None, None]:
-        """[ZBEX] The HV/MV feeders that normally energize this ``LvSubstation``. The returned collection is read only."""
-        return ngen((self._normal_energizing_feeders_by_id or {}).values())
+        """[ZBEX] The HV/MV feeders that normally energize this ``LvSubstation``."""
+        return ngen(self._normal_energizing_feeders_by_id)
 
     def num_normal_energizing_feeders(self) -> int:
         """Get the number of entries in the normal ``Feeder`` collection."""
-        return nlen(self._normal_energizing_feeders_by_id or {})
+        return nlen(self._normal_energizing_feeders_by_id)
 
     def get_normal_energizing_feeder(self, mrid: str) -> 'Feeder | None':
         """
@@ -84,11 +84,12 @@ class LvSubstation(EquipmentContainer):
     @zbex
     @property
     def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        return ngen((self._normal_energized_lv_feeders_by_id or {}).values())
+        """[ZBEX] the ``LvFeeders`` that are normally energized by this ``LvSubstation``."""
+        return ngen(self._normal_energized_lv_feeders_by_id)
 
     def num_normal_energized_lv_feeders(self) -> int:
         """Get the number of entries in the normal ``LvFeeder`` collection."""
-        return nlen(self._normal_energized_lv_feeders_by_id or {})
+        return nlen(self._normal_energized_lv_feeders_by_id)
 
     def get_normal_energized_lv_feeder(self, mrid: str) -> LvFeeder | None:
         """
@@ -101,7 +102,10 @@ class LvSubstation(EquipmentContainer):
 
     def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
         """
+        Associate this ``LvSubstation`` with an ``LvFeeder`` in the normal state of the network.
+
         :param lv_feeder: the ``LvFeeder`` to associate with this feeder in the normal state of the network.
+        :returns: This ``LvSubstation`` for fluent use.
         """
         if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
             return self
@@ -113,6 +117,8 @@ class LvSubstation(EquipmentContainer):
 
     def remove_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
         """ 
+        Disassociate this ``LvSubstation`` from an ``LvFeeder`` in the normal state of the network.
+
         :param lv_feeder: the ``LvFeeder`` to disassociate from this HV/MV feeder in the normal state of the network.
         """
         self._normal_energized_lv_feeders_by_id = safe_remove_by_id(self._normal_energized_lv_feeders_by_id, lv_feeder)
@@ -131,15 +137,15 @@ class LvSubstation(EquipmentContainer):
     @property
     def current_energizing_feeders(self) -> Generator['Feeder', None, None]:
         """
-        [ZBEX] The HV/MV feeders that currently energize this LV substation. The returned collection is read only.
+        [ZBEX] The HV/MV feeders that currently energize this LV substation.
         """
-        return ngen((self._current_energizing_feeders_by_id or {}).values())
+        return ngen(self._current_energizing_feeders_by_id)
 
     def num_current_energizing_feeders(self) -> int:
         """
         Get the number of entries in the current ``Feeder`` collection.
         """
-        return nlen(self._current_energizing_feeders_by_id or {})
+        return nlen(self._current_energizing_feeders_by_id)
 
     def get_current_energizing_feeder(self, mrid: str) -> 'Feeder | None':
         """
@@ -185,7 +191,8 @@ class LvSubstation(EquipmentContainer):
 
     def normal_energized_lv_switch_feeders(self) -> Generator[LvFeeder, None, None]:
         """
-        Retrieves all normally energized LvFeeders that represent low voltage network connected below a switch on the edge of this LvSubstation. This is all LvFeeders in the normalEnergizedLvFeeders that has a normalHeadTerminal attached to a Switch.
+        Retrieves all normally energized LvFeeders that represent low voltage network connected below a switch on the edge of this LvSubstation. This is all
+        LvFeeders in the normalEnergizedLvFeeders that has a normalHeadTerminal attached to a Switch.
         """
         # NOTE: import exists here due to a circular import problem
         from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
