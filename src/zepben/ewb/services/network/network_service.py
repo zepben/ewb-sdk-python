@@ -10,7 +10,6 @@ __all__ = ["connect", "connected_terminals", "connected_equipment", "NetworkServ
 import itertools
 import logging
 from enum import Enum
-from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 

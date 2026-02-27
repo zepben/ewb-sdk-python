@@ -239,6 +239,23 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         return await self._get_terminals_for_connectivity_node(node)
 
 
+    @overload
+    async def get_network_hierarchy(
+        self,
+        include_geographical_regions: bool = None,
+        include_subgeographical_regions: bool = None,
+        include_substations: bool = None,
+        include_feeders: bool = None,
+        include_circuits: bool = None,
+        include_loops: bool = None,
+        include_lv_substations: bool = None,
+        include_lv_feeders: bool = None,
+    ) -> GrpcResult[NetworkHierarchy]: ...
+
+    @overload
+    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]: ...
+    # This method needs to exist as @overload requires 2 decorated methods and 1 functional method.
+
     async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]:
 
         """
