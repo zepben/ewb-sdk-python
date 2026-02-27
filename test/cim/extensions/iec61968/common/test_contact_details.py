@@ -49,8 +49,8 @@ def test_contact_details_constructor_default():
     assert c.preferred_contact_method == ContactMethodType.UNKNOWN
     assert c.is_primary is None
     assert c.business_name is None
-    assert list(c.phone_numbers) is None
-    assert list(c.electronic_addresses) is None
+    assert not list(c.phone_numbers)
+    assert not list(c.electronic_addresses)
 
 
 @given(**contact_details_kwargs)
