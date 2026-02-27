@@ -203,10 +203,10 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     #######################################
 
     @settings(**hypothesis_settings)
-    @given(distance_relay=create_directional_current_relay(False))
+    @given(directional_current_relay=create_directional_current_relay(False))
     @pytest.mark.timeout(PYTEST_TIMEOUT_SEC)
-    async def test_schema_distance_relay(self, directional_current_relay: DirectionalCurrentRelay):
-        await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, directional_current_relay))
+    async def test_schema_directional_current_relay(self, directional_current_relay: DirectionalCurrentRelay):
+        await self._validate_schema(SchemaNetworks().network_services_of(DirectionalCurrentRelay, directional_current_relay))
 
     @settings(**hypothesis_settings)
     @given(distance_relay=create_distance_relay(False))

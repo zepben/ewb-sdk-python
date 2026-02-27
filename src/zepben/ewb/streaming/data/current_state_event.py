@@ -101,11 +101,17 @@ class SwitchStateEvent(CurrentStateEvent):
         """
         Creates a protobuf `CurrentStateEvent` object with `switch` from this `SwitchStateEvent`.
         """
-        return PBCurrentStateEvent(
+        args = dict(
             eventId=self.event_id,
-            timestamp=datetime_to_timestamp(self.timestamp),
             switch=PBSwitchStateEvent(mRID=self.mrid, action=_map_switch_action.to_pb(self.action), phases=_map_phase_code.to_pb(self.phases))
         )
+
+        if self.timestamp is not None:
+            args['timestamp'] = datetime_to_timestamp(self.timestamp)
+        pb = PBCurrentStateEvent(**args)
+        if self.timestamp is None:
+            pb.ClearField('timestamp')
+        return pb
 
 
 @dataclass

@@ -80,7 +80,6 @@ class ContactDetails:
         """[ZBEX] Phone numbers."""
         return ngen(self._phone_numbers)
 
-    @property
     def num_phone_numbers(self) -> int:
         """Get the number of entries in the ``TelephoneNumber`` collection."""
         return nlen(self._phone_numbers)
@@ -104,13 +103,12 @@ class ContactDetails:
         :param phone_number: The ``TelephoneNumber`` to remove.
         :return: True if the ``TelephoneNumber`` was removed.
         """
-        try:
-            self._phone_numbers.remove(phone_number)
-            if self.num_phone_numbers == 0:
-                self._phone_numbers = None
-            return True
-        except ValueError:
-            return False
+        if not self._phone_numbers:
+            raise KeyError(phone_number)
+        self._phone_numbers.remove(phone_number)
+        if self.num_phone_numbers == 0:
+            self._phone_numbers = None
+        return True
 
     def clear_phone_numbers(self) -> "ContactDetails":
         """
@@ -149,13 +147,12 @@ class ContactDetails:
         :param electronic_address: The ``ElectronicAddress`` to remove.
         :return: True if the ``ElectronicAddress`` was removed.
         """
-        try:
-            self._electronic_addresses.remove(electronic_address)
-            if self.num_electronic_addresses == 0:
-                self._electronic_addresses = None
-            return True
-        except ValueError:
-            return False
+        if not self._electronic_addresses:
+            raise KeyError(electronic_address)
+        self._electronic_addresses.remove(electronic_address)
+        if self.num_electronic_addresses == 0:
+            self._electronic_addresses = None
+        return True
 
     def clear_electronic_addresses(self) -> "ContactDetails":
         """

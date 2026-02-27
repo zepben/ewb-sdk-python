@@ -8,7 +8,7 @@ __all__ = ["TelephoneNumber"]
 from dataclasses import field, dataclass
 
 
-@dataclass
+@dataclass(slots=True)
 class TelephoneNumber:
     """
     Telephone number.
@@ -60,12 +60,15 @@ class TelephoneNumber:
     """[ZBEX] Description for this phone number, e.g: home, work, mobile."""
 
     def __post_init__(self):
-        if self.country_code is not None and len(it := self._maybe_itu_formatted_phone()) <= 15:
+        if self.country_code is not None and (it := self._maybe_itu_formatted_phone())is not None and len(it) <= 15:
             self.itu_phone = it
         self.partial_itu_phone = self._maybe_itu_formatted_phone() if self.itu_phone is None else None
 
     def _maybe_itu_formatted_phone(self) -> str | None:
         return f"{self.country_code or ''}{self.area_code or ''}{self.city_code or ''}{self.local_number or ''}" or None
+
+    def __hash__(self):
+        return hash((type(self), *(getattr(self, s ) for s in self.__slots__)))
 
     def __str__(self):
         def inner():

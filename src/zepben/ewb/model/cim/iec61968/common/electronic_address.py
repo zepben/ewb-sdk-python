@@ -8,7 +8,7 @@ __all__ = ["ElectronicAddress"]
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(slots=True)
 class ElectronicAddress:
     """
     Electronic address information.
@@ -26,3 +26,6 @@ class ElectronicAddress:
 
     description: str | None = None
     """[ZBEX] A description for this email, e.g: work, personal."""
+
+    def __hash__(self):
+        return hash((type(self), *(getattr(self, s ) for s in self.__slots__)))
