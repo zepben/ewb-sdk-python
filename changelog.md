@@ -13,6 +13,9 @@
   * `DateTimeInterval`, interval between two date and time points, where the interval includes the start time but excludes end time.
   * `ElectronicAddress`, electronic address information.
   * `TelephoneNumber`, telephone number.
+  * `HvCustomer` - [ZBEX] an `EquipmentContainer` for high voltage customer assets.
+  * `LvSubstation` - [ZBEX] an `EquipmentContainer` to represent distribution transformer sites, with associations to `Feeder` and `LvFeeder`
+  * `AcLineSegmentPhase` - Details about an individual phase of an `AcLineSegment`.
 * Added the following new CIM extension classes:
   * `ContactDetails`, the details required to contact a person or company. These can be accessed/used via a `UsagePoint`.
   * `DirectionalCurrentRelay`, a directional current relay is a type of protective relay used in electrical power systems to detect the direction of current
@@ -20,10 +23,6 @@
 * Added new CIM extension enums:
   * `ContactMethodType`
   * `PolarizingQuantityType`
-* Added new classes to the model:
-  * `HvCustomer` - [ZBEX] an `EquipmentContainer` for high voltage customer assets.
-  * `LvSubstation` - [ZBEX] an `EquipmentContainer` to represent distribution transformer sites, with associations to `Feeder` and `LvFeeder`
-  * `AcLineSegmentPhase` - Details about an individual phase of an `AcLineSegment`.
 * Added new properties to the model:
   * `PricingStructure.code` - User allocated key for a pricing structure.
   * `ShuntCompensator.grounding_terminal` - [ZBEX] The terminal connecting to grounded network.
