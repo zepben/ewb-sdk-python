@@ -262,7 +262,7 @@ class Feeder(EquipmentContainer):
     @zbex
     @property
     def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen((self._normal_energized_lv_substations or {}).values())
+        return ngen(self._normal_energized_lv_substations)
 
     def num_normal_energized_lv_substations(self) -> int:
         """
@@ -315,7 +315,7 @@ class Feeder(EquipmentContainer):
     @zbex
     @property
     def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen((self._current_energized_lv_substations or {}).values())
+        return ngen(self._current_energized_lv_substations)
 
     def num_current_energized_lv_substations(self) -> int:
         """
