@@ -240,7 +240,7 @@ def _validate_unordered_other(
             case DuplicateBehaviour.SUPPORTED:
                 return lambda : _create_duplicates_supported_validator(it, others, get_all, num, add, remove, _assert_unordered)
             case DuplicateBehaviour.IGNORED:
-                return lambda : _create_duplicates_ignored_validator(it, others, get_all, num, add, remove, _assert_unordered)
+                return lambda : _create_duplicates_ignored_validator(it, others, get_all, num, add, _assert_unordered)
 
     _validate(
         it,
@@ -560,8 +560,10 @@ def _create_duplicates_ignored_validator(
     add: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
     validate_collection: Callable[[Generator[_U, None, None], List[_U]], None],
 ) -> Callable[[], None]:
-    for duplicate in others:
-        add(it, duplicate)
+    def func():
+        for duplicate in others:
+            add(it, duplicate)
 
-    assert num(it) == len(others) * 2
-    validate_collection(get_all(it), others)
+        assert num(it) == len(others) * 2
+        validate_collection(get_all(it), others)
+    return func
