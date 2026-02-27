@@ -1,13 +1,31 @@
 # Zepben Python SDK
 ## [1.2.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* The following gRPC fields have been modified to support nulls (they were missed in v1.0.0):
+  * `Document.created_date_time`
+  * `Equipment.commissioned_date`
+  * `MeasurementValue.time_stamp`
+  * `RelayInfo.curve_setting`
+  * `RelayInfo.reclose_fast`
 
 ### New Features
-* None.
+* Added the following new CIM classes:
+  * `DateTimeInterval`, interval between two date and time points, where the interval includes the start time but excludes end time.
+  * `ElectronicAddress`, electronic address information.
+  * `TelephoneNumber`, telephone number.
+* Added the following new CIM extension classes:
+  * `ContactDetails`, the details required to contact a person or company. These can be accessed/used via a `UsagePoint`.
+  * `DirectionalCurrentRelay`, a directional current relay is a type of protective relay used in electrical power systems to detect the direction of current
+    flow and operate only when the current exceeds a certain threshold in a specified direction.
+* Added new CIM extension enums:
+  * `ContactMethodType`
+  * `PolarizingQuantityType`
 
 ### Enhancements
-* None.
+* * `BaseService.contains` has been been expanded to support objects in addition to mRIDs.
+* `Agreement` now supports `validity_interval`, the date and time interval the agreement is valid (from going into effect to termination).
+* `StreetDetail` now supports extension `building_number`, the number of the building.
+* `TownDetail` now supports `country`, the name of the country.
 
 ### Fixes
 * Reordered the feeder equipment and direction assignment on database read to prevent parallel feeders from tracing back into the zone substation.
