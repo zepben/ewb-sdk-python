@@ -29,10 +29,12 @@ from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import 
 
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
 
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import *
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import *
 
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import *
 
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import *
 
@@ -65,6 +67,7 @@ from zepben.ewb.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import *
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import *
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_material_kind import *
 
 from zepben.ewb.model.cim.iec61968.assets.asset import *
@@ -175,6 +178,7 @@ from zepben.ewb.model.cim.iec61970.base.scada.remote_point import *
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import *
 
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import *
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import *
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import *
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import *
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import *
@@ -394,7 +398,9 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_relay
 
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import *
 
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_hv_customers import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import *
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_lv_substations import *
 
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import *
@@ -513,6 +519,7 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_points i
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_sources import *
 
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import *
+from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segment_phases import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_breakers import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_clamps import *

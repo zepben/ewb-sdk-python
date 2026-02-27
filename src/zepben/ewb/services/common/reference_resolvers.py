@@ -30,8 +30,6 @@ __all__ = [
 
 from typing import Callable, Optional
 
-from hypothesis import Phase
-
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop

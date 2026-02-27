@@ -22,7 +22,9 @@ class AcLineSegmentPhase(PowerSystemResource):
     Represents a single wire of an alternating current line segment.
 
     :var phase: The phase connection of the wire at both ends.
-    :var sequence_number: Number designation for this line segment phase. Each line segment phase within a line segment should have a unique sequence number. This is useful for unbalanced modelling to bind the mathematical model (PhaseImpedanceData of PerLengthPhaseImpedance) with the connectivity model (this class) and the physical model (WirePosition) without tight coupling.
+    :var sequence_number: Number designation for this line segment phase. Each line segment phase within a line segment should have a unique sequence number.
+        This is useful for unbalanced modelling to bind the mathematical model (PhaseImpedanceData of PerLengthPhaseImpedance) with the connectivity model
+        (this class) and the physical model (WirePosition) without tight coupling.
     :var ac_line_segment: The line segment to which the phase belongs.
     :var asset_info: The wire info for this phase of the AcLineSegment
     """

@@ -18,7 +18,7 @@ class WireInfo(AssetInfo):
     have the same wire characteristics
 
     :var rated_current: Current carrying capacity of the wire under stated thermal conditions in amperes.
-    :var material: `zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind` - Conductor material.
+    :var material: ``zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind`` - Conductor material.
     :var size_description: Describes the wire gauge or cross section (e.g., 4/0,
     :var strand_count: Number of strands in the conductor.
     :var core_strand_count: (if used) Number of strands in the steel core.
