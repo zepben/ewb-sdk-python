@@ -178,7 +178,7 @@ class TestNetworkConsumer:
     async def _test_filtered_get_network_hierarchy(self, service: NetworkService, **_filter: bool):
         (_filters := dict(
             include_geographical_regions=False,
-            include_sub_geographical_regions=False,
+            include_subgeographical_regions=False,
             include_substations=False,
             include_feeders=False,
             include_circuits=False,
@@ -210,7 +210,7 @@ class TestNetworkConsumer:
         ns = NetworkService()
         ns.add(SubGeographicalRegion(mrid="sg1"))
         ns.add(SubGeographicalRegion(mrid="sg2"))
-        await self._test_filtered_get_network_hierarchy(ns, include_sub_geographical_regions=True)
+        await self._test_filtered_get_network_hierarchy(ns, include_subgeographical_regions=True)
 
     @pytest.mark.asyncio
     async def test_can_optionally_retrieve_substations(self):
@@ -374,6 +374,7 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeders_with_open_point))),
+                StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
@@ -420,6 +421,7 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_pole))),
+                StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_pole)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),

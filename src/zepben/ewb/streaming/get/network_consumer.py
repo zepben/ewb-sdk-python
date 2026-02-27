@@ -239,7 +239,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         return await self._get_terminals_for_connectivity_node(node)
 
 
-    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[MultiObjectResult]:
+    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]:
 
         """
         Retrieve the network hierarchy

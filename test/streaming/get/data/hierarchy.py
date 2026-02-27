@@ -8,7 +8,7 @@ from zepben.ewb.model.cim.iec61970.base.core.geographical_region import Geograph
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 
-def create_hierarchy_network() -> NetworkService:
+def create_hierarchy_network(include_lv_sub=False, include_lv_feeder=False) -> NetworkService:
     ns = NetworkService()
 
     ns.add(GeographicalRegion(mrid="g1"))
@@ -29,10 +29,12 @@ def create_hierarchy_network() -> NetworkService:
     ns.add(Loop(mrid="l1"))
     ns.add(Loop(mrid="l2"))
 
-    ns.add(LvSubstation(mrid="lvs1"))
-    ns.add(LvSubstation(mrid="lvs2"))
+    if include_lv_sub:
+        ns.add(LvSubstation(mrid="lvs1"))
+        ns.add(LvSubstation(mrid="lvs2"))
 
-    ns.add(LvFeeder(mrid="lvf1"))
-    ns.add(LvFeeder(mrid="lvf2"))
+    if include_lv_feeder:
+        ns.add(LvFeeder(mrid="lvf1"))
+        ns.add(LvFeeder(mrid="lvf2"))
 
     return ns
