@@ -14,14 +14,17 @@ from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import Custome
 from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCustomer
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
+from zepben.protobuf.cim.iec61970.base.domain.DateTimeInterval_pb2 import DateTimeInterval as PBDateTimeInterval
 
 import zepben.ewb.services.common.resolver as resolver
-from zepben.ewb import organisation_role_to_cim, document_to_cim, BaseService, CustomerKind, bind_to_cim
+from zepben.ewb import organisation_role_to_cim, document_to_cim, CustomerKind, bind_to_cim
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.model.cim.iec61968.customers.customer import Customer
 from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
+from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
+
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.customer.customers import CustomerService
 
@@ -31,8 +34,13 @@ from zepben.ewb.services.customer.customers import CustomerService
 ###################
 
 @bind_to_cim
-def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):
-    document_to_cim(pb.doc, cim, service)
+def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: CustomerService):
+    if vi := get_nullable(pb, 'validityInterval'):
+        cim.validity_interval=(date_time_interval_to_cim(vi, service))
+
+    document_to_cim(
+        pb.doc, cim, service
+    )
 
 
 ######################
@@ -85,3 +93,15 @@ def tariff_to_cim(pb: PBTariff, service: CustomerService) -> Optional[Tariff]:
 
     document_to_cim(pb.doc, cim, service)
     return cim if service.add(cim) else None
+
+
+########################
+# IEC61970 Base Domain #
+########################
+
+@bind_to_cim
+def date_time_interval_to_cim(pb: PBDateTimeInterval, service: CustomerService) -> Optional[DateTimeInterval]:
+    return DateTimeInterval(
+        start=get_nullable(pb, 'start'),
+        end=get_nullable(pb, 'end'),
+    )

@@ -70,7 +70,7 @@ class BaseCollectionReader(ABC):
                 count = 0
                 while results.next():
                     if process_row(table, results, set_identifier):
-                        count = count + 1
+                        count += 1
 
                 return count
             except SqlException as e:

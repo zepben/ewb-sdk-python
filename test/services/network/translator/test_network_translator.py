@@ -6,6 +6,7 @@ from typing import TypeVar
 
 import pytest
 
+from cim.cim_creators import create_directional_current_relay
 from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.cim_creators import *
 from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
@@ -15,6 +16,10 @@ from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, 
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
     TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, TableBatteryUnitsBatteryControls, \
     TableEndDevicesEndDeviceFunctions, TableAssetsPowerSystemResources, TableSynchronousMachinesReactiveCapabilityCurves, TableCurveData
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_electronic_addresses import TableContactDetailsElectronicAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
+from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 
 T = TypeVar("T", bound=IdentifiedObject)
@@ -55,6 +60,7 @@ types_to_test = {
     # Extensions IEC61970 Base Protection #
     #######################################
 
+    "create_directional_current_relay": create_directional_current_relay(),
     "create_distance_relay": create_distance_relay(),
     "create_protection_relay_scheme": create_protection_relay_scheme(),
     "create_protection_relay_system": create_protection_relay_system(),
@@ -246,6 +252,9 @@ def test_network_service_translations():
             TableUsagePointsEndDevices,
 
             # Excluded array data.
+            TableContactDetailsElectronicAddresses,
+            TableContactDetailsStreetAddresses,
+            TableContactDetailsTelephoneNumbers,
             TableCurveData,
             TablePhaseImpedanceData,
             TableLocationStreetAddresses,
@@ -255,6 +264,7 @@ def test_network_service_translations():
             TableProtectionRelayFunctionTimeLimits,
             TableProtectionRelayFunctionsSensors,
             TableRecloseDelays,
+            TableUsagePointsContactDetails,
 
         },
         types_to_test=types_to_test,

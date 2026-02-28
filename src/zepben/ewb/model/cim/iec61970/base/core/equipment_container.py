@@ -46,7 +46,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         The `Equipment` contained in this `EquipmentContainer`
         """
-        return ngen(self._equipment.values() if self._equipment is not None else None)
+        return ngen(self._equipment)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """

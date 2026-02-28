@@ -9,7 +9,7 @@ __all__ = ["BaseService", "TBaseService"]
 
 from abc import ABC
 from collections import OrderedDict
-from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar
+from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar, overload
 from typing import Type
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
@@ -74,15 +74,22 @@ class BaseService(ABC):
         }
         """
 
-    def __contains__(self, mrid: str) -> bool:
+    @overload
+    def __contains__(self, mrid: str) -> bool: ...
+
+    @overload
+    def __contains__(self, obj: IdentifiedObject) -> bool: ...
+
+    def __contains__(self, to_find: str | IdentifiedObject) -> bool:
         """
         Check if `mrid` has any associated object.
 
         `mrid` The mRID to search for.
         Returns True if there is an object associated with the specified `mrid`, False otherwise.
         """
+        matcher = (lambda it: to_find in it) if isinstance(to_find, str) else (lambda it: it[to_find.mrid] == to_find)
         for type_map in self._objects_by_type.values():
-            if mrid in type_map:
+            if matcher(type_map):
                 return True
         return False
 

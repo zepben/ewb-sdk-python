@@ -26,11 +26,15 @@ from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_r
 from zepben.ewb.database.sqlite.tables.associations.table_usage_points_end_devices import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_reclose_delays import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_relay_info import *
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_electronic_addresses import TableContactDetailsElectronicAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import *
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_time_limits import *
@@ -60,6 +64,7 @@ from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_p
 from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassets.table_poles import *
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_meters import *
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points import *
+from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.database.sqlite.tables.iec61968.operations.table_operational_restrictions import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_current_transformers import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_fault_indicators import *
@@ -128,8 +133,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
 
     @property
     def _included_tables(self) -> Generator[SqliteTable, None, None]:
-        for table in super()._included_tables:
-            yield table
+        yield from super()._included_tables
 
         yield TableAcLineSegments()
         yield TableAccumulators()
@@ -149,12 +153,16 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableCircuitsTerminals()
         yield TableClamps()
         yield TableConnectivityNodes()
+        yield TableContactDetailsElectronicAddresses()
+        yield TableContactDetailsStreetAddresses()
+        yield TableContactDetailsTelephoneNumbers()
         yield TableControls()
         yield TableCurrentRelays()
         yield TableCurrentTransformerInfo()
         yield TableCurrentTransformers()
         yield TableCurveData()
         yield TableCuts()
+        yield TableDirectionalCurrentRelays()
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()
@@ -238,5 +246,6 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableTransformerStarImpedances()
         yield TableTransformerTankInfo()
         yield TableUsagePoints()
+        yield TableUsagePointsContactDetails()
         yield TableUsagePointsEndDevices()
         yield TableVoltageRelays()

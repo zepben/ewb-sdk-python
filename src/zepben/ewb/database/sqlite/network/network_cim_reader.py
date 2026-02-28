@@ -12,10 +12,19 @@ from zepben.ewb.database.sqlite.tables.associations.table_battery_units_battery_
 from zepben.ewb.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details import TableContactDetails
+
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_electronic_addresses import TableContactDetailsElectronicAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.wires.table_battery_controls import TableBatteryControls
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
+from zepben.ewb.database.sqlite.tables.iec61968.common.table_electronic_addresses import TableElectronicAddresses
+from zepben.ewb.database.sqlite.tables.iec61968.common.table_telephone_numbers import TableTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
+from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_curves import TableCurves
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
@@ -27,10 +36,16 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_reactive_capabi
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
+from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
+from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.ewb.model.cim.iec61970.base.core.curve import Curve
 from zepben.ewb.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
@@ -341,6 +356,13 @@ class NetworkCimReader(BaseCimReader):
 
         self._service = service
         """The :class:`NetworkService` used to store any items read from the database."""
+        
+        #
+        # NOTE: Since `ContactDetails` aren't an `IdentifiedObject`, we can't store them directly in the `NetworkService`. For now, we will
+        #       just keep a local cache during load. In the future we might decide to store them in a public fashion in the service, but this
+        #     is likely to only be when we want to author the `ContactDetails`, or reuse them between places and require a lookup.
+        #
+        self._contact_details_by_id: dict[str, ContactDetails] = {}
 
     ##################################
     # Extensions IEC61968 Asset Info #
@@ -385,6 +407,72 @@ class NetworkCimReader(BaseCimReader):
         relay_info.reclose_fast = result_set.get_boolean(table.reclose_fast.query_index, on_none=None)
 
         return self._load_asset_info(relay_info, table, result_set) and self._add_or_throw(relay_info)
+
+    ##############################
+    # Extensions IEC61968 Common #
+    ##############################
+
+    def load_contact_details(self, contact_details: ContactDetails, table: TableContactDetails, result_set: ResultSet) -> bool:
+        contact_details.contact_type = result_set.get_string(table.contact_type.query_index, on_none=None)
+        contact_details.first_name = result_set.get_string(table.first_name.query_index, on_none=None)
+        contact_details.last_name = result_set.get_string(table.last_name.query_index, on_none=None)
+        contact_details.preferred_contact_method = ContactMethodType[result_set.get_string(table.preferred_contact_method.query_index)]
+        contact_details.is_primary = result_set.get_boolean(table.is_primary.query_index, on_none=None)
+        contact_details.business_name = result_set.get_string(table.business_name.query_index, on_none=None)
+
+        self._contact_details_by_id[contact_details.id] = contact_details
+        return True
+
+    def load_contact_details_electronic_addresses(self, table: TableContactDetailsElectronicAddresses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`ElectronicAddress`, populate its fields from :class:`TableContactDetailsElectronicAddresses`,
+        and add it to the specified :class:`ContactDetails`.
+
+        :param table: The database table to read the :class:`ElectronicAddress` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ElectronicAddress`.
+        :param set_identifier: A callback to register the mRID of this :class:`ElectronicAddress` for logging purposes.
+
+        :return: True if the :class:`ElectronicAddress` was successfully read from the database and added to the :class:`ContactDetails`.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        contact_details_id = result_set.get_string(table.contact_details_id.query_index, on_none=None)
+        self._contact_details_by_id.get(contact_details_id) \
+            .add_electronic_address(self._load_electronic_address(table, result_set))
+        return True
+
+    def load_contact_details_street_addresses(self, table: TableContactDetailsStreetAddresses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`StreetAddress`, populate its fields from :class:`TableContactDetailsStreetAddresses`,
+        and add it to the specified :class:`ContactDetails`.
+
+        :param table: The database table to read the :class:`StreetAddress` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`StreetAddress`.
+        :param set_identifier: A callback to register the mRID of this :class:`ElectronicAddress` for logging purposes.
+
+        :return: True if the :class:`StreetAddress` was successfully read from the database and added to the :class:`ContactDetails`.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        contact_details_id = result_set.get_string(table.contact_details_id.query_index, on_none=None)
+        self._contact_details_by_id.get(contact_details_id) \
+            .contact_address = self._load_street_address(table, result_set)
+        return True
+
+    def load_contact_details_telephone_number(self, table: TableContactDetailsTelephoneNumbers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`TelephoneNumber`, populate its fields from :class:`TableContactDetailsTelephoneNumbers`,
+        and add it to the specified :class:`ContactDetails`.
+
+        :param table: The database table to read the :class:`TelephoneNumber` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`TelephoneNumber`.
+        :param set_identifier: A callback to register the mRID of this :class:`ElectronicAddress` for logging purposes.
+
+        :return: True if the :class:`TelephoneNumber` was successfully read from the database and added to the :class:`ContactDetails`.
+        :raises SqlException: For any errors encountered reading from the database
+        """
+        contact_details_id = result_set.get_string(table.contact_details_id.query_index, on_none=None)
+        self._contact_details_by_id.get(contact_details_id) \
+            .add_phone_number(self._load_telephone_number(table, result_set))
+        return True
 
     ################################
     # Extensions IEC61968 Metering #
@@ -488,6 +576,29 @@ class NetworkCimReader(BaseCimReader):
     #######################################
     # Extensions IEC61970 Base Protection #
     #######################################
+
+    def load_directional_current_relay(self, table: TableDirectionalCurrentRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+         * Create a [DirectionalCurrentRelay] and populate its fields from [TableDirectionalCurrentRelays].
+         *
+         * @param service The [NetworkService] used to store any items read from the database.
+         * @param table The database table to read the [DirectionalCurrentRelay] fields from.
+         * @param resultSet The record in the database table containing the fields for this [DirectionalCurrentRelay].
+         * @param setIdentifier A callback to register the mRID of this [DirectionalCurrentRelay] for logging purposes.
+         *
+         * @return true if the [DirectionalCurrentRelay] was successfully read from the database and added to the service.
+         * @throws SQLException For any errors encountered reading from the database.
+        """
+        directional_current_relay = DirectionalCurrentRelay(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+        directional_current_relay.directional_characteristic_angle = result_set.get_float(table.directional_characteristic_angle.query_index, on_none=None)
+        directional_current_relay.polarizing_quantity_type = PolarizingQuantityType[result_set.get_string(table.polarizing_quantity_type.query_index)]
+        directional_current_relay.relay_element_phase = PhaseCode[result_set.get_string(table.relay_element_phase.query_index)]
+        directional_current_relay.minimum_pickup_current = result_set.get_float(table.minimum_pickup_current.query_index, on_none=None)
+        directional_current_relay.current_limit_1 = result_set.get_float(table.current_limit_1.query_index, on_none=None)
+        directional_current_relay.inverse_time_flag = result_set.get_boolean(table.inverse_time_flag.query_index, on_none=None)
+        directional_current_relay.time_delay_1 = result_set.get_float(table.time_delay_1.query_index, on_none=None)
+
+        return self._load_protection_relay_function(directional_current_relay, table, result_set) and self._add_or_throw(directional_current_relay)
 
     def load_distance_relay(self, table: TableDistanceRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -1006,6 +1117,14 @@ class NetworkCimReader(BaseCimReader):
     # IEC61968 Common #
     ###################
 
+    @staticmethod
+    def _load_electronic_address(table: TableElectronicAddresses, result_set: ResultSet) -> ElectronicAddress:
+        return ElectronicAddress(
+            email1=result_set.get_string(table.email_1.query_index, on_none=None),
+            is_primary=result_set.get_boolean(table.is_primary.query_index, on_none=None),
+            description=result_set.get_string(table.description.query_index, on_none=None),
+        )
+
     def load_location(self, table: TableLocations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`Location` and populate its fields from :class:`TableLocations`.
@@ -1070,34 +1189,50 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_street_address(self, table: TableStreetAddresses, result_set: ResultSet) -> StreetAddress:
         return StreetAddress(
-            result_set.get_string(table.postal_code.query_index, on_none=None),
-            self._load_town_detail(table, result_set),
-            result_set.get_string(table.po_box.query_index, on_none=None),
-            self._load_street_detail(table, result_set)
+            postal_code=result_set.get_string(table.postal_code.query_index, on_none=None),
+            town_detail=self._load_town_detail(table, result_set),
+            po_box=result_set.get_string(table.po_box.query_index, on_none=None),
+            street_detail=self._load_street_detail(table, result_set)
         )
 
     @staticmethod
     def _load_street_detail(table: TableStreetAddresses, result_set: ResultSet) -> Optional[StreetDetail]:
         sd = StreetDetail(
-            result_set.get_string(table.building_name.query_index, on_none=None),
-            result_set.get_string(table.floor_identification.query_index, on_none=None),
-            result_set.get_string(table.street_name.query_index, on_none=None),
-            result_set.get_string(table.number.query_index, on_none=None),
-            result_set.get_string(table.suite_number.query_index, on_none=None),
-            result_set.get_string(table.type.query_index, on_none=None),
-            result_set.get_string(table.display_address.query_index, on_none=None)
+            building_name=result_set.get_string(table.building_name.query_index, on_none=None),
+            floor_identification=result_set.get_string(table.floor_identification.query_index, on_none=None),
+            name=result_set.get_string(table.street_name.query_index, on_none=None),
+            number=result_set.get_string(table.number.query_index, on_none=None),
+            suite_number=result_set.get_string(table.suite_number.query_index, on_none=None),
+            type=result_set.get_string(table.type.query_index, on_none=None),
+            display_address=result_set.get_string(table.display_address.query_index, on_none=None),
+            building_number=result_set.get_string(table.building_number.query_index, on_none=None)
         )
 
-        return sd if not sd.all_fields_empty() else None
+        return sd if not sd.all_fields_null() else None
+
+    @staticmethod
+    def _load_telephone_number(table: TableTelephoneNumbers, result_set: ResultSet) -> TelephoneNumber:
+        return TelephoneNumber(
+            area_code=result_set.get_string(table.area_code.query_index, on_none=None),
+            city_code=result_set.get_string(table.city_code.query_index, on_none=None),
+            country_code=result_set.get_string(table.country_code.query_index, on_none=None),
+            dial_out=result_set.get_string(table.dial_out.query_index, on_none=None),
+            extension=result_set.get_string(table.extension.query_index, on_none=None),
+            international_prefix=result_set.get_string(table.international_prefix.query_index, on_none=None),
+            local_number=result_set.get_string(table.local_number.query_index, on_none=None),
+            is_primary=result_set.get_boolean(table.is_primary.query_index, on_none=None),
+            description=result_set.get_string(table.description.query_index, on_none=None),
+        )
 
     @staticmethod
     def _load_town_detail(table: TableTownDetails, result_set: ResultSet) -> Optional[TownDetail]:
         td = TownDetail(
-            result_set.get_string(table.town_name.query_index, on_none=None),
-            result_set.get_string(table.state_or_province.query_index, on_none=None)
+            name=result_set.get_string(table.town_name.query_index, on_none=None),
+            state_or_province=result_set.get_string(table.state_or_province.query_index, on_none=None),
+            country=result_set.get_string(table.country.query_index, on_none=None),
         )
 
-        return td if not td.all_fields_null_or_empty() else None
+        return td if not td.all_fields_null() else None
 
     #####################################
     # IEC61968 InfIEC61968 InfAssetInfo #
@@ -1240,6 +1375,29 @@ class NetworkCimReader(BaseCimReader):
         usage_point.phase_code = PhaseCode[result_set.get_string(table.phase_code.query_index)]
 
         return self._load_identified_object(usage_point, table, result_set) and self._add_or_throw(usage_point)
+
+    def load_usage_points_contact_details(self, table: TableUsagePointsContactDetails, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`ContactDetails` and populate its fields from :class`TableUsagePointsContactDetails`.
+
+        :param table: The database table to read the :class:`ContactDetails` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ContactDetails`
+        :param set_identifier: A callback to register the mRID of this :class:`ContactDetails` for logging purposes.
+
+        :return: True if the :class:`ContactDetails` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        usage_point_mrid = set_identifier(result_set.get_string(table.usage_point_mrid.query_index))
+        contact_details_id = result_set.get_string(table.id.query_index)
+        set_identifier(f"{usage_point_mrid}-to-{contact_details_id}")
+
+        usage_point = self._ensure_get(usage_point_mrid, UsagePoint)
+        contact_details = ContactDetails(contact_details_id)
+
+        val = self.load_contact_details(contact_details, table, result_set)
+        # We add the contact after it has been populated to ensure the `equals` check in the `addContact` works as intended.
+        usage_point.add_contact(contact_details)
+        return val
 
     #######################
     # IEC61968 Operations #

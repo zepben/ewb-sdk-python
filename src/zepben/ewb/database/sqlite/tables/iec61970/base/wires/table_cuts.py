@@ -11,7 +11,7 @@ from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_switches import TableSwitches
 
 
-class TableCuts(TableSwitches, ABC):
+class TableCuts(TableSwitches, ABC):  # FIXME: should this really inherit from ABC?
 
     def __init__(self):
         super().__init__()

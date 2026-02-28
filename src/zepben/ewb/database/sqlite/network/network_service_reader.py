@@ -29,11 +29,15 @@ from zepben.ewb.database.sqlite.tables.associations.table_synchronous_machines_r
 from zepben.ewb.database.sqlite.tables.associations.table_usage_points_end_devices import TableUsagePointsEndDevices
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_reclose_delays import TableRecloseDelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.assetinfo.table_relay_info import TableRelayInfo
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_electronic_addresses import TableContactDetailsElectronicAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
+from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import TableSites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import TableEvChargingUnits
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import TableDistanceRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import \
     TableProtectionRelayFunctionThresholds
@@ -65,6 +69,7 @@ from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_p
 from zepben.ewb.database.sqlite.tables.iec61968.infiec61968.infassets.table_poles import TablePoles
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_meters import TableMeters
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points import TableUsagePoints
+from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.database.sqlite.tables.iec61968.operations.table_operational_restrictions import TableOperationalRestrictions
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_current_transformers import TableCurrentTransformers
 from zepben.ewb.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_fault_indicators import TableFaultIndicators
@@ -149,7 +154,7 @@ class NetworkServiceReader(BaseServiceReader):
 
         # This is not strictly necessary, it is just to update the type of the reader. It could be done with a generic
         # on the base class which looks like it works, but that actually silently breaks code insight and completion
-        self._reader = reader
+        self._reader: NetworkCimReader = reader
 
     def _do_load(self) -> bool:
         return all([
@@ -176,6 +181,10 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableMeters, self._reader.load_meter),
             self._load_each(TableEndDevicesEndDeviceFunctions, self._reader.load_end_devices_end_device_functions),
             self._load_each(TableUsagePoints, self._reader.load_usage_point),
+            self._load_each(TableUsagePointsContactDetails, self._reader.load_usage_points_contact_details),
+            self._load_each(TableContactDetailsElectronicAddresses, self._reader.load_contact_details_electronic_addresses),
+            self._load_each(TableContactDetailsStreetAddresses, self._reader.load_contact_details_street_addresses),
+            self._load_each(TableContactDetailsTelephoneNumbers, self._reader.load_contact_details_telephone_number),
             self._load_each(TableOperationalRestrictions, self._reader.load_operational_restriction),
             self._load_each(TableBaseVoltages, self._reader.load_base_voltage),
             self._load_each(TableConnectivityNodes, self._reader.load_connectivity_node),
@@ -194,6 +203,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableClamps, self._reader.load_clamp),
             self._load_each(TableCuts, self._reader.load_cut),
             self._load_each(TableCurrentRelays, self._reader.load_current_relay),
+            self._load_each(TableDirectionalCurrentRelays, self._reader.load_directional_current_relay),
             self._load_each(TableDistanceRelays, self._reader.load_distance_relay),
             self._load_each(TableVoltageRelays, self._reader.load_voltage_relay),
             self._load_each(TableProtectionRelayFunctionThresholds, self._reader.load_protection_relay_function_threshold),

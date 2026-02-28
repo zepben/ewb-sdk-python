@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 from collections import Counter
-from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple
+from enum import Enum
+from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any
+from unittest import case
 
 import pytest
 
@@ -15,6 +17,23 @@ UOther = TypeVar("UOther")
 K = TypeVar("K")
 
 _U = Union[UIdentifiedObject, UOther]
+
+
+class DuplicateBehaviour(Enum):
+    THROWS = 1,
+    """
+    Different objects with common IDs are expected to throw.
+    """
+
+    SUPPORTED = 2,
+    """
+    The collection has no concept of IDs, or duplicates, and just accepts the new value
+    """
+
+    IGNORED = 3,
+    """
+    Any attempt to add a duplicates is detected and just ignored.
+    """
 
 
 def validate_unordered(
@@ -47,7 +66,8 @@ def validate_unordered_other(
     remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
     clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
     get_key: Callable[..., K],  # Callable[[UOther], K]
-    key_to_str: Callable[[K], str] = str
+    key_to_str: Callable[[K], str] = str,
+    duplicate_behaviour: Type[DuplicateBehaviour] = DuplicateBehaviour.THROWS,
 ):
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
@@ -56,7 +76,7 @@ def validate_unordered_other(
           class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
           signatures are stored in comments against the arguments.
     """
-    _validate_unordered_other(create_it, create_other, get_all.fget, num, get_by_key, add, remove, clear, get_key, key_to_str)
+    _validate_unordered_other(create_it, create_other, get_all.fget, num, get_by_key, add, remove, clear, get_key, key_to_str, duplicate_behaviour)
 
 
 def validate_ordered(
@@ -132,8 +152,14 @@ def _validate_unordered(
     other3 = create_other("3")
     duplicate1 = create_other("1")
 
+    def _get_identifier(obj: Any) -> str:
+        try:
+            return obj.mrid
+        except AttributeError:
+            return obj.id
+
     expected_duplicate_errors = {
-        duplicate1: rf"An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {re.escape(str(it))}"
+        duplicate1: rf"An? (current )?{other1.__class__.__name__} with mRID {_get_identifier(other1)} already exists in {re.escape(str(it))}"
     }
 
     def validate_before_removal():
@@ -176,7 +202,8 @@ def _validate_unordered_other(
     remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
     clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
     get_key: Callable[..., K],  # Callable[[UOther], K]
-    key_to_str: Callable[[K], str] = str
+    key_to_str: Callable[[K], str] = str,
+    duplicate_behaviour: Type[DuplicateBehaviour] = DuplicateBehaviour.THROWS
 ):
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
@@ -186,6 +213,7 @@ def _validate_unordered_other(
     other2 = create_other(2)
     other3 = create_other(3)
     other_duplicate_key = create_other(1)
+    others = [other1, other2, other3]
 
     if isinstance(other1, IdentifiedObject):
         raise ValueError("do not use this function with identified 'other', use one of the other variants instead.")
@@ -205,6 +233,15 @@ def _validate_unordered_other(
             get_by_key(it, get_key(other1))
         assert get_by_key(it, get_key(other2)) == other2
 
+    def duplicate_behaviour_func() -> Callable:
+        match duplicate_behaviour:
+            case DuplicateBehaviour.THROWS:
+                return lambda : _create_duplicates_throw_validator(it, expected_duplicate_errors, add)
+            case DuplicateBehaviour.SUPPORTED:
+                return lambda : _create_duplicates_supported_validator(it, others, get_all, num, add, remove, _assert_unordered)
+            case DuplicateBehaviour.IGNORED:
+                return lambda : _create_duplicates_ignored_validator(it, others, get_all, num, add, _assert_unordered)
+
     _validate(
         it,
         [other1, other2, other3],
@@ -214,7 +251,7 @@ def _validate_unordered_other(
         remove,
         clear,
         validate_collection=_assert_unordered,
-        perform_duplicate_validation=_create_duplicates_throw_validator(it, expected_duplicate_errors, add),
+        perform_duplicate_validation=duplicate_behaviour_func(),
         before_removal_validation=validate_before_removal,
         after_removal_validation=validate_after_removal,
         others_have_order=False
@@ -512,4 +549,21 @@ def _create_duplicates_supported_validator(
         for duplicate in others:
             assert remove(it, duplicate), "Should be able to remove the duplicate"
 
+    return func
+
+
+def _create_duplicates_ignored_validator(
+    it: TIdentifiedObject,
+    others: List[_U],
+    get_all: Callable[[TIdentifiedObject], Generator[_U, None, None]],
+    num: Callable[[TIdentifiedObject], int],
+    add: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
+    validate_collection: Callable[[Generator[_U, None, None], List[_U]], None],
+) -> Callable[[], None]:
+    def func():
+        for duplicate in others:
+            add(it, duplicate)
+
+        assert num(it) == len(others) * 2
+        validate_collection(get_all(it), others)
     return func

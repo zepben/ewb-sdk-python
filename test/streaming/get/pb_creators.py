@@ -210,6 +210,8 @@ def floats(*args, **kwargs):
     return hypo_floats(*args, **kwargs)
 
 def lists(*args, **kwargs):
+    if kwargs.get("min_size") == 1:
+        raise ValueError("min_size = 1 is not required as its the default. please dont make messy code.")
     kwargs.update({"min_size": 1})
     return hypo_lists(*args, **kwargs)
 
@@ -555,7 +557,7 @@ def document():
         PBDocument,
         io=identified_object(),
         titleSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        createdDateTime=timestamp(),
+        createdDateTimeSet=timestamp(),
         authorNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         statusSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -592,18 +594,23 @@ def street_address():
 def street_detail():
     return builds(
         PBStreetDetail,
-        buildingNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        floorIdentificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        numberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        suiteNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        displayAddressSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        buildingNameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        floorIdentificationSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        numberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        suiteNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        typeSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        displayAddressSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        buildingNumberSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)
     )
 
 
 def town_detail():
-    return builds(PBTownDetail, nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvinceSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+    return builds(
+        PBTownDetail,
+        nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str),
+        stateOrProvinceSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE).map(str)
+    )
 
 
 ######################
@@ -829,7 +836,7 @@ def equipment():
         psr=power_system_resource(),
         inService=booleans(),
         normallyInService=booleans(),
-        commissionedDate=timestamp(),
+        commissionedDateSet=timestamp(),
         equipmentContainerMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         operationalRestrictionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
@@ -860,7 +867,7 @@ def identified_object():
         PBIdentifiedObject,
         mRID=uuids(version=4).map(lambda x: str(x)),
         nameSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        descriptionSet=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
+        descriptionSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
@@ -1290,7 +1297,7 @@ def power_electronics_connection():
         qSet=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         ratedSSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         ratedUSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        inverterStandardSet=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        inverterStandardSet=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         sustainOpOvervoltLimitSet=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         stopAtOverFreqSet=floats(min_value=51.0, max_value=52.0),
         stopAtUnderFreqSet=floats(min_value=47.0, max_value=49.0),

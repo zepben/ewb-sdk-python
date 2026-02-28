@@ -6,7 +6,7 @@
 __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb", "organisation_to_pb"]
 
 import inspect
-from typing import ParamSpec, TypeVar, Callable, Generator
+from typing import ParamSpec, TypeVar, Callable
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
@@ -57,8 +57,8 @@ def document_to_pb(cim: Document) -> PBDocument:
 
     return PBDocument(
         io=identified_object_to_pb(cim),
-        createdDateTime=timestamp,
         **set_or_null(
+            createdDateTime=timestamp,
             title=cim.title,
             authorName=cim.author_name,
             type=cim.type,
