@@ -22,8 +22,14 @@ class PricingStructure(Document):
     criteria under which these terms may be offered to a customer. The reasons for grouping include state,
     customer classification, site characteristics, classification (i.e. fee price structure, deposit price
     structure, electric service price structure, etc.) and accounting requirements.
+
+    :var tariffs: All tariffs used by this pricing structure
+    :var code: Unique user-allocated key for this pricing structure, used by company representatives to identify the correct price structure for allocating to a
+               customer. For rate schedules it is often prefixed by a state code.
     """
     _tariffs: Optional[List[Tariff]] = None
+
+    code: str | None = None
 
     def __init__(self, tariffs: List[Tariff] = None, **kwargs):
         super(PricingStructure, self).__init__(**kwargs)

@@ -30,6 +30,8 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_hv_customers import TableHvCustomers
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_lv_substations import TableLvSubstations
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import *
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import *
@@ -88,6 +90,7 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.meas.table_discretes import
 from zepben.ewb.database.sqlite.tables.iec61970.base.protection.table_current_relays import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_controls import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_sources import *
+from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segment_phases import TableAcLineSegmentPhases
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_breakers import *
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import *
@@ -135,6 +138,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
     def _included_tables(self) -> Generator[SqliteTable, None, None]:
         yield from super()._included_tables
 
+        yield TableAcLineSegmentPhases()
         yield TableAcLineSegments()
         yield TableAccumulators()
         yield TableAnalogs()
@@ -183,6 +187,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableGrounds()
         yield TableGroundDisconnectors()
         yield TableGroundingImpedances()
+        yield TableHvCustomers()
         yield TableJumpers()
         yield TableJunctions()
         yield TableLinearShuntCompensators()
@@ -192,6 +197,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableLoops()
         yield TableLoopsSubstations()
         yield TableLvFeeders()
+        yield TableLvSubstations()
         yield TableMeters()
         yield TableNoLoadTests()
         yield TableOpenCircuitTests()

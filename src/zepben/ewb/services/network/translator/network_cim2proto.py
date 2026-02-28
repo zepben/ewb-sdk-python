@@ -35,9 +35,11 @@ from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.common.ContactDetails_pb2 import ContactDetails as PBContactDetails
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.core.HvCustomer_pb2 import HvCustomer as PBHvCustomer
 from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvSubstation_pb2 import LvSubstation as PBLvSubstation
 from zepben.protobuf.cim.extensions.iec61970.base.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay as PBDistanceRelay
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DirectionalCurrentRelay_pb2 import DirectionalCurrentRelay as PBDirectionalCurrentRelay
@@ -121,6 +123,7 @@ from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteCont
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
+from zepben.protobuf.cim.iec61970.base.wires.AcLineSegmentPhase_pb2 import AcLineSegmentPhase as PBAcLineSegmentPhase
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp as PBClamp
@@ -174,10 +177,12 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit 
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import *
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import *
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import *
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.distance_relay import *
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import *
@@ -260,6 +265,7 @@ from zepben.ewb.model.cim.iec61970.base.scada.remote_control import *
 from zepben.ewb.model.cim.iec61970.base.scada.remote_point import *
 from zepben.ewb.model.cim.iec61970.base.scada.remote_source import *
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import *
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import *
 from zepben.ewb.model.cim.iec61970.base.wires.breaker import *
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import *
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import *
@@ -317,7 +323,7 @@ from zepben.ewb.services.network.translator.network_enum_mappers import _map_bat
     _map_feeder_direction, _map_phase_code, _map_phase_shunt_connection_kind, _map_potential_transformer_kind, _map_power_direction_kind, _map_protection_kind, \
     _map_regulating_control_mode_kind, _map_single_phase_kind, _map_streetlight_lamp_kind, _map_svc_control_mode, _map_synchronous_machine_kind, \
     _map_transformer_construction_kind, _map_transformer_cooling_type, _map_transformer_function_kind, _map_unit_symbol, _map_vector_group, \
-    _map_winding_connection, _map_wire_material_kind, _map_contact_method_type, _map_polarizing_quantity_type
+    _map_winding_connection, _map_wire_material_kind, _map_contact_method_type, _map_polarizing_quantity_type, _map_wire_insulation_kind
 
 
 def _get_or_none(getter, obj) -> Optional[Any]:
@@ -395,6 +401,11 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
 #################################
 
 @bind_to_pb
+def hv_customer_to_pb(cim: HvCustomer) -> PBHvCustomer:
+    return PBHvCustomer(ec=equipment_container_to_pb(cim))
+
+
+@bind_to_pb
 def site_to_pb(cim: Site) -> PBSite:
     return PBSite(ec=equipment_container_to_pb(cim))
 
@@ -419,7 +430,17 @@ def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
         ec=equipment_container_to_pb(cim),
         normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
         normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders],
-        currentlyEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders]
+        currentlyEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders],
+        normalEnergizingLvSubstationMRID=mrid_or_empty(cim.normal_energizing_lv_substation)
+    )
+
+@bind_to_pb
+def lv_substation_to_pb(cim: LvSubstation) -> PBLvSubstation:
+    return PBLvSubstation(
+        ec=equipment_container_to_pb(cim),
+        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders],
+        currentEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders],
+        normalEnergizedLvFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_feeders],
     )
 
 
@@ -687,8 +708,14 @@ def wire_info_to_pb(cim: WireInfo) -> PBWireInfo:
     return PBWireInfo(
         ai=asset_info_to_pb(cim),
         material=_map_wire_material_kind.to_pb(cim.material),
+        insulationMaterial=_map_wire_insulation_kind.to_pb(cim.insulation_material),
         **set_or_null(
             ratedCurrent=cim.rated_current,
+            sizeDescription=cim.size_description,
+            strandCount=cim.strand_count,
+            coreStrandCount=cim.core_strand_count,
+            insulated=cim.insulated,
+            insulationThickness=cim.insulation_thickness,
         )
     )
 
@@ -1084,7 +1111,9 @@ def feeder_to_pb(cim: Feeder) -> PBFeeder:
         normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
         normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation),
         normalEnergizedLvFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_feeders],
-        currentlyEnergizedLvFeedersMRIDs=[str(io.mrid) for io in cim.current_energized_lv_feeders]
+        currentlyEnergizedLvFeedersMRIDs=[str(io.mrid) for io in cim.current_energized_lv_feeders],
+        normalEnergizedLvSubstationMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_substations],
+        currentlyEnergizedLvSubstationMRIDs=[str(io.mrid) for io in cim.current_energized_lv_substations],
     )
 
 
@@ -1320,9 +1349,20 @@ def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
         cd=conductor_to_pb(cim),
         perLengthImpedanceMRID=mrid_or_empty(cim.per_length_impedance),
         cutMRIDs=[str(it.mrid) for it in cim.cuts],
-        clampMRIDs=[str(it.mrid) for it in cim.clamps]
+        clampMRIDs=[str(it.mrid) for it in cim.clamps],
+        phaseMRIDs=[str(it.mrid) for it in cim.phases],
     )
 
+@bind_to_pb
+def ac_line_segment_phase_to_pb(cim: AcLineSegmentPhase) -> PBAcLineSegmentPhase:
+    return PBAcLineSegmentPhase(
+        psr=power_system_resource_to_pb(cim),
+        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment),
+        phase=_map_single_phase_kind.to_pb(cim.phase),
+        **set_or_null(
+            sequenceNumber=cim.sequence_number,
+        )
+    )
 
 @bind_to_pb
 def breaker_to_pb(cim: Breaker) -> PBBreaker:
@@ -1791,6 +1831,7 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
     return PBShuntCompensator(
         rce=regulating_cond_eq_to_pb(cim, True),
         phaseConnection=_map_phase_shunt_connection_kind.to_pb(cim.phase_connection),
+        groundingTerminalMRID=mrid_or_empty(cim.grounding_terminal),
         **set_or_null(
             sections=cim.sections,
             grounded=cim.grounded,

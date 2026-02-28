@@ -33,6 +33,8 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_hv_customers import TableHvCustomers
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_lv_substations import TableLvSubstations
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_sites import TableSites
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
@@ -93,6 +95,7 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.meas.table_discretes import
 from zepben.ewb.database.sqlite.tables.iec61970.base.protection.table_current_relays import TableCurrentRelays
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_controls import TableRemoteControls
 from zepben.ewb.database.sqlite.tables.iec61970.base.scada.table_remote_sources import TableRemoteSources
+from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segment_phases import TableAcLineSegmentPhases
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
@@ -192,11 +195,13 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableSubGeographicalRegions, self._reader.load_sub_geographical_region),
             self._load_each(TableSubstations, self._reader.load_substation),
             self._load_each(TableSites, self._reader.load_site),
+            self._load_each(TableHvCustomers, self._reader.load_hv_customer),
             self._load_each(TablePerLengthPhaseImpedances, self._reader.load_per_length_phase_impedance),
             self._load_each(TablePhaseImpedanceData, self._reader.load_phase_impedance_data),
             self._load_each(TablePerLengthSequenceImpedances, self._reader.load_per_length_sequence_impedance),
             self._load_each(TableEquivalentBranches, self._reader.load_equivalent_branch),
             self._load_each(TableAcLineSegments, self._reader.load_ac_line_segment),
+            self._load_each(TableAcLineSegmentPhases, self._reader.load_ac_line_segment_phase),
             self._load_each(TableBreakers, self._reader.load_breaker),
             self._load_each(TableLoadBreakSwitches, self._reader.load_load_break_switch),
             self._load_each(TableBusbarSections, self._reader.load_busbar_section),
@@ -222,7 +227,6 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableGroundDisconnectors, self._reader.load_ground_disconnector),
             self._load_each(TableSeriesCompensators, self._reader.load_series_compensator),
             self._load_each(TableStaticVarCompensators, self._reader.load_static_var_compensator),
-            self._load_each(TableLinearShuntCompensators, self._reader.load_linear_shunt_compensator),
             self._load_each(TablePowerTransformers, self._reader.load_power_transformer),
             self._load_each(TableReclosers, self._reader.load_recloser),
             self._load_each(TablePowerElectronicsConnections, self._reader.load_power_electronics_connection),
@@ -231,6 +235,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TablePetersenCoils, self._reader.load_petersen_coil),
             self._load_each(TableGroundingImpedances, self._reader.load_grounding_impedance),
             self._load_each(TableSynchronousMachines, self._reader.load_synchronous_machine),
+            self._load_each(TableLinearShuntCompensators, self._reader.load_linear_shunt_compensator),
             self._load_each(TableTerminals, self._reader.load_terminal),
             self._load_each(TableTapChangerControls, self._reader.load_tap_changer_control),
             self._load_each(TablePowerElectronicsConnectionPhases, self._reader.load_power_electronics_connection_phase),
@@ -249,6 +254,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TablePotentialTransformers, self._reader.load_potential_transformer),
             self._load_each(TableFeeders, self._reader.load_feeder),
             self._load_each(TableLoops, self._reader.load_loop),
+            self._load_each(TableLvSubstations, self._reader.load_lv_substation),
             self._load_each(TableLvFeeders, self._reader.load_lv_feeder),
             self._load_each(TableCircuits, self._reader.load_circuit),
             self._load_each(TablePositionPoints, self._reader.load_position_point),

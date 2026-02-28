@@ -5,6 +5,8 @@
 
 __all__ = ["TableLvFeeders"]
 
+from typing import Generator, List
+
 from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_equipment_containers import TableEquipmentContainers
 
@@ -14,7 +16,14 @@ class TableLvFeeders(TableEquipmentContainers):
     def __init__(self):
         super().__init__()
         self.normal_head_terminal_mrid: Column = self._create_column("normal_head_terminal_mrid", "TEXT", Nullable.NULL)
+        self.lv_substation_mrid: Column = self._create_column("lv_substation_mrid", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:
         return "lv_feeders"
+
+    @property
+    def non_unique_index_columns(self) -> Generator[List[Column], None, None]:
+        yield from super().non_unique_index_columns
+        yield [self.normal_head_terminal_mrid]
+        yield [self.lv_substation_mrid]

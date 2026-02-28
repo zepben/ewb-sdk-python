@@ -7,9 +7,11 @@ __all__ = []
 
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.core.HvCustomer_pb2 import HvCustomer
 from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvFeeder_pb2 import LvFeeder
+from zepben.protobuf.cim.extensions.iec61970.base.feeder.LvSubstation_pb2 import LvSubstation
 from zepben.protobuf.cim.extensions.iec61970.base.generation.production.EvChargingUnit_pb2 import EvChargingUnit
 from zepben.protobuf.cim.extensions.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionRelayFunction_pb2 import ProtectionRelayFunction
@@ -89,6 +91,7 @@ from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import Curren
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
+from zepben.protobuf.cim.iec61970.base.wires.AcLineSegmentPhase_pb2 import AcLineSegmentPhase
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
@@ -138,6 +141,7 @@ from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
+
 
 PanDemandResponseFunction.mrid = lambda self: self.edf.mrid()
 BatteryControl.mrid = lambda self: self.rc.mrid()
@@ -195,6 +199,8 @@ GeographicalRegion.mrid = lambda self: self.io.mrid()
 IdentifiedObject.mrid = lambda self: self.mRID
 PowerSystemResource.mrid = lambda self: self.io.mrid()
 Site.mrid = lambda self: self.ec.mrid()
+LvSubstation.mrid = lambda self: self.ec.mrid()
+HvCustomer.mrid = lambda self: self.ec.mrid()
 SubGeographicalRegion.mrid = lambda self: self.io.mrid()
 Substation.mrid = lambda self: self.ec.mrid()
 Terminal.mrid = lambda self: self.ad.mrid()
@@ -272,6 +278,7 @@ Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
 LvFeeder.mrid = lambda self: self.ec.mrid()
 EvChargingUnit.mrid = lambda self: self.peu.mrid()
+AcLineSegmentPhase.mrid = lambda self: self.psr.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()
@@ -386,6 +393,7 @@ ProtectionRelayFunction.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 Switch.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 VoltageRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
+AcLineSegmentPhase.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

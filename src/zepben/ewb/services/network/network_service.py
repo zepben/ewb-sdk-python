@@ -300,3 +300,21 @@ class NetworkService(BaseService):
     @property
     def lv_feeder_start_points(self) -> Set[ConductingEquipment]:
         return {it.normal_head_terminal.conducting_equipment for it in self.objects(LvFeeder) if it.normal_head_terminal}
+
+    @staticmethod
+    def connected_terminals(terminal: Terminal, phases_or_code: List[SinglePhaseKind] | PhaseCode = None) -> List[ConnectivityResult]:
+        """
+        Find the connected [Terminal]s for the specified [terminal] using only the specified [phases].
+
+        :param terminal: terminal The [Terminal] to process.
+        :param phases_or_code: A collection of [SinglePhaseKind] or a [PhaseCode] specifying which phases should be used for the connectivity check. If omitted,
+                       all valid phases will be used.
+        :returns: A list of [ConnectivityResult] specifying the connections between [terminal] and the connected [Terminal]s
+        """
+        if isinstance(phases_or_code, PhaseCode):
+            phases = phases_or_code.single_phases
+        else:
+            phases = phases_or_code
+        if phases is None:
+            phases = terminal.phases.single_phases
+        return TerminalConnectivityConnected().connected_terminals(terminal, phases)

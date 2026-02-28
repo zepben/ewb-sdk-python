@@ -27,12 +27,14 @@ from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, Transf
     TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
     StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
-    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind
+    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind, LvSubstation
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
@@ -51,6 +53,7 @@ from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubG
 from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
 from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
 from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
@@ -105,6 +108,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     # Extensions IEC61970 Base Core #
     #################################
 
+    def test_compare_hv_customer(self):
+        self._compare_equipment_container(HvCustomer)
+
     def test_compare_site(self):
         self._compare_equipment_container(Site)
 
@@ -129,6 +135,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_equipment_container(LvFeeder)
 
         self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_property(LvFeeder.normal_energizing_lv_substation, LvFeeder, lambda _: LvSubstation(mrid="lvs1"), lambda _: LvSubstation(mrid="lvs2"))
         self.validator.validate_collection(
             LvFeeder.normal_energizing_feeders,
             LvFeeder.add_normal_energizing_feeder,
@@ -149,6 +156,31 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             LvFeeder,
             lambda _: Junction(mrid="j1"),
             lambda _: Junction(mrid="j2")
+        )
+
+    def test_compare_lv_substation(self):
+        self._compare_equipment_container(LvSubstation)
+
+        self.validator.validate_collection(
+            LvSubstation.normal_energizing_feeders,
+            LvSubstation.add_normal_energizing_feeder,
+            LvSubstation,
+            lambda _: Feeder(mrid="lvf1"),
+            lambda _: Feeder(mrid="lvf2")
+        )
+        self.validator.validate_collection(
+            LvSubstation.current_energizing_feeders,
+            LvSubstation.add_current_energizing_feeder,
+            LvSubstation,
+            lambda _: Feeder(mrid="lvf1"),
+            lambda _: Feeder(mrid="lvf2")
+        )
+        self.validator.validate_collection(
+            LvSubstation.normal_energized_lv_feeders,
+            LvSubstation.add_normal_energized_lv_feeder,
+            LvSubstation,
+            lambda _: Feeder(mrid="lvf1"),
+            lambda _: Feeder(mrid="lvf2")
         )
 
     ##################################################
@@ -421,6 +453,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_property(WireInfo.rated_current, creator, lambda _: 1, lambda _: 2)
         self.validator.validate_property(WireInfo.material, creator, lambda _: WireMaterialKind.aluminum, lambda _: WireMaterialKind.copperCadmium)
+        self.validator.validate_property(WireInfo.size_description, creator, lambda _: "1", lambda _: "2")
+        self.validator.validate_property(WireInfo.strand_count, creator, lambda _: "3", lambda _: "4")
+        self.validator.validate_property(WireInfo.core_strand_count, creator, lambda _: "5", lambda _: "6")
+        self.validator.validate_property(WireInfo.insulated, creator, lambda _: True, lambda _: False)
+        self.validator.validate_property(WireInfo.insulation_material, creator, lambda _: WireInsulationKind.doubleWireArmour, lambda _: WireInsulationKind.beltedPilc)
+        self.validator.validate_property(WireInfo.insulation_thickness, creator, lambda _: 1.0, lambda _: 2.0)
 
     ###################
     # IEC61968 Assets #
@@ -808,6 +846,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: LvFeeder(mrid="lvf1"),
             lambda _: LvFeeder(mrid="lvf2")
         )
+        self.validator.validate_collection(
+            Feeder.normal_energized_lv_substations,
+            Feeder.add_normal_energized_lv_substation,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvs1"),
+            lambda _: LvFeeder(mrid="lvs2")
+        )
+        self.validator.validate_collection(
+            Feeder.current_energized_lv_substations,
+            Feeder.add_current_energized_lv_substation,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvs1"),
+            lambda _: LvFeeder(mrid="lvs2")
+        )
 
     def test_compare_geographical_region(self):
         self._compare_identified_object(GeographicalRegion)
@@ -1031,6 +1083,26 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Clamp(mrid="clamp1"),
             lambda _: Clamp(mrid="clamp2")
         )
+        self.validator.validate_collection(
+            AcLineSegment.phases,
+            AcLineSegment.add_phase,
+            AcLineSegment,
+            lambda _: AcLineSegmentPhase(mrid="p1"),
+            lambda _: AcLineSegmentPhase(mrid="p2")
+        )
+
+    def test_ac_line_segment_phase(self):
+        self._compare_power_system_resource(AcLineSegmentPhase)
+
+        self.validator.validate_property(
+            AcLineSegmentPhase.ac_line_segment,
+            AcLineSegmentPhase,
+            lambda _: AcLineSegment(mrid="c1"),
+            lambda _: AcLineSegment(mrid="c2")
+        )
+        self.validator.validate_property(AcLineSegmentPhase.asset_info, AcLineSegmentPhase, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"))
+        self.validator.validate_property(AcLineSegmentPhase.phase, AcLineSegmentPhase, lambda _: SinglePhaseKind.A, lambda _: SinglePhaseKind.B)
+        self.validator.validate_property(AcLineSegmentPhase.sequence_number, AcLineSegmentPhase, lambda _: 1, lambda _: 2)
 
     def test_compare_breaker(self):
         self._compare_protected_switch(Breaker)
@@ -1470,6 +1542,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
                                          lambda _: ShuntCompensatorInfo(mrid="asci2"), expected_differences={"shunt_compensator_info"})
         self.validator.validate_property(ShuntCompensator.shunt_compensator_info, creator, lambda _: ShuntCompensatorInfo(mrid="sci1"),
                                          lambda _: ShuntCompensatorInfo(mrid="sci2"), expected_differences={"asset_info"})
+        self.validator.validate_property(ShuntCompensator.grounding_terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
 
     def test_compare_static_var_compensator(self):
         self._compare_conducting_equipment(StaticVarCompensator)

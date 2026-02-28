@@ -32,6 +32,7 @@ from zepben.ewb import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEquip
     TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, RegulatingControl, \
     ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse, BatteryUnit, \
     SynchronousMachine
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
@@ -39,6 +40,7 @@ from zepben.ewb.model.cim.iec61970.base.core.geographical_region import Geograph
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
@@ -50,6 +52,9 @@ from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import Regulati
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.services.common.reference_resolvers import *
+from zepben.ewb.services.common.reference_resolvers import acls_to_acls_phase_resolver, acls_phase_to_acls_resolver, acls_phase_to_wire_info_resolver, \
+    shunt_compensator_to_terminal_resolver, feeder_to_nelvs_resolver, feeder_to_celvs_resolver, lvs_to_nef_resolver, lvs_to_cef_resolver, lvf_to_nelvs_resolver, \
+    lvs_to_nelvf_resolver
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -100,6 +105,15 @@ def clamp_ac_line_segment(clamp: Clamp) -> BoundReferenceResolver:
 def clamps(acls: AcLineSegment) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(acls, acls_to_clamp_resolver, None)
+
+def phases(acls: AcLineSegment) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(acls, acls_to_acls_phase_resolver, acls_phase_to_acls_resolver)
+
+
+def ac_line_segment(phase: AcLineSegmentPhase) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(phase, acls_phase_to_acls_resolver, acls_to_acls_phase_resolver)
 
 
 def cn_terminals(cn: ConnectivityNode) -> BoundReferenceResolver:
@@ -297,9 +311,15 @@ def normal_energized_loops(substation: Substation) -> BoundReferenceResolver:
     return BoundReferenceResolver(substation, sub_to_eloop_resolver, loop_to_esub_resolver)
 
 
-def normal_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(feeder, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
+def normal_energized_lv_feeders(other: Feeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, Feeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_nef_resolver, lvf_to_nelvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
 
 
 def current_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
@@ -307,14 +327,41 @@ def current_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
     return BoundReferenceResolver(feeder, feeder_to_celvf_resolver, lvfeeder_to_cef_resolver)
 
 
-def normal_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+def normal_energized_lv_substations(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_feeder, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
+    return BoundReferenceResolver(feeder, feeder_to_nelvs_resolver, lvs_to_nef_resolver)
 
 
-def current_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+def current_energized_lv_substations(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(lv_feeder, lvfeeder_to_cef_resolver, feeder_to_celvf_resolver)
+    return BoundReferenceResolver(feeder, feeder_to_celvs_resolver, lvs_to_cef_resolver)
+
+
+def normal_energizing_feeders(other: LvFeeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, LvFeeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_nef_resolver, feeder_to_nelvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
+
+
+def current_energizing_feeders(other: LvFeeder | LvSubstation) -> BoundReferenceResolver:
+    if isinstance(other, LvFeeder):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvfeeder_to_cef_resolver, feeder_to_celvf_resolver)
+    elif isinstance(other, LvSubstation):
+        # noinspection PyArgumentList
+        return BoundReferenceResolver(other, lvs_to_cef_resolver, feeder_to_celvs_resolver)
+    else:
+        raise TypeError(f'unsupported type {type(other)}')
+
+
+def normal_energizing_lv_substations(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(lv_feeder, lvf_to_nelvs_resolver, lvs_to_nelvf_resolver)
 
 
 def normal_energizing_substation(feeder: Feeder) -> BoundReferenceResolver:
@@ -595,3 +642,13 @@ def usage_point_location(usage_point: UsagePoint) -> BoundReferenceResolver:
 def wire_info(conductor: Conductor) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
+
+
+def asset_info(acls_phase: AcLineSegmentPhase) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(acls_phase, acls_phase_to_wire_info_resolver, None)
+
+
+def terminal(shunt_compensator: ShuntCompensator) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(shunt_compensator, shunt_compensator_to_terminal_resolver, None)

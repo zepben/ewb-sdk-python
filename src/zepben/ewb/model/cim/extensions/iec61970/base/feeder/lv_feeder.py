@@ -15,6 +15,7 @@ from zepben.ewb.model.cim.iec61970.base.core.equipment_container import Equipmen
 from zepben.ewb.util import safe_remove_by_id, nlen, ngen
 
 if typing.TYPE_CHECKING:
+    from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
@@ -25,19 +26,29 @@ class LvFeeder(EquipmentContainer):
     """
     [ZBEX]
     A branch of LV network starting at a distribution substation and continuing until the end of the LV network.
+
+    :var normal_head_terminal: [ZBEX] The normal head terminal or terminals of this LvFeeder
+    :var normal_energizing_feeders: [ZBEX] The feeders that energize this LvFeeder in the normal state of the network.
+    :var current_equipment: [ZBEX] The equipment contained in this LvFeeder in the current state of the network.
+    :var current_energizing_feeders: [ZBEX] The feeders that energize this LvFeeder in the current state of the network.
+    :var normal_energizing_lv_substation: [ZBEX] The normally energizing LvSubstation for this LvFeeder
+
     """
 
-    _normal_head_terminal: Optional[Terminal] = None
-    """The normal head terminal or terminals of this LvFeeder"""
+    _normal_head_terminal: Terminal | None = None
+    """[ZBEX] The normal head terminal or terminals of this LvFeeder"""
 
-    _normal_energizing_feeders: Optional[Dict[str, Feeder]] = None
-    """The feeders that energize this LV feeder in the normal state of the network."""
+    _normal_energizing_feeders: Dict[str, Feeder] | None = None
+    """[ZBEX] The feeders that energize this LV feeder in the normal state of the network."""
 
-    _current_equipment: Optional[Dict[str, Equipment]] = None
-    """The equipment contained in this LvFeeder in the current state of the network."""
+    _current_equipment: Dict[str, Equipment] | None = None
+    """[ZBEX] The equipment contained in this LvFeeder in the current state of the network."""
 
-    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
-    """The feeders that energize this LV feeder in the current state of the network."""
+    _current_energizing_feeders: Dict[str, Feeder] | None = None
+    """[ZBEX] The feeders that energize this LV feeder in the current state of the network."""
+
+    normal_energizing_lv_substation: 'LvSubstation | None' = None
+    """[ZBEX] The normally energizing LvSubstation for this LvFeeder"""
 
     def __init__(
         self,
@@ -79,7 +90,7 @@ class LvFeeder(EquipmentContainer):
         """
         [ZBEX] The HV/MV feeders that normally energize this LV feeder.
         """
-        return ngen(self._normal_energizing_feeders.values() if self._normal_energizing_feeders is not None else None)
+        return ngen(self._normal_energizing_feeders)
 
     def num_normal_energizing_feeders(self) -> int:
         """
@@ -140,7 +151,7 @@ class LvFeeder(EquipmentContainer):
         """
         [ZBEX] The HV/MV feeders that currently energize this LV feeder.
         """
-        return ngen(self._current_energizing_feeders.values() if self._current_energizing_feeders is not None else None)
+        return ngen(self._current_energizing_feeders)
 
     def num_current_energizing_feeders(self) -> int:
         """
@@ -201,7 +212,7 @@ class LvFeeder(EquipmentContainer):
         """
         Contained `Equipment` using the current state of the network.
         """
-        return ngen(self._current_equipment.values() if self._current_equipment is not None else None)
+        return ngen(self._current_equipment)
 
     def num_current_equipment(self):
         """

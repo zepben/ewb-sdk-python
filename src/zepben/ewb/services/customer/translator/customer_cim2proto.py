@@ -76,7 +76,10 @@ def customer_agreement_to_pb(cim: CustomerAgreement) -> PBCustomerAgreement:
 def pricing_structure_to_pb(cim: PricingStructure) -> PBPricingStructure:
     return PBPricingStructure(
         doc=document_to_pb(cim),
-        tariffMRIDs=[str(io.mrid) for io in cim.tariffs]
+        tariffMRIDs=[str(io.mrid) for io in cim.tariffs],
+        **set_or_null(
+            code=cim.code,
+        )
     )
 
 

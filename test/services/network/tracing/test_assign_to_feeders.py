@@ -248,6 +248,51 @@ class TestAssignToFeeders:
         validate_equipment(feeder.equipment, 'b0', 'c1', 'tx2')
         assert [it.mrid for it in feeder.normal_energized_lv_feeders] == ['lvf9', 'lvf10', 'lvf11']
 
+
+    async def  test_energizes_all_lv_feeders_for_a_lv_substation_that_is_energized(self):
+        #
+        #                              1--c4--21 b5 2
+        # 1 b0 21--c1--21 tx2 21--c3--2
+        #                              1--c6--21 b7 2
+        #
+        network = (TestNetworkBuilder()
+            .from_breaker(action=self._make_hv) # b0
+            .to_acls(action=self._make_hv) # c1
+            .to_power_transformer(end_actions=[
+                lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage),
+                lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)
+            ])  # tx2
+            .to_acls(action=self._make_lv) # c3
+            .to_acls(action=self._make_lv) # c4
+            .to_breaker(action=self._make_lv) # b5
+            .from_acls(action=self._make_lv) # c6
+            .to_breaker(action=self._make_lv) # b7
+            .connect("c3", "c6", 2, 1)
+            .add_feeder("b0") # fdr8
+            .add_lv_feeder("tx2") # lvf9
+            .add_lv_feeder("b5") # lvf10
+            .add_lv_feeder("b7") # lvf11
+            .add_lv_substation(["tx2", "c3", "c4", "b5", "c6", "b7"]) # lvs12
+        ).network
+
+        feeder = network["fdr8"]
+        lv_sub = network["lvs12"]
+        lvf9 = network["lvf9"]
+        lvf10 = network["lvf10"]
+        lvf11 = network["lvf11"]
+
+        await Tracing.assign_equipment_to_feeders().run(network, NetworkStateOperators.NORMAL)
+
+        # We ensure the HV trace stopped at the transformer, but the additional LV feeders from b5 and b7 are still
+        # marked as energized through the dist substation site.
+        validate_equipment(feeder.equipment, "b0", "c1", "tx2")
+        assert [it.mrid for it in feeder.normal_energized_lv_feeders] == ["lvf9", "lvf10", "lvf11"]
+        assert [it.mrid for it in feeder.normal_energized_lv_substations] == ["lvs12"]
+        assert [it.mrid for it in lv_sub.normal_energizing_feeders] == ["fdr8"]
+        assert [it.mrid for it in lvf9.normal_energizing_feeders] == ["fdr8"]
+        assert [it.mrid for it in lvf10.normal_energizing_feeders] == ["fdr8"]
+        assert [it.mrid for it in lvf11.normal_energizing_feeders] == ["fdr8"]
+
     @pytest.mark.asyncio
     async def test_does_not_trace_out_from_terminal_belonging_to_open_switch(self):
         network = (TestNetworkBuilder()

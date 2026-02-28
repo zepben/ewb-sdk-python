@@ -339,6 +339,82 @@ class TestAssignToLvFeeders:
         await run_with_operators(operators = NetworkStateOperators.NORMAL)
         await run_with_operators(operators = NetworkStateOperators.CURRENT)
 
+    async def test_lv_feeders_detect_back_feeds_for_lv_substations(self):
+        async def run_with_operators(operators: Type[NetworkStateOperators]):
+            #
+            #                1--c2--21 b3 2
+            # 1 tx0 21--c1--2
+            #                1--c4--21 b5 21--c6--21 b7 2
+            #
+            network = (TestNetworkBuilder()
+                .from_power_transformer(end_actions=[
+                    lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage),
+                    lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)
+                ])  # tx0
+                .to_acls(action=self._make_lv)  # c1
+                .to_acls(action=self._make_lv)  # c2
+                .to_breaker(action=self._make_lv)  # b3
+                .from_acls(action=self._make_lv)  # c4
+                .to_breaker(action=self._make_lv)  # b5
+                .to_acls(action=self._make_lv)  # c6
+                .to_breaker(action=self._make_lv)  # b7
+                .connect("c1", "c4", 2, 1)
+                .add_lv_feeder("tx0") # lvf8
+                .add_lv_feeder("b3") # lvf9
+                .add_lv_feeder("b5") # lvf10
+                .add_lv_feeder("b7", 1) # lvf11
+                .add_lv_substation(["tx0", "c1", "c2", "b3", "c4", "b5"]) # lvs12
+            ).network
+
+            b7 = network["b7"]
+
+            feeder = Feeder(mrid=generate_id())
+            lv_sub = network["lvs12"]
+            operators.associate_energizing_feeder(feeder, lv_sub)
+
+            lv_feeder8 = network["lvf8"]
+            operators.associate_energizing_feeder(feeder, lv_feeder8)
+            lv_feeder8.normal_energizing_lv_substation = lv_sub
+
+            lv_feeder9 = network["lvf9"]
+            operators.associate_energizing_feeder(feeder, lv_feeder9)
+            lv_feeder9.normal_energizing_lv_substation = lv_sub
+
+            lv_feeder10 = network["lvf10"]
+            operators.associate_energizing_feeder(feeder, lv_feeder10)
+            lv_feeder10.normal_energizing_lv_substation = lv_sub
+
+            # We create an LV feeder to assign from b7 with its associated energizing feeder, which we will test is assigned to all LV feeders
+            # in the dist substation site, not just the one on b5.
+            back_feed = Feeder(mrid=generate_id())
+            lv_feeder = LvFeeder(mrid=generate_id())
+            operators.associate_energizing_feeder(back_feed, lv_feeder)
+
+            await Tracing.assign_equipment_to_lv_feeders().run(
+                next(b7.terminals),
+                network.lv_feeder_start_points,
+                terminal_to_aux_equipment = dict(),
+                lv_feeders_to_assign=[lv_feeder],
+                network_state_operators=operators
+            )
+
+            # Make sure the LV feeder traced stopped at the first LV feeder head.
+            assert [it.mrid for it in operators.get_equipment(lv_feeder)] == ["b7", "c6", "b5"]
+
+            # Make sure both feeders are now considered to be energizing all LV feeders.
+            assert list(operators.get_energized_lv_feeders(feeder)) == [lv_feeder8, lv_feeder9, lv_feeder10, lv_feeder]
+            assert list(operators.get_energized_lv_feeders(back_feed)) == [lv_feeder, lv_feeder8, lv_feeder9, lv_feeder10]
+
+            # Make sure all LV feeders are now considered to be energized by both feeders.
+            assert list(operators.get_energizing_feeders(lv_feeder)) == [back_feed, feeder]
+            assert list(operators.get_energizing_feeders(lv_feeder8)) == [feeder, back_feed]
+            assert list(operators.get_energizing_feeders(lv_feeder9)) == [feeder, back_feed]
+            assert list(operators.get_energizing_feeders(lv_feeder10)) == [feeder, back_feed]
+            assert list(operators.get_energizing_feeders(lv_sub)) == [feeder, back_feed]
+
+        await run_with_operators(NetworkStateOperators.NORMAL)
+        await run_with_operators(NetworkStateOperators.CURRENT)
+
     @pytest.mark.asyncio
     async def test_assigns_normal_and_current_energising_feeders_based_on_state(self):
         network = (TestNetworkBuilder()

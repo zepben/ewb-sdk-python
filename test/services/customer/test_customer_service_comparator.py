@@ -47,6 +47,7 @@ class TestCustomerServiceComparator(TestBaseServiceComparator):
             PricingStructure,
             lambda _: Tariff(mrid="1"),
             lambda _: Tariff(mrid="2"))
+        self.validator.validate_property(PricingStructure.code, PricingStructure, lambda _: "1",lambda _: "2")
 
     def test_compare_tariff(self):
         self._compare_document(Tariff)

@@ -11,7 +11,7 @@ from cim.iec61970.base.core.test_power_system_resource import power_system_resou
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered
 from util import mrid_strategy
-from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer, generate_id
+from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer, generate_id, Site, LvFeeder, Substation, LvSubstation
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
@@ -125,3 +125,46 @@ def test_current_containers_collection():
         Equipment.remove_current_container,
         Equipment.clear_current_containers
     )
+
+def test_equipmentContainerFilters():
+    equipment = Equipment(mrid=generate_id())
+    site1 = Site(mrid=generate_id())
+    site2 = Site(mrid=generate_id())
+    feeder1 = Feeder(mrid=generate_id())
+    feeder2 = Feeder(mrid=generate_id())
+    feeder3 = Feeder(mrid=generate_id())
+    feeder4 = Feeder(mrid=generate_id())
+    lv_feeder1 = LvFeeder(mrid=generate_id())
+    lv_feeder2 = LvFeeder(mrid=generate_id())
+    lv_feeder3 = LvFeeder(mrid=generate_id())
+    lv_feeder4 = LvFeeder(mrid=generate_id())
+    substation1 = Substation(mrid=generate_id())
+    substation2 = Substation(mrid=generate_id())
+    lv_sub1 = LvSubstation(mrid=generate_id())
+    lv_sub2 = LvSubstation(mrid=generate_id())
+
+    equipment.add_container(site1)
+    equipment.add_container(site2)
+    equipment.add_container(feeder1)
+    equipment.add_container(feeder2)
+    equipment.add_container(lv_feeder1)
+    equipment.add_container(lv_feeder2)
+    equipment.add_container(substation1)
+    equipment.add_container(substation2)
+    equipment.add_container(lv_sub1)
+    equipment.add_container(lv_sub2)
+
+    equipment.add_current_container(feeder3)
+    equipment.add_current_container(feeder4)
+    equipment.add_current_container(lv_feeder3)
+    equipment.add_current_container(lv_feeder4)
+    equipment.add_current_container(lv_sub1)
+    equipment.add_current_container(lv_sub2)
+
+    assert  [site1, site2] == list(equipment.sites)
+    assert  [feeder1, feeder2] == list(equipment.normal_feeders)
+    assert  [feeder3, feeder4] == list(equipment.current_feeders)
+    assert  [lv_feeder1, lv_feeder2] == list(equipment.normal_lv_feeders)
+    assert  [lv_feeder3, lv_feeder4] == list(equipment.current_lv_feeders)
+    assert  [substation1, substation2] == list(equipment.substations)
+    assert  [lv_sub1, lv_sub2] == list(equipment.normal_lv_substations)

@@ -15,7 +15,7 @@ from zepben.ewb import MetadataCollection, NetworkService, DiagramService, Custo
     PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
     Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    generate_id
+    generate_id, LinearShuntCompensator
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -24,6 +24,7 @@ from zepben.ewb.model.cim.iec61970.base.core.geographical_region import Geograph
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
@@ -150,6 +151,8 @@ class SchemaNetworks:
             for it in filled.normal_energizing_feeders:
                 it.add_normal_energized_lv_feeder(filled)
                 service.add(it)
+            if filled.normal_energizing_lv_substation:
+                service.add(filled.normal_energizing_lv_substation)
 
         ##################################################
         # Extensions IEC61970 Base Generation Production #
@@ -480,6 +483,12 @@ class SchemaNetworks:
                 it.ac_line_segment = filled
                 service.add(it)
 
+        if isinstance(filled, AcLineSegmentPhase):
+            if filled.asset_info is not None:
+                service.add(filled.asset_info)
+            filled.ac_line_segment.add_phase(filled)
+            service.add(filled.ac_line_segment)
+
         if isinstance(filled, Clamp):
             filled.ac_line_segment.add_clamp(filled)
             service.add(filled.ac_line_segment)
@@ -511,6 +520,10 @@ class SchemaNetworks:
 
         if isinstance(filled, Fuse):
             service.add(filled.function)
+
+        if isinstance(filled, LinearShuntCompensator):
+            if filled.grounding_terminal:
+                service.add(filled.grounding_terminal)
 
         if isinstance(filled, PowerElectronicsConnection):
             for it in filled.units:

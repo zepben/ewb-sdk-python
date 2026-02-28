@@ -46,7 +46,7 @@ class CustomerServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_reference_collections(diff, PricingStructure.tariffs)
-
+        self._compare_values(diff, PricingStructure.code)
         return self._compare_document(diff)
 
     def _compare_tariff(self, source: Tariff, target: Tariff) -> ObjectDifference:

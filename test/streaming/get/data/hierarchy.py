@@ -2,13 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb import NetworkService, Loop, Circuit, Substation
+from zepben.ewb import NetworkService, Loop, Circuit, Substation, LvSubstation, LvFeeder
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 
-def create_hierarchy_network() -> NetworkService:
+def create_hierarchy_network(include_lv_sub=False, include_lv_feeder=False) -> NetworkService:
     ns = NetworkService()
 
     ns.add(GeographicalRegion(mrid="g1"))
@@ -28,5 +28,13 @@ def create_hierarchy_network() -> NetworkService:
 
     ns.add(Loop(mrid="l1"))
     ns.add(Loop(mrid="l2"))
+
+    if include_lv_sub:
+        ns.add(LvSubstation(mrid="lvs1"))
+        ns.add(LvSubstation(mrid="lvs2"))
+
+    if include_lv_feeder:
+        ns.add(LvFeeder(mrid="lvf1"))
+        ns.add(LvFeeder(mrid="lvf2"))
 
     return ns

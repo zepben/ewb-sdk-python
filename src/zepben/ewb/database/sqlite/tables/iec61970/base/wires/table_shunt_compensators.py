@@ -6,6 +6,7 @@
 __all__ = ["TableShuntCompensators"]
 
 from abc import ABC
+from typing import Generator, List
 
 from zepben.ewb.database.sql.column import Column, Nullable
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_regulating_cond_eq import TableRegulatingCondEq
@@ -20,3 +21,9 @@ class TableShuntCompensators(TableRegulatingCondEq, ABC):
         self.nom_u: Column = self._create_column("nom_u", "INTEGER", Nullable.NULL)
         self.phase_connection: Column = self._create_column("phase_connection", "TEXT", Nullable.NOT_NULL)
         self.sections: Column = self._create_column("sections", "NUMBER", Nullable.NULL)
+        self.grounding_terminal_mrid: Column = self._create_column("grounding_terminal_mrid", "TEXT", Nullable.NULL)
+
+    @property
+    def non_unique_index_columns(self) -> Generator[List[Column], None, None]:
+        yield from super().non_unique_index_columns
+        yield [self.grounding_terminal_mrid]

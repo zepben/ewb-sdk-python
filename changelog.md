@@ -13,6 +13,9 @@
   * `DateTimeInterval`, interval between two date and time points, where the interval includes the start time but excludes end time.
   * `ElectronicAddress`, electronic address information.
   * `TelephoneNumber`, telephone number.
+  * `HvCustomer` - [ZBEX] an `EquipmentContainer` for high voltage customer assets.
+  * `LvSubstation` - [ZBEX] an `EquipmentContainer` to represent distribution transformer sites, with associations to `Feeder` and `LvFeeder`
+  * `AcLineSegmentPhase` - Details about an individual phase of an `AcLineSegment`.
 * Added the following new CIM extension classes:
   * `ContactDetails`, the details required to contact a person or company. These can be accessed/used via a `UsagePoint`.
   * `DirectionalCurrentRelay`, a directional current relay is a type of protective relay used in electrical power systems to detect the direction of current
@@ -20,6 +23,22 @@
 * Added new CIM extension enums:
   * `ContactMethodType`
   * `PolarizingQuantityType`
+* Added new properties to the model:
+  * `PricingStructure.code` - User allocated key for a pricing structure.
+  * `ShuntCompensator.grounding_terminal` - [ZBEX] The terminal connecting to grounded network.
+  * `WireInfo` - extra properties for conductors:
+    * `size_description`
+    * `strand_count`
+    * `core_strand_count`
+    * `insulated`
+    * `insulation_material`
+    * `insulation_thickness`
+* Added new enum `WireInsulationKind` with extensions.
+* Added helper function `AcLineSegment.wire_info_for_phase()` for retrieving the `WireInfo` for a given phase of a conductor.
+* Added helper function `EquipmentContainer.edge_terminals()` for retrieving all terminals on the edge of an `EquipmentContainer`.
+* Added support to filter NetworkHierarchy responses when calling `NetworkConsumerClient.get_network_hierarchy()`. A client can now choose what hierarchy
+  containers should be populated in the response.
+* Added `AcLineSegment.wire_info_for_phase(phase: SinglePhaseKind)` to retrieve the `WireInfo` associated with a given phase of a conductor.
 
 ### Enhancements
 * * `BaseService.contains` has been been expanded to support objects in addition to mRIDs.

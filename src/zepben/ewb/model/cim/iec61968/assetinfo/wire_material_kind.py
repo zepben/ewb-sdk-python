@@ -14,43 +14,43 @@ from zepben.ewb import unique
 class WireMaterialKind(Enum):
     """
     Kind of wire material.
+    :var UNKNOWN: Unknown material kind.
+    :var aaac: Aluminum-alloy conductor steel reinforced.
+    :var acsr: Aluminum conductor steel reinforced.
+    :var acsrAz: Aluminum conductor steel reinforced, aluminumized steel core
+    :var aluminium: Aluminum wire.
+    :var aluminiumAlloy: Aluminum-alloy wire.
+    :var aluminiumAlloySteel: Aluminum-alloy-steel wire.
+    :var aluminiumSteel: Aluminum-steel wire.
+    :var copper: Copper wire.
+    :var copperCadmium: Copper cadmium wire.
+    :var other: Other wire material.
+    :var steel: Steel wire.
     """
 
     UNKNOWN = 0
-    """UNKNOWN"""
 
     aaac = 1
-    """Aluminum-alloy conductor steel reinforced."""
 
     acsr = 2
-    """Aluminum conductor steel reinforced."""
 
     acsrAz = 3
-    """Aluminum conductor steel reinforced, aluminumized steel core"""
 
     aluminum = 4
-    """Aluminum wire."""
 
     aluminumAlloy = 5
-    """Aluminum-alloy wire."""
 
     aluminumAlloySteel = 6
-    """Aluminum-alloy-steel wire."""
 
     aluminumSteel = 7
-    """Aluminum-steel wire."""
 
     copper = 8
-    """Copper wire."""
 
     copperCadmium = 9
-    """Copper cadmium wire."""
 
     other = 10
-    """Other wire material."""
 
     steel = 11
-    """Steel wire."""
 
     @property
     def short_name(self):

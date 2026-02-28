@@ -7,14 +7,17 @@ from __future__ import annotations
 
 __all__ = ['EquipmentContainer']
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
 
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
 
 if TYPE_CHECKING:
+    from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
+    from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+    from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 
 T = TypeVar("T")
@@ -197,3 +200,46 @@ class EquipmentContainer(ConnectivityNodeContainer):
                 if f not in seen:
                     seen.add(f.mrid)
                     yield f
+
+    def find_lv_feeders(
+        self,
+        lv_feeder_start_points: Iterable['ConductingEquipment'],
+        state_operators: Type['NetworkStateOperators']
+    ) -> Generator['LvFeeder', None, None]:
+        # NOTE: this import exists due to a circular import problem.
+        from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+        for ce in state_operators.get_equipment(self):
+            if isinstance(ce, ConductingEquipment):
+                if ce in lv_feeder_start_points:
+                    if not state_operators.is_open(ce):  # Exclude any open switch that might be energised by a different feeder on the other side
+                        for lv_feeder in ce.lv_feeders(state_operators):
+                            yield lv_feeder
+
+    def edge_terminals(self, state_operator: 'Type[NetworkStateOperators]' = None) -> Generator['Terminal', None, None]:
+        """
+        Retrieve all terminals that are located on the edge of this EquipmentContainer. This is determined by any terminal that connects to another terminal on a
+        ConductingEquipment that is not a member of this EquipmentContainer. This will explicitly exclude equipment with only one terminal that do not
+        provide connectivity to the rest of the network.
+
+        :param state_operator: The network state to operate on.
+        """
+
+        # NOTE: these imports and lazy state operator setting exist due to a circular import problem.
+        from zepben.ewb.services.network.network_service import NetworkService
+        from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+        from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+        if state_operator is None:
+            state_operator = NetworkStateOperators.NORMAL
+
+        seen: set = set()
+        for it in state_operator.get_equipment(self):
+            if isinstance(it, ConductingEquipment):
+                for t in it.terminals:
+                    for ct in NetworkService.connected_terminals(t):
+                        if to := ct.to_equip:
+                            try:
+                                to.get_container(self.mrid)
+                            except KeyError:
+                                if t not in seen:
+                                    seen.add(ct.from_terminal)
+                                    yield ct.from_terminal

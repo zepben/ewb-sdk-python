@@ -12,6 +12,7 @@ from logging import Logger
 from typing import Iterable, Union, List, Dict, Any, Set, Type, Generator, TYPE_CHECKING
 
 from zepben.ewb import Switch, ProtectedSwitch, PowerElectronicsConnection
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.ewb.services.network.network_service import NetworkService
@@ -89,17 +90,27 @@ class BaseFeedersInternal:
             for lv_feeder in lv_feeders:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
-    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Set[ConductingEquipment], to_equipment: PowerTransformer):
+    def _feeder_energizes_lv_substations(self, feeders: Iterable[LvFeeder | Feeder], lv_substations: Iterable[LvSubstation]):
+        for feeder in feeders:
+            for lvs in lv_substations:
+                self.network_state_operators.associate_energizing_feeder(feeder, lvs)
 
-        lv_feeders = []
-        if len(sites := list(to_equipment.sites)) > 0:
+    def _feeder_try_energize_lv_feeders_and_substations(
+        self,
+        feeders: Iterable[Feeder],
+        lv_feeder_start_points: Set[ConductingEquipment],
+        to_equipment: PowerTransformer
+    ):
+        if substations := list(to_equipment.normal_lv_substations):
+            for s in substations:
+                self._feeder_energizes(feeders, (lvf for lvf in s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators)))
+            self._feeder_energizes_lv_substations(feeders, substations)
+        elif sites := list(to_equipment.sites):
             for s in sites:
-                lv_feeders.extend(lv_f for lv_f in s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
+                self._feeder_energizes(feeders, (lv_f for lv_f in s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators)))
         else:
             for eq in to_equipment:
-                lv_feeders.extend(eq.lv_feeders(self.network_state_operators))
-
-        self._feeder_energizes(feeders, lv_feeders)
+                self._feeder_energizes(feeders, eq.lv_feeders(self.network_state_operators))
 
 
 class AssignToFeedersInternal(BaseFeedersInternal):
@@ -195,7 +206,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
         to_equip = step_path.to_equipment
         if isinstance(to_equip, PowerTransformer):
-            self._feeder_try_energize_lv_feeders(feeders_to_assign, lv_feeder_start_points, to_equip)
+            self._feeder_try_energize_lv_feeders_and_substations(feeders_to_assign, lv_feeder_start_points, to_equip)
         elif isinstance(to_equip, ProtectedSwitch):
             self._associate_relay_systems_with_containers(feeders_to_assign, to_equip)
         elif isinstance(to_equip, PowerElectronicsConnection):

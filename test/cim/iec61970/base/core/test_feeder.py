@@ -10,7 +10,7 @@ from cim.iec61970.base.core.test_equipment_container import equipment_container_
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered
 from util import mrid_strategy
-from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id
+from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id, LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 feeder_kwargs = {
@@ -113,6 +113,31 @@ def test_current_energized_lv_feeder_collection():
         Feeder.add_current_energized_lv_feeder,
         Feeder.remove_current_energized_lv_feeder,
         Feeder.clear_current_energized_lv_feeders
+    )
+
+def test_normal_energized_lv_substations_collection():
+    validate_unordered(
+        Feeder,
+        lambda mrid: LvSubstation(mrid),
+        Feeder.normal_energized_lv_substations,
+        Feeder.num_normal_energized_lv_substations,
+        Feeder.get_normal_energized_lv_substation,
+        Feeder.add_normal_energized_lv_substation,
+        Feeder.remove_normal_energized_lv_substation,
+        Feeder.clear_normal_energized_lv_substations
+    )
+
+
+def test_current_energized_lv_substations_collection():
+    validate_unordered(
+        Feeder,
+        lambda mrid: LvSubstation(mrid),
+        Feeder.current_energized_lv_substations,
+        Feeder.num_current_energized_lv_substations,
+        Feeder.get_current_energized_lv_substation,
+        Feeder.add_current_energized_lv_substation,
+        Feeder.remove_current_energized_lv_substation,
+        Feeder.clear_current_energized_lv_substations
     )
 
 

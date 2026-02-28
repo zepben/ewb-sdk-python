@@ -18,6 +18,8 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_street_addresses import TableContactDetailsStreetAddresses
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_hv_customers import TableHvCustomers
+from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.core.table_lv_substations import TableLvSubstations
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.protection.table_directional_current_relay import TableDirectionalCurrentRelays
 from zepben.ewb.database.sqlite.tables.extensions.iec61970.base.wires.table_battery_controls import TableBatteryControls
 from zepben.ewb.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
@@ -27,6 +29,7 @@ from zepben.ewb.database.sqlite.tables.iec61968.metering.table_end_device_functi
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
 from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_curves import TableCurves
+from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_ac_line_segment_phases import TableAcLineSegmentPhases
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_grounding_impedances import TableGroundingImpedances
 from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
@@ -39,15 +42,19 @@ from zepben.ewb.database.sqlite.tables.iec61970.base.wires.table_synchronous_mac
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
 from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.ewb.model.cim.iec61970.base.core.curve import Curve
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.ewb.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
@@ -500,6 +507,21 @@ class NetworkCimReader(BaseCimReader):
     # Extensions IEC61970 Base Core #
     #################################
 
+    def load_hv_customer(self, table: TableHvCustomers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`HvCustomer` and populate its fields from :class:`TableHvCustomers`.
+
+        :param table: The database table to read the :class:`HvCustomer` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`HvCustomer`.
+        :param set_identifier: A callback to register the mRID of this :class:`HvCustomer` for logging purposes.
+
+        :return: True if the :class:`HvCustomer` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        hv_customer = HvCustomer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        return self._load_equipment_container(hv_customer, table, result_set) and self._add_or_throw(hv_customer)
+
     def load_site(self, table: TableSites, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`Site` and populate its fields from :class:`TableSites`.
@@ -551,8 +573,29 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.normal_head_terminal_mrid.query_index, on_none=None),
             Terminal
         )
+        lv_feeder.normal_energizing_lv_substation = self._ensure_get(
+            result_set.get_string(table.lv_substation_mrid.query_index, on_none=None),
+            LvSubstation
+        )
+        if lv_feeder.normal_energizing_lv_substation is not None:
+            lv_feeder.normal_energizing_lv_substation.add_normal_energized_lv_feeder(lv_feeder)
 
         return self._load_equipment_container(lv_feeder, table, result_set) and self._add_or_throw(lv_feeder)
+
+    def load_lv_substation(self, table: TableLvSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`LvSubstation` and populate its fields from :class:`TableLvSubstations`.
+
+        :param table: The database table to read the :class:`LvSubstation` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`LvSubstation`.
+        :param set_identifier: A callback to register the mRID of this :class:`LvSubstation` for logging purposes.
+
+        :return: True if the :class:`LvSubstation` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        lv_substation = LvSubstation(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        return self._load_equipment_container(lv_substation, table, result_set) and self._add_or_throw(lv_substation)
 
     ##################################################
     # Extensions IEC61970 Base Generation Production #
@@ -1044,6 +1087,12 @@ class NetworkCimReader(BaseCimReader):
     def _load_wire_info(self, wire_info: WireInfo, table: TableWireInfo, result_set: ResultSet) -> bool:
         wire_info.rated_current = result_set.get_int(table.rated_current.query_index, on_none=None)
         wire_info.material = WireMaterialKind[result_set.get_string(table.material.query_index)]
+        wire_info.size_description = result_set.get_string(table.size_description.query_index, on_none=None)
+        wire_info.strand_count = result_set.get_string(table.strand_count.query_index, on_none=None)
+        wire_info.core_strand_count = result_set.get_string(table.core_strand_count.query_index, on_none=None)
+        wire_info.insulated = result_set.get_boolean(table.insulated.query_index, on_none=None)
+        wire_info.insulation_material = WireInsulationKind[result_set.get_string(table.insulation_material.query_index)]
+        wire_info.insulation_thickness = result_set.get_float(table.insulation_thickness.query_index, on_none=None)
 
         return self._load_asset_info(wire_info, table, result_set)
 
@@ -1989,6 +2038,28 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_conductor(ac_line_segment, table, result_set) and self._add_or_throw(ac_line_segment)
 
+    def load_ac_line_segment_phase(self, table: TableAcLineSegmentPhases, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`AcLineSegmentPhase` and populate its fields from :class:`TableAcLineSegmentPhases`.
+
+        :param table: The database table to read the :class:`AcLineSegmentPhase` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`AcLineSegmentPhase`.
+        :param set_identifier: A callback to register the mRID of this :class:`AcLineSegmentPhase` for logging purposes.
+
+        :return: True if the :class:`AcLineSegmentPhase` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        ac_line_segment_phase = AcLineSegmentPhase(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+        ac_line_segment_phase.asset_info = self._ensure_get(result_set.get_string(table.wire_info_mrid.query_index, on_none=None), WireInfo)
+        ac_line_segment = self._ensure_get(result_set.get_string(table.ac_line_segment_mrid.query_index, on_none=None), AcLineSegment)
+        if ac_line_segment is not None:
+            ac_line_segment.add_phase(ac_line_segment_phase)
+            ac_line_segment_phase.ac_line_segment = ac_line_segment
+        ac_line_segment_phase.phase = SinglePhaseKind[result_set.get_string(table.phase.query_index)]
+        ac_line_segment_phase.sequence_number = result_set.get_int(table.sequence_number.query_index, on_none=None)
+
+        return self._load_power_system_resource(ac_line_segment_phase, table, result_set) and self._add_or_throw(ac_line_segment_phase)
+
     def load_breaker(self, table: TableBreakers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`Breaker` and populate its fields from :class:`TableBreakers`.
@@ -2718,6 +2789,13 @@ class NetworkCimReader(BaseCimReader):
         shunt_compensator.nom_u = result_set.get_int(table.nom_u.query_index, on_none=None)
         shunt_compensator.phase_connection = PhaseShuntConnectionKind[result_set.get_string(table.phase_connection.query_index)]
         shunt_compensator.sections = result_set.get_float(table.sections.query_index, on_none=None)
+
+        # We use a resolver here because there is an ordering conflict between Terminal, ConductingEquipment, and ShuntCompensator
+        # We check this resolver has actually been resolved in the afterServiceRead of the database read and throw there if it hasn't.
+        self._service.resolve_or_defer_reference(
+            resolver.terminal(shunt_compensator),
+            result_set.get_string(table.grounding_terminal_mrid.query_index, on_none=None)
+        )
 
         return self._load_regulating_cond_eq(shunt_compensator, table, result_set)
 

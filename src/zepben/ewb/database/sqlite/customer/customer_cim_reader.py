@@ -105,7 +105,10 @@ class CustomerCimReader(BaseCimReader):
         :return: True if the `PricingStructure` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
-        pricing_structure = PricingStructure(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+        pricing_structure = PricingStructure(
+            mrid=set_identifier(result_set.get_string(table.mrid.query_index)),
+            code=result_set.get_string(table.code.query_index, on_none=None)
+        )
 
         return self._load_document(pricing_structure, table, result_set) and self._add_or_throw(pricing_structure)
 

@@ -53,6 +53,10 @@ from util import mrid_strategy
 from zepben.ewb import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none
+from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
+from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
+from zepben.ewb.services.common.resolver import normal_energizing_lv_substations
 
 # @formatter:on
 
@@ -122,6 +126,9 @@ def create_pan_demand_response_function(include_runtime: bool = True):
 # Extensions IEC61970 Base Core #
 #################################
 
+def create_hv_customer(include_runtime: bool = True):
+    return builds(Site, **create_equipment_container(include_runtime))
+
 def create_site(include_runtime: bool = True):
     return builds(Site, **create_equipment_container(include_runtime))
 
@@ -144,7 +151,8 @@ def create_lv_feeder(include_runtime: bool = True):
     runtime = {
         "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
         "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
-        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2)
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "normal_energizing_lv_substation": builds(LvSubstation, **create_identified_object(include_runtime)),
     } if include_runtime else {}
 
     return builds(
@@ -153,6 +161,20 @@ def create_lv_feeder(include_runtime: bool = True):
         **create_equipment_container(include_runtime, add_equipment=include_runtime),
         normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
         **runtime
+    )
+
+
+def create_lv_substation(include_runtime: bool = True):
+    runtime = {
+        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), max_size=2),
+        "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
+        "normal_energized_lv_feeder": builds(LvFeeder, **create_identified_object(include_runtime)),
+    }
+
+    return builds(
+        LvSubstation,
+        **create_equipment_container(include_runtime, add_equipment=include_runtime),
     )
 
 
@@ -419,12 +441,22 @@ def create_wire_info(include_runtime: bool):
     return {
         **create_asset_info(include_runtime),
         "rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "material": sampled_wire_material_kind()
+        "material": sampled_wire_material_kind(),
+        "size_description": one_of(none(), text(alphabet=ALPHANUM)),
+        "strand_count": one_of(none(), text(alphabet=ALPHANUM)),
+        "core_strand_count": one_of(none(), text(alphabet=ALPHANUM)),
+        "insulated": booleans(),
+        "insulation_material": sampled_wire_insulation_kind(),
+        "insulation_thickness": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
     }
 
 
 def sampled_wire_material_kind():
     return sampled_from(WireMaterialKind)
+
+
+def sampled_wire_insulation_kind():
+    return sampled_from(WireInsulationKind)
 
 
 ###################
@@ -890,8 +922,10 @@ def create_equipment_container(include_runtime: bool, add_equipment: bool = True
 def create_feeder(include_runtime: bool = True):
     runtime = {
         "normal_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), max_size=2),
-        "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
         "current_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), max_size=2),
+        "normal_energized_lv_substations": lists(builds(LvSubstation, **create_identified_object(include_runtime)), max_size=2),
+        "current_energized_lv_substations": lists(builds(LvSubstation, **create_identified_object(include_runtime)), max_size=2),
+        "current_equipment": lists(sampled_equipment(include_runtime), max_size=2),
     } if include_runtime else {}
 
     return builds(
@@ -1236,7 +1270,16 @@ def create_ac_line_segment(include_runtime: bool = True):
     return builds(
         AcLineSegment,
         **args,
-        per_length_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
+        per_length_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime)),
+    )
+
+def create_ac_line_segment_phase(include_runtime: bool = True):
+    return builds(
+        AcLineSegmentPhase,
+        **create_power_system_resource(include_runtime),
+        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime)),
+        phase=sampled_single_phase_kind(),
+        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER),
     )
 
 
@@ -1675,10 +1718,11 @@ def create_shunt_compensator(include_runtime: bool):
     return {
         **create_regulating_cond_eq(include_runtime),
         "asset_info": builds(ShuntCompensatorInfo, **create_identified_object(include_runtime)),
-        "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "grounded": booleans(),
         "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "phase_connection": sampled_phase_shunt_connection_kind()
+        "phase_connection": sampled_phase_shunt_connection_kind(),
+        "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "grounding_terminal": builds(Terminal, **create_identified_object(include_runtime)),
     }
 
 

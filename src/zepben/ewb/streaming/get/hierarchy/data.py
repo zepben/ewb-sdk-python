@@ -25,3 +25,5 @@ class NetworkHierarchy(object):
     feeders: Dict[str, Feeder]
     circuits: Dict[str, Circuit]
     loops: Dict[str, Loop]
+    lv_substations: Dict[str, Substation]
+    lv_feeders: Dict[str, Feeder]

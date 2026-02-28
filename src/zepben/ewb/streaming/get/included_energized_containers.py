@@ -28,7 +28,12 @@ class IncludedEnergizedContainers(Enum):
 
     LV_FEEDERS = 2
     """
-    Energized HV feeders and LV feeders should be included.
+    Energized HV feeders, LV substations, and LV feeders should be included.
+    """
+
+    LV_SUBSTATIONS = 3
+    """
+    Energized HV feeders and LV substations should be included.
     """
 
     @property
