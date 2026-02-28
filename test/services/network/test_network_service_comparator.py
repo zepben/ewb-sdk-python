@@ -457,12 +457,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(WireInfo.strand_count, creator, lambda _: "3", lambda _: "4")
         self.validator.validate_property(WireInfo.core_strand_count, creator, lambda _: "5", lambda _: "6")
         self.validator.validate_property(WireInfo.insulated, creator, lambda _: True, lambda _: False)
-        # self.validator.validate_property(
-        #     WireInfo.insulation_material,
-        #     WireInfo,
-        #     lambda _: WireInsulationKind.doubleWireArmour,
-        #     lambda _: WireInsulationKind.beltedPilc
-        # ) # FIXME: throws a key error?
+        self.validator.validate_property(WireInfo.insulation_material, creator, lambda _: WireInsulationKind.doubleWireArmour, lambda _: WireInsulationKind.beltedPilc)
         self.validator.validate_property(WireInfo.insulation_thickness, creator, lambda _: 1.0, lambda _: 2.0)
 
     ###################
