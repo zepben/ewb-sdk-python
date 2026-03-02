@@ -240,7 +240,6 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
 # END CIM MODEL #
 #################
 
-from zepben.ewb.model.phases import *
 from zepben.ewb.model.resistance_reactance import *
 
 from zepben.ewb.services.network.tracing.util import *

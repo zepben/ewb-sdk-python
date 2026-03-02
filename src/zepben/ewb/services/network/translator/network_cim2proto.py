@@ -1166,7 +1166,7 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
         sequenceNumber=cim.sequence_number,
         normalFeederDirection=_map_feeder_direction.to_pb(cim.normal_feeder_direction),
         currentFeederDirection=_map_feeder_direction.to_pb(cim.current_feeder_direction),
-        # phases=cim.pha
+        tracedPhases=(cim.current_phases._phase_status_internal << 16) + cim.normal_phases._phase_status_internal,
     )
 
 

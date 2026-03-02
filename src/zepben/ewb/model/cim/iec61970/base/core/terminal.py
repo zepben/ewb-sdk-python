@@ -1,9 +1,11 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2026 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
+__all__ = ["Terminal"]
 
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
@@ -13,15 +15,12 @@ from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
-from zepben.ewb.model.phases import TracedPhases
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
-from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus, NormalPhases, CurrentPhases
+from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
     from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
-
-__all__ = ["Terminal"]
 
 
 class Terminal(AcDcTerminal):
@@ -35,10 +34,6 @@ class Terminal(AcDcTerminal):
 
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
-
-    traced_phases: TracedPhases = TracedPhases()
-    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
-    to match those in `phases`"""
 
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
@@ -56,8 +51,16 @@ class Terminal(AcDcTerminal):
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
 
+    _normal_phases: PhaseStatus = None
+    _current_phases: PhaseStatus = None
+
     def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
         super(Terminal, self).__init__(**kwargs)
+
+        self._normal_phases = PhaseStatus(self)
+
+        self._current_phases = PhaseStatus(self)
+
         if conducting_equipment:
             self.conducting_equipment = conducting_equipment
 
@@ -69,13 +72,13 @@ class Terminal(AcDcTerminal):
 
     @property
     def normal_phases(self) -> PhaseStatus:
-        """ Convenience method for accessing the normal phases"""
-        return NormalPhases(self)
+        """The status of phases as traced for the normal state of the network."""
+        return self._normal_phases
 
     @property
     def current_phases(self) -> PhaseStatus:
-        """ Convenience method for accessing the current phases"""
-        return CurrentPhases(self)
+        """The status of phases as traced for the current state of the network.gi"""
+        return self._current_phases
 
     @property
     def conducting_equipment(self):
@@ -146,9 +149,10 @@ class Terminal(AcDcTerminal):
         *
         :return: A `Generator` of terminals that share the same `ConductingEquipment` as this `Terminal`.
         """
-        for t in self.conducting_equipment.terminals:
-            if t is not self:
-                yield t
+        if self.conducting_equipment is not None:
+            for t in self.conducting_equipment.terminals:
+                if t is not self:
+                    yield t
 
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node

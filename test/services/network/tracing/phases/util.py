@@ -5,7 +5,7 @@
 import logging
 from typing import Iterable, Optional, Union
 
-from zepben.ewb import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal
+from zepben.ewb import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal, SinglePhaseKind
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 logger = logging.getLogger("phase_logger.py")
@@ -95,7 +95,7 @@ def _log_equipment(step: NetworkTraceStep, _: bool):
                 "\n",
                 ce)
 
-    def phase_info(term, phase):
+    def phase_info(term: Terminal, phase: SinglePhaseKind) -> str:
         nps = term.normal_phases[phase]
         cps = term.current_phases[phase]
 
@@ -110,7 +110,8 @@ def _log_equipment(step: NetworkTraceStep, _: bool):
         )
 
 
-def _do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_phases: Union[Iterable[Phase], PhaseCode]):
+def _do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_phases: Union[Iterable[Phase], PhaseCode]) -> None:
+    """:raises AssertionError: if `expected_phases` is `None`."""
     if list(expected_phases) == [Phase.NONE]:
         for nominal_phase in terminal.phases.single_phases:
             assert phase_status[nominal_phase] == Phase.NONE, \

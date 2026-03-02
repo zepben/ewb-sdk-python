@@ -7,6 +7,7 @@
   * `MeasurementValue.time_stamp`
   * `RelayInfo.curve_setting`
   * `RelayInfo.reclose_fast`
+* Removed `TracedPhases`. `Terminal.normalPhases` and `Terminal.currentPhases` should be used instead of `Terminal.tracedPhases` going forward. (missed in 0.48.0)
 
 ### New Features
 * Added the following new CIM classes:

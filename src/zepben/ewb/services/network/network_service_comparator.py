@@ -764,8 +764,9 @@ class NetworkServiceComparator(BaseServiceComparator):
             Terminal.sequence_number,
             Terminal.normal_feeder_direction,
             Terminal.current_feeder_direction,
-            Terminal.phases
         )
+        self._add_if_different(diff, Terminal.normal_phases.fget.__name__, self._calculate_values_diff(Terminal.normal_phases, diff, to_comparable=lambda it: it._phase_status_internal))
+        self._add_if_different(diff, Terminal.current_phases.fget.__name__, self._calculate_values_diff(Terminal.current_phases, diff, to_comparable=lambda it: it._phase_status_internal))
 
         return self._compare_ac_dc_terminal(diff)
 

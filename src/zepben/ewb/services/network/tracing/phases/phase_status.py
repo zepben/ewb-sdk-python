@@ -5,61 +5,87 @@
 
 from __future__ import annotations
 
-__all__ = ["normal_phases", "current_phases", "PhaseStatus", "NormalPhases", "CurrentPhases"]
+__all__ = ["PhaseStatus"]
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-if TYPE_CHECKING:
-    from zepben.ewb import Terminal
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
-
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from abc import ABC, abstractmethod
+from zepben.ewb.exceptions import PhaseException
+from zepben.ewb.services.network.tracing.phases.traced_phases_bit_manipulation import TracedPhasesBitManipulation
+
+if TYPE_CHECKING:
+    from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-def normal_phases(terminal: Terminal):
-    return NormalPhases(terminal)
+def _validate_spk(spk: SinglePhaseKind):
+    if spk in (SinglePhaseKind.NONE, SinglePhaseKind.INVALID):
+        raise ValueError(f"INTERNAL ERROR: Phase {spk.name} is invalid")
+    return spk
 
 
-def current_phases(terminal: Terminal):
-    return CurrentPhases(terminal)
+SinglePhaseKind.validate = _validate_spk
 
+@dataclass(slots=True)
+class PhaseStatus:
+    """
+    Class that holds the traced phase statuses for a nominal phase on a [Terminal].
 
-class PhaseStatus(ABC):
+    :var _phase_status_internal:
+    """
     terminal: Terminal
 
-    def __init__(self, terminal: Terminal):
-        self.terminal = terminal
+    _phase_status_internal: int = 0
+    """
+    The underlying implementation value tracking the phase status for nominal phases of a terminal.
+    It is exposed internally for data serialisation and debugging within official EWB libraries and utilities.
+    
+    This property should be considered internal and not for public use as the underlying
+    data structure to store the status could change at any time (and thus be a breaking change).
+    Use directly at your own risk.
+    
+    See ``TracedPhasesBitManipulation`` for details on bit representation for phase_status_internal and how we track phases status.
+    """
 
-    @abstractmethod
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
-        Get the traced phase for the specified `nominal_phase`.
+        Get the traced phase for the specified ``nominal_phase``.
 
-        `nominal_phase` The nominal phase you are interested in querying.
+        :param nominal_phase: The nominal phase you are interested in querying.
 
-        Returns the traced phase.
+        :returns: the traced phase.
         """
-        raise NotImplementedError()
+        return TracedPhasesBitManipulation.get(self._phase_status_internal, nominal_phase.validate())
 
-    @abstractmethod
-    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
+    def __setitem__(self, nominal_phase: SinglePhaseKind, single_phase_kind: SinglePhaseKind) -> bool:
         """
-        Set the traced phase for the specified `nominal_phase`.
+        Set the traced phase for the specified ``nominal_phase``.
 
-        `nominal_phase` The nominal phase you are interested in updating.
+        :param nominal_phase: The nominal phase you are interested in updating.
+        :param single_phase_kind: The phase you wish to set for this ``single_phase_kind``. Specify ``SinglePhaseKind.NONE`` to clear the phase.
 
-        `traced_phase` The phase you wish to set for this `nominal_phase`. Specify `SinglePhaseKind.NONE` to clear the phase.
-
-        Returns True if the phase is updated, otherwise False.
+        :returns: ``True`` if the phase is updated, otherwise False.
         """
-        raise NotImplementedError()
+        it = self[nominal_phase]
+        if it == single_phase_kind:
+            return False
+
+        elif it == SinglePhaseKind.NONE or single_phase_kind == SinglePhaseKind.NONE:
+            self._phase_status_internal = TracedPhasesBitManipulation.set(
+                self._phase_status_internal,
+                nominal_phase,
+                single_phase_kind
+            )
+            return True
+        else:
+            raise PhaseException("Crossing Phases")
 
     def as_phase_code(self) -> Optional[PhaseCode]:
         """
-        Get the traced phase for each nominal phase as a `PhaseCode`.
+        Get the traced phase for each nominal phase as a ``PhaseCode``.
 
-        Returns The `PhaseCode` if the combination of phases makes sense, otherwise `None`.
+        :returns: The ``PhaseCode`` if the combination of phases makes sense, otherwise ``None``.
         """
         if self.terminal.phases == PhaseCode.NONE:
             return PhaseCode.NONE
@@ -75,27 +101,3 @@ class PhaseStatus(ABC):
             return phase_code_from_single_phases(phases)
         else:
             return None
-
-
-class NormalPhases(PhaseStatus):
-    """
-    The traced phases in the normal state of the network.
-    """
-
-    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return self.terminal.traced_phases.normal(nominal_phase)
-
-    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
-        return self.terminal.traced_phases.set_normal(nominal_phase, traced_phase)
-
-
-class CurrentPhases(PhaseStatus):
-    """
-    The traced phases in the current state of the network.
-    """
-
-    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return self.terminal.traced_phases.current(nominal_phase)
-
-    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
-        return self.terminal.traced_phases.set_current(nominal_phase, traced_phase)

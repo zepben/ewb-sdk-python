@@ -1012,7 +1012,6 @@ def create_substation(include_runtime: bool = True):
 
 def create_terminal(include_runtime: bool = True):
     runtime = {
-        "traced_phases": builds(TracedPhases)
     } if include_runtime else {}
     return builds(
         Terminal,
