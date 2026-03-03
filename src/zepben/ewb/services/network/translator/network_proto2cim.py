@@ -1352,6 +1352,8 @@ def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional
         normal_feeder_direction=FeederDirection(pb.normalFeederDirection),
         current_feeder_direction=FeederDirection(pb.currentFeederDirection),
     )
+    cim.normal_phases._phase_status_internal = (pb.tracedPhases & 0xFFFF)
+    cim.current_phases._phase_status_internal = (pb.tracedPhases >> 16) & 0xFFFF
 
     network_service.resolve_or_defer_reference(resolver.conducting_equipment(cim), pb.conductingEquipmentMRID)
     network_service.resolve_or_defer_reference(resolver.connectivity_node(cim), pb.connectivityNodeMRID)

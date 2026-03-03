@@ -77,7 +77,8 @@ class RemovePhases(object):
         """
 
         for t in network_service.objects(Terminal):
-            t.traced_phases.phase_status = 0
+            t.normal_phases._phase_status_internal = 0
+            t.current_phases._phase_status_internal = 0
 
     async def _run_with_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """

@@ -219,7 +219,7 @@ class BaseServiceComparator:
             diff.differences[name] = difference
 
     @staticmethod
-    def _calculate_values_diff(prop: Union[MemberDescriptorType, property], diff: ObjectDifference) -> Optional[ValueDifference]:
+    def _calculate_values_diff(prop: Union[MemberDescriptorType, property], diff: ObjectDifference, to_comparable: Callable[[property], Any] = (lambda it: it)) -> Optional[ValueDifference]:
         if isinstance(prop, property):
             s_val = getattr(diff.source, prop.fget.__name__) if diff.source else None
             t_val = getattr(diff.target, prop.fget.__name__) if diff.target else None
@@ -230,7 +230,7 @@ class BaseServiceComparator:
         if (type(s_val) == float) or (type(t_val) == float):
             raise TypeError(f"Using wrong comparator for {prop}, use _calculate_float_diff instead.")
 
-        if s_val == t_val:
+        if to_comparable(s_val) == to_comparable(t_val):
             return None
         else:
             return ValueDifference(s_val, t_val)

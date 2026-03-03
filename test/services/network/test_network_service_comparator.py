@@ -20,14 +20,15 @@ from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, Transf
     PowerElectronicsWindUnit, AcLineSegment, Breaker, BusbarSection, Connector, Disconnector, EnergyConnection, \
     EnergyConsumer, PhaseShuntConnectionKind, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     PowerTransformer, PowerTransformerEnd, VectorGroup, \
-    ProtectedSwitch, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, Circuit, Loop, NetworkService, TracedPhases, \
+    ProtectedSwitch, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, Circuit, Loop, NetworkService, \
     FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, RelayInfo, \
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
     TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
     StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
-    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind, LvSubstation
+    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind, LvSubstation, \
+    PhaseStatus
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
@@ -926,15 +927,27 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Terminal.normal_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
         self.validator.validate_property(Terminal.current_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
 
-        for i in range(0, 32, 4):
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
-            # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
+        def _change_state(prop, val):
+            setattr(prop, '_phase_status_internal',  val)
+
+        for first, second in (
+            (0x00000001, 0x00000002),
+            (0x00000010, 0x00000020),
+            (0x00000100, 0x00000200),
+            (0x00001000, 0x00002000),
+        ):
+            #expected_diff = ObjectDifference()
+            #expected_diff.differences["normal_phases"] = ValueDifference(1, 2)
+
+            #self.validator.validate_compare(closed_switch, open_switch, expect_modification=difference)
+
+            for state in (Terminal.normal_phases, Terminal.current_phases):
+                self.validator.validate_val_property(
+                    state,
+                    Terminal,
+                    lambda _, prop: _change_state(prop, first),
+                    lambda _, prop: _change_state(prop, second),
+                )
 
         self.validator.validate_val_property(
             Terminal.connectivity_node,
