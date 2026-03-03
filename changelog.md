@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [1.2.0] - UNRELEASED
+## [1.3.0] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [1.2.0] - 2026-03-03
 ### Breaking Changes
 * The following gRPC fields have been modified to support nulls (they were missed in v1.0.0):
   * `Document.created_date_time`
