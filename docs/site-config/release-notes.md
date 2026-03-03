@@ -2,6 +2,7 @@
 
 | Version            | Released              |
 | ------------------ | --------------------- |
+|[1.2.0](#120)| `03 March 2026` |
 |[1.1.0](#110)| `21 January 2026` |
 | [1.0.4](#104)      | `14 November 2025`    |
 | [1.0.3](#103)      | `29 August 2025`      |
@@ -58,6 +59,66 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.2.0]
+
+### Breaking Changes
+* The following gRPC fields have been modified to support nulls (they were missed in v1.0.0):
+  * `Document.created_date_time`
+  * `Equipment.commissioned_date`
+  * `MeasurementValue.time_stamp`
+  * `RelayInfo.curve_setting`
+  * `RelayInfo.reclose_fast`
+* Removed `TracedPhases`. `Terminal.normalPhases` and `Terminal.currentPhases` should be used instead of `Terminal.tracedPhases` going forward. (missed in 0.48.0)
+
+### New Features
+* Added the following new CIM classes:
+  * `DateTimeInterval`, interval between two date and time points, where the interval includes the start time but excludes end time.
+  * `ElectronicAddress`, electronic address information.
+  * `TelephoneNumber`, telephone number.
+  * `HvCustomer` - [ZBEX] an `EquipmentContainer` for high voltage customer assets.
+  * `LvSubstation` - [ZBEX] an `EquipmentContainer` to represent distribution transformer sites, with associations to `Feeder` and `LvFeeder`
+  * `AcLineSegmentPhase` - Details about an individual phase of an `AcLineSegment`.
+* Added the following new CIM extension classes:
+  * `ContactDetails`, the details required to contact a person or company. These can be accessed/used via a `UsagePoint`.
+  * `DirectionalCurrentRelay`, a directional current relay is a type of protective relay used in electrical power systems to detect the direction of current
+    flow and operate only when the current exceeds a certain threshold in a specified direction.
+* Added new CIM extension enums:
+  * `ContactMethodType`
+  * `PolarizingQuantityType`
+* Added new properties to the model:
+  * `PricingStructure.code` - User allocated key for a pricing structure.
+  * `ShuntCompensator.grounding_terminal` - [ZBEX] The terminal connecting to grounded network.
+  * `WireInfo` - extra properties for conductors:
+    * `size_description`
+    * `strand_count`
+    * `core_strand_count`
+    * `insulated`
+    * `insulation_material`
+    * `insulation_thickness`
+* Added new enum `WireInsulationKind` with extensions.
+* Added helper function `AcLineSegment.wire_info_for_phase()` for retrieving the `WireInfo` for a given phase of a conductor.
+* Added helper function `EquipmentContainer.edge_terminals()` for retrieving all terminals on the edge of an `EquipmentContainer`.
+* Added support to filter NetworkHierarchy responses when calling `NetworkConsumerClient.get_network_hierarchy()`. A client can now choose what hierarchy
+  containers should be populated in the response.
+* Added `AcLineSegment.wire_info_for_phase(phase: SinglePhaseKind)` to retrieve the `WireInfo` associated with a given phase of a conductor.
+
+### Enhancements
+* * `BaseService.contains` has been been expanded to support objects in addition to mRIDs.
+* `Agreement` now supports `validity_interval`, the date and time interval the agreement is valid (from going into effect to termination).
+* `StreetDetail` now supports extension `building_number`, the number of the building.
+* `TownDetail` now supports `country`, the name of the country.
+* `ngen()` now directly accepts `dict()`s and will return a generator of the `values()` or `None` if `collection is None`
+
+### Fixes
+* Reordered the feeder equipment and direction assignment on database read to prevent parallel feeders from tracing back into the zone substation.
+* `NetworkDatabaseTables`, `CustomerDatabaseTables`, `DiagramDatabaseTables` and `BaseEntryWriter` can now be imported from `zepben.ewb` and are officially 
+  regarded as public.
+
+### Notes
+* None.
 
 ---
 
