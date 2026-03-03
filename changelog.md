@@ -49,6 +49,8 @@
 
 ### Fixes
 * Reordered the feeder equipment and direction assignment on database read to prevent parallel feeders from tracing back into the zone substation.
+* `NetworkDatabaseTables`, `CustomerDatabaseTables`, `DiagramDatabaseTables` and `BaseEntryWriter` can now be imported from `zepben.ewb` and are officially 
+  regarded as public.
 
 ### Notes
 * None.
