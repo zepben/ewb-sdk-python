@@ -10,7 +10,7 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import Di
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 
 import zepben.ewb.services.common.resolver as resolver
-from zepben.ewb import identified_object_to_cim, OrientationKind, DiagramStyle, add_to_network_or_none, bind_to_cim
+from zepben.ewb import identified_object_to_cim, OrientationKind, DiagramStyle, add_to_service_or_none, bind_to_cim
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -23,7 +23,7 @@ from zepben.ewb.services.diagram.diagrams import DiagramService
 ################################
 
 @bind_to_cim
-@add_to_network_or_none
+@add_to_service_or_none
 def diagram_to_cim(pb: PBDiagram, service: DiagramService):
     cim = Diagram(
         mrid=pb.mrid(),

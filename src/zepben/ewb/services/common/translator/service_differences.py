@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Callable, Optional, Set, Dict, Generator, Tuple, Any, Iterable
 
-from zepben.ewb import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common.difference import ObjectDifference
 
@@ -13,8 +13,8 @@ class ServiceDifferences(object):
 
     def __init__(
         self,
-        source_lookup: Callable[[str], Optional[IdentifiedObject]],
-        target_lookup: Callable[[str], Optional[IdentifiedObject]],
+        source_lookup: Callable[[str], Optional[Identifiable]],
+        target_lookup: Callable[[str], Optional[Identifiable]],
         source_name_type_lookup: Callable[[str], Optional[NameType]],
         target_name_type_lookup: Callable[[str], Optional[NameType]]
     ):
@@ -50,8 +50,8 @@ class ServiceDifferences(object):
         self._modifications[mrid] = difference
 
     def __str__(self) -> str:
-        return ("\nMissing From Target:" + _indent_each(self._missing_from_target, self._source_lookup, self._source_name_type_lookup) + \
-                "\nMissing From Source:" + _indent_each(self._missing_from_source, self._target_lookup, self._target_name_type_lookup) + \
+        return ("\nMissing From Target:" + _indent_each(self._missing_from_target, self._source_lookup, self._source_name_type_lookup) +
+                "\nMissing From Source:" + _indent_each(self._missing_from_source, self._target_lookup, self._target_name_type_lookup) +
                 "\nModifications:" +
                     ''.join(_indented_line(f"{k}: {_detailed_modifications(v)},") for k, v in self._modifications.items()))
 

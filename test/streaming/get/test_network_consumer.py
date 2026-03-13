@@ -10,12 +10,13 @@ import grpc_testing
 import pytest
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
+from typing_extensions import deprecated
 from zepben.protobuf.nc import nc_pb2
-from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetEquipmentForRestrictionRequest, \
+from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiable
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiablesRequest, GetEquipmentForContainersRequest, GetEquipmentForRestrictionRequest, \
     GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, IncludedEnergizedContainers as PBIncludedEnergizedContainers, \
     NetworkState as PBNetworkState
-from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, \
+from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiablesResponse, GetEquipmentForContainersResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from cim.fill_fields import create_ac_line_segment
@@ -66,18 +67,18 @@ class TestNetworkConsumer:
     async def test_get_identified_objects_supported_types(self, nios):
         requested = []
         for nio in nios:
-            mrid = getattr(nio, nio.WhichOneof("identifiedObject"), None).mrid()
+            mrid = getattr(nio, nio.WhichOneof("identifiable"), None).mrid()
             requested.append(mrid)
 
             async def client_test():
-                mor = (await self.client.get_identified_objects([mrid])).throw_on_error().value
+                mor = (await self.client.get_identifiables([mrid])).throw_on_error().value
 
-                assert mrid in self.service, f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert mor.objects[mrid] is not None, f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert self.service[mrid] is mor.objects[mrid], f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
+                assert mrid in self.service, f"type: {nio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert mor.objects[mrid] is not None, f"type: {nio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert self.service[mrid] is mor.objects[mrid], f"type: {nio.WhichOneof('identifiable')} mrid: {mrid}"
 
-            response = GetIdentifiedObjectsResponse(identifiedObjects=[nio])
-            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+            response = GetIdentifiablesResponse(identifiables=[nio])
+            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
         assert len(requested) == len(nios) == self.service.len_of()
 
@@ -86,29 +87,29 @@ class TestNetworkConsumer:
         mrid = "unknown"
 
         async def client_test():
-            mor = (await self.client.get_identified_objects([mrid])).throw_on_error().value
+            mor = (await self.client.get_identifiables([mrid])).throw_on_error().value
 
             assert mor.objects == {}
             assert mor.failed == {mrid}
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     # noinspection PyUnresolvedReferences
     @pytest.mark.asyncio
     async def test_get_identified_objects_partial_not_found(self):
         async def client_test():
-            mor = (await self.client.get_identified_objects(["acls1", "acls2", "acls3"])).throw_on_error().value
+            mor = (await self.client.get_identifiables(["acls1", "acls2", "acls3"])).throw_on_error().value
 
             assert mor.objects.keys() == {"acls1", "acls2"}
             assert mor.failed == {"acls3"}
 
-        response1 = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls1").to_pb())])
-        response2 = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls2").to_pb())])
+        response1 = GetIdentifiablesResponse(identifiables=[NetworkIdentifiable(acLineSegment=AcLineSegment(mrid="acls1").to_pb())])
+        response2 = GetIdentifiablesResponse(identifiables=[NetworkIdentifiable(acLineSegment=AcLineSegment(mrid="acls2").to_pb())])
 
         await self.mock_server.validate(
             client_test,
             [
-                StreamGrpc('getIdentifiedObjects', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2])),
+                StreamGrpc('getIdentifiables', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2])),
             ],
         )
 
@@ -118,27 +119,27 @@ class TestNetworkConsumer:
         mrid = acls.mrid()
 
         async def client_test():
-            io = (await self.client.get_identified_object(mrid)).throw_on_error().value
+            io = (await self.client.get_identifiable(mrid)).throw_on_error().value
 
             assert mrid in self.service
             assert io is not None
             assert self.service[mrid] is io
 
-        response = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=acls)])
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+        response = GetIdentifiablesResponse(identifiables=[NetworkIdentifiable(acLineSegment=acls)])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
     @pytest.mark.asyncio
     async def test_get_identified_object_not_found(self):
         mrid = "unknown"
 
         async def client_test():
-            result = (await self.client.get_identified_object(mrid))
+            result = (await self.client.get_identifiable(mrid))
 
             assert result.was_failure
             assert isinstance(result.thrown, ValueError)
             assert str(result.thrown) == f"No object with mRID {mrid} could be found."
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     @pytest.mark.asyncio
     async def test_get_metadata(self):
@@ -297,7 +298,7 @@ class TestNetworkConsumer:
             interactions.extend(
                 [
                     StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, containers)]),
-                    StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)]),
+                    StreamGrpc('getIdentifiables', [_create_object_responses(ns, assoc_objs)]),
                 ],
             )
 
@@ -328,8 +329,8 @@ class TestNetworkConsumer:
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
                 StreamGrpc('getEquipmentForContainers', [_create_container_responses(feeder_network)]),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses])
+                StreamGrpc('getIdentifiables', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses])
             ],
         )
 
@@ -371,10 +372,10 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeders_with_open_point))),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
             ],
         )
 
@@ -419,10 +420,10 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_pole))),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_pole)]),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses]),
             ],
         )
 
@@ -468,8 +469,8 @@ class TestNetworkConsumer:
                         )
                     ],
                 ),
-                StreamGrpc('getIdentifiedObjects', [object_responses]),
-                StreamGrpc('getIdentifiedObjects', [object_responses])
+                StreamGrpc('getIdentifiables', [object_responses]),
+                StreamGrpc('getIdentifiables', [object_responses])
             ],
         )
 
@@ -568,7 +569,7 @@ class TestNetworkConsumer:
                     'getEquipmentForContainers',
                     [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)],
                 ),
-                StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
+                StreamGrpc('getIdentifiables', [_create_object_responses(ns, assoc_objs)])
             ],
         )
 
@@ -594,7 +595,7 @@ class TestNetworkConsumer:
                     'getEquipmentForContainers',
                     [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)],
                 ),
-                StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
+                StreamGrpc('getIdentifiables', [_create_object_responses(ns, assoc_objs)])
             ],
         )
 
@@ -617,13 +618,13 @@ class TestNetworkConsumer:
 
             assert result.was_failure
             assert isinstance(result.thrown, UnsupportedOperationException)
-            assert str(result.thrown) == "Identified object type 'other' is not supported by the network service"
+            assert str(result.thrown) == "Identifiable type 'other' is not supported by the network service"
 
         def responses(_):
             nio = Any()
             # noinspection PyUnresolvedReferences
             nio.Pack(Diagram(mrid=generate_id()).to_pb())
-            yield GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(other=nio)])
+            yield GetIdentifiablesResponse(identifiables=[NetworkIdentifiable(other=nio)])
 
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [responses])])
 
@@ -652,69 +653,72 @@ def _assert_contains_mrids(service: BaseService, *mrids):
 
 
 def _response_of(io: IdentifiedObject, response_type):
-    return response_type(identifiedObjects=[_to_network_identified_object(io)])
+    return response_type(identifiables=[_to_network_identifiable(io)])
 
+@deprecated("Use `_to_network_identifiable_object instead")
+def _to_network_identified_object(obj: IdentifiedObject) -> NetworkIdentifiable:
+    return _to_network_identifiable(obj)
 
 # noinspection PyUnresolvedReferences
-def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
+def _to_network_identifiable(obj) -> NetworkIdentifiable:
     if isinstance(obj, AcLineSegment):
-        nio = NetworkIdentifiedObject(acLineSegment=obj.to_pb())
+        nio = NetworkIdentifiable(acLineSegment=obj.to_pb())
     elif isinstance(obj, Breaker):
-        nio = NetworkIdentifiedObject(breaker=obj.to_pb())
+        nio = NetworkIdentifiable(breaker=obj.to_pb())
     elif isinstance(obj, EnergySource):
-        nio = NetworkIdentifiedObject(energySource=obj.to_pb())
+        nio = NetworkIdentifiable(energySource=obj.to_pb())
     elif isinstance(obj, EnergySourcePhase):
-        nio = NetworkIdentifiedObject(energySourcePhase=obj.to_pb())
+        nio = NetworkIdentifiable(energySourcePhase=obj.to_pb())
     elif isinstance(obj, Junction):
-        nio = NetworkIdentifiedObject(junction=obj.to_pb())
+        nio = NetworkIdentifiable(junction=obj.to_pb())
     elif isinstance(obj, PowerTransformer):
-        nio = NetworkIdentifiedObject(powerTransformer=obj.to_pb())
+        nio = NetworkIdentifiable(powerTransformer=obj.to_pb())
     elif isinstance(obj, Terminal):
-        nio = NetworkIdentifiedObject(terminal=obj.to_pb())
+        nio = NetworkIdentifiable(terminal=obj.to_pb())
     elif isinstance(obj, ConnectivityNode):
-        nio = NetworkIdentifiedObject(connectivityNode=obj.to_pb())
+        nio = NetworkIdentifiable(connectivityNode=obj.to_pb())
     elif isinstance(obj, CableInfo):
-        nio = NetworkIdentifiedObject(cableInfo=obj.to_pb())
+        nio = NetworkIdentifiable(cableInfo=obj.to_pb())
     elif isinstance(obj, TransformerStarImpedance):
-        nio = NetworkIdentifiedObject(transformerStarImpedance=obj.to_pb())
+        nio = NetworkIdentifiable(transformerStarImpedance=obj.to_pb())
     elif isinstance(obj, EnergySourcePhase):
-        nio = NetworkIdentifiedObject(energySourcePhase=obj.to_pb())
+        nio = NetworkIdentifiable(energySourcePhase=obj.to_pb())
     elif isinstance(obj, Feeder):
-        nio = NetworkIdentifiedObject(feeder=obj.to_pb())
+        nio = NetworkIdentifiable(feeder=obj.to_pb())
     elif isinstance(obj, Location):
-        nio = NetworkIdentifiedObject(location=obj.to_pb())
+        nio = NetworkIdentifiable(location=obj.to_pb())
     elif isinstance(obj, LvFeeder):
-        nio = NetworkIdentifiedObject(lvFeeder=obj.to_pb())
+        nio = NetworkIdentifiable(lvFeeder=obj.to_pb())
     elif isinstance(obj, LvSubstation):
-        nio = NetworkIdentifiedObject(lvSubstation=obj.to_pb())
+        nio = NetworkIdentifiable(lvSubstation=obj.to_pb())
     elif isinstance(obj, OverheadWireInfo):
-        nio = NetworkIdentifiedObject(overheadWireInfo=obj.to_pb())
+        nio = NetworkIdentifiable(overheadWireInfo=obj.to_pb())
     elif isinstance(obj, PerLengthSequenceImpedance):
-        nio = NetworkIdentifiedObject(perLengthSequenceImpedance=obj.to_pb())
+        nio = NetworkIdentifiable(perLengthSequenceImpedance=obj.to_pb())
     elif isinstance(obj, PerLengthPhaseImpedance):
-        nio = NetworkIdentifiedObject(perLengthPhaseImpedance=obj.to_pb())
+        nio = NetworkIdentifiable(perLengthPhaseImpedance=obj.to_pb())
     elif isinstance(obj, PowerTransformerEnd):
-        nio = NetworkIdentifiedObject(powerTransformerEnd=obj.to_pb())
+        nio = NetworkIdentifiable(powerTransformerEnd=obj.to_pb())
     # Currently unused #
     elif isinstance(obj, PanDemandResponseFunction):
-        nio = NetworkIdentifiedObject(panDemandResponseFunction=obj.to_pb())
+        nio = NetworkIdentifiable(panDemandResponseFunction=obj.to_pb())
     elif isinstance(obj, StaticVarCompensator):
-        nio = NetworkIdentifiedObject(staticVarCompensator=obj.to_pb())
+        nio = NetworkIdentifiable(staticVarCompensator=obj.to_pb())
     elif isinstance(obj, BatteryUnit):
-        nio = NetworkIdentifiedObject(batteryUnit=obj.to_pb())
+        nio = NetworkIdentifiable(batteryUnit=obj.to_pb())
     elif isinstance(obj, BatteryControl):
-        nio = NetworkIdentifiedObject(batteryControl=obj.to_pb())
+        nio = NetworkIdentifiable(batteryControl=obj.to_pb())
     # End currently unused #
     elif isinstance(obj, Substation):
-        nio = NetworkIdentifiedObject(substation=obj.to_pb())
+        nio = NetworkIdentifiable(substation=obj.to_pb())
     elif isinstance(obj, Loop):
-        nio = NetworkIdentifiedObject(loop=obj.to_pb())
+        nio = NetworkIdentifiable(loop=obj.to_pb())
     elif isinstance(obj, Circuit):
-        nio = NetworkIdentifiedObject(circuit=obj.to_pb())
+        nio = NetworkIdentifiable(circuit=obj.to_pb())
     elif isinstance(obj, LvFeeder):
-        nio = NetworkIdentifiedObject(lvFeeder=obj.to_pb())
+        nio = NetworkIdentifiable(lvFeeder=obj.to_pb())
     elif isinstance(obj, Pole):
-        nio = NetworkIdentifiedObject(pole=obj.to_pb())
+        nio = NetworkIdentifiable(pole=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return nio
@@ -816,14 +820,14 @@ def _validate_hierarchy(hierarchy, service):
 def _create_object_responses(
     ns: NetworkService,
     mrids: Optional[Iterable[str]] = None,
-) -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
+) -> Callable[[GetIdentifiablesRequest], Generator[GetIdentifiablesResponse, None, None]]:
     valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
-    def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:
+    def responses(request: GetIdentifiablesRequest) -> Generator[GetIdentifiablesResponse, None, None]:
         for mrid in request.mrids:
             obj = valid[mrid]
             if obj:
-                yield _response_of(obj, GetIdentifiedObjectsResponse)
+                yield _response_of(obj, GetIdentifiablesResponse)
             else:
                 raise AssertionError(f"Requested unexpected object {mrid}.")
 

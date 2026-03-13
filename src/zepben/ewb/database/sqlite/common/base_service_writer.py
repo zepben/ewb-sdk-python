@@ -3,17 +3,20 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
+
 __all__ = ["BaseServiceWriter"]
 
 from abc import ABC, abstractmethod
-from typing import Callable, Type
-
-from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.common.base_collection_writer import BaseCollectionWriter
-from zepben.ewb.model.cim.iec61970.base.core.identified_object import TIdentifiedObject
-from zepben.ewb.model.cim.iec61970.base.core.name import Name
-from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-from zepben.ewb.services.common.base_service import BaseService
+from typing import Callable, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
+    from zepben.ewb.services.common.base_service import BaseService
+    from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
+    from zepben.ewb.model.cim.iec61970.base.core.name import Name
+    from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 
 class BaseServiceWriter(BaseCollectionWriter, ABC):
@@ -47,38 +50,33 @@ class BaseServiceWriter(BaseCollectionWriter, ABC):
         :return: True if the objects were successfully saved to the database, otherwise False
         """
 
-    """
-    Save each object of the specified type using the provided `saver`.
-    
-    @param T The type of object to save to the database.
-    @param saver The callback used to save the objects to the database. Will be called once for each object and should return True if the object is
-      successfully saved to the database.
-    
-    :return: True if all objects are successfully saved to the database, otherwise False.
-    """
+    def _save_each_object(self, type_: Type[Identifiable], saver: Callable[[Identifiable], bool]) -> bool:
+        """
+        Save each object of the specified type using the provided `saver`.
 
-    def _save_each_object(self, type_: Type[TIdentifiedObject], saver: Callable[[TIdentifiedObject], bool]) -> bool:
+        @param T The type of object to save to the database.
+        @param saver The callback used to save the objects to the database. Will be called once for each object and should return True if the object is
+          successfully saved to the database.
+
+        :return: True if all objects are successfully saved to the database, otherwise False.
+        """
         status = True
         for it in self._service.objects(type_):
             status = status and self._validate_save_object(it, saver)
 
         return status
 
-    """
-    Validate that an object is actually saved to the database, logging an error if anything goes wrong.
-    
-    @param T The type of object being saved.
-    @param it The object being saved.
-    @param saver The callback actually saving the object to the database.
-    
-    :return: True if the object is successfully saved to the database, otherwise False.
-    """
+    def _validate_save_object(self, it: Identifiable, saver: Callable[[Identifiable], bool]) -> bool:
+        """
+        Validate that an object is actually saved to the database, logging an error if anything goes wrong.
 
-    def _validate_save_object(self, it: TIdentifiedObject, saver: Callable[[TIdentifiedObject], bool]) -> bool:
-        def log_error(e: Exception):
-            self._logger.error(f"Failed to save {it.__class__.__name__} {it.name} [{it.mrid}]: {e}")
+        @param T The type of object being saved.
+        @param it The object being saved.
+        @param saver The callback actually saving the object to the database.
 
-        return self._validate_save(it, saver, log_error)
+        :return: True if the object is successfully saved to the database, otherwise False.
+        """
+        return self._validate_save(it, saver, lambda e: self._logger.error(f"Failed to save {it.__class__.__name__} {it.name} [{it.mrid}]: {e}"))
 
     def _save_name_types(self) -> bool:
         status = True

@@ -8,21 +8,22 @@ from __future__ import annotations
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
+from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiablesRequest, GetDiagramObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
-from zepben.ewb import DiagramService, IdentifiedObject, ServiceInfo
+from zepben.ewb import DiagramService, ServiceInfo
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
 
-class DiagramConsumerClient(CimConsumerClient[DiagramService]):
+class DiagramConsumerClient(CimConsumerClient[DiagramService, DiagramConsumerStub]):
     """
     Consumer client for a :class:`DiagramService`.
 
@@ -39,16 +40,13 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
     def service(self) -> DiagramService:
         return self.__service
 
-    _stub: DiagramConsumerStub = None
-
     def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=DiagramConsumerStub(channel))
         else:
-            self._stub = DiagramConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
         self.__service = DiagramService()
 
@@ -67,32 +65,32 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable | None, str], None]:
         if not mrids:
             return
 
         responses = self._stub.getDiagramObjects(self._batch_send(GetDiagramObjectsRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for dio in response.identifiedObjects:
-                yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
+            for dio in response.identifiables:
+                yield self._extract_identifiable("diagram", dio, _dio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identifiables(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable | None, str], None]:
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for dio in response.identifiedObjects:
-                yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
+            for dio in response.identifiables:
+                yield self._extract_identifiable("diagram", dio, _dio_type_to_cim)
 
 
 class SyncDiagramConsumerClient(DiagramConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
-        return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
+    def get_identifiable(self, mrid: str) -> GrpcResult[Identifiable | None]:
+        return get_event_loop().run_until_complete(super()._get_identifiable(mrid))
 
-    def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super()._get_identified_objects(mrids))
+    def get_identifiables(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super()._get_identifiables(mrids))
 
     def get_diagram_objects(self, mrid: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_diagram_objects(mrid))

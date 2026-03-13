@@ -5,25 +5,33 @@
 from types import MemberDescriptorType
 from typing import Optional, Any, Callable, TypeVar, Union, Type, Set, Generic, TypeAlias
 
+from __future__ import annotations
+
+__all__ = ["ServiceComparatorValidator"]
+
+from typing import Optional, Any, Callable, TypeVar, Union, Set, Protocol, Generic, overload, Type, Concatenate
+
 from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
-                        Difference, ReferenceDifference, ValueDifference, IndexedDifference)
+                        Difference, ReferenceDifference, ValueDifference, IndexedDifference, TIdentifiable, BaseServiceComparator, Identifiable)
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions
 
 TService = TypeVar("TService", bound=BaseService)
+TOtherCreator = Callable[[str], Any]
 C = TypeVar("C")
+T = TypeVar("T")
 R = TypeVar("R")
-Property = Union[MemberDescriptorType, property]
+TCreator = Union[Callable[[str], T], T]
 
-TAddr: TypeAlias = Callable[[TIdentifiedObject, R], TIdentifiedObject] | Callable[[R], TIdentifiedObject]
+TAddr: TypeAlias = Callable[[TIdentifiable, R], TIdentifiable] | Callable[[R], TIdentifiable]
 
 
 #
-# NOTE: Should be using the following with TCreator[TIdentifiedObject] in the functions, but Python
-#       3.10 and PyCharm don't like passing TCreator[TIdentifiedObject] to bind correctly, so until
+# NOTE: Should be using the following with TCreator[TIdentifiable] in the functions, but Python
+#       3.10 and PyCharm don't like passing TCreator[TIdentifiable] to bind correctly, so until
 #       we move on to a new version of Python, it looks like we are stuck repeating ourselves.
 #
-#       TCreator: TypeAlias = Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject]
+#       TCreator: TypeAlias = Type[TIdentifiable] | Callable[[str], TIdentifiable]
 #
 
 
@@ -95,9 +103,9 @@ class ServiceComparatorValidator(Generic[TService, C]):
     def validate_property(
         self,
         prop: Property | R,  # Isn't actually R, but that is what the type checker thinks when passing class member references.
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
-        create_value: Callable[[TIdentifiedObject], R],
-        create_other_value: Callable[[TIdentifiedObject], R],
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
+        create_value: Callable[[TIdentifiablet], R],
+        create_other_value: Callable[[TIdentifiable], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
@@ -124,9 +132,9 @@ class ServiceComparatorValidator(Generic[TService, C]):
     def validate_val_property(
         self,
         prop: Property,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
-        change_state: Callable[[TIdentifiedObject, R], Any],
-        other_change_state: Callable[[TIdentifiedObject, R], Any],
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
+        change_state: Callable[[TIdentifiable, R], Any],
+        other_change_state: Callable[[TIdentifiable, R], Any],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
@@ -152,10 +160,10 @@ class ServiceComparatorValidator(Generic[TService, C]):
     def validate_collection(
         self,
         prop: Property,
-        add_to_collection: TAddr[TIdentifiedObject, R],
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
-        create_item: Callable[[TIdentifiedObject], R],
-        create_other_item: Callable[[TIdentifiedObject], R],
+        add_to_collection: TAddr[TIdentifiable, R],
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
+        create_item: Callable[[TIdentifiable], R],
+        create_other_item: Callable[[TIdentifiable], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
@@ -205,7 +213,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_name_collection(
         self,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
@@ -217,7 +225,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
         in_target_difference = creator("mRID")
 
         # noinspection PyArgumentList
-        name_type = NameType("type")
+        name_type = NameType(name="type")
 
         in_source.add_name(name_type, "name1")
         in_target.add_name(name_type, "name1")
@@ -260,9 +268,9 @@ class ServiceComparatorValidator(Generic[TService, C]):
         self,
         prop: Property,
         add_to_collection: TAddr,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
-        create_item: Callable[[TIdentifiedObject], R],
-        create_other_item: Callable[[TIdentifiedObject], R],
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
+        create_item: Callable[[TIdentifiable], R],
+        create_other_item: Callable[[TIdentifiable], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
@@ -322,14 +330,11 @@ class ServiceComparatorValidator(Generic[TService, C]):
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-    K = TypeVar('K')
-    R = TypeVar('R')
-
     def validate_unordered_collection(
         self,
         prop: Property,
         add_to_collection: TAddr,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
         create_item_1: Callable[[K], R],
         create_item_2: Callable[[K], R],
         create_diff_item_1: Callable[[K], R],
@@ -424,7 +429,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
         return source_empty
 
     @staticmethod
-    def _get_value_or_reference_difference(source: Optional[R], target: Optional[R]) -> Difference:
+    def _get_value_or_reference_difference(source: R | None, target: R | None) -> Difference:
         if isinstance(source, IdentifiedObject) or isinstance(target, IdentifiedObject):
             return ReferenceDifference(source, target)
         else:
@@ -447,21 +452,21 @@ class ServiceComparatorValidator(Generic[TService, C]):
         )
 
 
-def _prop_name(prop: Property) -> str:
+def _prop_name(prop: property) -> str:
     if isinstance(prop, property):
         return prop.fget.__name__
     else:
         return prop.__name__
 
 
-def _get_prop(it: Any, prop: Property) -> Any:
+def _get_prop(it: Any, prop: property) -> Any:
     if isinstance(prop, property):
         return getattr(it, prop.fget.__name__)
     else:
         return getattr(it, prop.__name__)
 
 
-def _set_prop(it: Any, prop: Property, value: Any):
+def _set_prop(it: Any, prop: property, value: Any):
     if isinstance(prop, property):
         return setattr(it, prop.fset.__name__, value)
     else:

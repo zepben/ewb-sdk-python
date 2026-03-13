@@ -277,7 +277,7 @@ def test_network_service_translations():
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
 def test_creates_new_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyUnresolvedReferences
     cim = NetworkService().add_from_pb(pb)
@@ -288,10 +288,10 @@ def test_creates_new_name_type():
 
 def test_updates_existing_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyArgumentList
-    nt = NameType("nt1 name")
+    nt = NameType(name="nt1 name")
     ns = NetworkService()
     ns.add_name_type(nt)
     # noinspection PyUnresolvedReferences

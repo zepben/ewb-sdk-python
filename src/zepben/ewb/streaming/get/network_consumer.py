@@ -10,16 +10,16 @@ __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast, overload
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, TypeVar, Awaitable, cast, overload, Type
 
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiablesRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, \
     IncludedEnergizedContainers as PBIncludedEnergizedContainers, NetworkState as PBNetworkState
 
-from zepben.ewb import NetworkService, IdentifiedObject, Organisation, Location, OperationalRestriction, BaseVoltage, ConnectivityNode, Substation, Terminal, \
+from zepben.ewb import NetworkService, Organisation, Location, OperationalRestriction, BaseVoltage, ConnectivityNode, Substation, Terminal, \
     AcLineSegment, Breaker, Disconnector, EnergyConsumer, \
     EnergySource, EnergySourcePhase, \
     Fuse, Jumper, PowerTransformer, Recloser, Circuit, \
@@ -31,6 +31,7 @@ from zepben.ewb import NetworkService, IdentifiedObject, Organisation, Location,
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
 from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
@@ -103,7 +104,7 @@ _map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIn
 _map_network_state = EnumMapper(NetworkState, PBNetworkState)
 
 
-class NetworkConsumerClient(CimConsumerClient[NetworkService]):
+class NetworkConsumerClient(CimConsumerClient[NetworkService, NetworkConsumerStub]):
     """
     Consumer client for a :class:`NetworkService`.
 
@@ -114,7 +115,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         check for mRIDs that were not found or retrieved but not added to service (this should not be the case unless you are processing things concurrently).
     """
 
-    CIM_IO = TypeVar('CIM_IO', bound=IdentifiedObject)
+    CIM_IO = TypeVar('CIM_IO', bound=Identifiable)
     PB_IO = TypeVar('PB_IO')
 
     __service: NetworkService
@@ -124,21 +125,19 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     def service(self) -> NetworkService:
         return self.__service
 
-    _stub: NetworkConsumerStub = None
-
     def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
         """
         :param channel: a gRPC channel used to create a stub if no stub is provided.
         :param stub: the gRPC stub to use for this consumer client.
         :param error_handlers: a collection of handlers to be processed for any errors that occur.
         """
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=NetworkConsumerStub(channel))
         else:
-            self._stub = NetworkConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
+
 
         self.__service = NetworkService()
         self.__network_hierarchy = None
@@ -489,8 +488,8 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self, it: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NORMAL,
-    ) -> AsyncGenerator[IdentifiedObject, None]:
+        network_state: NetworkState = NetworkState.NORMAL
+    ) -> AsyncGenerator[Identifiable, None]:
         async for response in self._process_equipment_for_containers(
             [it.mrid if isinstance(it, EquipmentContainer) else it],
             include_energizing_containers,
@@ -504,45 +503,45 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mrids: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NORMAL,
-    ) -> AsyncGenerator[IdentifiedObject, None]:
+        network_state: NetworkState = NetworkState.NORMAL
+    ) -> AsyncGenerator[Identifiable, None]:
         request = GetEquipmentForContainersRequest()
         request.includeEnergizingContainers = _map_include_energizing_containers.to_pb(include_energizing_containers)
         request.includeEnergizedContainers = _map_include_energized_containers.to_pb(include_energized_containers)
         request.networkState = _map_network_state.to_pb(network_state)
         responses = self._stub.getEquipmentForContainers(self._batch_send(request, mrids), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
-                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
+            for nio in response.identifiables:
+                yield self._extract_identifiable("network", nio, _nio_type_to_cim)
 
     async def _process_equipment_for_restriction(
         self,
-        it: Union[str, OperationalRestriction],
-    ) -> AsyncGenerator[IdentifiedObject, None]:
+        it: str | OperationalRestriction
+    ) -> AsyncGenerator[Identifiable, None]:
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
         responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
-                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
+            for nio in response.identifiables:
+                yield self._extract_identifiable("network", nio, _nio_type_to_cim)
 
     async def _process_terminals_for_connectivity_node(
         self,
-        it: Union[str, ConnectivityNode],
-    ) -> AsyncGenerator[IdentifiedObject, None]:
+        it: str | ConnectivityNode
+    ) -> AsyncGenerator[Identifiable, None]:
         mrid = it.mrid if isinstance(it, ConnectivityNode) else it
         responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
             # noinspection PyUnresolvedReferences
             yield self.service.get(response.terminal.mrid(), Terminal, default=None) or self.service.add_from_pb(response.terminal), response.terminal.mrid()
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identifiables(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable | None, str], None]:
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
-                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
+            for nio in response.identifiables:
+                yield self._extract_identifiable("network", nio, _nio_type_to_cim)
 
     async def _handle_network_hierarchy(self, config: GetNetworkHierarchyConfig):
         response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest(**config.generate_config()), timeout=self.timeout)
@@ -561,7 +560,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return self.__network_hierarchy
 
-    async def _handle_multi_object_rpc(self, processor: Callable[[], AsyncGenerator[IdentifiedObject, None]]) -> GrpcResult[MultiObjectResult]:
+    async def _handle_multi_object_rpc(self, processor: Callable[[], AsyncGenerator[Identifiable, None]]) -> GrpcResult[MultiObjectResult]:
         result = MultiObjectResult()
 
         async def rpc():
@@ -588,7 +587,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         io = self.service.get(mrid, default=None)
         if not io:
-            response = await self._get_identified_object(mrid)
+            response = await self._get_identifiable(mrid)
             if response.was_failure:
                 # noinspection PyArgumentList
                 return GrpcResult(response.thrown, response.was_error_handled)
@@ -633,7 +632,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
                         continue
                     to_resolve.add(ref.to_mrid)
 
-            response = await self._get_identified_objects(to_resolve)
+            response = await self._get_identifiables(to_resolve)
             if response.was_failure:
                 # noinspection PyArgumentList
                 return GrpcResult(response.thrown, response.was_error_handled)
@@ -661,11 +660,11 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 class SyncNetworkConsumerClient(NetworkConsumerClient):
     """Synchronised wrapper for :class:`NetworkConsumerClient`"""
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject]:
-        return get_event_loop().run_until_complete(super().get_identified_object(mrid))
+    def get_identifiable(self, mrid: str) -> GrpcResult[Identifiable]:
+        return get_event_loop().run_until_complete(super().get_identifiable(mrid))
 
-    def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_identified_objects(mrids))
+    def get_identifiables(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_identifiables(mrids))
 
     def get_equipment_for_container(
         self,

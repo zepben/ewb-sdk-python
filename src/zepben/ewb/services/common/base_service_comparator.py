@@ -7,6 +7,7 @@ from types import MemberDescriptorType
 from typing import get_type_hints, Dict, Type, Callable, Any, TypeVar, Optional, Union, List, Tuple
 
 from zepben.ewb import BaseService, IdentifiedObject, Organisation, Document, OrganisationRole
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common.difference import ObjectDifference, Difference, ValueDifference, ReferenceDifference, CollectionDifference, IndexedDifference
@@ -127,8 +128,13 @@ class BaseServiceComparator:
     def _compare_organisation(self, source: Organisation, target: Organisation) -> ObjectDifference:
         return self._compare_identified_object(ObjectDifference(source, target))
 
+    def _compare_identifiable(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, Identifiable.mrid)
+        return diff
+
     def _compare_identified_object(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, IdentifiedObject.mrid, IdentifiedObject.name, IdentifiedObject.description)
+        self._compare_identifiable(diff)
+        self._compare_values(diff, IdentifiedObject.name, IdentifiedObject.description)
         self._compare_names(diff, IdentifiedObject.names)
         return diff
 

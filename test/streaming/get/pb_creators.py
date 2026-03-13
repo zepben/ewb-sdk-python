@@ -5,6 +5,9 @@
 
 __all__ = ['network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
 
+from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiable
+from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiable
+from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiable
 from hypothesis.strategies import composite
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
@@ -24,69 +27,70 @@ def network_identified_objects(draw):
         # Extensions IEC61968 Asset Info #
         ##################################
 
-        draw(create_relay_info().map(lambda it: NetworkIdentifiedObject(relayInfo=it.to_pb()))),
+        draw(create_relay_info().map(lambda it: NetworkIdentifiable(relayInfo=it.to_pb()))),
+        draw(create_relay_info().map(lambda it: NetworkIdentifiable(relayInfo=it.to_pb()))),
 
         ################################
         # Extensions IEC61968 Metering #
         ################################
 
-        draw(create_pan_demand_response_function().map(lambda it: NetworkIdentifiedObject(panDemandResponseFunction=it.to_pb()))),
+        draw(create_pan_demand_response_function().map(lambda it: NetworkIdentifiable(panDemandResponseFunction=it.to_pb()))),
 
         #################################
         # Extensions IEC61970 Base Core #
         #################################
 
-        draw(create_site().map(lambda it: NetworkIdentifiedObject(site=it.to_pb()))),
+        draw(create_site().map(lambda it: NetworkIdentifiable(site=it.to_pb()))),
 
         ###################################
         # Extensions IEC61970 Base Feeder #
         ###################################
 
-        draw(create_loop().map(lambda it: NetworkIdentifiedObject(loop=it.to_pb()))),
-        draw(create_lv_feeder().map(lambda it: NetworkIdentifiedObject(lvFeeder=it.to_pb()))),
+        draw(create_loop().map(lambda it: NetworkIdentifiable(loop=it.to_pb()))),
+        draw(create_lv_feeder().map(lambda it: NetworkIdentifiable(lvFeeder=it.to_pb()))),
 
         ##################################################
         # Extensions IEC61970 Base Generation Production #
         ##################################################
 
-        draw(create_ev_charging_unit().map(lambda it: NetworkIdentifiedObject(evChargingUnit=it.to_pb()))),
+        draw(create_ev_charging_unit().map(lambda it: NetworkIdentifiable(evChargingUnit=it.to_pb()))),
 
         #######################################
         # Extensions IEC61970 Base Protection #
         #######################################
 
-        draw(create_distance_relay().map(lambda it: NetworkIdentifiedObject(distanceRelay=it.to_pb()))),
-        draw(create_protection_relay_scheme().map(lambda it: NetworkIdentifiedObject(protectionRelayScheme=it.to_pb()))),
-        draw(create_protection_relay_system().map(lambda it: NetworkIdentifiedObject(protectionRelaySystem=it.to_pb()))),
-        draw(create_voltage_relay().map(lambda it: NetworkIdentifiedObject(voltageRelay=it.to_pb()))),
+        draw(create_distance_relay().map(lambda it: NetworkIdentifiable(distanceRelay=it.to_pb()))),
+        draw(create_protection_relay_scheme().map(lambda it: NetworkIdentifiable(protectionRelayScheme=it.to_pb()))),
+        draw(create_protection_relay_system().map(lambda it: NetworkIdentifiable(protectionRelaySystem=it.to_pb()))),
+        draw(create_voltage_relay().map(lambda it: NetworkIdentifiable(voltageRelay=it.to_pb()))),
 
         ##################################
         # Extensions IEC61970 Base Wires #
         ##################################
 
-        draw(create_battery_control().map(lambda it: NetworkIdentifiedObject(batteryControl=it.to_pb()))),
+        draw(create_battery_control().map(lambda it: NetworkIdentifiable(batteryControl=it.to_pb()))),
 
         #######################
         # IEC61968 Asset Info #
         #######################
 
-        draw(create_cable_info().map(lambda it: NetworkIdentifiedObject(cableInfo=it.to_pb()))),
-        draw(create_no_load_test().map(lambda it: NetworkIdentifiedObject(noLoadTest=it.to_pb()))),
-        draw(create_open_circuit_test().map(lambda it: NetworkIdentifiedObject(openCircuitTest=it.to_pb()))),
-        draw(create_overhead_wire_info().map(lambda it: NetworkIdentifiedObject(overheadWireInfo=it.to_pb()))),
-        draw(create_power_transformer_info().map(lambda it: NetworkIdentifiedObject(powerTransformerInfo=it.to_pb()))),
-        draw(create_short_circuit_test().map(lambda it: NetworkIdentifiedObject(shortCircuitTest=it.to_pb()))),
-        draw(create_shunt_compensator_info().map(lambda it: NetworkIdentifiedObject(shuntCompensatorInfo=it.to_pb()))),
-        draw(create_switch_info().map(lambda it: NetworkIdentifiedObject(switchInfo=it.to_pb()))),
-        draw(create_transformer_end_info().map(lambda it: NetworkIdentifiedObject(transformerEndInfo=it.to_pb()))),
-        draw(create_transformer_tank_info().map(lambda it: NetworkIdentifiedObject(transformerTankInfo=it.to_pb()))),
+        draw(create_cable_info().map(lambda it: NetworkIdentifiable(cableInfo=it.to_pb()))),
+        draw(create_no_load_test().map(lambda it: NetworkIdentifiable(noLoadTest=it.to_pb()))),
+        draw(create_open_circuit_test().map(lambda it: NetworkIdentifiable(openCircuitTest=it.to_pb()))),
+        draw(create_overhead_wire_info().map(lambda it: NetworkIdentifiable(overheadWireInfo=it.to_pb()))),
+        draw(create_power_transformer_info().map(lambda it: NetworkIdentifiable(powerTransformerInfo=it.to_pb()))),
+        draw(create_short_circuit_test().map(lambda it: NetworkIdentifiable(shortCircuitTest=it.to_pb()))),
+        draw(create_shunt_compensator_info().map(lambda it: NetworkIdentifiable(shuntCompensatorInfo=it.to_pb()))),
+        draw(create_switch_info().map(lambda it: NetworkIdentifiable(switchInfo=it.to_pb()))),
+        draw(create_transformer_end_info().map(lambda it: NetworkIdentifiable(transformerEndInfo=it.to_pb()))),
+        draw(create_transformer_tank_info().map(lambda it: NetworkIdentifiable(transformerTankInfo=it.to_pb()))),
 
         ###################
         # IEC61968 Assets #
         ###################
 
-        draw(create_asset_owner().map(lambda it: NetworkIdentifiedObject(assetOwner=it.to_pb()))),
-        draw(create_streetlight().map(lambda it: NetworkIdentifiedObject(streetlight=it.to_pb()))),
+        draw(create_asset_owner().map(lambda it: NetworkIdentifiable(assetOwner=it.to_pb()))),
+        draw(create_streetlight().map(lambda it: NetworkIdentifiable(streetlight=it.to_pb()))),
 
         ###################
         # IEC61968 Common #

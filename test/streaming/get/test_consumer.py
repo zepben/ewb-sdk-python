@@ -10,16 +10,16 @@ from zepben.ewb import CimConsumerClient
 
 @pytest.mark.asyncio
 async def test_abstract_coverage():
-    client = CimConsumerClient()
+    client = CimConsumerClient(stub='not-a-stub-but-required-because-kwarg')
 
     with pytest.raises(NotImplementedError):
         (await client.service).throw_on_error()
 
     with pytest.raises(NotImplementedError):
-        (await client.get_identified_object("id")).throw_on_error()
+        (await client.get_identifiable("id")).throw_on_error()
 
     with pytest.raises(NotImplementedError):
-        (await client.get_identified_objects(["id"])).throw_on_error()
+        (await client.get_identifiables(["id"])).throw_on_error()
 
     with pytest.raises(NotImplementedError):
         (await client.get_metadata()).throw_on_error()

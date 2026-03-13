@@ -22,25 +22,38 @@ from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import Identifi
 from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNameType
 from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
 
-from zepben.ewb import Document, IdentifiedObject, Organisation, OrganisationRole
 from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.model.cim.iec61968.common.document import Document
+from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
+from zepben.ewb.model.cim.iec61968.common.organisation import Organisation
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
+from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common import resolver
 from zepben.ewb.services.common.base_service import BaseService
 
 
-TProtoToCimFunc = Callable[[Message, BaseService], Optional[IdentifiedObject]]
+TProtoToCimFunc = Callable[[Message, BaseService], Optional[Identifiable]]
 P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def add_to_network_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
+def add_to_service_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
     """
     This should wrap any leaf class of the hierarchy, for example, If you're porting over ewb-sdk-jvm
     changes, any of the classes that get used in a `network.add(Class)`
+
+    This decorator expects your function to return the Class to be added to the ``BaseService``.
+
+    Unless you know what you're doing, this should be the "innermost" decorator. ie::
+
+        @bind_to_cim
+        @add_to_service_or_none
+        def cim_class_to_cim(pb: PBCimClass, service: BaseService) -> CimClass | None:
+            return CimClass()
     """
     @functools.wraps(func)
-    def wrapper(pb: Message, service: BaseService) -> Optional[IdentifiedObject]:
+    def wrapper(pb: Message, service: BaseService) -> Optional[Identifiable]:
         return cim if service.add(cim := func(pb, service)) else None
     return wrapper
 
@@ -48,7 +61,16 @@ def add_to_network_or_none(func: TProtoToCimFunc) -> TProtoToCimFunc:
 def bind_to_cim(func: Callable[P, R]) -> Callable[P, R]:
     """
     Get the object described in the type hint of the first argument of the function we are wrapping
-    set that object's `to_cim` function to be the function we are wrapping
+    set that object's `to_cim` function to be the function we are wrapping so that the decorated
+    function can be called directly on the object, ie::
+
+        object.to_cim()
+
+    This should be the "outermost" decorator. ie::
+
+        @bind_to_cim
+        def cim_class_to_cim(pb: PBCimClass, cim: CimClass, service: BaseService) -> CimClass | None:
+            cim.field = stuff()
     """
     inspect.get_annotations(func, eval_str=True)[func.__code__.co_varnames[0]].to_cim = func
     return func
@@ -76,7 +98,7 @@ def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
 
 
 @bind_to_cim
-@add_to_network_or_none
+@add_to_service_or_none
 def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Optional[Organisation]:
     cim = Organisation(mrid=pb.mrid())
 
@@ -109,7 +131,7 @@ def name_to_cim(pb: PBName, io: IdentifiedObject, service: BaseService):
         nt = service.get_name_type(pb.type)
     except KeyError:
         # noinspection PyArgumentList
-        nt = NameType(pb.type)
+        nt = NameType(name=pb.type)
         service.add_name_type(nt)
 
     return nt.get_or_add_name(pb.name, io)
@@ -121,7 +143,7 @@ def name_type_to_cim(pb: PBNameType, service: BaseService):
         nt = service.get_name_type(pb.name)
     except KeyError:
         # noinspection PyArgumentList
-        nt = NameType(pb.name)
+        nt = NameType(name=pb.name)
         service.add_name_type(nt)
 
     nt.description = get_nullable(pb, 'description')
@@ -134,7 +156,7 @@ class BaseProtoToCim(object, metaclass=ABCMeta):
 
 
 # Extensions
-def _add_from_pb(service: BaseService, pb) -> Optional[IdentifiedObject]:
+def _add_from_pb(service: BaseService, pb) -> Optional[Identifiable]:
     """Must only be called by objects for which .to_cim() takes themselves and the network service."""
     try:
         return pb.to_cim(service)

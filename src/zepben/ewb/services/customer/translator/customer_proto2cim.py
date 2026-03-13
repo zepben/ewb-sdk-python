@@ -17,7 +17,7 @@ from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 from zepben.protobuf.cim.iec61970.base.domain.DateTimeInterval_pb2 import DateTimeInterval as PBDateTimeInterval
 
 import zepben.ewb.services.common.resolver as resolver
-from zepben.ewb import organisation_role_to_cim, document_to_cim, CustomerKind, bind_to_cim
+from zepben.ewb import organisation_role_to_cim, document_to_cim, CustomerKind, bind_to_cim, add_to_service_or_none
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.model.cim.iec61968.customers.customer import Customer
 from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
@@ -48,6 +48,7 @@ def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: CustomerService):
 ######################
 
 @bind_to_cim
+@add_to_service_or_none
 def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Customer]:
     cim = Customer(
         mrid=pb.mrid(),
@@ -60,10 +61,11 @@ def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Custom
         service.resolve_or_defer_reference(resolver.agreements(cim), mrid)
 
     organisation_role_to_cim(getattr(pb, 'or'), cim, service)
-    return cim if service.add(cim) else None
+    return cim
 
 
 @bind_to_cim
+@add_to_service_or_none
 def customer_agreement_to_cim(pb: PBCustomerAgreement, service: CustomerService) -> Optional[CustomerAgreement]:
     cim = CustomerAgreement(mrid=pb.mrid())
 
@@ -72,10 +74,11 @@ def customer_agreement_to_cim(pb: PBCustomerAgreement, service: CustomerService)
         service.resolve_or_defer_reference(resolver.pricing_structures(cim), mrid)
 
     agreement_to_cim(pb.agr, cim, service)
-    return cim if service.add(cim) else None
+    return cim
 
 
 @bind_to_cim
+@add_to_service_or_none
 def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -> Optional[PricingStructure]:
     cim = PricingStructure(mrid=pb.mrid())
 
@@ -85,16 +88,17 @@ def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -
     cim.code = get_nullable(pb, 'code')
 
     document_to_cim(pb.doc, cim, service)
-    return cim if service.add(cim) else None
+    return cim
 
 
 @bind_to_cim
+@add_to_service_or_none
 def tariff_to_cim(pb: PBTariff, service: CustomerService) -> Optional[Tariff]:
     # noinspection PyArgumentList
     cim = Tariff(mrid=pb.mrid())
 
     document_to_cim(pb.doc, cim, service)
-    return cim if service.add(cim) else None
+    return cim
 
 
 ########################

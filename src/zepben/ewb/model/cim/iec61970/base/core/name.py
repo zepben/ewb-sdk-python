@@ -7,24 +7,30 @@ from __future__ import annotations
 
 __all__ = ["Name"]
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
+
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
     from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 
-#
-# NOTE: unsafe_hash is used as we can't mark this class frozen due to needing to update/lazy initialise the identified_object, which shouldn't change once
-#       it has been initialised.
-#
-@dataclass(unsafe_hash=True)
-class Name:
+class Name(Identifiable):
     """
     The Name class provides the means to define any number of human-readable names for an object. A name is **not** to be used for defining inter-object
     relationships. For inter-object relationships instead use the object identification 'mRID'.
     """
+
+    @property
+    def mrid(self) -> str:
+        return f"{self.name}-{self.type.name}-{self.identified_object.mrid}"
+
+    def __getattribute__(self, item):
+        # This is a workaround for self.mrid being a property, when we're expecting a string.
+        if item == "mrid":
+            return object.__getattribute__(self, 'mrid').fget(self)
+        return object.__getattribute__(self, item)
 
     name: str
     """Any free text that name the object."""
@@ -34,3 +40,9 @@ class Name:
 
     identified_object: Optional[IdentifiedObject] = None
     """Identified object that this name designates."""
+
+    def __str__(self) -> str:
+        class_name = f'{self.__class__.__name__}'
+        if self.name:
+            return f'{class_name}{{{self.mrid}|{self.name}}}'
+        return f'{class_name}{{{self.mrid}}}'

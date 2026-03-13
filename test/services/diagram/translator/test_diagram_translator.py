@@ -43,7 +43,7 @@ def test_diagram_service_translations():
 
 def test_creates_new_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyUnresolvedReferences
     cim = DiagramService().add_from_pb(pb)
@@ -54,10 +54,10 @@ def test_creates_new_name_type():
 
 def test_updates_existing_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyArgumentList
-    nt = NameType("nt1 name")
+    nt = NameType(name="nt1 name")
     ds = DiagramService()
     ds.add_name_type(nt)
     # noinspection PyUnresolvedReferences

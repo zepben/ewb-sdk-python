@@ -34,7 +34,7 @@ from uuid import UUID
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
 if TYPE_CHECKING:
-    from zepben.ewb import IdentifiedObject, TIdentifiedObject
+    from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable, TIdentifiable
 
 T = TypeVar('T')
 
@@ -54,13 +54,13 @@ def iter_but_not_str(obj: Any):
     return isinstance(obj, Iterable) and not isinstance(obj, (str, bytes, bytearray, dict))
 
 
-def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) -> TIdentifiedObject:
+def get_by_mrid(collection: Optional[Iterable[TIdentifiable]], mrid: str) -> TIdentifiable:
     """
-    Get an `IdentifiedObject` from `collection` based on
+    Get an `Identifiable` from `collection` based on
     its mRID.
     `collection` The collection to operate on
-    `mrid` The mRID of the `IdentifiedObject` to lookup in the collection
-    Returns The `IdentifiedObject`
+    `mrid` The mRID of the `Identifiable` to lookup in the collection
+    Returns The `Identifiable`
     Raises `KeyError` if `mrid` was not found in the collection.
     """
     if not collection:
@@ -75,13 +75,13 @@ def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) ->
     raise KeyError(mrid)
 
 
-def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> bool:
+def contains_mrid(collection: Optional[Iterable[Identifiable]], mrid: str) -> bool:
     """
-    Check if a collection of `IdentifiedObject` contains an
+    Check if a collection of `Identifiable` contains an
     object with a specified mRID.
     `collection` The collection to operate on
     `mrid` The mRID to look up.
-    Returns True if an `IdentifiedObject` is found in the collection with the specified mRID, False otherwise.
+    Returns True if an `Identifiable` is found in the collection with the specified mRID, False otherwise.
     """
     if not collection:
         return False
@@ -94,7 +94,7 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
 
 def safe_remove(collection: Optional[List[T]], obj: T) -> Optional[List[T]]:
     """
-    Remove an IdentifiedObject from a collection safely.
+    Remove an Identifiable from a collection safely.
     Raises `ValueError` if `obj` is not in the collection.
     Returns The collection if successfully removed or None if after removal the collection was empty.
     """
@@ -106,9 +106,9 @@ def safe_remove(collection: Optional[List[T]], obj: T) -> Optional[List[T]]:
     return collection if collection else None
 
 
-def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: IdentifiedObject) -> {Optional[Dict[str, IdentifiedObject]]}:
+def safe_remove_by_id(collection: Optional[Dict[str, Identifiable]], obj: Identifiable) -> dict[str, Identifiable] | None:
     """
-    Remove an IdentifiedObject from a collection safely.
+    Remove an Identifiable from a collection safely.
     Raises `KeyError` if `obj` is not in the collection.
     Returns The collection if successfully removed or None if after removal the collection was empty.
     """
@@ -181,9 +181,11 @@ def generate_id() -> str:
     return str(UUID(bytes=os.urandom(16), version=4))
 
 
+CPT = TypeVar("CPT", bound=type)
+
 class classproperty(property):
-    def __get__(self, cls, owner: T) -> T:
-        return classmethod(self.fget).__get__(None, owner)()
+    def __get__(self, __instance: Any, __owner: type | None = None) -> Any:
+        return classmethod(self.fget).__get__(None, __owner)()
 
 
 def datetime_to_timestamp(date_time: Optional[datetime]) -> Optional[PBTimestamp]:
