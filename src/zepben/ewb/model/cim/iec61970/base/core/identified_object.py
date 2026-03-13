@@ -8,10 +8,9 @@ from __future__ import annotations
 __all__ = ["IdentifiedObject", "TIdentifiedObject"]
 
 import logging
-from abc import ABCMeta
 from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 
-from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.util import require, nlen, ngen, safe_remove
@@ -23,8 +22,7 @@ TIdentifiedObject = TypeVar("TIdentifiedObject", bound="IdentifiedObject")
 Generic type of IdentifiedObject which can be used for type hinting generics.
 """
 
-@dataclass(slots=True)
-class IdentifiedObject(metaclass=ABCMeta):
+class IdentifiedObject(Identifiable):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.
     Everything should extend this class, however it's not mandated that every subclass must use all the fields
@@ -35,7 +33,7 @@ class IdentifiedObject(metaclass=ABCMeta):
     """
 
     mrid: str
-    """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
+    """Master resource identifier issued by a model authority. The mRID is unique within an exchange context.
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
     name: Optional[str] = None
@@ -49,8 +47,6 @@ class IdentifiedObject(metaclass=ABCMeta):
     # TODO: Missing num_diagram_objects: int = None  def has_diagram_objects(self): return (self.num_diagram_objects or 0) > 0
 
     def __init__(self, names: Optional[List[Name]] = None, **kwargs):
-        if kwargs:
-            raise TypeError("unexpected keyword arguments in IdentifiedObject constructor: {}".format(kwargs))
         super(IdentifiedObject, self).__init__(**kwargs)
         if not self.mrid or not self.mrid.strip():
             raise ValueError("You must provide an mRID for this object.")
@@ -166,12 +162,13 @@ class IdentifiedObject(metaclass=ABCMeta):
             name_obj.identified_object = self
         require(name_obj.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
 
-        if self.has_name(name_obj.type, name_obj.name):
-            existing = self.get_name(name_obj.type, name_obj.name)
-            if existing is name_obj:
+        try:  # If name_obj already exists, ensure it's a duplicate.
+            if self.get_name(name_obj.type, name_obj.name) is name_obj:
                 return self
             else:
                 raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")
+        except KeyError:
+            pass
 
         self._names = list() if not self._names else self._names
         self._names.append(name_obj)

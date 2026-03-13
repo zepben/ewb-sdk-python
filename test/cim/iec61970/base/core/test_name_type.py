@@ -24,7 +24,7 @@ name_type_args = ["1", "2"]
 
 def test_name_type_constructor_default():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     assert nt.name == "nt"
     assert nt.description is None
@@ -43,16 +43,6 @@ def test_name_type_constructor_kwargs(name, description, **kwargs):
     assert not list(nt.names)
 
 
-def test_name_type_constructor_args():
-    # noinspection PyArgumentList
-    nt = NameType(*name_type_args)
-
-    assert name_type_args == [
-        nt.name,
-        nt.description
-    ]
-    assert not list(nt.names)
-
 
 #
 # NOTE: The names collection is non-standard and can't be tested with the verify_container methods.
@@ -61,7 +51,7 @@ def test_name_type_constructor_args():
 
 def test_get_or_add_names():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
     j2 = Junction(mrid=generate_id())
@@ -79,7 +69,7 @@ def test_get_or_add_names():
 
 def test_names():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
     j2 = Junction(mrid=generate_id())
@@ -93,7 +83,7 @@ def test_names():
 
 def test_get_names():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
     j2 = Junction(mrid=generate_id())
@@ -110,7 +100,7 @@ def test_get_names():
 
 def test_removes_names():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
     j2 = Junction(mrid=generate_id())
@@ -130,7 +120,7 @@ def test_removes_names():
 
 def test_remove_name():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
     j2 = Junction(mrid=generate_id())
@@ -153,7 +143,7 @@ def test_remove_name():
 
 def test_clear_names():
     # noinspection PyArgumentList
-    nt = NameType("nt")
+    nt = NameType(name="nt")
 
     j1 = Junction(mrid=generate_id())
 

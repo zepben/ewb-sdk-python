@@ -9,15 +9,14 @@ __all__ = ["NameType"]
 
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional
 
-from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-@dataclass(slots=True)
-class NameType:
+class NameType(Identifiable):
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
     IT systems each having its own local name for the same object, e.g. a planning system may have different names from an EMS. An object may also have
@@ -29,6 +28,10 @@ class NameType:
 
     name: str
     """Name of the name type."""
+
+    @property
+    def mrid(self):
+        return self.name
 
     description: Optional[str] = None
     """Description of the name type."""

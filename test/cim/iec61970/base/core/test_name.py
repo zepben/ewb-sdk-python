@@ -21,7 +21,7 @@ name_kwargs = {
 }
 
 # noinspection PyArgumentList
-name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
+name_args = ["1", NameType(name="nt1"), Junction(mrid=generate_id())]
 
 
 #

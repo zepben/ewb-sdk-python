@@ -110,7 +110,7 @@ def name_to_cim(pb: PBName, io: IdentifiedObject, service: BaseService):
         nt = service.get_name_type(pb.type)
     except KeyError:
         # noinspection PyArgumentList
-        nt = NameType(pb.type)
+        nt = NameType(name=pb.type)
         service.add_name_type(nt)
 
     return nt.get_or_add_name(pb.name, io)
@@ -122,7 +122,7 @@ def name_type_to_cim(pb: PBNameType, service: BaseService):
         nt = service.get_name_type(pb.name)
     except KeyError:
         # noinspection PyArgumentList
-        nt = NameType(pb.name)
+        nt = NameType(name=pb.name)
         service.add_name_type(nt)
 
     nt.description = get_nullable(pb, 'description')

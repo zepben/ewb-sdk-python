@@ -191,7 +191,7 @@ class ServiceComparatorValidator(object):
         in_target_difference: IdentifiedObject = creator("mRID")
 
         # noinspection PyArgumentList
-        name_type = NameType("type")
+        name_type = NameType(name="type")
 
         in_source.add_name(name_type, "name1")
         in_target.add_name(name_type, "name1")

@@ -154,7 +154,7 @@ class BaseCimReader(ABC):
         :raises SQLException: For any errors encountered reading from the database.
         """
         # noinspection PyArgumentList
-        name_type = NameType(set_last_name_type(result_set.get_string(table.name_.query_index)))
+        name_type = NameType(name=set_last_name_type(result_set.get_string(table.name_.query_index)))
         name_type.description = result_set.get_string(table.description.query_index)
 
         return self._add_or_throw_name_type(name_type)
