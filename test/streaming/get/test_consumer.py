@@ -10,7 +10,7 @@ from zepben.ewb import CimConsumerClient
 
 @pytest.mark.asyncio
 async def test_abstract_coverage():
-    client = CimConsumerClient()
+    client = CimConsumerClient(stub='not-a-stub-but-required-because-kwarg')
 
     with pytest.raises(NotImplementedError):
         (await client.service).throw_on_error()

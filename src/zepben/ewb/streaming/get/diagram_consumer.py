@@ -22,7 +22,7 @@ from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResu
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
 
-class DiagramConsumerClient(CimConsumerClient[DiagramService]):
+class DiagramConsumerClient(CimConsumerClient[DiagramService, DiagramConsumerStub]):
     """
     Consumer client for a :class:`DiagramService`.
 
@@ -39,16 +39,13 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
     def service(self) -> DiagramService:
         return self.__service
 
-    _stub: DiagramConsumerStub = None
-
     def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=DiagramConsumerStub(channel))
         else:
-            self._stub = DiagramConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
         self.__service = DiagramService()
 

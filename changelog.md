@@ -2,6 +2,7 @@
 ## [1.3.0] - UNRELEASED
 ### Breaking Changes
 * `NameType` and `Name` now require constructor args to be supplied as kwargs only.
+* `GrpcClient` now requires a `stub` to be passed into its constructor as a kw only arg.
 
 ### New Features
 * None.

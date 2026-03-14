@@ -19,6 +19,7 @@ from zepben.ewb.services.common.meta.metadata_translations import service_info_f
 from zepben.ewb.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 T = TypeVar('T', bound=IdentifiedObject)
+TStub = TypeVar('TStub')
 
 
 @dataclass()
@@ -32,7 +33,7 @@ PBIdentifiedObject = TypeVar('PBIdentifiedObject')
 GrpcRequest = TypeVar('GrpcRequest')
 
 
-class CimConsumerClient(GrpcClient, Generic[ServiceType]):
+class CimConsumerClient(GrpcClient[TStub], Generic[ServiceType, TStub]):
     """
     Base class that defines some helpful functions when producer clients are sending to the server.
 

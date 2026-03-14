@@ -79,20 +79,25 @@ class GrpcResult(Generic[T]):
             raise self.result
         return self
 
+TStub = TypeVar("TStub")
 
 @dataclass(init=False, slots=True)
-class GrpcClient(object):
+class GrpcClient(Generic[TStub]):
     error_handlers: List[Callable[[Exception], bool]] = []
 
     timeout: int = 0
     '''Timeout for client gRPC requests'''
 
-    def __init__(self, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+    _stub: TStub = None
+
+    def __init__(self, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60, *, stub: T):
         if error_handlers:
             self.error_handlers = error_handlers.copy()
         else:
             self.error_handlers = list()
         self.timeout = timeout
+
+        self._stub = stub
 
     def try_handle_error(self, e: Exception) -> bool:
         for handler in self.error_handlers:

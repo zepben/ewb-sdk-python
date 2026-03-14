@@ -102,7 +102,7 @@ _map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIn
 _map_network_state = EnumMapper(NetworkState, PBNetworkState)
 
 
-class NetworkConsumerClient(CimConsumerClient[NetworkService]):
+class NetworkConsumerClient(CimConsumerClient[NetworkService, NetworkConsumerStub]):
     """
     Consumer client for a :class:`NetworkService`.
 
@@ -123,21 +123,19 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     def service(self) -> NetworkService:
         return self.__service
 
-    _stub: NetworkConsumerStub = None
-
     def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
         """
         :param channel: a gRPC channel used to create a stub if no stub is provided.
         :param stub: the gRPC stub to use for this consumer client.
         :param error_handlers: a collection of handlers to be processed for any errors that occur.
         """
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=NetworkConsumerStub(channel))
         else:
-            self._stub = NetworkConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
+
 
         self.__service = NetworkService()
         self.__network_hierarchy = None

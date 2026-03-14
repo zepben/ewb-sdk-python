@@ -16,22 +16,19 @@ from zepben.ewb.streaming.data.set_current_states_status import SetCurrentStates
 from zepben.ewb.streaming.grpc.grpc import GrpcClient
 
 
-class UpdateNetworkStateClient(GrpcClient):
+class UpdateNetworkStateClient(GrpcClient[UpdateNetworkStateServiceStub]):
     """
     A client class that provides functionality to interact with the gRPC service for updating network states.
     A gRPC channel or stub must be provided.
     """
 
-    _stub: UpdateNetworkStateServiceStub = None
-
     def __init__(self, channel=None, stub: UpdateNetworkStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=UpdateNetworkStateServiceStub(channel))
         else:
-            self._stub = UpdateNetworkStateServiceStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
     async def set_current_states(self, batch_id: int, batch: Iterable[CurrentStateEvent]) -> SetCurrentStatesStatus:
         """

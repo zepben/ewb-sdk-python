@@ -20,7 +20,7 @@ from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResu
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
 
-class CustomerConsumerClient(CimConsumerClient[CustomerService]):
+class CustomerConsumerClient(CimConsumerClient[CustomerService, CustomerConsumerStub]):
     """
     Consumer client for a :class:`CustomerService`.
 
@@ -37,16 +37,13 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     def service(self) -> CustomerService:
         return self.__service
 
-    _stub: CustomerConsumerStub = None
-
     def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=CustomerConsumerStub(channel))
         else:
-            self._stub = CustomerConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
         self.__service = CustomerService()
 
