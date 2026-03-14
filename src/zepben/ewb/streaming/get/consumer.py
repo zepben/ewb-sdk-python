@@ -131,7 +131,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
         Raises :class:`UnsupportedOperationException` if `pb_io` was invalid/unset.
         """
-        io_type = pb_io.WhichOneof("identifiedObject")
+        io_type = pb_io.WhichOneof("identifiable")
         if io_type:
             cim_type = pb_type_to_cim.get(io_type, None)
             if cim_type is None:

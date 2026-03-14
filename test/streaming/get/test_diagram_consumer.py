@@ -10,8 +10,8 @@ import pytest
 # noinspection PyPackageRequirements
 from hypothesis import given, settings, Phase
 from zepben.protobuf.dc import dc_pb2
-from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
-from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiedObjectsResponse, GetDiagramObjectsResponse
+from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiable
+from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiablesResponse, GetDiagramObjectsResponse
 
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import diagram_identified_objects, diagram, diagram_object
@@ -48,7 +48,7 @@ class TestDiagramConsumer:
     async def test_get_identified_objects_supported_types(self, dios):
         requested = []
         for dio in dios:
-            mrid = getattr(dio, dio.WhichOneof("identifiedObject"), None).mrid()
+            mrid = getattr(dio, dio.WhichOneof("identifiable"), None).mrid()
             requested.append(mrid)
 
             async def client_test():
@@ -59,12 +59,12 @@ class TestDiagramConsumer:
                     return
                 mor = result.throw_on_error().value
 
-                assert mrid in self.service, f"type: {dio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert mor.objects[mrid] is not None, f"type: {dio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert self.service[mrid] is mor.objects[mrid], f"type: {dio.WhichOneof('identifiedObject')} mrid: {mrid}"
+                assert mrid in self.service, f"type: {dio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert mor.objects[mrid] is not None, f"type: {dio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert self.service[mrid] is mor.objects[mrid], f"type: {dio.WhichOneof('identifiable')} mrid: {mrid}"
 
-            response = GetIdentifiedObjectsResponse(identifiedObjects=[dio])
-            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+            response = GetIdentifiablesResponse(identifiables=[dio])
+            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
         assert len(requested) == len(dios) == self.service.len_of()
 
@@ -78,7 +78,7 @@ class TestDiagramConsumer:
             assert mor.objects == {}
             assert mor.failed == {mrid}
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     # noinspection PyUnresolvedReferences
     @pytest.mark.asyncio
@@ -89,11 +89,11 @@ class TestDiagramConsumer:
             assert mor.objects.keys() == {"diagram1", "diagram2"}
             assert mor.failed == {"diagram3"}
 
-        response1 = GetIdentifiedObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagram=Diagram(mrid="diagram1").to_pb())])
-        response2 = GetIdentifiedObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagram=Diagram(mrid="diagram2").to_pb())])
+        response1 = GetIdentifiablesResponse(identifiables=[DiagramIdentifiable(diagram=Diagram(mrid="diagram1").to_pb())])
+        response2 = GetIdentifiablesResponse(identifiables=[DiagramIdentifiable(diagram=Diagram(mrid="diagram2").to_pb())])
 
         await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["diagram1", "diagram2", "diagram3"], [response1, response2]))])
+                                        [StreamGrpc('getIdentifiables', stream_from_fixed(["diagram1", "diagram2", "diagram3"], [response1, response2]))])
 
     @pytest.mark.asyncio
     @given(diagram())
@@ -107,8 +107,8 @@ class TestDiagramConsumer:
             assert io is not None
             assert self.service[mrid] is io
 
-        response = GetIdentifiedObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagram=diagram_)])
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+        response = GetIdentifiablesResponse(identifiables=[DiagramIdentifiable(diagram=diagram_)])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
     @pytest.mark.asyncio
     async def test_get_identified_object_not_found(self):
@@ -121,7 +121,7 @@ class TestDiagramConsumer:
             assert isinstance(result.thrown, ValueError)
             assert str(result.thrown) == f"No object with mRID {mrid} could be found."
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     @pytest.mark.asyncio
     @given(diagram_object())
@@ -138,7 +138,7 @@ class TestDiagramConsumer:
             assert io is not None
             assert self.service[mrid] is io
 
-        response = GetDiagramObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagramObject=dio)])
+        response = GetDiagramObjectsResponse(identifiables=[DiagramIdentifiable(diagramObject=dio)])
         await self.mock_server.validate(client_test, [StreamGrpc('getDiagramObjects', stream_from_fixed([mrid], [response]))])
 
     @pytest.mark.asyncio
@@ -169,15 +169,15 @@ def _assert_contains_mrids(service: BaseService, *mrids):
 
 
 def _response_of(io: IdentifiedObject, response_type):
-    return response_type(identifiedObjects=[_to_diagram_identified_object(io)])
+    return response_type(identifiables=[_to_diagram_identified_object(io)])
 
 
 # noinspection PyUnresolvedReferences
-def _to_diagram_identified_object(obj) -> DiagramIdentifiedObject:
+def _to_diagram_identified_object(obj) -> DiagramIdentifiable:
     if isinstance(obj, Diagram):
-        dio = DiagramIdentifiedObject(diagram=obj.to_pb())
+        dio = DiagramIdentifiable(diagram=obj.to_pb())
     elif isinstance(obj, DiagramObject):
-        dio = DiagramIdentifiedObject(diagramObject=obj.to_pb())
+        dio = DiagramIdentifiable(diagramObject=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return dio

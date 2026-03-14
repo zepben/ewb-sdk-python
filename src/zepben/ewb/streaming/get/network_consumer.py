@@ -15,7 +15,7 @@ from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callab
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiablesRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, \
     IncludedEnergizedContainers as PBIncludedEnergizedContainers, NetworkState as PBNetworkState
 
@@ -511,7 +511,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         request.networkState = _map_network_state.to_pb(network_state)
         responses = self._stub.getEquipmentForContainers(self._batch_send(request, mrids), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
+            for nio in response.identifiables:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_equipment_for_restriction(self,
@@ -519,7 +519,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
         responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
+            for nio in response.identifiables:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_terminals_for_connectivity_node(self,
@@ -534,9 +534,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for nio in response.identifiedObjects:
+            for nio in response.identifiables:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _handle_network_hierarchy(self, config: GetNetworkHierarchyConfig):

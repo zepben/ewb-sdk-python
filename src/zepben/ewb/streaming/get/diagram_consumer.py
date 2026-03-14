@@ -11,7 +11,7 @@ from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
+from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiablesRequest, GetDiagramObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
@@ -73,16 +73,16 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         responses = self._stub.getDiagramObjects(self._batch_send(GetDiagramObjectsRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for dio in response.identifiedObjects:
+            for dio in response.identifiables:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
     async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for dio in response.identifiedObjects:
+            for dio in response.identifiables:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
 

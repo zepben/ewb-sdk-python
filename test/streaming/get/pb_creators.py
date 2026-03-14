@@ -17,7 +17,7 @@ from google.protobuf.struct_pb2 import NullValue
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
 from hypothesis.strategies import builds, text, integers, sampled_from, lists as hypo_lists, floats as hypo_floats, booleans, composite, uuids, one_of, none
-from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
+from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiable
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
 from zepben.protobuf.cim.extensions.iec61970.base.core.Site_pb2 import Site as PBSite
@@ -184,8 +184,8 @@ from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import Transform
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
-from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
-from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
+from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiable
+from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiable
 
 MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648
 MAX_32_BIT_INTEGER = 2147483647
@@ -1608,201 +1608,201 @@ def network_identified_objects(draw):
         # Extensions IEC61968 Asset Info #
         ##################################
 
-        draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
+        draw(builds(NetworkIdentifiable, relayInfo=relay_info())),
 
         ################################
         # Extensions IEC61968 Metering #
         ################################
 
-        draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
+        draw(builds(NetworkIdentifiable, panDemandResponseFunction=pan_demand_response_function())),
 
         #################################
         # Extensions IEC61970 Base Core #
         #################################
 
-        draw(builds(NetworkIdentifiedObject, site=site())),
+        draw(builds(NetworkIdentifiable, site=site())),
 
         ###################################
         # Extensions IEC61970 Base Feeder #
         ###################################
 
-        draw(builds(NetworkIdentifiedObject, loop=loop())),
-        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
+        draw(builds(NetworkIdentifiable, loop=loop())),
+        draw(builds(NetworkIdentifiable, lvFeeder=lv_feeder())),
 
         ##################################################
         # Extensions IEC61970 Base Generation Production #
         ##################################################
 
-        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit())),
+        draw(builds(NetworkIdentifiable, evChargingUnit=ev_charging_unit())),
 
         #######################################
         # Extensions IEC61970 Base Protection #
         #######################################
 
-        draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
-        draw(builds(NetworkIdentifiedObject, protectionRelayScheme=protection_relay_scheme())),
-        draw(builds(NetworkIdentifiedObject, protectionRelaySystem=protection_relay_system())),
-        draw(builds(NetworkIdentifiedObject, voltageRelay=voltage_relay())),
+        draw(builds(NetworkIdentifiable, distanceRelay=distance_relay())),
+        draw(builds(NetworkIdentifiable, protectionRelayScheme=protection_relay_scheme())),
+        draw(builds(NetworkIdentifiable, protectionRelaySystem=protection_relay_system())),
+        draw(builds(NetworkIdentifiable, voltageRelay=voltage_relay())),
 
         ##################################
         # Extensions IEC61970 Base Wires #
         ##################################
 
-        draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
+        draw(builds(NetworkIdentifiable, batteryControl=battery_control())),
 
         #######################
         # IEC61968 Asset Info #
         #######################
 
-        draw(builds(NetworkIdentifiedObject, cableInfo=cable_info())),
-        draw(builds(NetworkIdentifiedObject, noLoadTest=no_load_test())),
-        draw(builds(NetworkIdentifiedObject, openCircuitTest=open_circuit_test())),
-        draw(builds(NetworkIdentifiedObject, overheadWireInfo=overhead_wire_info())),
-        draw(builds(NetworkIdentifiedObject, powerTransformerInfo=power_transformer_info())),
-        draw(builds(NetworkIdentifiedObject, shortCircuitTest=short_circuit_test())),
-        draw(builds(NetworkIdentifiedObject, shuntCompensatorInfo=shunt_compensator_info())),
-        draw(builds(NetworkIdentifiedObject, switchInfo=switch_info())),
-        draw(builds(NetworkIdentifiedObject, transformerEndInfo=transformer_end_info())),
-        draw(builds(NetworkIdentifiedObject, transformerTankInfo=transformer_tank_info())),
+        draw(builds(NetworkIdentifiable, cableInfo=cable_info())),
+        draw(builds(NetworkIdentifiable, noLoadTest=no_load_test())),
+        draw(builds(NetworkIdentifiable, openCircuitTest=open_circuit_test())),
+        draw(builds(NetworkIdentifiable, overheadWireInfo=overhead_wire_info())),
+        draw(builds(NetworkIdentifiable, powerTransformerInfo=power_transformer_info())),
+        draw(builds(NetworkIdentifiable, shortCircuitTest=short_circuit_test())),
+        draw(builds(NetworkIdentifiable, shuntCompensatorInfo=shunt_compensator_info())),
+        draw(builds(NetworkIdentifiable, switchInfo=switch_info())),
+        draw(builds(NetworkIdentifiable, transformerEndInfo=transformer_end_info())),
+        draw(builds(NetworkIdentifiable, transformerTankInfo=transformer_tank_info())),
 
         ###################
         # IEC61968 Assets #
         ###################
 
-        draw(builds(NetworkIdentifiedObject, assetOwner=asset_owner())),
-        draw(builds(NetworkIdentifiedObject, streetlight=streetlight())),
+        draw(builds(NetworkIdentifiable, assetOwner=asset_owner())),
+        draw(builds(NetworkIdentifiable, streetlight=streetlight())),
 
         ###################
         # IEC61968 Common #
         ###################
 
-        draw(builds(NetworkIdentifiedObject, location=location())),
-        draw(builds(NetworkIdentifiedObject, organisation=organisation())),
+        draw(builds(NetworkIdentifiable, location=location())),
+        draw(builds(NetworkIdentifiable, organisation=organisation())),
 
         #####################################
         # IEC61968 InfIEC61968 InfAssetInfo #
         #####################################
 
-        draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
-        draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
+        draw(builds(NetworkIdentifiable, currentTransformerInfo=current_transformer_info())),
+        draw(builds(NetworkIdentifiable, potentialTransformerInfo=potential_transformer_info())),
 
         ##################################
         # IEC61968 InfIEC61968 InfAssets #
         ##################################
 
-        draw(builds(NetworkIdentifiedObject, pole=pole())),
+        draw(builds(NetworkIdentifiable, pole=pole())),
 
         #####################
         # IEC61968 Metering #
         #####################
 
-        draw(builds(NetworkIdentifiedObject, meter=meter())),
-        draw(builds(NetworkIdentifiedObject, usagePoint=usage_point())),
+        draw(builds(NetworkIdentifiable, meter=meter())),
+        draw(builds(NetworkIdentifiable, usagePoint=usage_point())),
 
         #######################
         # IEC61968 Operations #
         #######################
 
-        draw(builds(NetworkIdentifiedObject, operationalRestriction=operational_restriction())),
+        draw(builds(NetworkIdentifiable, operationalRestriction=operational_restriction())),
 
         #####################################
         # IEC61970 Base Auxiliary Equipment #
         #####################################
 
-        draw(builds(NetworkIdentifiedObject, currentTransformer=current_transformer())),
-        draw(builds(NetworkIdentifiedObject, faultIndicator=fault_indicator())),
-        draw(builds(NetworkIdentifiedObject, potentialTransformer=potential_transformer())),
+        draw(builds(NetworkIdentifiable, currentTransformer=current_transformer())),
+        draw(builds(NetworkIdentifiable, faultIndicator=fault_indicator())),
+        draw(builds(NetworkIdentifiable, potentialTransformer=potential_transformer())),
 
         ######################
         # IEC61970 Base Core #
         ######################
 
-        draw(builds(NetworkIdentifiedObject, baseVoltage=base_voltage())),
-        draw(builds(NetworkIdentifiedObject, connectivityNode=connectivity_node())),
-        draw(builds(NetworkIdentifiedObject, feeder=feeder())),
-        draw(builds(NetworkIdentifiedObject, geographicalRegion=geographical_region())),
-        draw(builds(NetworkIdentifiedObject, subGeographicalRegion=sub_geographical_region())),
-        draw(builds(NetworkIdentifiedObject, substation=substation())),
-        draw(builds(NetworkIdentifiedObject, terminal=terminal())),
+        draw(builds(NetworkIdentifiable, baseVoltage=base_voltage())),
+        draw(builds(NetworkIdentifiable, connectivityNode=connectivity_node())),
+        draw(builds(NetworkIdentifiable, feeder=feeder())),
+        draw(builds(NetworkIdentifiable, geographicalRegion=geographical_region())),
+        draw(builds(NetworkIdentifiable, subGeographicalRegion=sub_geographical_region())),
+        draw(builds(NetworkIdentifiable, substation=substation())),
+        draw(builds(NetworkIdentifiable, terminal=terminal())),
 
         #############################
         # IEC61970 Base Equivalents #
         #############################
 
-        draw(builds(NetworkIdentifiedObject, equivalentBranch=equivalent_branch())),
+        draw(builds(NetworkIdentifiable, equivalentBranch=equivalent_branch())),
 
         #######################################
         # IEC61970 Base Generation Production #
         #######################################
 
-        draw(builds(NetworkIdentifiedObject, batteryUnit=battery_unit())),
-        draw(builds(NetworkIdentifiedObject, photoVoltaicUnit=photo_voltaic_unit())),
-        draw(builds(NetworkIdentifiedObject, powerElectronicsWindUnit=power_electronics_wind_unit())),
+        draw(builds(NetworkIdentifiable, batteryUnit=battery_unit())),
+        draw(builds(NetworkIdentifiable, photoVoltaicUnit=photo_voltaic_unit())),
+        draw(builds(NetworkIdentifiable, powerElectronicsWindUnit=power_electronics_wind_unit())),
 
         ######################
         # IEC61970 Base Meas #
         ######################
 
-        draw(builds(NetworkIdentifiedObject, accumulator=accumulator())),
-        draw(builds(NetworkIdentifiedObject, analog=analog())),
-        draw(builds(NetworkIdentifiedObject, control=control())),
-        draw(builds(NetworkIdentifiedObject, discrete=discrete())),
+        draw(builds(NetworkIdentifiable, accumulator=accumulator())),
+        draw(builds(NetworkIdentifiable, analog=analog())),
+        draw(builds(NetworkIdentifiable, control=control())),
+        draw(builds(NetworkIdentifiable, discrete=discrete())),
 
         ############################
         # IEC61970 Base Protection #
         ############################
 
-        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
+        draw(builds(NetworkIdentifiable, currentRelay=current_relay())),
 
         #######################
         # IEC61970 Base Scada #
         #######################
 
-        draw(builds(NetworkIdentifiedObject, remoteControl=remote_control())),
-        draw(builds(NetworkIdentifiedObject, remoteSource=remote_source())),
+        draw(builds(NetworkIdentifiable, remoteControl=remote_control())),
+        draw(builds(NetworkIdentifiable, remoteSource=remote_source())),
 
         #######################
         # IEC61970 Base Wires #
         #######################
 
-        draw(builds(NetworkIdentifiedObject, acLineSegment=ac_line_segment())),
-        draw(builds(NetworkIdentifiedObject, breaker=breaker())),
-        draw(builds(NetworkIdentifiedObject, busbarSection=busbar_section())),
-        draw(builds(NetworkIdentifiedObject, clamp=clamp())),
-        draw(builds(NetworkIdentifiedObject, cut=cut())),
-        draw(builds(NetworkIdentifiedObject, disconnector=disconnector())),
-        draw(builds(NetworkIdentifiedObject, energyConsumer=energy_consumer())),
-        draw(builds(NetworkIdentifiedObject, energyConsumerPhase=energy_consumer_phase())),
-        draw(builds(NetworkIdentifiedObject, energySource=energy_source())),
-        draw(builds(NetworkIdentifiedObject, energySourcePhase=energy_source_phase())),
-        draw(builds(NetworkIdentifiedObject, fuse=fuse())),
-        draw(builds(NetworkIdentifiedObject, ground=ground())),
-        draw(builds(NetworkIdentifiedObject, groundDisconnector=ground_disconnector())),
-        draw(builds(NetworkIdentifiedObject, groundingImpedance=grounding_impedance())),
-        draw(builds(NetworkIdentifiedObject, jumper=jumper())),
-        draw(builds(NetworkIdentifiedObject, junction=junction())),
-        draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linear_shunt_compensator())),
-        draw(builds(NetworkIdentifiedObject, loadBreakSwitch=load_break_switch())),
-        draw(builds(NetworkIdentifiedObject, perLengthPhaseImpedance=per_length_phase_impedance())),
-        draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=per_length_sequence_impedance())),
-        draw(builds(NetworkIdentifiedObject, powerElectronicsConnection=power_electronics_connection())),
-        draw(builds(NetworkIdentifiedObject, powerElectronicsConnectionPhase=power_electronics_connection_phase())),
-        draw(builds(NetworkIdentifiedObject, powerTransformer=power_transformer())),
-        draw(builds(NetworkIdentifiedObject, powerTransformerEnd=power_transformer_end())),
-        draw(builds(NetworkIdentifiedObject, ratioTapChanger=ratio_tap_changer())),
-        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
-        draw(builds(NetworkIdentifiedObject, recloser=recloser())),
-        draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
-        draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
-        draw(builds(NetworkIdentifiedObject, synchronousMachine=synchronous_machine())),
-        draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
-        draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
+        draw(builds(NetworkIdentifiable, acLineSegment=ac_line_segment())),
+        draw(builds(NetworkIdentifiable, breaker=breaker())),
+        draw(builds(NetworkIdentifiable, busbarSection=busbar_section())),
+        draw(builds(NetworkIdentifiable, clamp=clamp())),
+        draw(builds(NetworkIdentifiable, cut=cut())),
+        draw(builds(NetworkIdentifiable, disconnector=disconnector())),
+        draw(builds(NetworkIdentifiable, energyConsumer=energy_consumer())),
+        draw(builds(NetworkIdentifiable, energyConsumerPhase=energy_consumer_phase())),
+        draw(builds(NetworkIdentifiable, energySource=energy_source())),
+        draw(builds(NetworkIdentifiable, energySourcePhase=energy_source_phase())),
+        draw(builds(NetworkIdentifiable, fuse=fuse())),
+        draw(builds(NetworkIdentifiable, ground=ground())),
+        draw(builds(NetworkIdentifiable, groundDisconnector=ground_disconnector())),
+        draw(builds(NetworkIdentifiable, groundingImpedance=grounding_impedance())),
+        draw(builds(NetworkIdentifiable, jumper=jumper())),
+        draw(builds(NetworkIdentifiable, junction=junction())),
+        draw(builds(NetworkIdentifiable, linearShuntCompensator=linear_shunt_compensator())),
+        draw(builds(NetworkIdentifiable, loadBreakSwitch=load_break_switch())),
+        draw(builds(NetworkIdentifiable, perLengthPhaseImpedance=per_length_phase_impedance())),
+        draw(builds(NetworkIdentifiable, perLengthSequenceImpedance=per_length_sequence_impedance())),
+        draw(builds(NetworkIdentifiable, powerElectronicsConnection=power_electronics_connection())),
+        draw(builds(NetworkIdentifiable, powerElectronicsConnectionPhase=power_electronics_connection_phase())),
+        draw(builds(NetworkIdentifiable, powerTransformer=power_transformer())),
+        draw(builds(NetworkIdentifiable, powerTransformerEnd=power_transformer_end())),
+        draw(builds(NetworkIdentifiable, ratioTapChanger=ratio_tap_changer())),
+        draw(builds(NetworkIdentifiable, reactiveCapabilityCurve=reactive_capability_curve())),
+        draw(builds(NetworkIdentifiable, recloser=recloser())),
+        draw(builds(NetworkIdentifiable, seriesCompensator=series_compensator())),
+        draw(builds(NetworkIdentifiable, staticVarCompensator=static_var_compensator())),
+        draw(builds(NetworkIdentifiable, synchronousMachine=synchronous_machine())),
+        draw(builds(NetworkIdentifiable, tapChangerControl=tap_changer_control())),
+        draw(builds(NetworkIdentifiable, transformerStarImpedance=transformer_star_impedance())),
 
         ###############################
         # IEC61970 InfIEC61970 Feeder #
         ###############################
 
-        draw(builds(NetworkIdentifiedObject, circuit=circuit())),
+        draw(builds(NetworkIdentifiable, circuit=circuit())),
     ]
     return nios
 
@@ -1819,8 +1819,8 @@ def diagram_identified_objects(draw):
         # IEC61970 Base Diagram Layout #
         ################################
 
-        draw(builds(DiagramIdentifiedObject, diagram=diagram())),
-        draw(builds(DiagramIdentifiedObject, diagramObject=diagram_object()))
+        draw(builds(DiagramIdentifiable, diagram=diagram())),
+        draw(builds(DiagramIdentifiable, diagramObject=diagram_object()))
     ]
     return dios
 
@@ -1837,15 +1837,15 @@ def customer_identified_objects(draw):
         # IEC61968 Common #
         ###################
 
-        draw(builds(CustomerIdentifiedObject, organisation=organisation())),
+        draw(builds(CustomerIdentifiable, organisation=organisation())),
 
         ######################
         # IEC61968 Customers #
         ######################
 
-        draw(builds(CustomerIdentifiedObject, customer=customer())),
-        draw(builds(CustomerIdentifiedObject, customerAgreement=customer_agreement())),
-        draw(builds(CustomerIdentifiedObject, pricingStructure=pricing_structure())),
-        draw(builds(CustomerIdentifiedObject, tariff=tariff())),
+        draw(builds(CustomerIdentifiable, customer=customer())),
+        draw(builds(CustomerIdentifiable, customerAgreement=customer_agreement())),
+        draw(builds(CustomerIdentifiable, pricingStructure=pricing_structure())),
+        draw(builds(CustomerIdentifiable, tariff=tariff())),
     ]
     return dios

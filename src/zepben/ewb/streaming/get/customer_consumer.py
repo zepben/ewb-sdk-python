@@ -11,7 +11,7 @@ from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
+from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiablesRequest, GetCustomersForContainerRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
@@ -78,9 +78,9 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for cio in response.identifiedObjects:
+            for cio in response.identifiables:
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
 

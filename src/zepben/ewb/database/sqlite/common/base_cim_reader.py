@@ -3,11 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
+
 __all__ = ["BaseCimReader"]
 
 import logging
 from abc import ABC
-from typing import Callable, Optional, Type
+from typing import Callable, Optional, Type, TYPE_CHECKING
 
 from zepben.ewb.database.sqlite.common.reader_exceptions import DuplicateMRIDException
 from zepben.ewb.database.sqlite.extensions.result_set import ResultSet
@@ -23,6 +25,9 @@ from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationR
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common.base_service import BaseService
+
+if TYPE_CHECKING:
+    from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
 class BaseCimReader(ABC):
@@ -159,23 +164,27 @@ class BaseCimReader(ABC):
 
         return self._add_or_throw_name_type(name_type)
 
-    def _add_or_throw(self, identified_object: IdentifiedObject) -> bool:
-        """
-        Try and add the `identified_object` to the `service`, and throw an `Exception` if unsuccessful.
+    #############
+    # End Model #
+    #############
 
-        :param identified_object: The `IdentifiedObject` to add to the `service`.
+    def _add_or_throw(self, identifiable: Identifiable) -> bool:
+        """
+        Try and add the `identifiable` to the `service`, and throw an `Exception` if unsuccessful.
+
+        :param identifiable: The `identifiable` to add to the `service`.
 
         :return: True in all instances, otherwise it throws.
-        :raises DuplicateMRIDException: If the `IdentifiedObject.mRID` has already been used.
-        :raises UnsupportedIdentifiedObjectException: If the `IdentifiedObject` is not supported by the `service`. This is an indication of an internal coding
+        :raises DuplicateMRIDException: If the `identifiable.mRID` has already been used.
+        :raises UnsupportedIdentifiableException: If the `identifiable` is not supported by the `service`. This is an indication of an internal coding
           issue, rather than a problem with the data being read, and in a correctly configured system will never occur.
         """
-        if self._service.add(identified_object):
+        if self._service.add(identifiable):
             return True
         else:
-            duplicate = self._service.get(identified_object.mrid)
+            duplicate = self._service.get(identifiable.mrid)
             raise DuplicateMRIDException(
-                f"Failed to load {identified_object}. " +
+                f"Failed to load {identifiable}. " +
                 f"Unable to add to service '{self._service.name}': duplicate MRID ({duplicate})"
             )
 

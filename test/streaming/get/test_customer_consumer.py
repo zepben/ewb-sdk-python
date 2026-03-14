@@ -10,8 +10,8 @@ import pytest
 # noinspection PyPackageRequirements
 from hypothesis import given, settings, Phase
 from zepben.protobuf.cc import cc_pb2
-from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
-from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, GetCustomersForContainerResponse
+from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiable
+from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiablesResponse, GetCustomersForContainerResponse
 
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import customer_identified_objects, customer
@@ -46,7 +46,7 @@ class TestCustomerConsumer:
     async def test_get_identified_objects_supported_types(self, cios):
         requested = []
         for cio in cios:
-            mrid = getattr(cio, cio.WhichOneof("identifiedObject"), None).mrid()
+            mrid = getattr(cio, cio.WhichOneof("identifiable"), None).mrid()
             requested.append(mrid)
 
             async def client_test():
@@ -57,12 +57,12 @@ class TestCustomerConsumer:
                     return
                 mor = result.throw_on_error().value
 
-                assert mrid in self.service, f"type: {cio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert mor.objects[mrid] is not None, f"type: {cio.WhichOneof('identifiedObject')} mrid: {mrid}"
-                assert self.service[mrid] is mor.objects[mrid], f"type: {cio.WhichOneof('identifiedObject')} mrid: {mrid}"
+                assert mrid in self.service, f"type: {cio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert mor.objects[mrid] is not None, f"type: {cio.WhichOneof('identifiable')} mrid: {mrid}"
+                assert self.service[mrid] is mor.objects[mrid], f"type: {cio.WhichOneof('identifiable')} mrid: {mrid}"
 
-            response = GetIdentifiedObjectsResponse(identifiedObjects=[cio])
-            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+            response = GetIdentifiablesResponse(identifiables=[cio])
+            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
         assert len(requested) == len(cios) == self.service.len_of()
 
@@ -76,7 +76,7 @@ class TestCustomerConsumer:
             assert mor.objects == {}
             assert mor.failed == {mrid}
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     # noinspection PyUnresolvedReferences
     @pytest.mark.asyncio
@@ -87,11 +87,11 @@ class TestCustomerConsumer:
             assert mor.objects.keys() == {"customer1", "customer2"}
             assert mor.failed == {"customer3"}
 
-        response1 = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=Customer(mrid="customer1").to_pb())])
-        response2 = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=Customer(mrid="customer2").to_pb())])
+        response1 = GetIdentifiablesResponse(identifiables=[CustomerIdentifiable(customer=Customer(mrid="customer1").to_pb())])
+        response2 = GetIdentifiablesResponse(identifiables=[CustomerIdentifiable(customer=Customer(mrid="customer2").to_pb())])
 
         await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getIdentifiedObjects',
+                                        [StreamGrpc('getIdentifiables',
                                                     stream_from_fixed(["customer1", "customer2", "customer3"], [response1, response2]))])
 
     @pytest.mark.asyncio
@@ -106,8 +106,8 @@ class TestCustomerConsumer:
             assert io is not None
             assert self.service[mrid] is io
 
-        response = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=customer_)])
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+        response = GetIdentifiablesResponse(identifiables=[CustomerIdentifiable(customer=customer_)])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], [response]))])
 
     @pytest.mark.asyncio
     async def test_get_identified_object_not_found(self):
@@ -120,7 +120,7 @@ class TestCustomerConsumer:
             assert isinstance(result.thrown, ValueError)
             assert str(result.thrown) == f"No object with mRID {mrid} could be found."
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiables', stream_from_fixed([mrid], []))])
 
     @pytest.mark.asyncio
     @given(customer())
@@ -137,7 +137,7 @@ class TestCustomerConsumer:
             assert io is not None
             assert self.service[mrid] is io
 
-        response = GetCustomersForContainerResponse(identifiedObjects=[CustomerIdentifiedObject(customer=c)])
+        response = GetCustomersForContainerResponse(identifiables=[CustomerIdentifiable(customer=c)])
         await self.mock_server.validate(client_test, [StreamGrpc('getCustomersForContainer', stream_from_fixed([mrid], [response]))])
 
     @pytest.mark.asyncio
@@ -168,21 +168,21 @@ def _assert_contains_mrids(service: BaseService, *mrids):
 
 
 def _response_of(io: IdentifiedObject, response_type):
-    return response_type(identifiedObjects=[_to_customer_identified_object(io)])
+    return response_type(identifiables=[_to_customer_identified_object(io)])
 
 
 # noinspection PyUnresolvedReferences
-def _to_customer_identified_object(obj) -> CustomerIdentifiedObject:
+def _to_customer_identified_object(obj) -> CustomerIdentifiable:
     if isinstance(obj, Customer):
-        cio = CustomerIdentifiedObject(customer=obj.to_pb())
+        cio = CustomerIdentifiable(customer=obj.to_pb())
     elif isinstance(obj, CustomerAgreement):
-        cio = CustomerIdentifiedObject(customerAgreement=obj.to_pb())
+        cio = CustomerIdentifiable(customerAgreement=obj.to_pb())
     elif isinstance(obj, Organisation):
-        cio = CustomerIdentifiedObject(organisation=obj.to_pb())
+        cio = CustomerIdentifiable(organisation=obj.to_pb())
     elif isinstance(obj, PricingStructure):
-        cio = CustomerIdentifiedObject(pricingStructure=obj.to_pb())
+        cio = CustomerIdentifiable(pricingStructure=obj.to_pb())
     elif isinstance(obj, Tariff):
-        cio = CustomerIdentifiedObject(tariff=obj.to_pb())
+        cio = CustomerIdentifiable(tariff=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return cio
