@@ -12,7 +12,7 @@ from collections import OrderedDict
 from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar, overload
 from typing import Type
 
-from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable, TIdentifiable
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.common.meta.metadata_collection import MetadataCollection
 from zepben.ewb.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
@@ -32,7 +32,7 @@ class BaseService(ABC):
         self.name: str = name
         self.metadata: MetadataCollection = metadata or MetadataCollection()
 
-        self._objects_by_type: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
+        self._objects_by_type: Dict[type, Dict[str, Identifiable]] = OrderedDict()
         self._name_types: Dict[str, NameType] = dict()
         self._unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
         """
@@ -54,7 +54,7 @@ class BaseService(ABC):
             ]
         }
         
-        `resolve` in `ReferenceResolver` will be the function used to populate the relationship between the `IdentifiedObject`s either when 
+        `resolve` in `ReferenceResolver` will be the function used to populate the relationship between the `Identifiable`s either when 
         `resolveOrDeferReference() is called if the other side of the reference exists in the service, or otherwise when the second object is added to the service.
         """
 
@@ -78,9 +78,9 @@ class BaseService(ABC):
     def __contains__(self, mrid: str) -> bool: ...
 
     @overload
-    def __contains__(self, obj: IdentifiedObject) -> bool: ...
+    def __contains__(self, obj: Identifiable) -> bool: ...
 
-    def __contains__(self, to_find: str | IdentifiedObject) -> bool:
+    def __contains__(self, to_find: str | Identifiable) -> bool:
         """
         Check if `mrid` has any associated object.
 
@@ -148,17 +148,17 @@ class BaseService(ABC):
             for ur in unresolved_refs:
                 yield ur
 
-    def get(self, mrid: str, type_: Type[TIdentifiedObject] = IdentifiedObject, default=_GET_DEFAULT,
-            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> TIdentifiedObject:
+    def get(self, mrid: str, type_: Type[TIdentifiable] = Identifiable, default=_GET_DEFAULT,
+            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> TIdentifiable:
         """
         Get an object associated with this service.
 
-        `mrid` The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
-        `type_` The `iec61970.base.core.identified_object.IdentifiedObject` subclass type of the object
+        `mrid` The mRID of the `iec61970.base.core.identifiable.Identifiable` to retrieve.
+        `type_` The `iec61970.base.core.identifiable.Identifiable` subclass type of the object
                       with `mrid`. If None, will check all types stored in the service.
         `default` The default to return if `mrid` can't be found in the service.
         `generate_error` Function to call for an error message. Will be passed the mrid and _type (if set).
-        Returns The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`, or default
+        Returns The `iec61970.base.core.identifiable.Identifiable` associated with `mrid`, or default
                  if it is set.
         Raises `KeyError` if `mrid` was not found in the service with `type_`, if no objects of `type_` are
                  stored by the service and default was not set, or if an empty mRID is provided.
@@ -167,7 +167,7 @@ class BaseService(ABC):
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
 
         # This can be written much simpler than below, but we want to avoid throwing any exceptions in this high frequency function
-        if type_ != IdentifiedObject:
+        if type_ != Identifiable:
             objs = self._objects_by_type.get(type_)
             if objs:
                 obj = objs.get(mrid)
@@ -191,26 +191,26 @@ class BaseService(ABC):
         """
         Get an object associated with this service.
         Note that you should use `get` directly where the type of the desired object is known.
-        `mrid` The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
-        Returns The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`.
+        `mrid` The mRID of the `iec61970.base.core.identifiable.Identifiable` to retrieve.
+        Returns The `iec61970.base.core.identifiable.Identifiable` associated with `mrid`.
         Raises `KeyError` if `mrid` was not found in the service with `type`.
         """
         return self.get(mrid)
 
-    def add(self, identified_object: IdentifiedObject) -> bool:
+    def add(self, identifiable: Identifiable) -> bool:
         """
         Associate an object with this service.
-        `identified_object` The object to associate with this service.
+        `identifiable` The object to associate with this service.
         Returns True if the object is associated with this service, False otherwise.
         """
-        mrid = identified_object.mrid
+        mrid = identifiable.mrid
         if not mrid:
             return False
         # TODO: Only allow supported types
 
-        objs = self._objects_by_type.get(identified_object.__class__, dict())
+        objs = self._objects_by_type.get(identifiable.__class__, dict())
         if mrid in objs:
-            return objs[mrid] is identified_object
+            return objs[mrid] is identifiable
 
         # Check other types and make sure this mRID is unique
         for obj_map in self._objects_by_type.values():
@@ -220,16 +220,16 @@ class BaseService(ABC):
         unresolved_refs = self._unresolved_references_to.get(mrid, None)
         if unresolved_refs:
             for ref in unresolved_refs:
-                ref.resolver.resolve(ref.from_ref, identified_object)
+                ref.resolver.resolve(ref.from_ref, identifiable)
                 if ref.reverse_resolver:
-                    ref.reverse_resolver.resolve(identified_object, ref.from_ref)
+                    ref.reverse_resolver.resolve(identifiable, ref.from_ref)
                 self._unresolved_references_from[ref.from_ref.mrid].remove(ref)
                 if not self._unresolved_references_from[ref.from_ref.mrid]:
                     del self._unresolved_references_from[ref.from_ref.mrid]
             del self._unresolved_references_to[mrid]
 
-        objs[mrid] = identified_object
-        self._objects_by_type[identified_object.__class__] = objs
+        objs[mrid] = identifiable
+        self._objects_by_type[identifiable.__class__] = objs
         return True
 
     def resolve_or_defer_reference(self, bound_resolver: BoundReferenceResolver, to_mrid: str) -> bool:
@@ -326,17 +326,17 @@ class BaseService(ABC):
             for ref in self._unresolved_references_to[mrid]:
                 yield ref
 
-    def remove(self, identified_object: IdentifiedObject) -> bool:
+    def remove(self, identifiable: Identifiable) -> bool:
         """
         Disassociate an object from this service.
 
-        `identified_object` THe object to disassociate from the service.
-        Raises `KeyError` if `identified_object` or its type was not present in the service.
+        `identifiable` THe object to disassociate from the service.
+        Raises `KeyError` if `identifiable` or its type was not present in the service.
         """
-        del self._objects_by_type[identified_object.__class__][identified_object.mrid]
+        del self._objects_by_type[identifiable.__class__][identifiable.mrid]
         return True
 
-    def objects(self, obj_type: Optional[Type[TIdentifiedObject]] = None, exc_types: Optional[List[type]] = None) -> Generator[TIdentifiedObject, None, None]:
+    def objects(self, obj_type: Optional[Type[TIdentifiable]] = None, exc_types: Optional[List[type]] = None) -> Generator[TIdentifiable, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
         `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.
