@@ -35,18 +35,8 @@ name_args = ["1", NameType(name="nt1"), Junction(mrid=generate_id())]
 def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
     assert not kwargs, f"found unexpected args: {kwargs}"
 
-    n = Name(name, type, identified_object)
+    n = Name(name=name, type=type, identified_object=identified_object)
 
     assert n.name == name
     assert n.type == type
     assert n.identified_object == identified_object
-
-
-def test_name_constructor_args():
-    n = Name(*name_args)
-
-    assert name_args == [
-        n.name,
-        n.type,
-        n.identified_object
-    ]

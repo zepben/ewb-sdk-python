@@ -952,7 +952,7 @@ def create_identified_object(include_runtime: bool):
         "mrid": uuids(version=4).map(lambda x: str(x)),
         "name": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         "description": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
-        "names": one_of(none(), lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()), max_size=2, unique_by=lambda it: it.name))
+        "names": one_of(none(), lists(builds(Name, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), type=create_name_type()), max_size=2, unique_by=lambda it: it.name))
     }
 
 

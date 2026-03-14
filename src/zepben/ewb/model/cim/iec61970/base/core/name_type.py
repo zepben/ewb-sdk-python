@@ -196,7 +196,7 @@ class NameType(Identifiable):
         if had_name:
             name_obj = identified_object.get_name(self, name)
         else:
-            name_obj = Name(name, self, identified_object)
+            name_obj = Name(name=name, type=self, identified_object=identified_object)
 
         update_index(name_obj)
 

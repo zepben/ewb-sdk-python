@@ -1,7 +1,7 @@
 # Zepben Python SDK
 ## [1.3.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* `NameType` and `Name` now require constructor args to be supplied as kwargs only.
 
 ### New Features
 * None.

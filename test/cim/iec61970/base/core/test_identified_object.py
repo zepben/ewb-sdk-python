@@ -25,13 +25,13 @@ identified_object_kwargs = {
     "mrid": uuids(version=4).map(lambda x: str(x)),
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()),
+    "names": lists(builds(Name, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), type=create_name_type()),
                    max_size=2,
                    unique_by=lambda it: it.name)
 }
 
 # noinspection PyArgumentList
-identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType(name="nt1"), Junction(mrid=generate_id()))]]
+identified_object_args = ["test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
