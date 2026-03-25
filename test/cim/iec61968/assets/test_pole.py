@@ -54,7 +54,7 @@ def test_pole_constructor_args():
 def test_streetlights_collection():
     validate_unordered(
         Pole,
-        lambda mrid: Streetlight(mrid),
+        Streetlight,
         Pole.streetlights,
         Pole.num_streetlights,
         Pole.get_streetlight,

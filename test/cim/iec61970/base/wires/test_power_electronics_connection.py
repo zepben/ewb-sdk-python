@@ -285,7 +285,7 @@ def test_power_electronics_connection_constructor_args():
 def test_power_electronics_units_collection():
     validate_unordered(
         PowerElectronicsConnection,
-        lambda mrid: PowerElectronicsUnit(mrid),
+        PowerElectronicsUnit,
         PowerElectronicsConnection.units,
         PowerElectronicsConnection.num_units,
         PowerElectronicsConnection.get_unit,
@@ -298,7 +298,7 @@ def test_power_electronics_units_collection():
 def test_power_electronics_connection_phases_collection():
     validate_unordered(
         PowerElectronicsConnection,
-        lambda mrid: PowerElectronicsConnectionPhase(mrid),
+        PowerElectronicsConnectionPhase,
         PowerElectronicsConnection.phases,
         PowerElectronicsConnection.num_phases,
         PowerElectronicsConnection.get_phase,

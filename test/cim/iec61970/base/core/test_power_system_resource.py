@@ -57,7 +57,7 @@ def verify_power_system_resource_constructor_args(psr: PowerSystemResource):
 def test_assets_collection():
     validate_unordered(
         PowerSystemResource,
-        lambda mrid: Asset(mrid),
+        Asset,
         PowerSystemResource.assets,
         PowerSystemResource.num_assets,
         PowerSystemResource.get_asset,

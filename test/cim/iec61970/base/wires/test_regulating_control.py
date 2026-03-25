@@ -119,7 +119,7 @@ def test_regulating_control_regulating_conducting_equipment():
     # noinspection PyArgumentList
     validate_unordered(
         RegulatingControl,
-        lambda mrid: RegulatingCondEq(mrid),
+        RegulatingCondEq,
         RegulatingControl.regulating_conducting_equipment,
         RegulatingControl.num_regulating_cond_eq,
         RegulatingControl.get_regulating_cond_eq,

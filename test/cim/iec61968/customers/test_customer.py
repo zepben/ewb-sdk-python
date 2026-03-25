@@ -63,7 +63,7 @@ def test_customer_constructor_args():
 def test_customer_agreements_collection():
     validate_unordered(
         Customer,
-        lambda mrid: CustomerAgreement(mrid),
+        CustomerAgreement,
         Customer.agreements,
         Customer.num_agreements,
         Customer.get_agreement,

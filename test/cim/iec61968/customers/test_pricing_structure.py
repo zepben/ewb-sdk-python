@@ -57,7 +57,7 @@ def test_pricing_structure_constructor_args():
 def test_tariffs_collection():
     validate_unordered(
         PricingStructure,
-        lambda mrid: Tariff(mrid),
+        Tariff,
         PricingStructure.tariffs,
         PricingStructure.num_tariffs,
         PricingStructure.get_tariff,

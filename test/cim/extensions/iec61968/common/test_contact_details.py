@@ -111,9 +111,11 @@ def test_phone_number_collection():
                 return tn
         raise KeyError(number)
 
+    # ContactDetails isn't an IdentifiedObject, but it has an `id` as its first arg, so it works (just with lots of type errors).
+    # noinspection PyTypeChecker
     validate_unordered_other(
         ContactDetails,
-        lambda it: TelephoneNumber(local_number=it),
+        lambda it: TelephoneNumber(local_number=str(it)),
         ContactDetails.phone_numbers,
         ContactDetails.num_phone_numbers,
         get_phone_number,
@@ -131,6 +133,8 @@ def test_electronic_address_collection():
                 return tn
         raise KeyError(number)
 
+    # ContactDetails isn't an IdentifiedObject, but it has an `id` as its first arg, so it works (just with lots of type errors).
+    # noinspection PyTypeChecker
     validate_unordered_other(
         ContactDetails,
         lambda it: ElectronicAddress(email1=it),

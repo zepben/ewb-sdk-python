@@ -87,7 +87,7 @@ def test_energy_consumer_constructor_args():
 def test_phases_collection():
     validate_unordered(
         EnergyConsumer,
-        lambda mrid: EnergyConsumerPhase(mrid),
+        EnergyConsumerPhase,
         EnergyConsumer.phases,
         EnergyConsumer.num_phases,
         EnergyConsumer.get_phase,

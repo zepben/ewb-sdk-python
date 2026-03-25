@@ -206,7 +206,7 @@ def test_energy_source_constructor_args():
 def test_phases_collection():
     validate_unordered(
         EnergySource,
-        lambda mrid: EnergySourcePhase(mrid),
+        EnergySourcePhase,
         EnergySource.phases,
         EnergySource.num_phases,
         EnergySource.get_phase,

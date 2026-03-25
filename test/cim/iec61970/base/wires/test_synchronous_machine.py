@@ -183,7 +183,7 @@ def verify_synchronous_machine_constructor_args():
 def test_curves_collection():
     validate_unordered(
         SynchronousMachine,
-        lambda mrid: ReactiveCapabilityCurve(mrid),
+        ReactiveCapabilityCurve,
         SynchronousMachine.curves,
         SynchronousMachine.num_curves,
         SynchronousMachine.get_curve,

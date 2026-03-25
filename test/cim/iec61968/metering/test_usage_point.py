@@ -98,7 +98,7 @@ def test_usage_point_constructor_args():
 def test_equipment_collection():
     validate_unordered(
         UsagePoint,
-        lambda mrid: Equipment(mrid),
+        Equipment,
         UsagePoint.equipment,
         UsagePoint.num_equipment,
         UsagePoint.get_equipment,
@@ -111,7 +111,7 @@ def test_equipment_collection():
 def test_end_devices_collection():
     validate_unordered(
         UsagePoint,
-        lambda mrid: EndDevice(mrid),
+        EndDevice,
         UsagePoint.end_devices,
         UsagePoint.num_end_devices,
         UsagePoint.get_end_device,
@@ -123,7 +123,7 @@ def test_end_devices_collection():
 def test_contacts_collection():
     validate_unordered_other(
         UsagePoint,
-        lambda _id: ContactDetails(_id),
+        lambda _id: ContactDetails(mrid=str(_id)),
         UsagePoint.contacts,
         UsagePoint.num_contacts,
         UsagePoint.get_contact,

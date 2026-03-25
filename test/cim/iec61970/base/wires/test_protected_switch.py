@@ -46,7 +46,7 @@ def verify_protected_switch_constructor_args(ps: ProtectedSwitch):
 def test_relay_function_collection():
     validate_unordered(
         ProtectedSwitch,
-        lambda mrid: ProtectionRelayFunction(mrid),
+        ProtectionRelayFunction,
         ProtectedSwitch.relay_functions,
         ProtectedSwitch.num_relay_functions,
         ProtectedSwitch.get_relay_function,

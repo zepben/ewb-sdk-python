@@ -66,7 +66,7 @@ def test_battery_unit_constructor_args():
 def test_battery_control_collection():
     validate_unordered(
         BatteryUnit,
-        lambda mrid: BatteryControl(mrid),
+        BatteryControl,
         BatteryUnit.controls,
         BatteryUnit.num_battery_controls,
         BatteryUnit.get_control,

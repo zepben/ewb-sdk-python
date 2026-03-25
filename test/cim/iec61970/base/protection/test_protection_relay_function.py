@@ -108,7 +108,7 @@ def verify_protection_relay_function_constructor_args(prf: ProtectionRelayFuncti
 def test_sensors_collection():
     validate_unordered(
         ProtectionRelayFunction,
-        lambda mrid: Sensor(mrid),
+        Sensor,
         ProtectionRelayFunction.sensors,
         ProtectionRelayFunction.num_sensors,
         ProtectionRelayFunction.get_sensor,
@@ -121,7 +121,7 @@ def test_sensors_collection():
 def test_protected_switches_collection():
     validate_unordered(
         ProtectionRelayFunction,
-        lambda mrid: ProtectedSwitch(mrid),
+        ProtectedSwitch,
         ProtectionRelayFunction.protected_switches,
         ProtectionRelayFunction.num_protected_switches,
         ProtectionRelayFunction.get_protected_switch,
@@ -134,7 +134,7 @@ def test_protected_switches_collection():
 def test_scheme_collection():
     validate_unordered(
         ProtectionRelayFunction,
-        lambda mrid: ProtectionRelayScheme(mrid),
+        ProtectionRelayScheme,
         ProtectionRelayFunction.schemes,
         ProtectionRelayFunction.num_schemes,
         ProtectionRelayFunction.get_scheme,

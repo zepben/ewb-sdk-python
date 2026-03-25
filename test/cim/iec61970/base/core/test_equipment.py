@@ -78,7 +78,7 @@ def verify_equipment_constructor_args(eq: Equipment):
 def test_usage_points_collection():
     validate_unordered(
         Equipment,
-        lambda mrid: UsagePoint(mrid),
+        UsagePoint,
         Equipment.usage_points,
         Equipment.num_usage_points,
         Equipment.get_usage_point,
@@ -91,7 +91,7 @@ def test_usage_points_collection():
 def test_equipment_containers_collection():
     validate_unordered(
         Equipment,
-        lambda mrid: EquipmentContainer(mrid),
+        EquipmentContainer,
         Equipment.containers,
         Equipment.num_containers,
         Equipment.get_container,
@@ -104,7 +104,7 @@ def test_equipment_containers_collection():
 def test_operational_restrictions_collection():
     validate_unordered(
         Equipment,
-        lambda mrid: OperationalRestriction(mrid),
+        OperationalRestriction,
         Equipment.operational_restrictions,
         Equipment.num_operational_restrictions,
         Equipment.get_operational_restriction,
@@ -117,7 +117,7 @@ def test_operational_restrictions_collection():
 def test_current_containers_collection():
     validate_unordered(
         Equipment,
-        lambda mrid: EquipmentContainer(mrid),
+        EquipmentContainer,
         Equipment.current_containers,
         Equipment.num_current_containers,
         Equipment.get_current_container,

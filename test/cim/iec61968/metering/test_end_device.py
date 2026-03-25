@@ -51,7 +51,7 @@ def verify_end_device_constructor_args(ed: EndDevice):
 def test_usage_points_collection():
     validate_unordered(
         EndDevice,
-        lambda mrid: UsagePoint(mrid),
+        UsagePoint,
         EndDevice.usage_points,
         EndDevice.num_usage_points,
         EndDevice.get_usage_point,
@@ -64,7 +64,7 @@ def test_usage_points_collection():
 def test_end_device_function_collection():
     validate_unordered(
         EndDevice,
-        lambda mrid: EndDeviceFunction(mrid),
+        EndDeviceFunction,
         EndDevice.functions,
         EndDevice.num_functions,
         EndDevice.get_function,

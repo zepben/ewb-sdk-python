@@ -6,7 +6,6 @@ import re
 from collections import Counter
 from enum import Enum
 from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any
-from unittest import case
 
 import pytest
 
@@ -37,44 +36,44 @@ class DuplicateBehaviour(Enum):
 
 
 def validate_unordered(
-    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
-    create_other: Callable[[str], UIdentifiedObject],
-    get_all: property,  # Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]]
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_id: Callable[..., UIdentifiedObject],  # Callable[[TIdentifiedObject, str], UIdentifiedObject]
-    add: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
+    create_it: Type[IdentifiedObject] | Callable[[str], TIdentifiedObject],
+    create_other: Type[UIdentifiedObject] | Callable[[str], UIdentifiedObject],
+    get_all: Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]] | Callable[[], Generator[UIdentifiedObject, None, None]] | property,
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_id: Callable[[TIdentifiedObject, str], UIdentifiedObject] | Callable[[str], UIdentifiedObject],
+    add: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
 ):
     """
     Validate the internal collection for an associated :class:`IdentifiedObject` that has no order significance.
 
-    NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-          class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-          signatures are stored in comments against the arguments.
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     _validate_unordered(create_it, create_other, get_all.fget, num, get_by_id, add, remove, clear)
 
 
 def validate_unordered_other(
-    create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
+    create_it: Union[Callable[[str], TIdentifiedObject], Type[TIdentifiedObject]],
     create_other: Callable[[int], UOther],
-    get_all: property,  # Callable[[TIdentifiedObject], Generator[UOther, None, None]]
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_key: Callable[..., UOther],  # Callable[[TIdentifiedObject, K], UOther]
-    add: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
-    get_key: Callable[..., K],  # Callable[[UOther], K]
+    get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]] | Callable[[], Generator[UOther, None, None]] | property,
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_key: Callable[[TIdentifiedObject, K], UOther] | Callable[[K], UOther],
+    add: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
+    get_key: Callable[[UOther], K] | Callable[[], K],
     key_to_str: Callable[[K], str] = str,
     duplicate_behaviour: Type[DuplicateBehaviour] = DuplicateBehaviour.THROWS,
 ):
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
 
-    NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-          class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-          signatures are stored in comments against the arguments.
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     _validate_unordered_other(create_it, create_other, get_all.fget, num, get_by_key, add, remove, clear, get_key, key_to_str, duplicate_behaviour)
 
@@ -82,14 +81,14 @@ def validate_unordered_other(
 def validate_ordered(
     create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str, int], UIdentifiedObject],
-    get_all: property,  # Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]]
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_id: Callable[..., UIdentifiedObject],  # Callable[[TIdentifiedObject, str], UIdentifiedObject]
-    get_by_index: Callable[..., UIdentifiedObject],  # Callable[[TIdentifiedObject, int], UIdentifiedObject]
-    add: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
-    index_of: Callable[..., int],  # Callable[[UIdentifiedObject], int]
+    get_all: Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]] | Callable[[], Generator[UIdentifiedObject, None, None]] | property,
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_id: Callable[[TIdentifiedObject, str], UIdentifiedObject] | Callable[[str], UIdentifiedObject],
+    get_by_index: Callable[[TIdentifiedObject, int], UIdentifiedObject] | Callable[[int], UIdentifiedObject],
+    add: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
+    index_of: Callable[[UIdentifiedObject], int] | Callable[[], int]
 ):
     """
     Validate the internal collection for an associated :class:`IdentifiedObject` that has order significance, baked into the object itself, not just
@@ -97,9 +96,9 @@ def validate_ordered(
 
     NOTE: Baked in index is expected to be 1-based, not 0-based.
 
-    NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-          class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-          signatures are stored in comments against the arguments.
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     _validate_ordered(create_it, create_other, get_all.fget, num, get_by_id, get_by_index, add, remove, clear, index_of)
 
@@ -107,24 +106,24 @@ def validate_ordered(
 def validate_ordered_other(
     create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
-    get_all: property,  # Callable[[TIdentifiedObject], Generator[UOther, None, None]]
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_index: Callable[..., UOther],  # Callable[[TIdentifiedObject, int], UOther]
-    for_each: Callable[..., None],  # Callable[[TIdentifiedObject, Callable[[int, UOther], None]], None]
-    add: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    add_with_index: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther, int], TIdentifiedObject]
-    remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    remove_at_index: Callable[..., UOther],  # Callable[[TIdentifiedObject, int], UOther]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
+    get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]] | Callable[[], Generator[UOther, None, None]] | property,
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_index: Callable[[TIdentifiedObject, int], UOther] | Callable[[int], UOther],
+    for_each: Callable[[TIdentifiedObject, Callable[[int, UOther], None]], None] | Callable[[Callable[[int, UOther], None]], None],
+    add: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    add_with_index: Callable[[TIdentifiedObject, UOther, int], TIdentifiedObject] | Callable[[UOther, int], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    remove_at_index: Callable[[TIdentifiedObject, int], UOther] | Callable[[int], UOther],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
 ):
     """
     Validate the internal collection for an associated object that is not an :class:`IdentifiedObject` that has order significance.
 
     NOTE: Positional index is expected to be 0-based, not 1-based.
 
-    NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-          class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-          signatures are stored in comments against the arguments.
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     _validate_ordered_other(create_it, create_other, get_all.fget, num, get_by_index, for_each, add, add_with_index, remove, remove_at_index, clear)
 
@@ -142,9 +141,9 @@ def _validate_unordered(
     """
     Validate the internal collection for an associated :class:`IdentifiedObject` that has no order significance.
 
-    NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-          class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-          signatures are stored in comments against the arguments.
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     it = create_it("test")
     other1 = create_other("1")
@@ -187,26 +186,25 @@ def _validate_unordered(
     )
 
 
-#
-# NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-#       class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-#       signatures are stored in comments against the arguments.
-#
 def _validate_unordered_other(
     create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[int], UOther],
     get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]],
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_key: Callable[..., UOther],  # Callable[[TIdentifiedObject, K], UOther]
-    add: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
-    get_key: Callable[..., K],  # Callable[[UOther], K]
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_key: Callable[[TIdentifiedObject, K], UOther] | Callable[[K], UOther],
+    add: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
+    get_key: Callable[[UOther], K] | Callable[[], K],
     key_to_str: Callable[[K], str] = str,
     duplicate_behaviour: Type[DuplicateBehaviour] = DuplicateBehaviour.THROWS
 ):
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
+
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
     """
     it = create_it("test")
     other1 = create_other(1)
@@ -258,26 +256,25 @@ def _validate_unordered_other(
     )
 
 
-#
-# NOTE: The callables using `...` do so to work around bugs in the type checking of both the IDE and mypy, where passing a reference to the
-#       class method doesn't recognise it needs the `self` parameter, and therefore marks the parameter as having the incorrect type. Actual
-#       signatures are stored in comments against the arguments.
-#
 def _validate_ordered(
     create_it: Union[Callable[[str], TIdentifiedObject], Type[IdentifiedObject]],
     create_other: Callable[[str, int], UIdentifiedObject],
     get_all: Callable[[TIdentifiedObject], Generator[UIdentifiedObject, None, None]],
-    num: Callable[..., int],  # Callable[[TIdentifiedObject], int]
-    get_by_id: Callable[[..., str], UIdentifiedObject],  # Callable[[TIdentifiedObject, str], UIdentifiedObject]
-    get_by_index: Callable[[..., int], UIdentifiedObject],  # Callable[[TIdentifiedObject, int], UIdentifiedObject]
-    add: Callable[[..., UIdentifiedObject], TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    remove: Callable[[..., UIdentifiedObject], TIdentifiedObject],  # Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject]
-    clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
-    index_of: Callable[..., int],  # Callable[[UIdentifiedObject], int]
+    num: Callable[[TIdentifiedObject], int] | Callable[[], int],
+    get_by_id: Callable[[TIdentifiedObject, str], UIdentifiedObject] | Callable[[str], UIdentifiedObject],
+    get_by_index: Callable[[TIdentifiedObject, int], UIdentifiedObject] | Callable[[int], UIdentifiedObject],
+    add: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    remove: Callable[[TIdentifiedObject, UIdentifiedObject], TIdentifiedObject] | Callable[[UIdentifiedObject], TIdentifiedObject],
+    clear: Callable[[TIdentifiedObject], TIdentifiedObject] | Callable[[], TIdentifiedObject],
+    index_of: Callable[[UIdentifiedObject], int] | Callable[[], int],
 ):
     """
     Validate the internal collection for an associated :class:`IdentifiedObject` that has order significance, baked into the object itself, not just
     the placement in the collection.
+
+    NOTE: The callables below use unions with a second callable to work around bugs in the type checking of both the IDE and mypy, where passing a reference to
+          the class method doesn't recognise it needs the `self` parameter, and would otherwise mark the parameter as having the incorrect type. If we move to a
+          newer version where this is resolved, the second callable should be removed.
 
     NOTE: Baked in index is expected to be 1-based, not 0-based.
     """
