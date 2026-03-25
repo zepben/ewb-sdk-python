@@ -13,7 +13,10 @@ from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServic
 
 
 class TestDiagramServiceComparator(TestBaseServiceComparator):
-    validator = ServiceComparatorValidator(lambda: DiagramService(), lambda _: DiagramServiceComparator())
+    validator = ServiceComparatorValidator[DiagramService, DiagramServiceComparator](
+        create_service=lambda: DiagramService(),
+        create_comparator=lambda _: DiagramServiceComparator()
+    )
 
     def test_compare_diagram_attributes(self):
         self._compare_identified_object(Diagram)
@@ -21,7 +24,8 @@ class TestDiagramServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Diagram.diagram_style, Diagram, lambda _: DiagramStyle.SCHEMATIC, lambda _: DiagramStyle.GEOGRAPHIC)
         self.validator.validate_property(Diagram.orientation_kind, Diagram, lambda _: OrientationKind.POSITIVE, lambda _: OrientationKind.NEGATIVE)
         self.validator.validate_collection(
-            Diagram.diagram_objects, Diagram.add_diagram_object,
+            Diagram.diagram_objects,
+            Diagram.add_diagram_object,
             Diagram,
             lambda it: DiagramObject(mrid="1", diagram=it),
             lambda it: DiagramObject(mrid="2", diagram=it))

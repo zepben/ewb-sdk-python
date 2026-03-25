@@ -71,7 +71,10 @@ from zepben.ewb.services.network.network_service_comparator import NetworkServic
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
-    validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
+    validator = ServiceComparatorValidator[NetworkService, NetworkServiceComparator](
+        create_service=lambda: NetworkService(),
+        create_comparator=lambda options: NetworkServiceComparator(options)
+    )
 
     ##################################
     # Extensions IEC61968 Asset Info #

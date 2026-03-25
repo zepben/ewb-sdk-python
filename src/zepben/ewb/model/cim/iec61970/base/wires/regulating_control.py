@@ -46,13 +46,13 @@ class RegulatingControl(PowerSystemResource):
     discrete: Optional[bool] = None
     """The regulation is performed in a discrete mode. This applies to equipment with discrete controls, e.g. tap changers and shunt compensators."""
 
-    mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN
+    mode: RegulatingControlModeKind = RegulatingControlModeKind.UNKNOWN
     """
     The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the 
     units from a schedule.
     """
 
-    monitored_phase: [PhaseCode] = PhaseCode.NONE
+    monitored_phase: PhaseCode = PhaseCode.NONE
     """Phase voltage controlling this regulator, measured at regulator location."""
 
     target_deadband: Optional[float] = None

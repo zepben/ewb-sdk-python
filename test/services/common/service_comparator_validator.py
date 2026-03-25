@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from types import MemberDescriptorType
-from typing import Optional, Any, Callable, TypeVar, Union, Type, Set
+from typing import Optional, Any, Callable, TypeVar, Union, Type, Set, Generic, TypeAlias
 
 from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
                         Difference, ReferenceDifference, ValueDifference, IndexedDifference)
@@ -15,14 +15,18 @@ C = TypeVar("C")
 R = TypeVar("R")
 Property = Union[MemberDescriptorType, property]
 
+TAddr: TypeAlias = Callable[[TIdentifiedObject, R], TIdentifiedObject] | Callable[[R], TIdentifiedObject]
 
 #
-# NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
-#       Ideally they should have `add: Callable[[TIdentifiedObject, R], Any]`.
+# NOTE: Should be using the following with TCreator[TIdentifiedObject] in the functions, but Python
+#       3.10 and PyCharm don't like passing TCreator[TIdentifiedObject] to bind correctly, so until
+#       we move on to a new version of Python, it looks like we are stuck repeating ourselves.
+#
+#       TCreator: TypeAlias = Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject]
 #
 
 
-class ServiceComparatorValidator(object):
+class ServiceComparatorValidator(Generic[TService, C]):
     create_service: Callable[[], TService]
     create_comparator: Callable[[NetworkServiceComparatorOptions], C]
 
@@ -64,8 +68,8 @@ class ServiceComparatorValidator(object):
 
     def validate_compare(
         self,
-        source: Any,
-        target: Any,
+        source: R,
+        target: R,
         expect_modification: Optional[ObjectDifference] = None,
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
@@ -86,8 +90,8 @@ class ServiceComparatorValidator(object):
 
     def validate_property(
         self,
-        prop: Any,  # should be Property but it types are not interpreted correctly so it gives a lot of errors.
-        creator: Type[TIdentifiedObject],
+        prop: Property | R,  # Isn't actually R, but that is what the type checker thinks when passing class member references.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         create_value: Callable[[TIdentifiedObject], R],
         create_other_value: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -112,8 +116,8 @@ class ServiceComparatorValidator(object):
 
     def validate_val_property(
         self,
-        prop: Any,  # should be Property but it types are not interpreted correctly so it gives a lot of errors.
-        creator: Any,  # should be Optional[Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject]] but that doesn't work,
+        prop: Property,
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         change_state: Callable[[TIdentifiedObject, R], None],
         other_change_state: Callable[[TIdentifiedObject, R], None],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -138,8 +142,8 @@ class ServiceComparatorValidator(object):
     def validate_collection(
         self,
         prop: Property,
-        add_to_collection: Callable[..., Any],
-        creator: Type[TIdentifiedObject],
+        add_to_collection: TAddr[TIdentifiedObject, R],
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -179,16 +183,16 @@ class ServiceComparatorValidator(object):
 
     def validate_name_collection(
         self,
-        creator: [[str], TIdentifiedObject],
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None
     ):
-        source_empty: IdentifiedObject = creator("mRID")
-        target_empty: IdentifiedObject = creator("mRID")
-        in_source: IdentifiedObject = creator("mRID")
-        in_target: IdentifiedObject = creator("mRID")
-        in_target_difference: IdentifiedObject = creator("mRID")
+        source_empty = creator("mRID")
+        target_empty = creator("mRID")
+        in_source = creator("mRID")
+        in_target = creator("mRID")
+        in_target_difference = creator("mRID")
 
         # noinspection PyArgumentList
         name_type = NameType("type")
@@ -221,8 +225,8 @@ class ServiceComparatorValidator(object):
     def validate_indexed_collection(
         self,
         prop: Property,
-        add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        add_to_collection: TAddr,
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
@@ -242,7 +246,7 @@ class ServiceComparatorValidator(object):
         self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
         self.validate_compare(in_source, in_target, options=options, options_stop_compare=options_stop_compare)
 
-        def get_item(obj) -> Optional[Any]:
+        def get_item(obj) -> Optional[R]:
             return next(_get_prop(obj, prop), None)
 
         diff = ObjectDifference(in_source, target_empty, {
@@ -272,15 +276,15 @@ class ServiceComparatorValidator(object):
     def validate_unordered_collection(
         self,
         prop: Property,
-        add_to_collection: Callable[..., Any],
-        creator: [[str], TIdentifiedObject],
+        add_to_collection: TAddr,
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
         create_item_1: Callable[[K], R],
         create_item_2: Callable[[K], R],
         create_diff_item_1: Callable[[K], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None
-    ):
+    ) -> TIdentifiedObject:
         source_empty = creator("mRID")
         target_empty = creator("mRID")
         self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
@@ -345,6 +349,9 @@ class ServiceComparatorValidator(object):
             ])
         })
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
+
+        # This is being returned to bind the TIdentifiedObject correctly.
+        return source_empty
 
     @staticmethod
     def _get_value_or_reference_difference(source: Optional[R], target: Optional[R]) -> Difference:
