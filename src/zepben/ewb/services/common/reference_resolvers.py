@@ -190,6 +190,9 @@ class UnresolvedReference(object):
     def __hash__(self):
         return hash((type(self), self.from_ref.mrid, self.to_mrid, self.resolver))
 
+    def __getitem__(self, item):
+        return (self.from_ref, self.to_mrid, self.resolver, self.reverse_resolver)[item]
+
 
 def _resolve_ce_term(ce, t):
     t.conducting_equipment = ce
