@@ -61,7 +61,7 @@ class TestSetDirection:
             .to_acls() \
             .network
 
-        await SetDirection().run_terminal(self._get_t(n, "c0", 2))
+        await SetDirection().run(self._get_t(n, "c0", 2))
         await log_directions(n["c0"])
 
         self._check_expected_direction(self._get_t(n, "c0", 1), NONE)
@@ -267,7 +267,7 @@ class TestSetDirection:
             .network
 
         sd = SetDirection()
-        await sd.run_terminal(self._get_t(n, "j0", 1))
+        await sd.run(self._get_t(n, "j0", 1))
         #print(sd.nodes['j0-t1'])
         await log_directions(n["j0"])
 
@@ -340,7 +340,7 @@ class TestSetDirection:
              .connect("c10", "j2", 1, 2)
              ).network
 
-        await SetDirection().run_terminal(self._get_t(n, "j0", 1))
+        await SetDirection().run(self._get_t(n, "j0", 1))
         await log_directions(n["j0"])
 
         # To avoid reprocessing all BOTH loops in larger networks we do not process anything with a direction already set. This means this test will apply
@@ -385,7 +385,7 @@ class TestSetDirection:
             .to_acls(nominal_phases=PhaseCode.A) \
             .network
 
-        await SetDirection().run_terminal(self._get_t(n, "j0", 1))
+        await SetDirection().run(self._get_t(n, "j0", 1))
         await log_directions(n["j0"])
 
         self._check_expected_direction(self._get_t(n, "j0", 1), DOWNSTREAM)
@@ -406,7 +406,7 @@ class TestSetDirection:
             .to_acls(nominal_phases=PhaseCode.NONE) \
             .network
 
-        await SetDirection().run_terminal(self._get_t(n, "j0", 1))
+        await SetDirection().run(self._get_t(n, "j0", 1))
         await log_directions(n["j0"])
 
         self._check_expected_direction(self._get_t(n, "j0", 1), DOWNSTREAM)

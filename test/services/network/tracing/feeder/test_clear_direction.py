@@ -252,7 +252,7 @@ class TestClearDirection:
 
         for term in head_terminals:
             if not self.state_operators.is_open(term.conducting_equipment):
-                await Tracing.set_direction().run_terminal(term, self.state_operators)
+                await Tracing.set_direction().run(term, self.state_operators)
 
         _check_expected_direction(_get_t(n, 'b0', 1), NONE)
         _check_expected_direction(_get_t(n, 'b0', 2), DOWNSTREAM)

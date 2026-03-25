@@ -677,8 +677,8 @@ class TestNetworkBuilder:
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
-                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
+                    await Tracing.set_direction(debug_logger=debug_logger).run(terminal, network_state_operators=NetworkStateOperators.NORMAL)
+                    await Tracing.set_direction(debug_logger=debug_logger).run(terminal, network_state_operators=NetworkStateOperators.CURRENT)
 
         await Tracing.assign_equipment_to_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
         await Tracing.assign_equipment_to_lv_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)

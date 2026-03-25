@@ -1,13 +1,14 @@
 # Zepben Python SDK
 ## [1.3.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Updated `SetDirection` to correctly use the `@singledispatchmethod` registration `run` instead of the old `run_terminal`. Simply replace your `run_terminal`
+  call with `run`.
 
 ### New Features
 * None.
 
 ### Enhancements
-* None.
+* `SetDirection.run` now supports `ConductingEquipment`.
 
 ### Fixes
 * None.
@@ -23,7 +24,8 @@
   * `MeasurementValue.time_stamp`
   * `RelayInfo.curve_setting`
   * `RelayInfo.reclose_fast`
-* Removed `TracedPhases`. `Terminal.normalPhases` and `Terminal.currentPhases` should be used instead of `Terminal.tracedPhases` going forward. (missed in 0.48.0)
+* Removed `TracedPhases`. `Terminal.normalPhases` and `Terminal.currentPhases` should be used instead of `Terminal.tracedPhases` going forward. (missed in
+  0.48.0)
 
 ### New Features
 * Added the following new CIM classes:
@@ -58,7 +60,8 @@
 * Added `AcLineSegment.wire_info_for_phase(phase: SinglePhaseKind)` to retrieve the `WireInfo` associated with a given phase of a conductor.
 
 ### Enhancements
-* * `BaseService.contains` has been been expanded to support objects in addition to mRIDs.
+*
+  * `BaseService.contains` has been been expanded to support objects in addition to mRIDs.
 * `Agreement` now supports `validity_interval`, the date and time interval the agreement is valid (from going into effect to termination).
 * `StreetDetail` now supports extension `building_number`, the number of the building.
 * `TownDetail` now supports `country`, the name of the country.
@@ -66,7 +69,7 @@
 
 ### Fixes
 * Reordered the feeder equipment and direction assignment on database read to prevent parallel feeders from tracing back into the zone substation.
-* `NetworkDatabaseTables`, `CustomerDatabaseTables`, `DiagramDatabaseTables` and `BaseEntryWriter` can now be imported from `zepben.ewb` and are officially 
+* `NetworkDatabaseTables`, `CustomerDatabaseTables`, `DiagramDatabaseTables` and `BaseEntryWriter` can now be imported from `zepben.ewb` and are officially
   regarded as public.
 
 ### Notes
