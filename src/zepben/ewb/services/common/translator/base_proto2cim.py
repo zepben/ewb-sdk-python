@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim", "organisation_role_to_cim",
-           "BaseProtoToCim", "add_to_network_or_none", "bind_to_cim"]
+           "BaseProtoToCim", "add_to_network_or_none", "bind_to_cim", "get_nullable"]
 
 import functools
 import inspect
