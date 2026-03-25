@@ -317,7 +317,7 @@ def normal_energized_lv_feeders(other: Feeder | LvSubstation) -> BoundReferenceR
         return BoundReferenceResolver(other, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
     elif isinstance(other, LvSubstation):
         # noinspection PyArgumentList
-        return BoundReferenceResolver(other, lvs_to_nef_resolver, lvf_to_nelvs_resolver)
+        return BoundReferenceResolver(other, lvs_to_nelvf_resolver, lvf_to_nelvs_resolver)
     else:
         raise TypeError(f'unsupported type {type(other)}')
 
