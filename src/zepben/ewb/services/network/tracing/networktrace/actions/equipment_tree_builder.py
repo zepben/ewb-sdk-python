@@ -37,14 +37,10 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     def __init__(self, calculate_leaves: bool = False):
         super().__init__(key=str(uuid.uuid4()))
 
-        self._roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
+        self.roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
         self._leaves: set[EquipmentTreeNode] = set()
 
         self._calculate_leaves = calculate_leaves
-
-    @property
-    def roots(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
-        return (r for r in self._roots.values())
 
     def recurse_nodes(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
         """
@@ -55,7 +51,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             for child in node.children:
                 yield from recurse(child)
 
-        for root in self._roots.values():
+        for root in self.roots.values():
             yield from recurse(root)
 
     @property
@@ -69,10 +65,10 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
         return set(self._leaves)
 
     def compute_initial_value(self, item: NetworkTraceStep[Any]) -> EquipmentTreeNode:
-        node = self._roots.get(item.path.to_equipment)
+        node = self.roots.get(item.path.to_equipment)
         if node is None:
             node = TreeNode(item.path.to_equipment, None)
-            self._roots[item.path.to_equipment] = node
+            self.roots[item.path.to_equipment] = node
         return node
 
     def compute_next_value(
@@ -101,4 +97,4 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             self._leaves.discard(current_node.parent) # this nodes parent now has a child, it's not a leaf anymore
 
     def clear(self):
-        self._roots.clear()
+        self.roots.clear()

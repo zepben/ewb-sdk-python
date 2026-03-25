@@ -89,7 +89,7 @@ async def test_downstream_tree():
 
     pprint.pprint(visit_counts)
 
-    root = tree_builder._roots[start]
+    root = tree_builder.roots[start]
 
     assert root is not None
     _verify_tree_asset(root, n["j1"], None, [n["ac1"], n["ac3"]])

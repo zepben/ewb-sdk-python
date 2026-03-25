@@ -3,6 +3,8 @@
 ### Breaking Changes
 * Updated `SetDirection` to correctly use the `@singledispatchmethod` registration `run` instead of the old `run_terminal`. Simply replace your `run_terminal`
   call with `run`.
+* `EquipmentTreeBuilder.roots` is now a `dict` keyed by the `start_item` rather than a `Generator`. This allows better lookup of root items when you are looking
+  for an explicit items tree.
 
 ### New Features
 * None.
