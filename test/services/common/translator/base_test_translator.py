@@ -56,6 +56,7 @@ def validate_service_translations(
     try:
         for desc, cim_builder in types_to_test.items():
             print(desc)
+            processing = f"generating given {desc}"
 
             @given(cim_builder)
             def run_test(cim):

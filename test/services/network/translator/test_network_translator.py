@@ -230,6 +230,7 @@ types_to_test = {
     "create_circuit": create_circuit(),
 }
 
+
 @pytest.mark.timeout(20000)
 def test_network_service_translations():
     validate_service_translations(
@@ -271,6 +272,7 @@ def test_network_service_translations():
         },
         types_to_test=types_to_test,
     )
+
 
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
 def test_creates_new_name_type():
