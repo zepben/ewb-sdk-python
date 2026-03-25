@@ -8,7 +8,7 @@ from typing import Union, List
 
 import pytest
 from zepben.ewb.dataclassy import dataclass
-from hypothesis import settings, Verbosity
+from hypothesis import settings, Verbosity, Phase
 from pytest import fixture
 
 from zepben.ewb import Terminal, ConnectivityNode, IdentifiedObject
@@ -18,9 +18,11 @@ from zepben.ewb.services.network.network_service import NetworkService
 # noinspection PyUnresolvedReferences
 from .network_fixtures import *
 
-settings.register_profile("ci", max_examples=1000)
-settings.register_profile("dev", max_examples=10)
-settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
+no_shrink_phases = [p for p in Phase if p != Phase.shrink]
+
+settings.register_profile("ci", max_examples=1000, phases=no_shrink_phases)
+settings.register_profile("dev", max_examples=10, phases=no_shrink_phases)
+settings.register_profile("debug", max_examples=10, phases=[p for p in Phase], verbosity=Verbosity.debug)
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'dev'))
 
 
