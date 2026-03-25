@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text, floats
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other

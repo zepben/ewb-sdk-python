@@ -8,7 +8,7 @@ from hypothesis.strategies import text, lists, builds
 from util import mrid_strategy
 from zepben.ewb import Pole, Streetlight, generate_id
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
 from cim.private_collection_validator import validate_unordered

@@ -6,7 +6,7 @@ from hypothesis import given
 from hypothesis.strategies import floats
 from zepben.ewb import DistanceRelay, generate_id
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
 

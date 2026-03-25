@@ -7,7 +7,7 @@ from hypothesis.strategies import floats, one_of, none
 from pytest import raises
 from zepben.ewb import CurveData
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 
 curve_data_kwargs = {
     "x_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),

@@ -8,7 +8,7 @@ from zepben.ewb import Location, generate_id
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
-from cim.cim_creators import create_position_point
+from cim.fill_fields import create_position_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other

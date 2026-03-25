@@ -5,7 +5,7 @@
 from hypothesis.strategies import integers, floats
 from zepben.ewb import Switch, SinglePhaseKind, SwitchInfo, generate_id
 
-from cim.cim_creators import MAX_32_BIT_INTEGER
+from cim.fill_fields import MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
 from cim.property_validator import validate_property_accessor

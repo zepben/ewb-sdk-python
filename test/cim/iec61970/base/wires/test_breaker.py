@@ -7,7 +7,7 @@ from hypothesis.strategies import floats
 from zepben.ewb import Breaker, Substation, Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
 

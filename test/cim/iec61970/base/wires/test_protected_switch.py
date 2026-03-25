@@ -7,7 +7,7 @@ from hypothesis.strategies import integers, lists, builds
 from util import mrid_strategy
 from zepben.ewb import ProtectionRelayFunction, ProtectedSwitch, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_switch import switch_kwargs, verify_switch_constructor_default, verify_switch_constructor_kwargs, \
     verify_switch_constructor_args, switch_args
 from cim.private_collection_validator import validate_unordered

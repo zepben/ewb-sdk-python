@@ -11,7 +11,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from cim.iec61970.base.core.test_name_type import name_type_kwargs
 
 name_kwargs = {

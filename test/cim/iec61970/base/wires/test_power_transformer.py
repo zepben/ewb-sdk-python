@@ -10,7 +10,7 @@ from util import mrid_strategy
 from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind, \
     Terminal, generate_id
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
 from cim.property_validator import validate_property_accessor

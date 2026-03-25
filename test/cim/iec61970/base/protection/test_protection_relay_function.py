@@ -2,9 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
+from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text, one_of, none
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered, validate_ordered_other
@@ -16,7 +16,7 @@ from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, Prot
 protection_relay_function_kwargs = {
     **power_system_resource_kwargs,
     "model": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "reclosing": boolean_or_none(),
+    "reclosing": one_of(none(), booleans()),
     "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "protection_kind": sampled_from(ProtectionKind),
     "directable": booleans(),

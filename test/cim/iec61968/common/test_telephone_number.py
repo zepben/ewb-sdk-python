@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import text
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import ALPHANUM
 from zepben.ewb import TelephoneNumber
 
 

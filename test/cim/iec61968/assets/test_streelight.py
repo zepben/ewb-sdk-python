@@ -9,7 +9,7 @@ from util import mrid_strategy
 from zepben.ewb import Streetlight, Pole, generate_id
 from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
     verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
 

@@ -7,7 +7,7 @@ from hypothesis.strategies import integers, builds
 from util import mrid_strategy
 from zepben.ewb import PowerElectronicsUnit, PowerElectronicsConnection, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 

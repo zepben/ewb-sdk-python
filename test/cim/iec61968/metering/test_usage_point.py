@@ -12,7 +12,7 @@ from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import Cont
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered, validate_unordered_other

@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from, text
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 from util import mrid_strategy
 from zepben.ewb import Customer, CustomerKind, CustomerAgreement, generate_id
 

@@ -8,7 +8,7 @@ from hypothesis.strategies import floats, builds
 from util import mrid_strategy
 from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 

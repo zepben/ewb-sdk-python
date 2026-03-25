@@ -4,22 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import floats
 
-from zepben.ewb import generate_id
+from zepben.ewb import generate_id, PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import linear_shunt_compensator_kwargs
 from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
-    verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_kwargs, shunt_compensator_args
-
-linear_shunt_compensator_kwargs = {
-    **shunt_compensator_kwargs,
-    "b0_per_section": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "b_per_section": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "g0_per_section": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "g_per_section": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+    verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_args
 
 linear_shunt_compensator_args = [*shunt_compensator_args, 1.1, 2.2, 3.3, 4.4]
 
@@ -34,8 +25,18 @@ def test_linear_shunt_compensator_constructor_default():
     assert lsc.g_per_section is None
 
 
-@given(**linear_shunt_compensator_kwargs)
+@given(**linear_shunt_compensator_kwargs())
 def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_section, g0_per_section, g_per_section, **kwargs):
+    #
+    # NOTE: The grounding terminal must be one of the included terminals, with phases N. If it isn't, the automated processes
+    #       will add the terminal and cause the tests to fail. If the phases are N, it will reject the invalid phases.
+    #
+    if kwargs["terminals"]:
+        kwargs["grounding_terminal"] = kwargs["terminals"][-1]
+        kwargs["grounding_terminal"].phases = PhaseCode.N
+    else:
+        kwargs["grounding_terminal"] = None
+
     lsc = LinearShuntCompensator(
         b0_per_section=b0_per_section,
         b_per_section=b_per_section,

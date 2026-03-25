@@ -13,7 +13,7 @@ from sqlite3 import Connection
 import pytest
 from hypothesis import given, settings, HealthCheck, assume
 
-from cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
+from cim.fill_fields import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
     create_short_circuit_test, create_shunt_compensator_info, create_transformer_end_info, create_transformer_tank_info, create_asset_owner, create_pole, \
     create_streetlight, create_location, create_organisation, create_meter, create_usage_point, create_operational_restriction, create_fault_indicator, \
     create_base_voltage, create_connectivity_node, create_feeder, create_geographical_region, create_site, create_sub_geographical_region, create_substation, \

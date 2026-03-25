@@ -12,7 +12,7 @@ from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 
 street_address_kwargs = {
     "postal_code": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),

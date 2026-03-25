@@ -6,7 +6,7 @@ import datetime
 
 from hypothesis.strategies import booleans, lists, builds, datetimes
 
-from cim.cim_creators import sampled_equipment_container, sampled_hvlv_feeder
+from cim.fill_fields import sampled_equipment_container, sampled_hvlv_feeder
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered

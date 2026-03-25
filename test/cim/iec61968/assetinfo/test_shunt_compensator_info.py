@@ -6,7 +6,7 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from zepben.ewb import ShuntCompensatorInfo, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args
 

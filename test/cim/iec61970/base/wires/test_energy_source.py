@@ -8,7 +8,7 @@ from hypothesis.strategies import builds, lists, floats, booleans
 from util import mrid_strategy
 from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from cim.private_collection_validator import validate_unordered

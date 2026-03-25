@@ -13,7 +13,7 @@ from util import mrid_strategy
 from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType, generate_id
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
 from cim.private_collection_validator import validate_unordered_other

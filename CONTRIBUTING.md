@@ -108,7 +108,7 @@ to prevent the test from timing out while you step through the code:
 * Add new classes to corresponding service translator test. [```test/services/.../translator```](test/services)
 * Add the required creators to:
   - [```pb_creators.py```](test/streaming/get/pb_creators.py)
-  - [```cim_creators.py```](test/cim/cim_creators.py)
+  - [```fill_fields.py```](test/cim/fill_fields.py)
     - If a relationship involving a branch class has been introduced. Add an entry in SAMPLE SET to ensure the correct leaf class is created for testing.
 * Add test for each new comparator to  [test/services/...](test/services) package.
   * [network](test/services/network/test_network_service_comparator.py)

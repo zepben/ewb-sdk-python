@@ -9,7 +9,7 @@ from zepben.ewb import IdentifiedObject, CustomerService, NameType, CustomerData
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
-from cim.cim_creators import *
+from cim.fill_fields import *
 from services.common.translator.base_test_translator import validate_service_translations
 
 T = TypeVar("T", bound=IdentifiedObject)

@@ -11,7 +11,7 @@ from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 
 name_type_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),

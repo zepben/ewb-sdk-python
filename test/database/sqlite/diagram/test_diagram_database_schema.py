@@ -7,7 +7,7 @@ from typing import TypeVar
 
 from hypothesis import given, settings, HealthCheck
 
-from cim.cim_creators import create_diagram, create_diagram_object
+from cim.fill_fields import create_diagram, create_diagram_object
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 from zepben.ewb import IdentifiedObject, DiagramDatabaseReader, DiagramDatabaseWriter, DiagramService

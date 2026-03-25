@@ -6,7 +6,7 @@ from hypothesis import given
 from hypothesis.strategies import floats, one_of, none
 from zepben.ewb import GroundingImpedance
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_earth_fault_compensator import earth_fault_compensator_kwargs, earth_fault_compensator_args, \
     verify_earth_fault_compensator_constructor_default, verify_earth_fault_compensator_constructor_kwargs, verify_earth_fault_compensator_constructor_args
 

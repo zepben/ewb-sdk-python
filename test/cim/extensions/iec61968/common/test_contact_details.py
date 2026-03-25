@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text, sampled_from, booleans
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import ALPHANUM
 from cim.private_collection_validator import validate_unordered_other, DuplicateBehaviour
 from streaming.get.pb_creators import lists
 from zepben.ewb import ContactMethodType, TelephoneNumber, ElectronicAddress, ContactDetails

@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import ALPHANUM
 from util import mrid_strategy
 from zepben.ewb import PricingStructure, Tariff, generate_id
 

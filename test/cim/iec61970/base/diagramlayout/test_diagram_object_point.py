@@ -7,7 +7,7 @@ from hypothesis.strategies import floats
 from pytest import raises
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 
 diagram_object_point_kwargs = {
     "x_position": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),

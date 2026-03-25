@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import text
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 
 street_detail_kwargs = {
     "building_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),

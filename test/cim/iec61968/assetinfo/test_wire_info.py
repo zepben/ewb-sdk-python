@@ -7,7 +7,7 @@ from hypothesis.strategies import integers, sampled_from, one_of, none, text, bo
 from streaming.get.pb_creators import floats
 from zepben.ewb import WireInfo, WireMaterialKind
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, FLOAT_MIN, FLOAT_MAX, sampled_wire_insulation_kind
+from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, FLOAT_MIN, FLOAT_MAX, sampled_wire_insulation_kind
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind

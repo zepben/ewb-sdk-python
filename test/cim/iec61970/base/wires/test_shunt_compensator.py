@@ -3,24 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import floats, booleans, integers, sampled_from, builds
-
-from util import mrid_strategy
-from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo, Terminal, generate_id
-
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
+from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
 from cim.property_validator import validate_property_accessor
-
-shunt_compensator_kwargs = {
-    **regulating_cond_eq_kwargs,
-    "grounded": booleans(),
-    "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "phase_connection": sampled_from(PhaseShuntConnectionKind),
-    "grounding_terminal": builds(Terminal, mrid=mrid_strategy),
-    "sections": floats(min_value=-100.0, max_value=100.0),
-}
+from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo, Terminal, generate_id
 
 shunt_compensator_args = [*regulating_cond_eq_args, True, 1, PhaseShuntConnectionKind.G, Terminal(mrid=generate_id()), 2.2]
 

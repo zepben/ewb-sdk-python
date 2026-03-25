@@ -8,7 +8,7 @@ from hypothesis.strategies import builds, text
 from util import mrid_strategy
 from zepben.ewb import Control, RemoteControl, generate_id
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
 

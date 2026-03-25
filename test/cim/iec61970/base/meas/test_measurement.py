@@ -8,7 +8,7 @@ from hypothesis.strategies import text, builds, sampled_from
 from util import mrid_strategy
 from zepben.ewb import Measurement, RemoteSource, PhaseCode, UnitSymbol, generate_id
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 

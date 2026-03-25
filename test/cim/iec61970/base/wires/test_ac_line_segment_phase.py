@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, builds
 
-from cim.cim_creators import sampled_single_phase_kind, MIN_SEQUENCE_NUMBER, MAX_SEQUENCE_NUMBER
+from cim.fill_fields import sampled_single_phase_kind, MIN_SEQUENCE_NUMBER, MAX_SEQUENCE_NUMBER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, verify_power_system_resource_constructor_kwargs, \
     verify_power_system_resource_constructor_args, power_system_resource_kwargs, power_system_resource_args
@@ -55,4 +55,3 @@ def test_ac_line_segment_phase_constructor_args():
         als.sequence_number,
         als.ac_line_segment,
     ]
-

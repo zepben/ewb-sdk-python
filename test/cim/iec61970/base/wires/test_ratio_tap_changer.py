@@ -10,7 +10,7 @@ from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
     verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_kwargs, tap_changer_args, assume_step_values
 
