@@ -34,6 +34,9 @@ class ObjectDifference(Difference, Generic[T]):
     target: T
     differences: Dict[str, Difference] = field(default_factory=dict)
 
+    def __str__(self):
+        return f"source: {str(self.source)}, target: {str(self.target)}, diff: {self.differences}"
+
 
 @dataclass()
 class ReferenceDifference(Difference):

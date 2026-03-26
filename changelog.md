@@ -19,6 +19,7 @@
 * None.
 
 ### Enhancements
+* Added sequence unpacking support for `UnresolvedReference` and `ObjectDifference`.
 * `SetDirection.run` now supports `ConductingEquipment`.
 * Fixed types on all overrides for `PowerSystemResource.asset_info`, removing the need to shadow them with type specific variants.
 * You can now pass a list of `TransformerEndRatedS` to the `PowerTransformerEnd` constructor via the `ratings` argument.
