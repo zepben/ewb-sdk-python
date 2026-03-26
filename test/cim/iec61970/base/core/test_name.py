@@ -4,21 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import text, builds
 
+from cim.fill_fields import name_kwargs
 from zepben.ewb import generate_id
-from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
-from cim.iec61970.base.core.test_name_type import name_type_kwargs
-
-name_kwargs = {
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "type": builds(NameType, **name_type_kwargs),
-    "identified_object": sampled_equipment(True)
-}
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 # noinspection PyArgumentList
 name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
@@ -31,7 +22,7 @@ name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
 
 
 # noinspection PyShadowingBuiltins
-@given(**name_kwargs)
+@given(**name_kwargs())
 def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
     assert not kwargs, f"found unexpected args: {kwargs}"
 

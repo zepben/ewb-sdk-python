@@ -3,21 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, sampled_from
 from pytest import raises
+
+from cim.fill_fields import phase_impedance_data_kwargs
 from zepben.ewb import SinglePhaseKind
-
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
-
-phase_impedance_data_kwargs = {
-    "from_phase": sampled_from(SinglePhaseKind),
-    "to_phase": sampled_from(SinglePhaseKind),
-    "b": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "g": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-}
 
 phase_impedance_data_args = [SinglePhaseKind.B, SinglePhaseKind.C, 1.1, 2.2, 3.3, 4.4]
 
@@ -44,7 +34,7 @@ def test_data_constructor_default():
     PhaseImpedanceData(from_phase=SinglePhaseKind.A, to_phase=SinglePhaseKind.B, b=1.0, g=2.0, r=3.0, x=4.0)
 
 
-@given(**phase_impedance_data_kwargs)
+@given(**phase_impedance_data_kwargs())
 def test_phase_impedance_data_constructor_kwargs(from_phase, to_phase, b, g, r, x, **kwargs):
     assert not kwargs
 

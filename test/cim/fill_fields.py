@@ -23,7 +23,7 @@ __all__ = [
     'create_organisation', 'organisation_kwargs', 'organisation_role_kwargs', 'create_position_point', 'position_point_kwargs', 'create_street_address',
     'street_address_kwargs', 'create_street_detail', 'street_detail_kwargs', 'create_telephone_number', 'telephone_number_kwargs', 'create_town_detail',
     'town_detail_kwargs', 'create_customer', 'customer_kwargs', 'create_customer_agreement', 'customer_agreement_kwargs', 'sampled_customer_kind',
-    'create_pricing_structure', 'pricing_structure_kwargs', 'create_tariffs', 'tariffs_kwargs', 'create_current_transformer_info',
+    'create_pricing_structure', 'pricing_structure_kwargs', 'create_tariff', 'tariff_kwargs', 'create_current_transformer_info',
     'current_transformer_info_kwargs', 'create_potential_transformer_info', 'potential_transformer_info_kwargs', 'sampled_transformer_construction_kind',
     'sampled_transformer_function_kind', 'create_pole', 'pole_kwargs', 'sampled_streetlight_lamp_kind', 'create_ratio', 'ratio_kwargs',
     'create_controlled_appliance', 'controlled_appliance_kwargs', 'end_device_kwargs', 'end_device_function_kwargs', 'sampled_end_device_function_kind',
@@ -75,9 +75,10 @@ from util import mrid_strategy
 # This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
 from zepben.ewb import *
 
-from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none
+from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none, just
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
+from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 
 # @formatter:on
@@ -148,7 +149,7 @@ def pan_demand_response_function_kwargs(include_runtime: bool = True):
     return {
         **end_device_function_kwargs(include_runtime),
         "kind": sampled_from(EndDeviceFunctionKind),
-        "appliances": integers(min_value=0, max_value=4095),
+        "appliance": integers(min_value=0, max_value=4095),
     }
 
 
@@ -162,7 +163,7 @@ def create_hv_customer(include_runtime: bool = True):
 
 def hv_customer_kwargs(include_runtime: bool = True):
     return {
-        **equipment_container_kwargs(include_runtime)
+        **equipment_container_kwargs(include_runtime),
     }
 
 
@@ -172,7 +173,7 @@ def create_site(include_runtime: bool = True):
 
 def site_kwargs(include_runtime: bool = True):
     return {
-        **equipment_container_kwargs(include_runtime)
+        **equipment_container_kwargs(include_runtime),
     }
 
 
@@ -240,7 +241,7 @@ def create_ev_charging_unit(include_runtime: bool = True):
 
 def ev_charging_unit_kwargs(include_runtime: bool = True):
     return {
-        **power_electronics_unit_kwargs(include_runtime)
+        **power_electronics_unit_kwargs(include_runtime),
     }
 
 
@@ -406,7 +407,7 @@ def create_cable_info(include_runtime: bool = True):
 
 def cable_info_kwargs(include_runtime: bool = True):
     return {
-        **wire_info_kwargs(include_runtime)
+        **wire_info_kwargs(include_runtime),
     }
 
 
@@ -446,7 +447,7 @@ def create_overhead_wire_info(include_runtime: bool = True):
 
 def overhead_wire_info_kwargs(include_runtime: bool = True):
     return {
-        **wire_info_kwargs(include_runtime)
+        **wire_info_kwargs(include_runtime),
     }
 
 
@@ -590,25 +591,25 @@ def asset_kwargs(include_runtime: bool):
 
 def asset_container_kwargs(include_runtime: bool):
     return {
-        **asset_kwargs(include_runtime)
+        **asset_kwargs(include_runtime),
     }
 
 
 def asset_function_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
 def asset_info_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
 def asset_organisation_role_kwargs(include_runtime: bool):
     return {
-        **organisation_role_kwargs(include_runtime)
+        **organisation_role_kwargs(include_runtime),
     }
 
 
@@ -618,7 +619,7 @@ def create_asset_owner(include_runtime: bool = True):
 
 def asset_owner_kwargs(include_runtime: bool = True):
     return {
-        **asset_organisation_role_kwargs(include_runtime)
+        **asset_organisation_role_kwargs(include_runtime),
     }
 
 
@@ -638,7 +639,7 @@ def streetlight_kwargs(include_runtime: bool = True):
 
 def structure_kwargs(include_runtime: bool):
     return {
-        **asset_container_kwargs(include_runtime)
+        **asset_container_kwargs(include_runtime),
     }
 
 
@@ -649,7 +650,8 @@ def structure_kwargs(include_runtime: bool):
 
 def agreement_kwargs(include_runtime: bool):
     return {
-        **document_kwargs(include_runtime)
+        **document_kwargs(include_runtime),
+        "validity_interval": datetimes().flatmap(lambda start: builds(DateTimeInterval, start=just(start), end=datetimes(min_value=start))),
     }
 
 
@@ -695,7 +697,7 @@ def create_organisation(include_runtime: bool = True):
 
 def organisation_kwargs(include_runtime: bool = True):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
@@ -755,6 +757,7 @@ def telephone_number_kwargs():
     return {
         "area_code": text(alphabet=ALPHANUM, max_size=3),
         "city_code": one_of(none(), text(alphabet=ALPHANUM, max_size=2)),
+        "country_code": one_of(none(), text(alphabet=ALPHANUM, max_size=2)),
         "dial_out": one_of(none(), text(alphabet=ALPHANUM, max_size=3)),
         "extension": one_of(none(), text(alphabet=ALPHANUM, max_size=4)),
         "international_prefix": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
@@ -819,16 +822,17 @@ def pricing_structure_kwargs(include_runtime: bool = True):
     return {
         **document_kwargs(include_runtime),
         "tariffs": lists(builds(Tariff, **identified_object_kwargs(include_runtime)), max_size=2),
+        "code": text(alphabet=ALPHANUM),
     }
 
 
-def create_tariffs(include_runtime: bool = True):
-    return builds(Tariff, **tariffs_kwargs(include_runtime))
+def create_tariff(include_runtime: bool = True):
+    return builds(Tariff, **tariff_kwargs(include_runtime))
 
 
-def tariffs_kwargs(include_runtime: bool = True):
+def tariff_kwargs(include_runtime: bool = True):
     return {
-        **document_kwargs(include_runtime)
+        **document_kwargs(include_runtime),
     }
 
 
@@ -938,7 +942,7 @@ def end_device_kwargs(include_runtime: bool):
     return {
         **asset_container_kwargs(include_runtime),
         "usage_points": lists(builds(UsagePoint, **identified_object_kwargs(include_runtime)), max_size=2),
-        "customer_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        "customer_mrid": mrid_strategy,
         "service_location": builds(Location, **identified_object_kwargs(include_runtime)),
         "functions": lists(sampled_end_device_function(include_runtime), max_size=2),
     }
@@ -961,7 +965,7 @@ def create_meter(include_runtime: bool = True):
 
 def meter_kwargs(include_runtime: bool = True):
     return {
-        **end_device_kwargs(include_runtime)
+        **end_device_kwargs(include_runtime),
     }
 
 
@@ -980,6 +984,7 @@ def usage_point_kwargs(include_runtime: bool = True):
         "equipment": lists(builds(EnergyConsumer, **identified_object_kwargs(include_runtime)), max_size=2),
         "end_devices": lists(builds(Meter, **identified_object_kwargs(include_runtime)), max_size=2),
         "contacts": lists(create_contact_details(), max_size=2),
+        "phase_code": sampled_phase_code(),
     }
 
 
@@ -1028,7 +1033,7 @@ def create_fault_indicator(include_runtime: bool = True):
 
 def fault_indicator_kwargs(include_runtime: bool = True):
     return {
-        **auxiliary_equipment_kwargs(include_runtime)
+        **auxiliary_equipment_kwargs(include_runtime),
     }
 
 
@@ -1062,7 +1067,7 @@ def sensor_kwargs(include_runtime: bool = True):
 
 def ac_dc_terminal_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
@@ -1098,7 +1103,7 @@ def connectivity_node_kwargs(include_runtime: bool = True):
 
 def connectivity_node_container_kwargs(include_runtime: bool):
     return {
-        **power_system_resource_kwargs(include_runtime)
+        **power_system_resource_kwargs(include_runtime),
     }
 
 
@@ -1146,7 +1151,7 @@ def equipment_container_kwargs(include_runtime: bool, add_equipment: bool = True
 
     return {
         **connectivity_node_container_kwargs(include_runtime),
-        **equipment
+        **equipment,
     }
 
 
@@ -1268,12 +1273,18 @@ def create_terminal(include_runtime: bool = True):
 
 
 def terminal_kwargs(include_runtime: bool = True):
+    runtime = {
+        "normal_feeder_direction": sampled_from(FeederDirection),
+        "current_feeder_direction": sampled_from(FeederDirection),
+    } if include_runtime else {}
+
     return {
         **ac_dc_terminal_kwargs(include_runtime),
         "conducting_equipment": sampled_conducting_equipment(include_runtime),
         "connectivity_node": builds(ConnectivityNode, **identified_object_kwargs(include_runtime)),
         "phases": sampled_phase_code(),
         "sequence_number": integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER),
+        **runtime,
     }
 
 
@@ -1303,7 +1314,7 @@ def diagram_object_kwargs(include_runtime: bool = True):
     return {
         **identified_object_kwargs(include_runtime),
         "diagram": builds(Diagram, **identified_object_kwargs(include_runtime)),
-        "identified_object_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        "identified_object_mrid": mrid_strategy,
         "style": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         "rotation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "diagram_object_points": lists(create_diagram_object_point(), max_size=2),
@@ -1370,7 +1381,7 @@ def equivalent_branch_kwargs(include_runtime: bool = True):
 
 def equivalent_equipment_kwargs(include_runtime: bool):
     return {
-        **conducting_equipment_kwargs(include_runtime)
+        **conducting_equipment_kwargs(include_runtime),
     }
 
 
@@ -1402,7 +1413,7 @@ def create_photo_voltaic_unit(include_runtime: bool = True):
 
 def photo_voltaic_unit_kwargs(include_runtime: bool = True):
     return {
-        **power_electronics_unit_kwargs(include_runtime)
+        **power_electronics_unit_kwargs(include_runtime),
     }
 
 
@@ -1421,7 +1432,7 @@ def create_power_electronics_wind_unit(include_runtime: bool = True):
 
 def power_electronics_wind_unit_kwargs(include_runtime: bool = True):
     return {
-        **power_electronics_unit_kwargs(include_runtime)
+        **power_electronics_unit_kwargs(include_runtime),
     }
 
 
@@ -1436,7 +1447,7 @@ def create_accumulator(include_runtime: bool = True):
 
 def accumulator_kwargs(include_runtime: bool = True):
     return {
-        **measurement_kwargs(include_runtime)
+        **measurement_kwargs(include_runtime),
     }
 
 
@@ -1448,6 +1459,7 @@ def accumulator_value_kwargs():
     return {
         **measurement_value_kwargs(),
         "value": integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
+        "accumulator_mrid": mrid_strategy,
     }
 
 
@@ -1470,6 +1482,7 @@ def analog_value_kwargs():
     return {
         **measurement_value_kwargs(),
         "value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "analog_mrid": mrid_strategy,
     }
 
 
@@ -1480,7 +1493,7 @@ def create_control(include_runtime: bool = True):
 def control_kwargs(include_runtime: bool = True):
     return {
         **io_point_kwargs(include_runtime),
-        "power_system_resource_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        "power_system_resource_mrid": mrid_strategy,
         "remote_control": builds(RemoteControl, **identified_object_kwargs(include_runtime)),
     }
 
@@ -1491,7 +1504,7 @@ def create_discrete(include_runtime: bool = True):
 
 def discrete_kwargs(include_runtime: bool = True):
     return {
-        **measurement_kwargs(include_runtime)
+        **measurement_kwargs(include_runtime),
     }
 
 
@@ -1503,12 +1516,13 @@ def discrete_value_kwargs():
     return {
         **measurement_value_kwargs(),
         "value": integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
+        "discrete_mrid": mrid_strategy,
     }
 
 
 def io_point_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
@@ -1526,7 +1540,7 @@ def measurement_kwargs(include_runtime: bool):
 # noinspection PyUnusedLocal
 def measurement_value_kwargs():
     return {
-        # "time_stamp": ...
+        "time_stamp": datetimes(),
     }
 
 
@@ -1565,7 +1579,7 @@ def remote_control_kwargs(include_runtime: bool = True):
 
 def remote_point_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
@@ -1633,7 +1647,7 @@ def busbar_section_kwargs(include_runtime: bool = True):
     args["terminals"] = lists(builds(Terminal, **identified_object_kwargs(include_runtime)), max_size=1)
 
     return {
-        **args
+        **args,
     }
 
 
@@ -1664,7 +1678,7 @@ def conductor_kwargs(include_runtime: bool):
 
 def connector_kwargs(include_runtime: bool):
     return {
-        **conducting_equipment_kwargs(include_runtime)
+        **conducting_equipment_kwargs(include_runtime),
     }
 
 
@@ -1689,7 +1703,7 @@ def create_disconnector(include_runtime: bool = True):
 
 def disconnector_kwargs(include_runtime: bool = True):
     return {
-        **switch_kwargs(include_runtime)
+        **switch_kwargs(include_runtime),
     }
 
 
@@ -1702,7 +1716,7 @@ def earth_fault_compensator_kwargs(include_runtime: bool):
 
 def energy_connection_kwargs(include_runtime: bool):
     return {
-        **conducting_equipment_kwargs(include_runtime)
+        **conducting_equipment_kwargs(include_runtime),
     }
 
 
@@ -1849,7 +1863,7 @@ def create_jumper(include_runtime: bool = True):
 
 def jumper_kwargs(include_runtime: bool = True):
     return {
-        **switch_kwargs(include_runtime)
+        **switch_kwargs(include_runtime),
     }
 
 
@@ -1859,13 +1873,13 @@ def create_junction(include_runtime: bool = True):
 
 def junction_kwargs(include_runtime: bool = True):
     return {
-        **connector_kwargs(include_runtime)
+        **connector_kwargs(include_runtime),
     }
 
 
 def line_kwargs(include_runtime: bool):
     return {
-        **equipment_container_kwargs(include_runtime)
+        **equipment_container_kwargs(include_runtime),
     }
 
 
@@ -1889,19 +1903,19 @@ def create_load_break_switch(include_runtime: bool = True):
 
 def load_break_switch_kwargs(include_runtime: bool = True):
     return {
-        **protected_switch_kwargs(include_runtime)
+        **protected_switch_kwargs(include_runtime),
     }
 
 
 def per_length_impedance_kwargs(include_runtime: bool):
     return {
-        **per_length_line_parameter_kwargs(include_runtime)
+        **per_length_line_parameter_kwargs(include_runtime),
     }
 
 
 def per_length_line_parameter_kwargs(include_runtime: bool):
     return {
-        **identified_object_kwargs(include_runtime)
+        **identified_object_kwargs(include_runtime),
     }
 
 
@@ -2032,6 +2046,8 @@ def power_transformer_kwargs(include_runtime: bool = True):
         "power_transformer_ends": lists(builds(PowerTransformerEnd, **identified_object_kwargs(include_runtime)), max_size=2),
         "vector_group": sampled_vector_group(),
         "transformer_utilisation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "construction_kind": sampled_transformer_construction_kind(),
+        "function": sampled_transformer_function_kind(),
     }
 
 
@@ -2099,7 +2115,7 @@ def create_recloser(include_runtime: bool = True):
 
 def recloser_kwargs(include_runtime: bool = True):
     return {
-        **protected_switch_kwargs(include_runtime)
+        **protected_switch_kwargs(include_runtime),
     }
 
 

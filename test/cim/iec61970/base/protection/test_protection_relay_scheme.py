@@ -3,20 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists
 
-from util import mrid_strategy
-from zepben.ewb import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme, generate_id
-
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
+from cim.fill_fields import protection_relay_scheme_kwargs
+from cim.iec61970.base.core.test_identified_object import identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
 from cim.private_collection_validator import validate_unordered
-
-protection_relay_scheme_kwargs = {
-    **identified_object_kwargs,
-    "system": builds(ProtectionRelaySystem, mrid=mrid_strategy),
-    "functions": lists(builds(ProtectionRelayFunction, mrid=mrid_strategy))
-}
+from zepben.ewb import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme, generate_id
 
 protection_relay_scheme_args = [
     *identified_object_args,
@@ -33,7 +25,7 @@ def test_protection_relay_scheme_constructor_default():
     assert len(list(prs.functions)) == 0
 
 
-@given(**protection_relay_scheme_kwargs)
+@given(**protection_relay_scheme_kwargs())
 def test_protection_relay_scheme_constructor_kwargs(system, functions, **kwargs):
     prs = ProtectionRelayScheme(
         system=system,

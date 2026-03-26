@@ -5,18 +5,11 @@
 from collections import Counter
 
 from hypothesis import given
-from hypothesis.strategies import text
 
+from cim.fill_fields import name_type_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
-
-name_type_kwargs = {
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-}
 
 # noinspection PyArgumentList
 name_type_args = ["1", "2"]
@@ -31,7 +24,7 @@ def test_name_type_constructor_default():
     assert not list(nt.names)
 
 
-@given(**name_type_kwargs)
+@given(**name_type_kwargs())
 def test_name_type_constructor_kwargs(name, description, **kwargs):
     assert not kwargs, f"found unexpected args: {kwargs}"
 

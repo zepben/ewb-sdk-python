@@ -3,19 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, booleans
-from zepben.ewb import CurrentRelay, ProtectionKind, generate_id
 
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
+from cim.fill_fields import current_relay_kwargs
+from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
-
-current_relay_kwargs = {
-    **protection_relay_function_kwargs,
-    "current_limit_1": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "inverse_time_flag": booleans(),
-    "time_delay_1": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+from zepben.ewb import CurrentRelay, ProtectionKind, generate_id
 
 current_relay_args = [*protection_relay_function_args, 1.1, True, 2.2]
 
@@ -29,7 +21,7 @@ def test_current_relay_constructor_default():
     assert cr.time_delay_1 is None
 
 
-@given(**current_relay_kwargs)
+@given(**current_relay_kwargs())
 def test_current_relay_constructor_kwargs(current_limit_1, inverse_time_flag, time_delay_1, **kwargs):
     cr = CurrentRelay(
         current_limit_1=current_limit_1,

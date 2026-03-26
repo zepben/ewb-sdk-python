@@ -3,22 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds, sampled_from
 
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import diagram_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import DiagramStyle, OrientationKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-
-diagram_kwargs = {
-    **identified_object_kwargs,
-    "diagram_style": sampled_from(DiagramStyle),
-    "orientation_kind": sampled_from(OrientationKind),
-    "diagram_objects": lists(builds(DiagramObject, mrid=mrid_strategy))
-}
 
 # noinspection PyArgumentList
 diagram_args = [*identified_object_args, DiagramStyle.GEOGRAPHIC, OrientationKind.NEGATIVE, {"do": DiagramObject(mrid=generate_id())}]
@@ -33,7 +25,7 @@ def test_diagram_constructor_default():
     assert not list(d.diagram_objects)
 
 
-@given(**diagram_kwargs)
+@given(**diagram_kwargs())
 def test_diagram_constructor_kwargs(diagram_style, orientation_kind, diagram_objects, **kwargs):
     d = Diagram(diagram_style=diagram_style,
                 orientation_kind=orientation_kind,

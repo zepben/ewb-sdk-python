@@ -3,18 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats
+
+from cim.fill_fields import breaker_kwargs
+from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
+    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_args
 from zepben.ewb import Breaker, Substation, Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
-    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
-
-breaker_kwargs = {
-    **protected_switch_kwargs,
-    "in_transit_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
 breaker_args = [*protected_switch_args, 1.1]
 
 
@@ -25,7 +20,7 @@ def test_breaker_constructor_default():
     assert br.in_transit_time is None
 
 
-@given(**breaker_kwargs)
+@given(**breaker_kwargs())
 def test_breaker_constructor_kwargs(in_transit_time, **kwargs):
     br = Breaker(in_transit_time=in_transit_time, **kwargs)
     verify_protected_switch_constructor_kwargs(br, **kwargs)

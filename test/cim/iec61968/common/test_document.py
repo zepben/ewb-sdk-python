@@ -4,22 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
-from hypothesis.strategies import text, datetimes
-from zepben.ewb import Document
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-document_kwargs = {
-    **identified_object_kwargs,
-    "title": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "created_date_time": datetimes(),
-    "author_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "status": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "comment": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-}
+from zepben.ewb import Document
 
 document_args = [*identified_object_args, "a", datetime(2021, 1, 1), "b", "c", "d", "e"]
 

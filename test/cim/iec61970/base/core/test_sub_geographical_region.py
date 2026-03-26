@@ -3,22 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import Substation, generate_id
-from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import sub_geographical_region_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered
-
-sub_geographical_region_kwargs = {
-    **identified_object_kwargs,
-    "geographical_region": builds(GeographicalRegion, mrid=mrid_strategy),
-    "substations": lists(builds(Substation, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import Substation, generate_id
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 
 sub_geographical_region_args = [*identified_object_args, GeographicalRegion(mrid=generate_id()), [Substation(mrid=generate_id())]]
 
@@ -30,7 +22,7 @@ def test_sub_geographical_region_constructor_default():
     assert not list(sgr.substations)
 
 
-@given(**sub_geographical_region_kwargs)
+@given(**sub_geographical_region_kwargs())
 def test_sub_geographical_region_constructor_kwargs(geographical_region, substations, **kwargs):
     sgr = SubGeographicalRegion(geographical_region=geographical_region,
                                 substations=substations,

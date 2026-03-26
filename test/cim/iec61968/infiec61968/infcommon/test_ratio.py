@@ -3,16 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import floats
+from pytest import raises
 
+from cim.fill_fields import ratio_kwargs
 from zepben.ewb import Ratio
-
-ratio_kwargs = {
-    "denominator": floats(min_value=0.1, max_value=1000),
-    "numerator": floats(min_value=0.0, max_value=1000)
-}
 
 ratio_args = [9.0, 6.0]
 
@@ -32,7 +27,7 @@ def test_ratio_constructor_default():
         Ratio(numerator=2.0)
 
 
-@given(**ratio_kwargs)
+@given(**ratio_kwargs())
 def test_ratio_constructor_kwargs(denominator, numerator, **kwargs):
     assert not kwargs
 

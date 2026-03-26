@@ -3,21 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, floats
-from zepben.ewb import NoLoadTest, generate_id
 
-from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
+from cim.fill_fields import no_load_test_kwargs
+from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
-
-no_load_test_kwargs = {
-    **transformer_test_kwargs,
-    "energised_end_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "exciting_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "exciting_current_zero": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "loss": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "loss_zero": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-}
+from zepben.ewb import NoLoadTest, generate_id
 
 no_load_test_args = [*transformer_test_args, 1, 2.2, 3.3, 4, 5]
 
@@ -33,7 +23,7 @@ def test_no_load_test_constructor_default():
     assert nlt.loss_zero is None
 
 
-@given(**no_load_test_kwargs)
+@given(**no_load_test_kwargs())
 def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
     nlt = NoLoadTest(energised_end_voltage=energised_end_voltage,
                      exciting_current=exciting_current,

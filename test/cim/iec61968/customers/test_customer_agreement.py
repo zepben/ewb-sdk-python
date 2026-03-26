@@ -4,20 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import CustomerAgreement, Customer, PricingStructure, generate_id
-
-from cim.iec61968.common.test_agreement import agreement_kwargs, verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
+from cim.fill_fields import customer_agreement_kwargs
+from cim.iec61968.common.test_agreement import verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args
 from cim.private_collection_validator import validate_unordered
-
-customer_agreement_kwargs = {
-    **agreement_kwargs,
-    "customer": builds(Customer, mrid=mrid_strategy),
-    "pricing_structures": lists(builds(PricingStructure, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import CustomerAgreement, Customer, PricingStructure, generate_id
 
 customer_agreement_args = [*agreement_args, Customer(mrid=generate_id()), [PricingStructure(mrid=generate_id())]]
 
@@ -30,7 +22,7 @@ def test_customer_agreement_constructor_default():
     assert not list(ca.pricing_structures)
 
 
-@given(**customer_agreement_kwargs)
+@given(**customer_agreement_kwargs())
 def test_customer_agreement_constructor_kwargs(customer, pricing_structures, **kwargs):
     ca = CustomerAgreement(
         customer=customer,
@@ -48,9 +40,9 @@ def test_customer_agreement_constructor_args():
 
     verify_agreement_constructor_args(ca)
     assert [
-        ca.customer,
-        list(ca.pricing_structures)
-    ] == customer_agreement_args[-2:]
+               ca.customer,
+               list(ca.pricing_structures)
+           ] == customer_agreement_args[-2:]
 
 
 def test_pricing_structures_collection():

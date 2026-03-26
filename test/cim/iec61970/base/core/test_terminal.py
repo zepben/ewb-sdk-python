@@ -3,24 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, sampled_from, integers
 
-from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
+from cim.fill_fields import terminal_kwargs
+from cim.iec61970.base.core.test_ac_dc_terminal import verify_ac_dc_terminal_constructor_default, \
     verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
-from util import mrid_strategy
 from zepben.ewb import Terminal, ConnectivityNode, ConductingEquipment, PhaseCode, generate_id, NetworkService, Junction
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
-
-terminal_kwargs = {
-    **ac_dc_terminal_kwargs,
-    "conducting_equipment": builds(ConductingEquipment, mrid=mrid_strategy),
-    "phases": sampled_from(PhaseCode),
-    "sequence_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "normal_feeder_direction": sampled_from(FeederDirection),
-    "current_feeder_direction": sampled_from(FeederDirection),
-    "connectivity_node": builds(ConnectivityNode, mrid=mrid_strategy)
-}
 
 # noinspection PyArgumentList
 terminal_args = [
@@ -48,9 +36,16 @@ def test_terminal_constructor_default():
     assert not t.connectivity_node
 
 
-@given(**terminal_kwargs)
-def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction,
-                                     connectivity_node, **kwargs):
+@given(**terminal_kwargs())
+def test_terminal_constructor_kwargs(
+    conducting_equipment,
+    phases,
+    sequence_number,
+    normal_feeder_direction,
+    current_feeder_direction,
+    connectivity_node,
+    **kwargs
+):
     t = Terminal(conducting_equipment=conducting_equipment,
                  phases=phases,
                  sequence_number=sequence_number,

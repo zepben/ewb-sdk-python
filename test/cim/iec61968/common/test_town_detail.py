@@ -4,16 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import text
+
+from cim.fill_fields import town_detail_kwargs
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
-
-town_detail_kwargs = {
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "state_or_province": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "country": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-}
 
 town_detail_args = ["a", "b", "c"]
 
@@ -26,7 +19,7 @@ def test_town_detail_constructor_default():
     assert td.country is None
 
 
-@given(**town_detail_kwargs)
+@given(**town_detail_kwargs())
 def test_town_detail_constructor_kwargs(name, state_or_province, country, **kwargs):
     assert not kwargs
 

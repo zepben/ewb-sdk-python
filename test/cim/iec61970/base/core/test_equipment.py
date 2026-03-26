@@ -4,27 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import datetime
 
-from hypothesis.strategies import booleans, lists, builds, datetimes
-
-from cim.fill_fields import sampled_equipment_container, sampled_hvlv_feeder
-from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
+from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer, generate_id, Site, LvFeeder, Substation, LvSubstation
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-equipment_kwargs = {
-    **power_system_resource_kwargs,
-    "in_service": booleans(),
-    "normally_in_service": booleans(),
-    "commissioned_date": datetimes(),
-    "usage_points": lists(builds(UsagePoint, mrid=mrid_strategy), max_size=2),
-    "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
-    "operational_restrictions": lists(builds(OperationalRestriction, mrid=mrid_strategy), max_size=2),
-    "current_containers": lists(sampled_hvlv_feeder(True), max_size=2),
-}
 
 equipment_args = [
     *power_system_resource_args,
@@ -126,6 +111,7 @@ def test_current_containers_collection():
         Equipment.clear_current_containers
     )
 
+
 def test_equipmentContainerFilters():
     equipment = Equipment(mrid=generate_id())
     site1 = Site(mrid=generate_id())
@@ -161,10 +147,10 @@ def test_equipmentContainerFilters():
     equipment.add_current_container(lv_sub1)
     equipment.add_current_container(lv_sub2)
 
-    assert  [site1, site2] == list(equipment.sites)
-    assert  [feeder1, feeder2] == list(equipment.normal_feeders)
-    assert  [feeder3, feeder4] == list(equipment.current_feeders)
-    assert  [lv_feeder1, lv_feeder2] == list(equipment.normal_lv_feeders)
-    assert  [lv_feeder3, lv_feeder4] == list(equipment.current_lv_feeders)
-    assert  [substation1, substation2] == list(equipment.substations)
-    assert  [lv_sub1, lv_sub2] == list(equipment.normal_lv_substations)
+    assert [site1, site2] == list(equipment.sites)
+    assert [feeder1, feeder2] == list(equipment.normal_feeders)
+    assert [feeder3, feeder4] == list(equipment.current_feeders)
+    assert [lv_feeder1, lv_feeder2] == list(equipment.normal_lv_feeders)
+    assert [lv_feeder3, lv_feeder4] == list(equipment.current_lv_feeders)
+    assert [substation1, substation2] == list(equipment.substations)
+    assert [lv_sub1, lv_sub2] == list(equipment.normal_lv_substations)

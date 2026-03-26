@@ -29,7 +29,7 @@ types_to_test = {
     "create_customer": create_customer(),
     "create_customer_agreement": create_customer_agreement(),
     "create_pricing_structure": create_pricing_structure(),
-    "create_tariffs": create_tariffs(),
+    "create_tariff": create_tariff(),
 
 }
 

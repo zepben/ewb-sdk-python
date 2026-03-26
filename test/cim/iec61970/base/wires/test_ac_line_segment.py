@@ -4,22 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 from hypothesis import given
-from hypothesis.strategies import builds
 
+from cim.fill_fields import ac_line_segment_kwargs
+from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
+    verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import AcLineSegment, generate_id, SinglePhaseKind, OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
-from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-
-from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
-    verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_kwargs, conductor_args
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-
-ac_line_segment_kwargs = {
-    **conductor_kwargs,
-    "per_length_impedance": builds(PerLengthSequenceImpedance, mrid=mrid_strategy)
-}
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 ac_line_segment_args = [*conductor_args, PerLengthSequenceImpedance(mrid=generate_id())]
 
@@ -33,7 +26,7 @@ def test_ac_line_segment_constructor_default():
     assert not als.per_length_phase_impedance
 
 
-@given(**ac_line_segment_kwargs)
+@given(**ac_line_segment_kwargs())
 def test_ac_line_segment_constructor_kwargs(per_length_impedance, **kwargs):
     als = AcLineSegment(per_length_impedance=per_length_impedance, **kwargs)
 
@@ -125,7 +118,7 @@ def test_ac_line_segment_phases():
 
 def test_retrieves_wire_info_for_phase():
     wi = OverheadWireInfo(mrid=generate_id())
-    (acls := AcLineSegment(mrid=generate_id())).wire_info = wi
+    (acls := AcLineSegment(mrid=generate_id())).asset_info = wi
     wiA = OverheadWireInfo(mrid=generate_id())
     wiB = OverheadWireInfo(mrid=generate_id())
     wiC = OverheadWireInfo(mrid=generate_id())

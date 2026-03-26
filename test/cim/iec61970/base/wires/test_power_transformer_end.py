@@ -5,37 +5,20 @@
 import re
 
 import pytest
-from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import builds, integers, floats, sampled_from
+from pytest import raises
 
-from util import mrid_strategy
+from cim.fill_fields import power_transformer_end_kwargs
+from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
+    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_args
+from cim.private_collection_validator import validate_unordered_other
+from util import assert_or_empty
 from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType, generate_id
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 
-from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
-    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
-from cim.private_collection_validator import validate_unordered_other
-
-power_transformer_end_kwargs = {
-    **transformer_end_kwargs,
-    "power_transformer": builds(PowerTransformer, mrid=mrid_strategy),
-    "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "g": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "g0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "b": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "b0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "connection_kind": sampled_from(WindingConnection),
-    "phase_angle_clock": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-}
-
-power_transformer_end_args = [*transformer_end_args, PowerTransformer(mrid=generate_id()), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11]
+power_transformer_end_args = [
+    *transformer_end_args, PowerTransformer(mrid=generate_id()), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11
+]
 
 
 def test_power_transformer_end_constructor_default():
@@ -58,12 +41,26 @@ def test_power_transformer_end_constructor_default():
     assert pte.phase_angle_clock is None
 
 
-@given(**power_transformer_end_kwargs)
-def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
-                                                  **kwargs):
+@given(**power_transformer_end_kwargs())
+def test_power_transformer_end_constructor_kwargs(
+    power_transformer,
+    ratings,
+    rated_u,
+    r,
+    x,
+    r0,
+    x0,
+    g,
+    g0,
+    b,
+    b0,
+    connection_kind,
+    phase_angle_clock,
+    **kwargs
+):
     pte = PowerTransformerEnd(
         power_transformer=power_transformer,
-        rated_s=rated_s,
+        ratings=ratings,
         rated_u=rated_u,
         r=r,
         x=x,
@@ -80,9 +77,11 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
 
     verify_transformer_end_constructor_kwargs(pte, **kwargs)
     assert pte.power_transformer == power_transformer
-    assert pte.rated_s == rated_s
-    # noinspection PyArgumentList
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, rated_s)]
+    if ratings:
+        assert pte.rated_s == sorted(ratings, key=lambda it: it.rated_s, reverse=True)[0].rated_s
+    else:
+        assert pte.rated_s is None
+    assert_or_empty(pte.s_ratings, ratings, sorted_by=lambda it: it.rated_s, sort_reversed=True)
     assert pte.rated_u == rated_u
     assert pte.r == r
     assert pte.x == x

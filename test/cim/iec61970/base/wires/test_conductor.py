@@ -2,21 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import floats, integers
 
-from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
+from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from cim.property_validator import validate_property_accessor
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.ewb import WireInfo
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
-
-conductor_kwargs = {
-    **conducting_equipment_kwargs,
-    "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "design_temperature": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "design_rating": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
 
 conductor_args = [*conducting_equipment_args, 1, 2, 3.3]
 
@@ -42,7 +31,3 @@ def verify_conductor_constructor_args(c: Conductor):
         c.design_temperature,
         c.design_rating
     ]
-
-
-def test_wire_info_accessor():
-    validate_property_accessor(Conductor, WireInfo, Conductor.wire_info)

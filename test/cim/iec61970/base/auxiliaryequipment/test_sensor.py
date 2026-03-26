@@ -3,19 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import lists, builds
-
-from util import mrid_strategy
-from zepben.ewb import Sensor, ProtectionRelayFunction, generate_id
-
-from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
+from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
 from cim.private_collection_validator import validate_unordered
-
-sensor_kwargs = {
-    **auxiliary_equipment_kwargs,
-    "relay_functions": lists(builds(ProtectionRelayFunction, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import Sensor, ProtectionRelayFunction, generate_id
 
 sensor_args = [*auxiliary_equipment_args, [ProtectionRelayFunction(mrid=generate_id())]]
 

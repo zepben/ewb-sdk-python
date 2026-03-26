@@ -2,21 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import sampled_from, lists, builds
+from pytest import raises
 
-from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, \
+from cim.fill_fields import pan_demand_response_function_kwargs
+from cim.iec61968.metering.test_end_device_function import end_device_function_args, \
     verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
-
-pan_demand_response_function_kwargs = {
-    **end_device_function_kwargs,
-    "kind": sampled_from(EndDeviceFunctionKind),
-    "appliance": builds(ControlledAppliance, appliances=lists(sampled_from(Appliance), max_size=4, min_size=1, unique=True))
-}
 
 pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, Appliance.IRRIGATION_PUMP]
 
@@ -30,13 +24,13 @@ def test_pan_demand_response_function_constructor_default():
     assert pdrf.appliance is None
 
 
-@given(**pan_demand_response_function_kwargs)
+@given(**pan_demand_response_function_kwargs())
 def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwargs):
-    pdrf = PanDemandResponseFunction(kind=kind, appliances=appliance, **kwargs)
+    pdrf = PanDemandResponseFunction(kind=kind, appliance=appliance, **kwargs)
 
     verify_end_device_function_constructor_kwargs(pdrf, **kwargs)
     assert pdrf.kind == kind
-    assert pdrf.appliance == appliance
+    assert pdrf.appliance.bitmask == appliance
 
 
 def test_pan_demand_response_function_constructor_args():
@@ -50,7 +44,7 @@ def test_pan_demand_response_function_constructor_args():
 
 def test_constructor_with_controlled_appliance():
     ca = ControlledAppliance([Appliance.SMART_APPLIANCE, Appliance.IRRIGATION_PUMP])
-    pdrf = PanDemandResponseFunction(mrid=generate_id(), appliances=ca)
+    pdrf = PanDemandResponseFunction(mrid=generate_id(), appliance=ca)
 
     assert pdrf.appliance == ca
 

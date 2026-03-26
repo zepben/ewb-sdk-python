@@ -3,32 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats
-from zepben.ewb import EquivalentBranch, generate_id
 
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
+from cim.fill_fields import equivalent_branch_kwargs
+from cim.iec61970.base.equivalents.test_equivalent_equipment import verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
-
-equivalent_branch_kwargs = {
-    **equivalent_equipment_kwargs,
-    "negative_r12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "negative_r21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "negative_x12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "negative_x21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "positive_r12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "positive_r21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "positive_x12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "positive_x21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "zero_r12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "zero_r21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "zero_x12": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "zero_x21": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-}
+from zepben.ewb import EquivalentBranch, generate_id
 
 equivalent_branch_args = [*equivalent_equipment_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, 11.11, 12.21, 13.31, 14.41, 15.51, 16.61]
 
@@ -55,7 +34,7 @@ def test_equivalent_branch_constructor_default():
     assert not t.zero_x21
 
 
-@given(**equivalent_branch_kwargs)
+@given(**equivalent_branch_kwargs())
 def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r,
                                               r21, x,
                                               x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):

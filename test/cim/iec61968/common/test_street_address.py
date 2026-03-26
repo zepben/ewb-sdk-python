@@ -4,22 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, text, one_of, none
 
-from cim.iec61968.common.test_street_detail import street_detail_kwargs
-from cim.iec61968.common.test_town_detail import town_detail_kwargs
+from cim.fill_fields import street_address_kwargs
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE
-
-street_address_kwargs = {
-    "postal_code": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "town_detail": one_of(none(), builds(TownDetail, **town_detail_kwargs)),
-    "po_box": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "street_detail": one_of(none(), builds(StreetDetail, **street_detail_kwargs)),
-}
 
 street_address_args = ["a", TownDetail(), "b", StreetDetail()]
 
@@ -31,7 +20,7 @@ def test_street_address_constructor_default():
     assert not sa.town_detail
 
 
-@given(**street_address_kwargs)
+@given(**street_address_kwargs())
 def test_street_address_constructor_kwargs(postal_code, town_detail, po_box, street_detail, **kwargs):
     assert not kwargs
 

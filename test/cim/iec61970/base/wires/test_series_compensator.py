@@ -4,22 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import floats, integers
-from zepben.ewb import SeriesCompensator, generate_id
 
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.fill_fields import series_compensator_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
-
-series_compensator_kwargs = {
-    **conducting_equipment_kwargs,
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "varistor_rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "varistor_voltage_threshold": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-}
+    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+from zepben.ewb import SeriesCompensator, generate_id
 
 series_compensator_args = [*conducting_equipment_args, 1.1, 2.2, 3.3, 4.4, 5, 6]
 
@@ -36,7 +25,7 @@ def test_series_compensator_constructor_default():
     assert sc.varistor_voltage_threshold is None
 
 
-@given(**series_compensator_kwargs)
+@given(**series_compensator_kwargs())
 def test_series_compensator_constructor_kwargs(r, r0, x, x0, varistor_rated_current, varistor_voltage_threshold, **kwargs):
     sc = SeriesCompensator(
         r=r,

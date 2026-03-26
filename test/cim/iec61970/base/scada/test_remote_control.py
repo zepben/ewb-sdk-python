@@ -3,18 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds
 
-from util import mrid_strategy
-from zepben.ewb import RemoteControl, Control, generate_id
-
-from cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
+from cim.fill_fields import remote_control_kwargs
+from cim.iec61970.base.scada.test_remote_point import verify_remote_point_constructor_default, \
     verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args
-
-remote_control_kwargs = {
-    **remote_point_kwargs,
-    "control": builds(Control, mrid=mrid_strategy)
-}
+from zepben.ewb import RemoteControl, Control, generate_id
 
 remote_control_args = [*remote_point_args, Control(mrid=generate_id())]
 
@@ -26,7 +19,7 @@ def test_remote_control_constructor_default():
     assert not rc.control
 
 
-@given(**remote_control_kwargs)
+@given(**remote_control_kwargs())
 def test_remote_control_constructor_kwargs(control, **kwargs):
     # noinspection PyArgumentList
     rc = RemoteControl(control=control, **kwargs)

@@ -3,23 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
+from cim.fill_fields import substation_kwargs
+from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import Substation, Feeder, Loop, Circuit, generate_id
-from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-
-substation_kwargs = {
-    **equipment_container_kwargs,
-    "sub_geographical_region": builds(SubGeographicalRegion, mrid=mrid_strategy),
-    "normal_energized_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2),
-    "loops": lists(builds(Loop, mrid=mrid_strategy), max_size=2),
-    "energized_loops": lists(builds(Loop, mrid=mrid_strategy), max_size=2),
-    "circuits": lists(builds(Circuit, mrid=mrid_strategy), max_size=2)
-}
 
 substation_args = [
     *equipment_container_args,
@@ -42,7 +31,7 @@ def test_substation_constructor_default():
     assert not list(cn.circuits)
 
 
-@given(**substation_kwargs)
+@given(**substation_kwargs())
 def test_substation_constructor_kwargs(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
     cn = Substation(sub_geographical_region=sub_geographical_region,
                     normal_energized_feeders=normal_energized_feeders,

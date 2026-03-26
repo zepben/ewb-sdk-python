@@ -2,22 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import builds, integers, lists
 
-from cim.fill_fields import sampled_wire_info, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import PowerSystemResource, Location, PowerTransformerInfo, Asset, generate_id
-
-power_system_resource_kwargs = {
-    **identified_object_kwargs,
-    "location": builds(Location, mrid=mrid_strategy),
-    "asset_info": sampled_wire_info(True),
-    "num_controls": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "assets": lists(builds(Asset, mrid=mrid_strategy), max_size=2)
-}
 
 power_system_resource_args = [
     *identified_object_args,
@@ -36,7 +25,7 @@ def verify_power_system_resource_constructor_default(psr: PowerSystemResource):
     assert not list(psr.assets)
 
 
-def verify_power_system_resource_constructor_kwargs(psr: PowerSystemResource, location, asset_info, num_controls, assets, **kwargs):
+def verify_power_system_resource_constructor_kwargs(psr: PowerSystemResource, location, num_controls, assets, asset_info = None, **kwargs):
     verify_identified_object_constructor_kwargs(psr, **kwargs)
     assert psr.location is location
     assert psr.asset_info is asset_info

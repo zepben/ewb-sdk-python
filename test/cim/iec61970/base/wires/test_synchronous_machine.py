@@ -3,41 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, one_of, none, booleans, integers, sampled_from, lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
-
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.wires.test_rotating_machine import rotating_machine_kwargs, rotating_machine_args, \
+from cim.fill_fields import synchronous_machine_kwargs
+from cim.iec61970.base.wires.test_rotating_machine import rotating_machine_args, \
     verify_rotating_machine_constructor_default, verify_rotating_machine_constructor_kwargs, verify_rotating_machine_constructor_args
 from cim.private_collection_validator import validate_unordered
-
-synchronous_machine_kwargs = {
-    **rotating_machine_kwargs,
-    "curves": lists(builds(ReactiveCapabilityCurve, mrid=mrid_strategy), max_size=2),
-    "base_q": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "condenser_p": one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-    "earthing": booleans(),
-    "earthing_star_point_r": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "earthing_star_point_x": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "ikk": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "max_q": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "max_u": one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-    "min_q": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "min_u": one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-    "mu": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "r": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "r0": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "r2": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "sat_direct_subtrans_x": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "sat_direct_sync_x": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "sat_direct_trans_x": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "x0": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "x2": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "type": sampled_from(SynchronousMachineKind),
-    "operating_mode": sampled_from(SynchronousMachineKind)
-}
+from zepben.ewb import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
 
 synchronous_machine_args = [*rotating_machine_args, [ReactiveCapabilityCurve(mrid="rcc1"), ReactiveCapabilityCurve(mrid="rcc2")], 1.1, 2, True, 3.3, 4.4, 5.5,
                             6.6, 7, 8.8, 9, 10.10, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16, 17.17, 18.18, SynchronousMachineKind.generatorOrMotor,
@@ -73,7 +44,7 @@ def verify_synchronous_machine_constructor_default():
 
 
 # noinspection PyShadowingBuiltins
-@given(**synchronous_machine_kwargs)
+@given(**synchronous_machine_kwargs())
 def verify_synchronous_machine_constructor_kwargs(
     curves,
     base_q,

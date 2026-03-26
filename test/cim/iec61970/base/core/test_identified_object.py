@@ -6,9 +6,7 @@ from collections import Counter
 from typing import Tuple
 
 import pytest
-from hypothesis.strategies import uuids, text, lists, builds
 
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.ewb import IdentifiedObject, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
@@ -21,15 +19,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 # There is a lot of overlap here, but calling both maximises the constructor combinations we check and should catch any breaking changes to
 # constructors.
 #
-
-identified_object_kwargs = {
-    "mrid": uuids(version=4).map(lambda x: str(x)),
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()),
-                   max_size=2,
-                   unique_by=lambda it: it.name)
-}
 
 # noinspection PyArgumentList
 identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType("nt1"), Junction(mrid=generate_id()))]]

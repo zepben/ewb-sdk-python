@@ -3,26 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, sampled_from, lists, floats
 from pytest import raises
 
-from util import mrid_strategy
-from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind, \
-    Terminal, generate_id
-
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import power_transformer_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
-from cim.property_validator import validate_property_accessor
-
-power_transformer_kwargs = {
-    **conducting_equipment_kwargs,
-    "vector_group": sampled_from(VectorGroup),
-    "power_transformer_ends": lists(builds(PowerTransformerEnd, mrid=mrid_strategy), max_size=2),
-    "transformer_utilisation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "construction_kind": sampled_from(TransformerConstructionKind),
-    "function": sampled_from(TransformerFunctionKind)
-}
+    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, TransformerConstructionKind, TransformerFunctionKind, \
+    Terminal, generate_id
 
 power_transformer_args = [
     *conducting_equipment_args,
@@ -45,10 +32,23 @@ def test_power_transformer_constructor_default():
     assert pt.transformer_utilisation is None
 
 
-@given(**power_transformer_kwargs)
-def test_power_transformer_constructor_kwargs(vector_group, power_transformer_ends, transformer_utilisation, construction_kind, function, **kwargs):
-    pt = PowerTransformer(vector_group=vector_group, power_transformer_ends=power_transformer_ends, transformer_utilisation=transformer_utilisation,
-                          construction_kind=construction_kind, function=function, **kwargs)
+@given(**power_transformer_kwargs())
+def test_power_transformer_constructor_kwargs(
+    vector_group,
+    power_transformer_ends,
+    transformer_utilisation,
+    construction_kind,
+    function,
+    **kwargs,
+):
+    pt = PowerTransformer(
+        vector_group=vector_group,
+        power_transformer_ends=power_transformer_ends,
+        transformer_utilisation=transformer_utilisation,
+        construction_kind=construction_kind,
+        function=function,
+        **kwargs
+    )
 
     verify_conducting_equipment_constructor_kwargs(pt, **kwargs)
     assert pt.vector_group == vector_group
@@ -69,10 +69,6 @@ def test_power_transformer_constructor_args():
         pt.construction_kind,
         pt.function
     ]
-
-
-def test_power_transformer_info_accessor():
-    validate_property_accessor(PowerTransformer, PowerTransformerInfo, PowerTransformer.power_transformer_info)
 
 
 def test_get_end_by_terminal():

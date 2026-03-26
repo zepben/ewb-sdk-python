@@ -3,25 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists
 
-from util import mrid_strategy
+from cim.fill_fields import lv_feeder_kwargs
+from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
+    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+from cim.private_collection_validator import validate_unordered
 from zepben.ewb import Terminal, Equipment, LvFeeder, generate_id
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
-    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from cim.private_collection_validator import validate_unordered
-
-lv_feeder_kwargs = {
-    **equipment_container_kwargs,
-    "normal_head_terminal": builds(Terminal, mrid=mrid_strategy),
-    "normal_energizing_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2),
-    "current_equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
-    "current_energizing_feeders": lists(builds(Feeder, mrid=mrid_strategy), max_size=2),
-    "normal_energizing_lv_substation": builds(LvSubstation, mrid=mrid_strategy),
-}
 
 lv_feeder_args = [
     *equipment_container_args,
@@ -44,7 +33,7 @@ def test_lv_feeder_constructor_default():
     assert lvf.normal_energizing_lv_substation is None
 
 
-@given(**lv_feeder_kwargs)
+@given(**lv_feeder_kwargs())
 def test_lv_feeder_constructor_kwargs(
     normal_head_terminal,
     normal_energizing_feeders,

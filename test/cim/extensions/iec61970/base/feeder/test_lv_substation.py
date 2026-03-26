@@ -4,13 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, equipment_container_args, \
+from cim.fill_fields import lv_substation_kwargs
+from cim.iec61970.base.core.test_equipment_container import equipment_container_args, \
     verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args
 from cim.private_collection_validator import validate_unordered
+from util import assert_or_empty
 from zepben.ewb import generate_id, LvFeeder, Feeder, Terminal, PowerTransformer, Fuse
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
-lv_substation_kwargs = equipment_container_kwargs
 lv_substation_args = equipment_container_args
 
 
@@ -18,9 +19,25 @@ def test_lv_substation_constructor_default():
     verify_equipment_container_constructor_default(LvSubstation(mrid=generate_id()))
 
 
-@given(**lv_substation_kwargs)
-def test_lv_substation_constructor_kwargs(**kwargs):
-    verify_equipment_container_constructor_kwargs(LvSubstation(**kwargs), **kwargs)
+@given(**lv_substation_kwargs())
+def test_lv_substation_constructor_kwargs(
+    normal_energizing_feeders,
+    current_energizing_feeders,
+    normal_energized_lv_feeders,
+    **kwargs
+):
+    lv_sub = LvSubstation(
+        normal_energizing_feeders=normal_energizing_feeders,
+        current_energizing_feeders=current_energizing_feeders,
+        normal_energized_lv_feeders=normal_energized_lv_feeders,
+        **kwargs
+    )
+
+    verify_equipment_container_constructor_kwargs(lv_sub, **kwargs)
+
+    assert_or_empty(lv_sub.normal_energizing_feeders, normal_energizing_feeders)
+    assert_or_empty(lv_sub.current_energizing_feeders, current_energizing_feeders)
+    assert_or_empty(lv_sub.normal_energized_lv_feeders, normal_energized_lv_feeders)
 
 
 def test_lv_substation_constructor_args():

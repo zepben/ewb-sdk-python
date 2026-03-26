@@ -3,21 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, integers, sampled_from
-from zepben.ewb import SVCControlMode, StaticVarCompensator, generate_id
 
-from cim.fill_fields import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MAX, FLOAT_MIN
-from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
+from cim.fill_fields import static_var_compensator_kwargs
+from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
-
-static_var_compensator_kwargs = {
-    **regulating_cond_eq_kwargs,
-    "capacitive_rating": floats(min_value=0, max_value=FLOAT_MAX),
-    "inductive_rating": floats(min_value=FLOAT_MIN, max_value=0),
-    "q": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "svc_control_mode": sampled_from(SVCControlMode),
-    "voltage_set_point": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-}
+from zepben.ewb import SVCControlMode, StaticVarCompensator, generate_id
 
 static_var_compensator_args = [*regulating_cond_eq_args, 1.0, -1.0, 2.0, SVCControlMode.voltage, 3]
 
@@ -32,7 +22,7 @@ def test_static_var_compensator_constructor_default():
     assert svc.voltage_set_point is None
 
 
-@given(**static_var_compensator_kwargs)
+@given(**static_var_compensator_kwargs())
 def test_static_var_compensator_constructor_kwargs(capacitive_rating, inductive_rating, q, svc_control_mode, voltage_set_point, **kwargs):
     svc = StaticVarCompensator(
         capacitive_rating=capacitive_rating,

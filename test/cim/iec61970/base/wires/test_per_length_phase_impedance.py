@@ -4,20 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from cim.private_collection_validator import validate_unordered_other
-from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, generate_id
-
+from cim.fill_fields import per_length_phase_impedance_kwargs
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
-    verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_kwargs, per_length_impedance_args
+    verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_args
+from cim.private_collection_validator import validate_unordered_other
+from util import assert_or_empty
+from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
-
-per_length_phase_impedance_kwargs = {
-    **per_length_impedance_kwargs,
-    "phase_impedance_data": lists(builds(PhaseImpedanceData), max_size=1),
-}
 
 per_length_phase_impedance_args = [*per_length_impedance_args, [PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.A)]]
 
@@ -29,13 +24,13 @@ def test_per_length_phase_impedance_constructor_default():
     assert not list(plpi.data)
 
 
-@given(**per_length_phase_impedance_kwargs)
-def test_per_length_phase_impedance_constructor_kwargs(phase_impedance_data, **kwargs):
+@given(**per_length_phase_impedance_kwargs())
+def test_per_length_phase_impedance_constructor_kwargs(data, **kwargs):
     # noinspection PyArgumentList
-    plpi = PerLengthPhaseImpedance(data=phase_impedance_data, **kwargs)
+    plpi = PerLengthPhaseImpedance(data=data, **kwargs)
 
     verify_per_length_impedance_constructor_kwargs(plpi, **kwargs)
-    assert list(plpi.data) == phase_impedance_data
+    assert_or_empty(plpi.data, data)
 
 
 def test_per_length_phase_impedance_constructor_args():

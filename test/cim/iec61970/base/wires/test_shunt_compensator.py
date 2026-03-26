@@ -5,8 +5,7 @@
 
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
-from cim.property_validator import validate_property_accessor
-from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo, Terminal, generate_id
+from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, Terminal, generate_id
 
 shunt_compensator_args = [*regulating_cond_eq_args, True, 1, PhaseShuntConnectionKind.G, Terminal(mrid=generate_id()), 2.2]
 
@@ -38,7 +37,3 @@ def verify_shunt_compensator_constructor_args(sc: ShuntCompensator):
         sc.grounding_terminal,
         sc.sections,
     ]
-
-
-def test_shunt_compensator_info_accessor():
-    validate_property_accessor(ShuntCompensator, ShuntCompensatorInfo, ShuntCompensator.shunt_compensator_info)

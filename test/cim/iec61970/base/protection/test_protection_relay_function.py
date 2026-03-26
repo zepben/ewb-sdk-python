@@ -2,32 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text, one_of, none
 
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
+from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered, validate_ordered_other
-from cim.property_validator import validate_property_accessor
-from util import mrid_strategy
-from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
+from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, Sensor, \
     UnitSymbol, unit_symbol_from_id, generate_id
-
-protection_relay_function_kwargs = {
-    **power_system_resource_kwargs,
-    "model": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "reclosing": one_of(none(), booleans()),
-    "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "protection_kind": sampled_from(ProtectionKind),
-    "directable": booleans(),
-    "power_direction": sampled_from(PowerDirectionKind),
-    "sensors": lists(builds(Sensor, mrid=mrid_strategy), max_size=2),
-    "protected_switches": lists(builds(ProtectedSwitch, mrid=mrid_strategy), max_size=2),
-    "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy), max_size=2),
-    "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
-    "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_from(UnitSymbol), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                               name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
-}
 
 protection_relay_function_args = [
     *power_system_resource_args,
@@ -174,7 +154,3 @@ def test_thresholds_collection():
         ProtectionRelayFunction.remove_threshold_at,
         ProtectionRelayFunction.clear_thresholds
     )
-
-
-def test_relay_info_accessor():
-    validate_property_accessor(ProtectionRelayFunction, RelayInfo, ProtectionRelayFunction.relay_info)

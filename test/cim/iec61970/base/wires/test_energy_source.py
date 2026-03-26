@@ -3,45 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists, floats, booleans
 
-from util import mrid_strategy
-from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
-
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import energy_source_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
+    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
 from cim.private_collection_validator import validate_unordered
-
-energy_source_kwargs = {
-    **energy_connection_kwargs,
-    "energy_source_phases": lists(builds(EnergySourcePhase, mrid=mrid_strategy)),
-    "active_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "reactive_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "voltage_angle": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "voltage_magnitude": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "p_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "p_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rn": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "xn": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "is_external_grid": booleans(),
-    "r_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rn_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "xn_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rn_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "xn_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0_max": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
 
 energy_source_args = [
     *energy_connection_args,
@@ -106,7 +73,7 @@ def test_energy_source_constructor_default():
     assert es.x0_max is None
 
 
-@given(**energy_source_kwargs)
+@given(**energy_source_kwargs())
 def test_energy_source_constructor_kwargs(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
                                           r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min,
                                           r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):

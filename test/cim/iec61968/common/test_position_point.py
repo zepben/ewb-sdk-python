@@ -3,14 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats
 from pytest import raises
-from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
-position_point_kwargs = {
-    "x_position": floats(min_value=-180, max_value=180),
-    "y_position": floats(min_value=-90, max_value=90)
-}
+from cim.fill_fields import position_point_kwargs
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 position_point_args = [1.1, 2.2]
 
@@ -30,7 +26,7 @@ def test_position_point_constructor_default():
         PositionPoint(y_position=2.0)
 
 
-@given(**position_point_kwargs)
+@given(**position_point_kwargs())
 def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
     assert not kwargs
 

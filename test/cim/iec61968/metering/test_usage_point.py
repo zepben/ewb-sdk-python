@@ -4,32 +4,19 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, lists, booleans, text, integers, sampled_from
 
-from util import mrid_strategy
-from zepben.ewb import Location, Equipment, PhaseCode, generate_id
-from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
-from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
-
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import usage_point_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered, validate_unordered_other
+from util import assert_or_empty
+from zepben.ewb import Location, Equipment, PhaseCode, generate_id
+from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 
-usage_point_kwargs = {
-    **identified_object_kwargs,
-    "usage_point_location": builds(Location, mrid=mrid_strategy),
-    "is_virtual": booleans(),
-    "connection_category": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "rated_power": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "approved_inverter_capacity": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "phase_code": sampled_from(PhaseCode),
-    "equipment": lists(builds(Equipment, mrid=mrid_strategy)),
-    "end_devices": lists(builds(EndDevice, mrid=mrid_strategy))
-}
-
-usage_point_args = [*identified_object_args, Location(mrid=generate_id()), True, "1", 1, 2, PhaseCode.XYN, [Equipment(mrid=generate_id())], [EndDevice(mrid=generate_id())]]
+usage_point_args = [*identified_object_args, Location(mrid=generate_id()), True, "1", 1, 2, PhaseCode.XYN, [Equipment(mrid=generate_id())],
+                    [EndDevice(mrid=generate_id())]]
 
 
 def test_usage_point_constructor_default():
@@ -45,7 +32,7 @@ def test_usage_point_constructor_default():
     assert not list(up.end_devices)
 
 
-@given(**usage_point_kwargs)
+@given(**usage_point_kwargs())
 def test_usage_point_constructor_kwargs(
     usage_point_location,
     is_virtual,
@@ -55,6 +42,7 @@ def test_usage_point_constructor_kwargs(
     phase_code,
     equipment,
     end_devices,
+    contacts,
     **kwargs
 ):
     up = UsagePoint(usage_point_location=usage_point_location,
@@ -65,6 +53,7 @@ def test_usage_point_constructor_kwargs(
                     phase_code=phase_code,
                     equipment=equipment,
                     end_devices=end_devices,
+                    contacts=contacts,
                     **kwargs)
 
     verify_identified_object_constructor_kwargs(up, **kwargs)
@@ -74,8 +63,9 @@ def test_usage_point_constructor_kwargs(
     assert up.rated_power == rated_power
     assert up.approved_inverter_capacity == approved_inverter_capacity
     assert up.phase_code == phase_code
-    assert list(up.equipment) == equipment
-    assert list(up.end_devices) == end_devices
+    assert_or_empty(up.equipment, equipment)
+    assert_or_empty(up.end_devices, end_devices)
+    assert_or_empty(up.contacts, contacts)
 
 
 def test_usage_point_constructor_args():
@@ -120,10 +110,11 @@ def test_end_devices_collection():
         UsagePoint.clear_end_devices
     )
 
+
 def test_contacts_collection():
     validate_unordered_other(
         UsagePoint,
-        lambda _id: ContactDetails(mrid=str(_id)),
+        lambda _id: ContactDetails(id=str(_id)),
         UsagePoint.contacts,
         UsagePoint.num_contacts,
         UsagePoint.get_contact,

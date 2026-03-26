@@ -3,21 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text, lists, floats, booleans
 
-from cim.fill_fields import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
+from cim.fill_fields import relay_info_kwargs
+from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
 from cim.private_collection_validator import validate_ordered_other
 from zepben.ewb import RelayInfo, generate_id
-
-relay_info_kwargs = {
-    **asset_info_kwargs,
-    "curve_setting": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "reclose_fast": booleans(),
-    "reclose_delays": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-}
 
 relay_info_args = [*asset_info_args, "a", True, [0.1, 0.2, 0.3]]
 
@@ -31,7 +22,7 @@ def test_relay_info_constructor_default():
     assert not list(ri.reclose_delays)
 
 
-@given(**relay_info_kwargs)
+@given(**relay_info_kwargs())
 def test_relay_info_constructor_kwargs(curve_setting, reclose_fast, reclose_delays, **kwargs):
     ri = RelayInfo(
         curve_setting=curve_setting,

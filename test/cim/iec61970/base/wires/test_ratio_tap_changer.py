@@ -3,22 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, floats
 
-from util import mrid_strategy
-from zepben.ewb import generate_id
-from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-
-from cim.fill_fields import FLOAT_MIN, FLOAT_MAX
+from cim.fill_fields import ratio_tap_changer_kwargs
 from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
-    verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_kwargs, tap_changer_args, assume_step_values
-
-ratio_tap_changer_kwargs = {
-    **tap_changer_kwargs,
-    "transformer_end": builds(TransformerEnd, mrid=mrid_strategy),
-    "step_voltage_increment": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+    verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_args, assume_step_values
+from zepben.ewb import generate_id
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 ratio_tap_changer_args = [*tap_changer_args, TransformerEnd(mrid=generate_id()), 1.1]
 
@@ -31,7 +22,7 @@ def test_ratio_tap_changer_constructor_default():
     assert rtc.step_voltage_increment is None
 
 
-@given(**ratio_tap_changer_kwargs)
+@given(**ratio_tap_changer_kwargs())
 def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_increment, **kwargs):
     assume_step_values(kwargs["high_step"], kwargs["low_step"], kwargs["neutral_step"], kwargs["normal_step"], kwargs["step"])
 
