@@ -306,7 +306,7 @@ def protection_relay_function_kwargs(include_runtime: bool = True):
         "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy), max_size=2),
         "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
         "thresholds": lists(create_relay_setting(), min_size=4, max_size=4),
-        "relay_info": builds(RelayInfo, mrid=mrid_strategy),
+        "asset_info": builds(RelayInfo, mrid=mrid_strategy),
     }
 
 
@@ -2202,9 +2202,10 @@ def switch_kwargs(include_runtime: bool):
         "rated_current": floats(min_value=1, max_value=FLOAT_MAX),
         # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
         "_normally_open": sampled_from([0, 15]),
-        "_open": sampled_from([0, 15])
+        "_open": sampled_from([0, 15]),
         # "_normally_open": integers(min_value=0, max_value=15),
         # "_open": integers(min_value=0, max_value=15),
+        "asset_info": builds(SwitchInfo, **identified_object_kwargs(include_runtime)),
     }
 
 

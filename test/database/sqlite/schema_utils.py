@@ -8,14 +8,12 @@ from typing import TypeVar, Type, Optional
 from hypothesis import assume
 
 from zepben.ewb import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumer, \
-    EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
-    OrganisationRole, Customer, CustomerAgreement, PricingStructure, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, \
-    ConnectivityNode, Equipment, EquipmentContainer, Name, PowerSystemResource, Substation, Terminal, \
-    Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, PowerElectronicsConnection, \
-    PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
-    Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
-    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    generate_id, LinearShuntCompensator
+    EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, OrganisationRole, \
+    Customer, CustomerAgreement, PricingStructure, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, \
+    EquipmentContainer, Name, PowerSystemResource, Substation, Terminal, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, \
+    AcLineSegment, PowerElectronicsConnection, PowerTransformer, TransformerStarImpedance, Circuit, Loop, LvFeeder, ProtectedSwitch, RegulatingCondEq, \
+    RegulatingControl, ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, \
+    SynchronousMachine, BatteryUnit, generate_id, LinearShuntCompensator
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -26,7 +24,6 @@ from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
@@ -52,7 +49,7 @@ class SchemaNetworks:
         name_type.description = "type description"
         services.add_name_type(name_type)
 
-        obj: object_type
+        obj: TIdentifiedObject
         try:
             obj = object_type(mrid="obj1")
         except Exception as ex:
@@ -172,7 +169,6 @@ class SchemaNetworks:
             for it in filled.schemes:
                 it.add_function(filled)
                 service.add(it)
-            service.add(filled.relay_info)
 
         if isinstance(filled, ProtectionRelayScheme):
             if filled.system is not None:
@@ -314,12 +310,6 @@ class SchemaNetworks:
         if isinstance(filled, AuxiliaryEquipment):
             service.add(filled.terminal)
 
-        if isinstance(filled, CurrentTransformer):
-            service.add(filled.asset_info)
-
-        if isinstance(filled, PotentialTransformer):
-            service.add(filled.asset_info)
-
         ######################
         # IEC61970 Base Core #
         ######################
@@ -369,6 +359,8 @@ class SchemaNetworks:
             service.add_name_type(filled.type)
 
         if isinstance(filled, PowerSystemResource):
+            if filled.asset_info is not None:
+                service.add(filled.asset_info)
             service.add(filled.location)
             for it in filled.assets:
                 it.add_power_system_resource(filled)
@@ -484,17 +476,12 @@ class SchemaNetworks:
                 service.add(it)
 
         if isinstance(filled, AcLineSegmentPhase):
-            if filled.asset_info is not None:
-                service.add(filled.asset_info)
             filled.ac_line_segment.add_phase(filled)
             service.add(filled.ac_line_segment)
 
         if isinstance(filled, Clamp):
             filled.ac_line_segment.add_clamp(filled)
             service.add(filled.ac_line_segment)
-
-        if isinstance(filled, Conductor):
-            service.add(filled.asset_info)
 
         if isinstance(filled, Cut):
             filled.ac_line_segment.add_cut(filled)
@@ -548,7 +535,6 @@ class SchemaNetworks:
             service.add(filled.power_electronics_connection)
 
         if isinstance(filled, PowerTransformer):
-            service.add(filled.asset_info)
             for it in filled.ends:
                 it.power_transformer = filled
                 service.add(it)
@@ -566,9 +552,6 @@ class SchemaNetworks:
             filled.transformer_end.ratio_tap_changer = filled
             service.add(filled.transformer_end)
             service.add(filled.tap_changer_control)
-
-        if isinstance(filled, ShuntCompensator):
-            service.add(filled.asset_info)
 
         if isinstance(filled, SynchronousMachine):
             # The curves use a one way link, so we just need to add them.

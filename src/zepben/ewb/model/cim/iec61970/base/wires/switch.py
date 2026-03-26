@@ -7,7 +7,12 @@ from __future__ import annotations
 
 __all__ = ["Switch"]
 
+import sys
 from typing import Optional, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -45,6 +50,8 @@ class Switch(ConductingEquipment):
       value for each phase of the switch.
     """
 
+    asset_info: SwitchInfo | None = None
+
     rated_current: Optional[float] = None
     """The maximum continuous current carrying capacity in amps governed by the device material and construction. The attribute shall be a positive value."""
 
@@ -56,11 +63,13 @@ class Switch(ConductingEquipment):
     is expected to match with the Switch.normalOpen."""
 
     @property
+    @deprecated("use asset_info instead.")
     def switch_info(self) -> Optional[SwitchInfo]:
         """Datasheet information for this Switch."""
         return self.asset_info
 
     @switch_info.setter
+    @deprecated("use asset_info instead.")
     def switch_info(self, si: Optional[SwitchInfo]):
         """
         Set the :class:`SwitchInfo` for this :class:`Switch`

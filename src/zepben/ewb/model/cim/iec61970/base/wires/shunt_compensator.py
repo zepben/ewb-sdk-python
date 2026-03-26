@@ -5,7 +5,12 @@
 
 __all__ = ["ShuntCompensator"]
 
+import sys
 from typing import Optional, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
@@ -36,22 +41,23 @@ class ShuntCompensator(RegulatingCondEq):
         For `NonlinearShuntCompensator`s shall only be set to one of the NonlinearShuntCompensatorPoint.sectionNumber. There is no interpolation between
         NonlinearShuntCompensatorPoint-s.
     """
+
+    asset_info: 'ShuntCompensatorInfo | None' = None
+
     grounded: Optional[bool] = None
-
     nom_u: Optional[int] = None
-
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
-
     grounding_terminal: 'Terminal | None' = None
-
     sections: Optional[float] = None
 
     @property
+    @deprecated("use asset_info instead.")
     def shunt_compensator_info(self) -> Optional['ShuntCompensatorInfo']:
         """The `ShuntCompensatorInfo` for this `ShuntCompensator`"""
         return self.asset_info
 
     @shunt_compensator_info.setter
+    @deprecated("use asset_info instead.")
     def shunt_compensator_info(self, sci: Optional['ShuntCompensatorInfo']):
         """
         Set the `ShuntCompensatorInfo` for this `ShuntCompensator`

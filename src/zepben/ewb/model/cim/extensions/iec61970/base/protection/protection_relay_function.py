@@ -7,7 +7,13 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayFunction"]
 
+import sys
+import warnings
 from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
@@ -29,6 +35,8 @@ class ProtectionRelayFunction(PowerSystemResource):
     [ZBEX]
     A function that a relay implements to protect equipment.
     """
+
+    asset_info: Optional[RelayInfo] = None
 
     model: Optional[str] = None
     """[ZBEX] The protection equipment type name(manufacturer information)."""
@@ -58,13 +66,16 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     _thresholds: Optional[List[RelaySetting]] = None
 
-    def __init__(self,
-                 sensors: Iterable[Sensor] = None,
-                 protected_switches: Iterable[ProtectedSwitch] = None,
-                 schemes: Iterable[ProtectionRelayScheme] = None,
-                 time_limits: Iterable[float] = None,
-                 thresholds: Iterable[RelaySetting] = None,
-                 relay_info: RelayInfo = None, **kwargs):
+    def __init__(
+        self,
+        sensors: Iterable[Sensor] = None,
+        protected_switches: Iterable[ProtectedSwitch] = None,
+        schemes: Iterable[ProtectionRelayScheme] = None,
+        time_limits: Iterable[float] = None,
+        thresholds: Iterable[RelaySetting] = None,
+        relay_info: RelayInfo | None = None,
+        **kwargs
+    ):
         super(ProtectionRelayFunction, self).__init__(**kwargs)
 
         if sensors is not None:
@@ -83,14 +94,17 @@ class ProtectionRelayFunction(PowerSystemResource):
             for threshold in thresholds:
                 self.add_threshold(threshold)
         if relay_info is not None:
-            self.relay_info = relay_info
+            warnings.warn("relay_info is deprecated, use asset_info instead.")
+            self.asset_info = relay_info
 
     @property
+    @deprecated("use asset_info instead.")
     def relay_info(self):
         """Datasheet information for this CurrentRelay"""
         return self.asset_info
 
     @relay_info.setter
+    @deprecated("use asset_info instead.")
     def relay_info(self, relay_info: Optional[RelayInfo]):
         self.asset_info = relay_info
 

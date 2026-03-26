@@ -7,7 +7,12 @@ from __future__ import annotations
 
 __all__ = ["PowerTransformer"]
 
+import sys
 from typing import List, Optional, Generator, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
@@ -37,9 +42,10 @@ class PowerTransformer(ConductingEquipment):
     Attributes -
         vector_group : `zepben.protobuf.cim.iec61970.base.wires.VectorGroup` of the transformer for protective relaying.
         power_transformer_ends : 
-                                 
-                                 
     """
+
+    asset_info: PowerTransformerInfo | None = None
+
     vector_group: VectorGroup = VectorGroup.UNKNOWN
     """
     Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
@@ -98,11 +104,13 @@ class PowerTransformer(ConductingEquipment):
         return ngen(self._power_transformer_ends)
 
     @property
+    @deprecated("use asset_info instead.")
     def power_transformer_info(self) -> Optional[PowerTransformerInfo]:
         """The `PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 
     @power_transformer_info.setter
+    @deprecated("use asset_info instead.")
     def power_transformer_info(self, pti: Optional[PowerTransformerInfo]):
         """
         Set the `PowerTransformerInfo` for this `PowerTransformer`
@@ -212,6 +220,8 @@ class PowerTransformer(ConductingEquipment):
         if not end.power_transformer:
             end.power_transformer = self
 
-        require(end.power_transformer is self,
-                lambda: f"PowerTransformerEnd {end} references another PowerTransformer {end.power_transformer}, expected {str(self)}.")
+        require(
+            end.power_transformer is self,
+            lambda: f"PowerTransformerEnd {end} references another PowerTransformer {end.power_transformer}, expected {str(self)}.",
+        )
         return False

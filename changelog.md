@@ -6,12 +6,21 @@
 * `EquipmentTreeBuilder.roots` is now a `dict` keyed by the `start_item` rather than a `Generator`. This allows better lookup of root items when you are looking
   for an explicit items tree.
 * Renamed `PanDemandResponseFunction` constructor argument `appliances` -> `appliance` to match the class property.
+* Deprecated the following side-hustle shadowy names for `PowerSystemResource.asset_info`, just use `asset_info` directly:
+  * `Conductor.wire_info`
+  * `CurrentTransformer.current_transformer_info`
+  * `PotentialTransformer.potential_transformer_info`
+  * `PowerTransformer.power_transformer_info`
+  * `ProtectionRelayFunction.relay_info`
+  * `ShuntCompensator.shunt_compensator_info`
+  * `Switch.switch_info`
 
 ### New Features
 * None.
 
 ### Enhancements
 * `SetDirection.run` now supports `ConductingEquipment`.
+* Fixed types on all overrides for `PowerSystemResource.asset_info`, removing the need to shadow them with type specific variants.
 
 ### Fixes
 * None.

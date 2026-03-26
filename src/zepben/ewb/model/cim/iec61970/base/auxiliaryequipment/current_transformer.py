@@ -5,7 +5,12 @@
 
 __all__ = ["CurrentTransformer"]
 
+import sys
 from typing import Optional, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
@@ -20,15 +25,19 @@ class CurrentTransformer(Sensor):
     A typical secondary current rating would be 5A.
     """
 
+    asset_info: 'CurrentTransformerInfo | None' = None
+
     core_burden: Optional[int] = None
     """Power burden of the CT core in watts."""
 
     @property
+    @deprecated("use asset_info instead.")
     def current_transformer_info(self) -> Optional['CurrentTransformerInfo']:
         """The `CurrentTransformerInfo` for this `CurrentTransformer`"""
         return self.asset_info
 
     @current_transformer_info.setter
+    @deprecated("use asset_info instead.")
     def current_transformer_info(self, cti: Optional['CurrentTransformerInfo']):
         """
         Set the `CurrentTransformerInfo` for this `CurrentTransformer`

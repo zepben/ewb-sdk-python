@@ -7,7 +7,6 @@ from typing import Callable, Optional, Any
 
 from zepben.ewb import BatteryControl, PanDemandResponseFunction, StaticVarCompensator
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
-from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
@@ -288,7 +287,6 @@ class NetworkServiceComparator(BaseServiceComparator):
             ProtectionRelayFunction.sensors,
             ProtectionRelayFunction.schemes,
         )
-        self._compare_id_references(diff, ProtectionRelayFunction.relay_info)
 
         return self._compare_power_system_resource(diff)
 
@@ -637,7 +635,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, CurrentTransformer.core_burden)
-        self._compare_id_references(diff, CurrentTransformer.current_transformer_info)
 
         return self._compare_sensor(diff)
 
@@ -648,7 +645,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, PotentialTransformer.type)
-        self._compare_id_references(diff, PotentialTransformer.potential_transformer_info)
 
         return self._compare_sensor(diff)
 
@@ -936,7 +932,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_conductor(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_floats(diff, Conductor.length, Conductor.design_rating)
         self._compare_values(diff, Conductor.design_temperature)
-        self._compare_id_references(diff, Conductor.wire_info)
 
         return self._compare_conducting_equipment(diff)
 
@@ -1161,7 +1156,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_indexed_id_reference_collections(diff, PowerTransformer.ends)
         self._compare_values(diff, PowerTransformer.vector_group, PowerTransformer.construction_kind, PowerTransformer.function)
         self._compare_floats(diff, PowerTransformer.transformer_utilisation)
-        self._compare_id_references(diff, PowerTransformer.power_transformer_info)
 
         return self._compare_conducting_equipment(diff)
 
@@ -1256,7 +1250,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_shunt_compensator(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, ShuntCompensator.grounded, ShuntCompensator.nom_u, ShuntCompensator.phase_connection)
         self._compare_floats(diff, ShuntCompensator.sections)
-        self._compare_id_references(diff, ShuntCompensator.shunt_compensator_info)
         self._compare_id_references(diff, ShuntCompensator.grounding_terminal)
 
         return self._compare_regulating_cond_eq(diff)
@@ -1277,7 +1270,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_floats(diff, Switch.rated_current)
         self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, lambda it, phase: it.is_normally_open(phase)))
         self._add_if_different(diff, "isOpen", self._compare_open_status(diff, lambda it, phase: it.is_open()))
-        self._compare_id_references(diff, Switch.switch_info)
 
         return self._compare_conducting_equipment(diff)
 

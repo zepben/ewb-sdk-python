@@ -1251,7 +1251,7 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TableCurrentTransformers)
         insert = self._database_tables.get_insert(TableCurrentTransformers)
 
-        insert.add_value(table.current_transformer_info_mrid.query_index, self._mrid_or_none(current_transformer.current_transformer_info))
+        insert.add_value(table.current_transformer_info_mrid.query_index, self._mrid_or_none(current_transformer.asset_info))
         insert.add_value(table.core_burden.query_index, current_transformer.core_burden)
 
         return self._save_sensor(table, insert, current_transformer, "current transformer")
@@ -1280,7 +1280,7 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TablePotentialTransformers)
         insert = self._database_tables.get_insert(TablePotentialTransformers)
 
-        insert.add_value(table.potential_transformer_info_mrid.query_index, self._mrid_or_none(potential_transformer.potential_transformer_info))
+        insert.add_value(table.potential_transformer_info_mrid.query_index, self._mrid_or_none(potential_transformer.asset_info))
         insert.add_value(table.type.query_index, potential_transformer.type.short_name)
 
         return self._save_sensor(table, insert, potential_transformer, "potential transformer")
@@ -1805,7 +1805,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.length.query_index, conductor.length)
         insert.add_value(table.design_temperature.query_index, conductor.design_temperature)
         insert.add_value(table.design_rating.query_index, conductor.design_rating)
-        insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(conductor.wire_info))
+        insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(conductor.asset_info))
 
         return self._save_conducting_equipment(table, insert, conductor, description)
 
@@ -2243,7 +2243,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.transformer_utilisation.query_index, power_transformer.transformer_utilisation)
         insert.add_value(table.construction_kind.query_index, power_transformer.construction_kind.short_name)
         insert.add_value(table.function.query_index, power_transformer.function.short_name)
-        insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(power_transformer.power_transformer_info))
+        insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(power_transformer.asset_info))
 
         return self._save_conducting_equipment(table, insert, power_transformer, "power transformer")
 
@@ -2440,7 +2440,7 @@ class NetworkCimWriter(BaseCimWriter):
         # noinspection PyProtectedMember
         insert.add_value(table.open.query_index, switch._open)
         insert.add_value(table.rated_current.query_index, switch.rated_current)
-        insert.add_value(table.switch_info_mrid.query_index, self._mrid_or_none(switch.switch_info))
+        insert.add_value(table.switch_info_mrid.query_index, self._mrid_or_none(switch.asset_info))
 
         return self._save_conducting_equipment(table, insert, switch, description)
 
