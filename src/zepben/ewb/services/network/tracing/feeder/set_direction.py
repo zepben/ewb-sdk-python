@@ -11,6 +11,7 @@ from functools import singledispatchmethod
 from logging import Logger
 from typing import Optional, TYPE_CHECKING, Type
 
+from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
@@ -26,7 +27,7 @@ from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing
 from zepben.ewb.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 if TYPE_CHECKING:
-    from zepben.ewb import NetworkService, Switch, ConductingEquipment
+    from zepben.ewb import NetworkService, Switch
 
 
 class SetDirection:
