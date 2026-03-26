@@ -5,6 +5,7 @@
   call with `run`.
 * `EquipmentTreeBuilder.roots` is now a `dict` keyed by the `start_item` rather than a `Generator`. This allows better lookup of root items when you are looking
   for an explicit items tree.
+* Renamed `PanDemandResponseFunction` constructor argument `appliances` -> `appliance` to match the class property.
 
 ### New Features
 * None.
