@@ -25,7 +25,8 @@
 * You can now pass a list of `TransformerEndRatedS` to the `PowerTransformerEnd` constructor via the `ratings` argument.
 
 ### Fixes
-* None.
+* Fixed the packing and unpacking of timestamps for `Agreement.validity_interval` in gRPC messages. Fix also ensures all other timestamps correctly support
+  `None` when optional.
 
 ### Notes
 * None.
