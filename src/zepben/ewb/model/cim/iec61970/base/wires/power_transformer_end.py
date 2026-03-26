@@ -84,7 +84,7 @@ class PowerTransformerEnd(TransformerEnd):
     Should not be used directly, instead use add_rating and get_rating functions. 
     """
 
-    def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, **kwargs):
+    def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, ratings: list[TransformerEndRatedS] = None, **kwargs):
         super(PowerTransformerEnd, self).__init__(**kwargs)
         if power_transformer:
             self.power_transformer = power_transformer
@@ -102,6 +102,9 @@ class PowerTransformerEnd(TransformerEnd):
         if self._rated_s is not None:
             self.rated_s = self._rated_s
             self._rated_s = None
+        if ratings:
+            for rating in ratings:
+                self.add_rating(rating.rated_s, rating.cooling_type)
 
     @property
     def power_transformer(self):
@@ -125,8 +128,8 @@ class PowerTransformerEnd(TransformerEnd):
         Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
         shall be identical.
         """
-        if self._s_ratings:
-            return self._s_ratings[0].rated_s if len(self._s_ratings) > 0 else None
+        if self._s_ratings and len(self._s_ratings) > 0:
+            return self._s_ratings[0].rated_s
         return None
 
     @rated_s.setter
