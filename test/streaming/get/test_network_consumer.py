@@ -355,16 +355,12 @@ class TestNetworkConsumer:
         async def client_test():
             mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
 
-            # lvf5 won't be in the collection of returned objects as its part of the network hierarchy already
             assert self.service.len_of() == 16
-            assert len(mor.objects) == 15
-            assert len(
-                {
-                    "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
-                    "b2-t2", "generated_cn_0", "generated_cn_1", "generated_cn_2"
-                }.difference(mor.objects.keys()),
-            ) == 0
-            assert "tx4" not in mor.objects
+            assert len(mor.objects) == 16
+            assert {
+                    "lvf5", "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
+                    "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"
+                } == set(mor.objects.keys())
             with pytest.raises(KeyError):
                 self.service.get("tx4")
             assert self.service.get("tx0") == mor.objects["tx0"]
