@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from logging import Logger
-from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol, Iterable
+from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol, Iterable, Any
 
 from zepben.ewb import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Terminal, LvFeeder,
                         PowerTransformer, EnergyConsumer, PowerElectronicsConnection, Clamp, Cut, Substation)
@@ -55,7 +55,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
-        action: Callable[[EnergySource], None] = null_action
+        action: Callable[[EnergySource], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from an `EnergySource`, updating the network pointer to the new `EnergySource`.
@@ -76,7 +76,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[EnergySource], None] = null_action
+        action: Callable[[EnergySource], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `EnergySource` to the network and connect it to the current network pointer, updating the network pointer to the new `EnergySource`.
@@ -99,7 +99,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
-        action: Callable[[AcLineSegment], None] = null_action
+        action: Callable[[AcLineSegment], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from an `AcLineSegment`, updating the network pointer to the new `AcLineSegment`.
@@ -120,7 +120,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[AcLineSegment], None] = null_action
+        action: Callable[[AcLineSegment], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `AcLineSegment` to the network and connect it to the current network pointer, updating the network pointer to the new `AcLineSegment`.
@@ -145,7 +145,7 @@ class TestNetworkBuilder:
         is_normally_open: bool = False,
         is_open: Optional[bool] = None,
         mrid: Optional[str] = None,
-        action: Callable[[Breaker], None] = null_action
+        action: Callable[[Breaker], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `Breaker`, updating the network pointer to the new `Breaker`.
@@ -170,7 +170,7 @@ class TestNetworkBuilder:
         is_open: Optional[bool] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[Breaker], None] = null_action
+        action: Callable[[Breaker], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `Breaker` to the network and connect it to the current network pointer, updating the network pointer to the new `Breaker`.
@@ -196,7 +196,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
-        action: Callable[[Junction], None] = null_action
+        action: Callable[[Junction], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `Junction`, updating the network pointer to the new `Junction`.
@@ -219,7 +219,7 @@ class TestNetworkBuilder:
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[Junction], None] = null_action
+        action: Callable[[Junction], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `Junction` to the network and connect it to the current network pointer, updating the network pointer to the new `Junction`.
@@ -245,7 +245,7 @@ class TestNetworkBuilder:
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[PowerElectronicsConnection], None] = null_action
+        action: Callable[[PowerElectronicsConnection], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `PowerElectronicsConnection` to the network and connect it to the current network pointer, updating the network pointer to the new
@@ -271,7 +271,7 @@ class TestNetworkBuilder:
         nominal_phases: Optional[List[PhaseCode]] = None,
         end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
         mrid: Optional[str] = None,
-        action: Callable[[PowerTransformer], None] = null_action
+        action: Callable[[PowerTransformer], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `PowerTransformer`, updating the network pointer to the new `PowerTransformer`.
@@ -297,7 +297,7 @@ class TestNetworkBuilder:
         end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[PowerTransformer], None] = null_action
+        action: Callable[[PowerTransformer], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `PowerTransformer` to the network and connect it to the current network pointer, updating the network pointer to the new `PowerTransformer`.
@@ -326,7 +326,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[EnergyConsumer], None] = null_action
+        action: Callable[[EnergyConsumer], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Add a new `EnergyConsumer` to the network and connect it to the current network pointer, updating the network pointer to the new
@@ -350,7 +350,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: str = None,
-        action: Callable[[BusbarSection], None] = null_action
+        action: Callable[[BusbarSection], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `BusbarSection`, updating the network pointer to the new `BusbarSection`.
@@ -371,7 +371,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: str = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[BusbarSection], None] = null_action
+        action: Callable[[BusbarSection], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
 
@@ -397,7 +397,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
-        action: Callable[[SubclassesConductingEquipment], None] = null_action,
+        action: Callable[[SubclassesConductingEquipment], Any] = null_action,
         default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
@@ -427,7 +427,7 @@ class TestNetworkBuilder:
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[SubclassesConductingEquipment], None] = null_action,
+        action: Callable[[SubclassesConductingEquipment], Any] = null_action,
         default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
@@ -459,7 +459,7 @@ class TestNetworkBuilder:
         mrid: Optional[str] = None,
         length_from_terminal_1: float = None,
         nominal_phases: PhaseCode = PhaseCode.ABC,
-        action: Callable[[Clamp], None] = null_action
+        action: Callable[[Clamp], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Create a clamp on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
@@ -490,7 +490,7 @@ class TestNetworkBuilder:
         is_normally_open: bool = True,
         is_open: bool = None,
         nominal_phases: PhaseCode = PhaseCode.ABC,
-        action: Callable[[Cut], None] = null_action
+        action: Callable[[Cut], Any] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
