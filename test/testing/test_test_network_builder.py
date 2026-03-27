@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
-from typing import Callable, List
+from typing import Callable, List, Any
 
 import pytest
 from pytest import raises
@@ -264,25 +264,25 @@ class TestTestNetworkBuilder:
         # 1 tx3 3
         #    2
         #
-        def init_rated_u(val: int) -> Callable[[PowerTransformerEnd], None]:
+        def init_rated_u(val: int) -> Callable[[PowerTransformerEnd], Any]:
             def set_rated_u(end: PowerTransformerEnd):
                 end.rated_u = val
 
             return set_rated_u
 
-        def init_rated_s(val: int) -> Callable[[PowerTransformerEnd], None]:
+        def init_rated_s(val: int) -> Callable[[PowerTransformerEnd], Any]:
             def set_rated_s(end: PowerTransformerEnd):
                 end.rated_s = val
 
             return set_rated_s
 
-        def init_s_rating(cooling_type: TransformerCoolingType,  rated_s: int) -> Callable[[PowerTransformerEnd], None]:
+        def init_s_rating(cooling_type: TransformerCoolingType,  rated_s: int) -> Callable[[PowerTransformerEnd], Any]:
             def add_s_rating(end: PowerTransformerEnd):
                 end.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
 
             return add_s_rating
 
-        def init_b(val: float) -> Callable[[PowerTransformerEnd], None]:
+        def init_b(val: float) -> Callable[[PowerTransformerEnd], Any]:
             def set_b(end: PowerTransformerEnd):
                 end.b = val
 
@@ -375,7 +375,7 @@ class TestTestNetworkBuilder:
             assert end.terminal == terminal
 
     @staticmethod
-    def _validate_connectivity_node_override(add_with_connectivity_node: Callable[[TestNetworkBuilder, str, str], None]):
+    def _validate_connectivity_node_override(add_with_connectivity_node: Callable[[TestNetworkBuilder, str, str], Any]):
         builder = TestNetworkBuilder()
         ns = builder.network
 

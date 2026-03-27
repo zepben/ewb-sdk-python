@@ -9,7 +9,7 @@ __all__ = ["ProtectionRelayFunction"]
 
 import sys
 import warnings
-from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
+from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING, Any
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
@@ -117,7 +117,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._thresholds)
 
-    def for_each_threshold(self, action: Callable[[int, RelaySetting], None]):
+    def for_each_threshold(self, action: Callable[[int, RelaySetting], Any]):
         """
         Call the `action` on each :class:`RelaySetting` in the `thresholds` collection
 
@@ -205,7 +205,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._time_limits)
 
-    def for_each_time_limit(self, action: Callable[[int, float], None]):
+    def for_each_time_limit(self, action: Callable[[int, float], Any]):
         """
         Call the `action` on each time limit in the `time_limits` collection
 

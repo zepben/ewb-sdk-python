@@ -5,7 +5,7 @@
 """
 Helpers to simply print the database SQL statements
 """
-from typing import Callable
+from typing import Callable, Any
 
 from zepben.ewb import SqliteTable, CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
 
@@ -29,7 +29,7 @@ def print_database_update_statements(table: SqliteTable):
     print_statement(table.prepared_update_sql)
 
 
-def print_statements(action: Callable[[SqliteTable], None]):
+def print_statements(action: Callable[[SqliteTable], Any]):
     print("******** Customer Database ********")
     print("")
     CustomerDatabaseTables().for_each_table(action)

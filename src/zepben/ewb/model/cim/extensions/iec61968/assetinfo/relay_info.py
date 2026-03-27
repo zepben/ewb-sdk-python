@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["RelayInfo"]
 
-from typing import Optional, List, Generator, Callable
+from typing import Optional, List, Generator, Callable, Any
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
@@ -57,7 +57,7 @@ class RelayInfo(AssetInfo):
         else:
             raise IndexError(index)
 
-    def for_each_delay(self, action: Callable[[int, float], None]):
+    def for_each_delay(self, action: Callable[[int, float], Any]):
         """
         Call the `action` on each delay in the `reclose_delays` collection
 

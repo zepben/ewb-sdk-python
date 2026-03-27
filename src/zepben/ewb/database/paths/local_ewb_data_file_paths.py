@@ -7,7 +7,7 @@ __all__ = ['LocalEwbDataFilePaths']
 
 from datetime import date
 from pathlib import Path
-from typing import Callable, Generator, Union
+from typing import Callable, Generator, Union, Any
 
 from zepben.ewb import require
 from zepben.ewb.database.paths.ewb_data_file_paths import EwbDataFilePaths
@@ -20,7 +20,7 @@ class LocalEwbDataFilePaths(EwbDataFilePaths):
         self,
         base_dir: Union[Path, str],
         create_path: bool = False,
-        create_directories_func: Callable[[Path], None] = lambda it: it.mkdir(parents=True),
+        create_directories_func: Callable[[Path], Any] = lambda it: it.mkdir(parents=True),
         is_directory: Callable[[Path], bool] = Path.is_dir,
         exists: Callable[[Path], bool] = Path.exists,
         list_files: Callable[[Path], Generator[Path, None, None]] = Path.iterdir,

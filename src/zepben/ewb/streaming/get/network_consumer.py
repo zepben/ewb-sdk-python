@@ -73,6 +73,7 @@ class NetworkResult:
     network_service: Optional[NetworkService]
     failed: Set[str] = set()
 
+
 @dataclass(slots=True)
 class GetNetworkHierarchyConfig:
     include_geographical_regions: bool = True
@@ -147,7 +148,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         container: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer` represented by `container`
@@ -175,7 +176,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         containers: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ):
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer`'s represented in `containers`
@@ -198,7 +199,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state)
 
-    async def get_equipment_for_restriction(self, restriction: [str, OperationalRestriction]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_restriction(self, restriction: str | OperationalRestriction) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`OperationalRestriction` represented by `restriction`
 
@@ -218,7 +219,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_equipment_for_restriction(restriction)
 
-    async def get_terminals_for_connectivity_node(self, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
+    async def get_terminals_for_connectivity_node(self, node: str | ConnectivityNode) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Terminal`s for the :class:`ConnectivityNode` represented by `node`
 
@@ -238,7 +239,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_terminals_for_connectivity_node(node)
 
-
     @overload
     async def get_network_hierarchy(
         self,
@@ -250,14 +250,15 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         include_loops: bool = None,
         include_lv_substations: bool = None,
         include_lv_feeders: bool = None,
-    ) -> GrpcResult[NetworkHierarchy]: ...
+    ) -> GrpcResult[NetworkHierarchy]:
+        ...
 
     @overload
-    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]: ...
-    # This method needs to exist as @overload requires 2 decorated methods and 1 functional method.
+    async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]:
+        # This method needs to exist as @overload requires 2 decorated methods and 1 functional method.
+        ...
 
     async def get_network_hierarchy(self, **kwargs) -> GrpcResult[NetworkHierarchy]:
-
         """
         Retrieve the network hierarchy
 
@@ -286,7 +287,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
@@ -364,10 +365,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         container: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(
-            lambda: self._process_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state)
+            lambda: self._process_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state),
         )
 
     async def _get_equipment_for_containers(
@@ -375,16 +376,16 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         containers: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(
-            lambda: self._process_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state)
+            lambda: self._process_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state),
         )
 
-    async def _get_equipment_for_restriction(self, restriction: [str, OperationalRestriction]) -> GrpcResult[MultiObjectResult]:
+    async def _get_equipment_for_restriction(self, restriction: str | OperationalRestriction) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_restriction(restriction))
 
-    async def _get_terminals_for_connectivity_node(self, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
+    async def _get_terminals_for_connectivity_node(self, node: str | ConnectivityNode) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(lambda: self._process_terminals_for_connectivity_node(node))
 
     async def _get_network_hierarchy(self, config: GetNetworkHierarchyConfig = GetNetworkHierarchyConfig()) -> GrpcResult[NetworkHierarchy]:
@@ -399,7 +400,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
             result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers, network_state)
@@ -488,13 +489,13 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self, it: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> AsyncGenerator[IdentifiedObject, None]:
         async for response in self._process_equipment_for_containers(
             [it.mrid if isinstance(it, EquipmentContainer) else it],
             include_energizing_containers,
             include_energized_containers,
-            network_state
+            network_state,
         ):
             yield response
 
@@ -503,7 +504,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mrids: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> AsyncGenerator[IdentifiedObject, None]:
         request = GetEquipmentForContainersRequest()
         request.includeEnergizingContainers = _map_include_energizing_containers.to_pb(include_energizing_containers)
@@ -514,16 +515,20 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-    async def _process_equipment_for_restriction(self,
-                                                 it: Union[str, OperationalRestriction]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_equipment_for_restriction(
+        self,
+        it: Union[str, OperationalRestriction],
+    ) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
         responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-    async def _process_terminals_for_connectivity_node(self,
-                                                       it: Union[str, ConnectivityNode]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_terminals_for_connectivity_node(
+        self,
+        it: Union[str, ConnectivityNode],
+    ) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, ConnectivityNode) else it
         responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
@@ -569,11 +574,12 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self.try_rpc(rpc)
 
-    async def _get_with_references(self,
-                                   mrid: str,
-                                   expected_class: type(Generic[CIM_IO]),
-                                   get_additional: Callable[[Generic[CIM_IO], MultiObjectResult], Awaitable[Optional[GrpcResult[MultiObjectResult]]]]
-                                   ) -> GrpcResult[MultiObjectResult]:
+    async def _get_with_references(
+        self,
+        mrid: str,
+        expected_class: type[CIM_IO],
+        get_additional: Callable[[CIM_IO, MultiObjectResult], Awaitable[Optional[GrpcResult[MultiObjectResult]]]],
+    ) -> GrpcResult[MultiObjectResult]:
         if not self.__network_hierarchy:
             response = await self._get_network_hierarchy()
             if response.was_failure:
@@ -641,7 +647,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return None
 
-    def _to_map(self, objects: Iterable[Generic[PB_IO]], class_: type(Generic[CIM_IO])) -> Dict[str, CIM_IO]:
+    def _to_map(self, objects: Iterable[PB_IO], class_: type[Generic[CIM_IO]]) -> Dict[str, CIM_IO]:
         result = {}
 
         for pb in objects:
@@ -666,10 +672,10 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         container: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
-            super().get_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state)
+            super().get_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state),
         )
 
     def get_equipment_for_containers(
@@ -677,10 +683,10 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         containers: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
-            super().get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state)
+            super().get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state),
         )
 
     def get_equipment_for_restriction(self, mrid: str) -> GrpcResult[MultiObjectResult]:
@@ -702,10 +708,10 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
-        network_state: NetworkState = NetworkState.NORMAL
+        network_state: NetworkState = NetworkState.NORMAL,
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
-            super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
+            super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state),
         )
 
     def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[MultiObjectResult]:

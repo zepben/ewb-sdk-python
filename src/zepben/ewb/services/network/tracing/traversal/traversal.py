@@ -210,7 +210,7 @@ class Traversal(Generic[T, D]):
         :return: this traversal instance.
         """
 
-        if callable(condition):  # Callable[[NetworkTraceStep[T], StepContext], None]
+        if callable(condition):  # Callable[[NetworkTraceStep[T], StepContext], Any]
             if len(inspect.getfullargspec(condition).args) == 2:
                 return self.add_stop_condition(condition)
             elif len(inspect.getfullargspec(condition).args) == 4:

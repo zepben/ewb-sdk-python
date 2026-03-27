@@ -7,7 +7,7 @@ __all__ = ["BaseCollectionWriter"]
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Callable, TypeVar, Iterable
+from typing import Callable, TypeVar, Iterable, Any
 
 from zepben.ewb.database.sqlite.extensions.prepared_statement import SqlException
 
@@ -35,7 +35,7 @@ class BaseCollectionWriter(ABC):
         """
         pass
 
-    def _save_each(self, items: Iterable[T], saver: Callable[[T], bool], on_save_failure: Callable[[T, Exception], None]) -> bool:
+    def _save_each(self, items: Iterable[T], saver: Callable[[T], bool], on_save_failure: Callable[[T, Exception], Any]) -> bool:
         """
         Save each of the [items] to the database.
 
@@ -56,7 +56,7 @@ class BaseCollectionWriter(ABC):
         return status
 
     @staticmethod
-    def _validate_save(it: T, saver: [[T], bool], on_save_failure: [[Exception], None]) -> bool:
+    def _validate_save(it: T, saver: Callable[[T], bool], on_save_failure: Callable[[Exception], Any]) -> bool:
         """
         Validate that a save actually works, and convert all exceptions into failures with a callback.
 

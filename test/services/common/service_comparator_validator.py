@@ -118,8 +118,8 @@ class ServiceComparatorValidator(Generic[TService, C]):
         self,
         prop: Property,
         creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
-        change_state: Callable[[TIdentifiedObject, R], None],
-        other_change_state: Callable[[TIdentifiedObject, R], None],
+        change_state: Callable[[TIdentifiedObject, R], Any],
+        other_change_state: Callable[[TIdentifiedObject, R], Any],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None

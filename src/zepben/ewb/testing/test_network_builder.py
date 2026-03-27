@@ -269,7 +269,7 @@ class TestNetworkBuilder:
     def from_power_transformer(
         self,
         nominal_phases: Optional[List[PhaseCode]] = None,
-        end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
+        end_actions: Optional[List[Callable[[PowerTransformerEnd], Any]]] = None,
         mrid: Optional[str] = None,
         action: Callable[[PowerTransformer], Any] = null_action
     ) -> 'TestNetworkBuilder':
@@ -294,7 +294,7 @@ class TestNetworkBuilder:
     def to_power_transformer(
         self,
         nominal_phases: Optional[List[PhaseCode]] = None,
-        end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
+        end_actions: Optional[List[Callable[[PowerTransformerEnd], Any]]] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
         action: Callable[[PowerTransformer], Any] = null_action

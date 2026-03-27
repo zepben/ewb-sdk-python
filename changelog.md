@@ -23,8 +23,8 @@
 * `SetDirection.run` now supports `ConductingEquipment`.
 * Fixed types on all overrides for `PowerSystemResource.asset_info`, removing the need to shadow them with type specific variants.
 * You can now pass a list of `TransformerEndRatedS` to the `PowerTransformerEnd` constructor via the `ratings` argument.
-* Updated the `action` type signatures for `TestNetworkBuilder` to remove the `None` return type. The return is unused, but requiring `None` raises types errors
-  if anything is actually returned.
+* Updated all `Callable` type signatures for callables with unused return values to accept `Any` instead of `None`. The return is still unused, but requiring
+  `None` raises types errors if anything is actually returned.
 
 ### Fixes
 * Fixed the packing and unpacking of timestamps for `Agreement.validity_interval` in gRPC messages. Fix also ensures all other timestamps correctly support

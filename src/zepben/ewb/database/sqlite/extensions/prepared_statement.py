@@ -82,7 +82,7 @@ class PreparedStatement(object):
             self.add_value(numerator_index, value.numerator)
             self.add_value(denominator_index, value.denominator)
 
-    def try_execute_single_update(self, on_error: Optional[Callable[[Exception], None]] = None) -> bool:
+    def try_execute_single_update(self, on_error: Optional[Callable[[Exception], Any]] = None) -> bool:
         """
         Execute an update on the database with the given `query`.
         Failures will be logged as warnings.

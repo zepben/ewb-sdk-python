@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["DiagramObject"]
 
-from typing import Optional, List, Generator, Callable, TYPE_CHECKING
+from typing import Optional, List, Generator, Callable, TYPE_CHECKING, Any
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -87,7 +87,7 @@ class DiagramObject(IdentifiedObject):
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
 
-    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], None]):
+    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], Any]):
         """
         Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
 

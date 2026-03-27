@@ -9,7 +9,7 @@ __all__ = ["SetPhases"]
 
 from collections.abc import Sequence
 from functools import singledispatchmethod
-from typing import Union, Set, Iterable, List, Type, TYPE_CHECKING, Optional, Callable
+from typing import Union, Set, Iterable, List, Type, TYPE_CHECKING, Optional, Callable, Any
 
 from zepben.ewb import PhaseStatus, add_neutral
 from zepben.ewb.exceptions import TracingException, PhaseException
@@ -399,7 +399,7 @@ class SetPhases:
         to_terminal: Terminal,
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
-        on_success: Callable[[], None]
+        on_success: Callable[[], Any]
     ):
         try:
             if phase != SinglePhaseKind.NONE and to_phases.__setitem__(to_, phase):
@@ -417,7 +417,7 @@ class SetPhases:
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
         allow_suspect_flow: bool,
-        on_success: Callable[[], None]
+        on_success: Callable[[], Any]
     ):
         # The phases that can be added are ABCN and Y, so for all cases other than Y we can just use the added phase. For
         #   Y we need to look at what the phases on the other side of the transformer are to determine what has been added.

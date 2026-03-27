@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["GrpcResult", "GrpcClient"]
 
-from typing import TypeVar, Generic, Callable, List, Union, Coroutine
+from typing import TypeVar, Generic, Callable, List, Union, Coroutine, Any
 
 from zepben.ewb.dataclassy import dataclass
 
@@ -43,7 +43,7 @@ class GrpcResult(Generic[T]):
     def was_error_unhandled(self):
         return not self.was_error_handled
 
-    def on_success(self, handler: Callable[[T], None]) -> GrpcResult[T]:
+    def on_success(self, handler: Callable[[T], Any]) -> GrpcResult[T]:
         """Calls `handler` with the `result` if this `was_successful`"""
         if self.was_successful:
             handler(self.result)
@@ -55,13 +55,13 @@ class GrpcResult(Generic[T]):
             return handler(self.result, self.was_error_handled)
         return self
 
-    def on_handled_error(self, handler: Callable[[Exception], None]) -> GrpcResult[T]:
+    def on_handled_error(self, handler: Callable[[Exception], Any]) -> GrpcResult[T]:
         """Calls `handler` with the `thrown` exception if `self.was_failure` only if `self.was_error_handled`."""
         if self.was_failure and self.was_error_handled:
             handler(self.result)
         return self
 
-    def on_unhandled_error(self, handler: Callable[[Exception], None]) -> GrpcResult[T]:
+    def on_unhandled_error(self, handler: Callable[[Exception], Any]) -> GrpcResult[T]:
         """Calls `handler` with the `thrown` exception if `self.was_failure` only if not `self.was_error_handled`."""
         if self.was_failure and not self.was_error_handled:
             handler(self.result)

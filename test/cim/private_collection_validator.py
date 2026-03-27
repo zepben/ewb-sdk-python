@@ -109,7 +109,7 @@ def validate_ordered_other(
     get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]] | Callable[[], Generator[UOther, None, None]] | property,
     num: Callable[[TIdentifiedObject], int] | Callable[[], int],
     get_by_index: Callable[[TIdentifiedObject, int], UOther] | Callable[[int], UOther],
-    for_each: Callable[[TIdentifiedObject, Callable[[int, UOther], None]], None] | Callable[[Callable[[int, UOther], None]], None],
+    for_each: Callable[[TIdentifiedObject, Callable[[int, UOther], Any]], Any] | Callable[[Callable[[int, UOther], None]], Any],
     add: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
     add_with_index: Callable[[TIdentifiedObject, UOther, int], TIdentifiedObject] | Callable[[UOther, int], TIdentifiedObject],
     remove: Callable[[TIdentifiedObject, UOther], TIdentifiedObject] | Callable[[UOther], TIdentifiedObject],
@@ -339,7 +339,7 @@ def _validate_ordered_other(
     get_all: Callable[[TIdentifiedObject], Generator[UOther, None, None]],
     num: Callable[[TIdentifiedObject], int],
     get_by_index: Callable[[TIdentifiedObject, int], UOther],
-    for_each: Callable[[TIdentifiedObject, Callable[[int, UOther], None]], None],
+    for_each: Callable[[TIdentifiedObject, Callable[[int, UOther], Any]], Any],
     add: Callable[[TIdentifiedObject, UOther], TIdentifiedObject],
     add_with_index: Callable[[TIdentifiedObject, UOther, int], TIdentifiedObject],
     remove: Callable[[TIdentifiedObject, UOther], TIdentifiedObject],
@@ -431,10 +431,10 @@ def _validate(
     add: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
     remove: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
     clear: Callable[[TIdentifiedObject], TIdentifiedObject],
-    validate_collection: Callable[[Generator[_U, None, None], List[_U]], None],
-    perform_duplicate_validation: Callable[[], None],
-    before_removal_validation: Callable[[], None],
-    after_removal_validation: Callable[[], None],
+    validate_collection: Callable[[Generator[_U, None, None], List[_U]], Any],
+    perform_duplicate_validation: Callable[[], Any],
+    before_removal_validation: Callable[[], Any],
+    after_removal_validation: Callable[[], Any],
     others_have_order: bool
 ):
     # Make sure all the objects are not equal.
@@ -513,7 +513,7 @@ def _create_duplicates_throw_validator(
     it: TIdentifiedObject,
     expected_duplicate_errors: Dict[_U, str],
     add: Callable[[TIdentifiedObject, _U], TIdentifiedObject]
-) -> Callable[[], None]:
+) -> Callable[[], Any]:
     def func():
         for other_duplicate, expected_error in expected_duplicate_errors.items():
             with pytest.raises(ValueError, match=expected_error):
@@ -529,8 +529,8 @@ def _create_duplicates_supported_validator(
     num: Callable[[TIdentifiedObject], int],
     add: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
     remove: Callable[[TIdentifiedObject, _U], bool],
-    validate_collection: Callable[[Generator[_U, None, None], List[_U]], None],
-) -> Callable[[], None]:
+    validate_collection: Callable[[Generator[_U, None, None], List[_U]], Any],
+) -> Callable[[], Any]:
     def func():
         #
         # NOTE: We add all the items a second time to allow us to clean it up, as the remove below will take the first instance out, changing
@@ -555,8 +555,8 @@ def _create_duplicates_ignored_validator(
     get_all: Callable[[TIdentifiedObject], Generator[_U, None, None]],
     num: Callable[[TIdentifiedObject], int],
     add: Callable[[TIdentifiedObject, _U], TIdentifiedObject],
-    validate_collection: Callable[[Generator[_U, None, None], List[_U]], None],
-) -> Callable[[], None]:
+    validate_collection: Callable[[Generator[_U, None, None], List[_U]], Any],
+) -> Callable[[], Any]:
     def func():
         for duplicate in others:
             add(it, duplicate)

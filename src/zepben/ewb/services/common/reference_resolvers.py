@@ -30,7 +30,7 @@ __all__ = [
     "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
     "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
@@ -125,7 +125,7 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 class ReferenceResolver(object):
     from_class: type
     to_class: type
-    resolve: Callable[[IdentifiedObject, IdentifiedObject], None]
+    resolve: Callable[[IdentifiedObject, IdentifiedObject], Any]
 
     def __eq__(self, other):
         return self.from_class is other.from_class and self.to_class is other.to_class and self.resolve is other.resolve

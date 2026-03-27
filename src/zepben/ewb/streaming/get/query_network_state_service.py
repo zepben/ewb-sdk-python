@@ -6,7 +6,7 @@
 __all__ = ["QueryNetworkStateService"]
 
 from datetime import datetime
-from typing import Callable, AsyncGenerator, Optional
+from typing import Callable, AsyncGenerator, Optional, Any
 
 from google.protobuf import empty_pb2
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceServicer
@@ -35,8 +35,8 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
     def __init__(
         self,
         on_get_current_states: Callable[[datetime, datetime], AsyncGenerator[CurrentStateEventBatch, None]],
-        on_current_states_status: Callable[[SetCurrentStatesStatus], None],
-        on_processing_error: Callable[[str, Optional[Exception]], None]
+        on_current_states_status: Callable[[SetCurrentStatesStatus], Any],
+        on_processing_error: Callable[[str, Optional[Exception]], Any]
     ):
         self.on_get_current_states = on_get_current_states
         self.on_current_states_status = on_current_states_status
