@@ -12,24 +12,24 @@ from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumer
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetEquipmentForRestrictionRequest, \
     GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, IncludedEnergizedContainers as PBIncludedEnergizedContainers, \
-    NetworkState as PBNetworkState, GetNetworkHierarchyRequest
+    NetworkState as PBNetworkState
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
+from cim.fill_fields import create_ac_line_segment
 from streaming.get.data.hierarchy import create_hierarchy_network
 from streaming.get.data.loops import create_loops_network
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
-from streaming.get.pb_creators import network_identified_objects, ac_line_segment
+from streaming.get.pb_creators import network_identified_objects
 from zepben.ewb import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
     BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
     UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
-    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole, generate_id, GrpcResult, NetworkHierarchy, MultiObjectResult, LvSubstation
+    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole, generate_id, LvSubstation
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
@@ -107,11 +107,13 @@ class TestNetworkConsumer:
 
         await self.mock_server.validate(
             client_test,
-            [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2]))]
+            [
+                StreamGrpc('getIdentifiedObjects', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2])),
+            ],
         )
 
     @pytest.mark.asyncio
-    @given(ac_line_segment())
+    @given(create_ac_line_segment().map(lambda it: it.to_pb()))
     async def test_get_identified_object(self, acls):
         mrid = acls.mrid()
 
@@ -298,10 +300,12 @@ class TestNetworkConsumer:
         interactions = [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns)))]
 
         for _ in ns.objects(EquipmentContainer):
-            interactions.extend([
-                StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, containers)]),
-                StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
-            ])
+            interactions.extend(
+                [
+                    StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, containers)]),
+                    StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)]),
+                ],
+            )
 
         await self.mock_server.validate(client_test, interactions)
 
@@ -332,7 +336,7 @@ class TestNetworkConsumer:
                 StreamGrpc('getEquipmentForContainers', [_create_container_responses(feeder_network)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses])
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -360,8 +364,12 @@ class TestNetworkConsumer:
             # lvf5 wont be in the collection of returned objects as its part of the network hierarchy already
             assert self.service.len_of() == 16
             assert len(mor.objects) == 15
-            assert len({"tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
-                        "b2-t2", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
+            assert len(
+                {
+                    "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
+                    "b2-t2", "generated_cn_0", "generated_cn_1", "generated_cn_2"
+                }.difference(mor.objects.keys()),
+            ) == 0
             assert "tx4" not in mor.objects
             with pytest.raises(KeyError):
                 self.service.get("tx4")
@@ -377,7 +385,7 @@ class TestNetworkConsumer:
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -408,7 +416,8 @@ class TestNetworkConsumer:
             assert self.service.len_of() == 11
             assert len(mor.objects) == 11
             assert len(
-                {"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys())) == 0
+                {"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys()),
+            ) == 0
             assert self.service.get("tx0") == mor.objects["tx0"]
             received_pole: Pole = mor.objects["p2"]
             assert self.service.get("p2") == received_pole
@@ -424,7 +433,7 @@ class TestNetworkConsumer:
                 StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_pole)]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -450,7 +459,7 @@ class TestNetworkConsumer:
                 Feeder,
                 IncludedEnergizingContainers.SUBSTATIONS,
                 IncludedEnergizedContainers.LV_FEEDERS,
-                NetworkState.ALL
+                NetworkState.ALL,
             )
 
         object_responses = _create_object_responses(feeder_network)
@@ -459,17 +468,19 @@ class TestNetworkConsumer:
             client_test,
             [
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
-                StreamGrpc('getEquipmentForContainers', [
-                    _create_container_responses(
-                        feeder_network,
-                        expected_include_energizing_containers=PBIncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
-                        expected_include_energized_containers=PBIncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
-                        network_state=PBNetworkState.NETWORK_STATE_ALL
-                    )
-                ]),
+                StreamGrpc(
+                    'getEquipmentForContainers', [
+                        _create_container_responses(
+                            feeder_network,
+                            expected_include_energizing_containers=PBIncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
+                            expected_include_energized_containers=PBIncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
+                            network_state=PBNetworkState.NETWORK_STATE_ALL,
+                        )
+                    ],
+                ),
                 StreamGrpc('getIdentifiedObjects', [object_responses]),
                 StreamGrpc('getIdentifiedObjects', [object_responses])
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -496,7 +507,7 @@ class TestNetworkConsumer:
             feeder_network,
             expected_include_energizing_containers=PBIncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
             expected_include_energized_containers=PBIncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
-            network_state=PBNetworkState.NETWORK_STATE_ALL
+            network_state=PBNetworkState.NETWORK_STATE_ALL,
         )
 
         await self.mock_server.validate(
@@ -504,7 +515,7 @@ class TestNetworkConsumer:
             [
                 StreamGrpc('getEquipmentForContainers', [response]),
                 StreamGrpc('getEquipmentForContainers', [response])
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -527,7 +538,7 @@ class TestNetworkConsumer:
 
         await self.mock_server.validate(
             client_test,
-            [StreamGrpc('getEquipmentForRestriction', [_create_restriction_equipment_responses(operational_restriction_with_equipment)])]
+            [StreamGrpc('getEquipmentForRestriction', [_create_restriction_equipment_responses(operational_restriction_with_equipment)])],
         )
 
     @pytest.mark.asyncio
@@ -565,10 +576,10 @@ class TestNetworkConsumer:
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
                 StreamGrpc(
                     'getEquipmentForContainers',
-                    [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)]
+                    [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)],
                 ),
                 StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -591,10 +602,10 @@ class TestNetworkConsumer:
                 UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
                 StreamGrpc(
                     'getEquipmentForContainers',
-                    [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)]
+                    [_create_container_equipment_responses(ns, loop_containers, network_state=PBNetworkState.NETWORK_STATE_ALL)],
                 ),
                 StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
-            ]
+            ],
         )
 
     @pytest.mark.asyncio
@@ -724,7 +735,7 @@ def _create_container_equipment_responses(
     mrids: Optional[Iterable[str]] = None,
     expected_include_energizing_containers: Optional[int] = None,
     expected_include_energized_containers: Optional[int] = None,
-    network_state: NetworkState = None
+    network_state: NetworkState = None,
 ) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
@@ -814,7 +825,7 @@ def _validate_hierarchy(hierarchy, service):
 
 def _create_object_responses(
     ns: NetworkService,
-    mrids: Optional[Iterable[str]] = None
+    mrids: Optional[Iterable[str]] = None,
 ) -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
     valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
@@ -834,7 +845,7 @@ def _create_container_responses(
     mrids: Optional[Iterable[str]] = None,
     expected_include_energizing_containers: Optional[int] = None,
     expected_include_energized_containers: Optional[int] = None,
-    network_state: Optional[int] = None
+    network_state: Optional[int] = None,
 ) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 

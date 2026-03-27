@@ -12,12 +12,12 @@ from zepben.protobuf.cc import cc_pb2
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, GetCustomersForContainerResponse
 
+from cim.fill_fields import create_customer
 from streaming.get.data.metadata import create_metadata, create_metadata_response
-from streaming.get.pb_creators import customer_identified_objects, customer
-from zepben.ewb import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
-
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed
+from streaming.get.pb_creators import customer_identified_objects
+from zepben.ewb import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -89,12 +89,15 @@ class TestCustomerConsumer:
         response1 = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=Customer(mrid="customer1").to_pb())])
         response2 = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=Customer(mrid="customer2").to_pb())])
 
-        await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getIdentifiedObjects',
-                                                    stream_from_fixed(["customer1", "customer2", "customer3"], [response1, response2]))])
+        await self.mock_server.validate(
+            client_test,
+            [
+                StreamGrpc('getIdentifiedObjects', stream_from_fixed(["customer1", "customer2", "customer3"], [response1, response2])),
+            ],
+        )
 
     @pytest.mark.asyncio
-    @given(customer())
+    @given(create_customer().map(lambda it: it.to_pb()))
     async def test_get_identified_object(self, customer_):
         mrid = customer_.mrid()
 
@@ -122,7 +125,7 @@ class TestCustomerConsumer:
         await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
 
     @pytest.mark.asyncio
-    @given(customer())
+    @given(create_customer().map(lambda it: it.to_pb()))
     @settings(max_examples=2, phases=(Phase.explicit, Phase.reuse, Phase.generate))
     async def test_get_customers_for_container_returns_results(self, c):
         mrid = c.mrid()

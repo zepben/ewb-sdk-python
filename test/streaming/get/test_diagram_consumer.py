@@ -12,14 +12,14 @@ from zepben.protobuf.dc import dc_pb2
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiedObjectsResponse, GetDiagramObjectsResponse
 
+from cim.fill_fields import create_diagram, create_diagram_object
 from streaming.get.data.metadata import create_metadata, create_metadata_response
-from streaming.get.pb_creators import diagram_identified_objects, diagram, diagram_object
+from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
+from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed
+from streaming.get.pb_creators import diagram_identified_objects
 from zepben.ewb import DiagramConsumerClient, BaseService, IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-
-from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -91,11 +91,15 @@ class TestDiagramConsumer:
         response1 = GetIdentifiedObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagram=Diagram(mrid="diagram1").to_pb())])
         response2 = GetIdentifiedObjectsResponse(identifiedObjects=[DiagramIdentifiedObject(diagram=Diagram(mrid="diagram2").to_pb())])
 
-        await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["diagram1", "diagram2", "diagram3"], [response1, response2]))])
+        await self.mock_server.validate(
+            client_test,
+            [
+                StreamGrpc('getIdentifiedObjects', stream_from_fixed(["diagram1", "diagram2", "diagram3"], [response1, response2])),
+            ],
+        )
 
     @pytest.mark.asyncio
-    @given(diagram())
+    @given(create_diagram().map(lambda it: it.to_pb()))
     async def test_get_identified_object(self, diagram_):
         mrid = diagram_.mrid()
 
@@ -123,7 +127,7 @@ class TestDiagramConsumer:
         await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
 
     @pytest.mark.asyncio
-    @given(diagram_object())
+    @given(create_diagram_object().map(lambda it: it.to_pb()))
     @settings(max_examples=2, phases=(Phase.explicit, Phase.reuse, Phase.generate))
     async def test_get_diagram_objects_returns_objects_for_a_given_id(self, dio):
         mrid = dio.mrid()

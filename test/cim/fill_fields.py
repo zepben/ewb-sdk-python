@@ -61,21 +61,22 @@ __all__ = [
     'create_synchronous_machine', 'synchronous_machine_kwargs', 'sampled_synchronous_machine_kind', 'tap_changer_kwargs', 'create_tap_changer_control',
     'tap_changer_control_kwargs', 'transformer_end_kwargs', 'create_transformer_star_impedance', 'transformer_star_impedance_kwargs',
     'sampled_winding_connection', 'create_circuit', 'circuit_kwargs', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_curves',
-    'sampled_end_device_function', 'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement',
+    'sampled_end_device_function', 'sampled_equipment', 'sampled_equipment_container', 'sampled_hv_lv_feeder', 'sampled_measurement',
     'sampled_protected_switches'
 ]
 
 from datetime import datetime
 from random import choice
 
-from streaming.get.pb_creators import lists, floats
 from util import mrid_strategy
 # @formatter:off
 
 # This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
 from zepben.ewb import *
 
-from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none, just
+from hypothesis.strategies import builds, text, integers, sampled_from, booleans, uuids, datetimes, one_of, none, just, \
+    lists as hypo_lists, floats as hypo_floats
+
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
@@ -95,6 +96,18 @@ MAX_END_NUMBER = 3
 MAX_SEQUENCE_NUMBER = 40
 MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+
+
+def floats(*args, **kwargs):
+    kwargs.update({"width": 32})
+    return hypo_floats(*args, **kwargs)
+
+
+def lists(*args, **kwargs):
+    if kwargs.get("min_size") == 1:
+        raise ValueError("min_size = 1 is not required as its the default. please dont make messy code.")
+    kwargs.update({"min_size": 1})
+    return hypo_lists(*args, **kwargs)
 
 
 ##################################
@@ -1129,7 +1142,7 @@ def curve_data_kwargs():
 
 def equipment_kwargs(include_runtime: bool):
     runtime = {
-        "current_containers": lists(sampled_hvlv_feeder(include_runtime), max_size=2),
+        "current_containers": lists(sampled_hv_lv_feeder(include_runtime), max_size=2),
     } if include_runtime else {}
 
     return {
@@ -1196,8 +1209,7 @@ def identified_object_kwargs(include_runtime: bool):
         "description": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         "names": one_of(
             none(),
-            lists(builds(Name, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), type=create_name_type()), max_size=2,
-                  unique_by=lambda it: it.name)
+            lists(builds(Name, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), type=create_name_type()), max_size=2, unique_by=lambda it: it.name),
         ),
     }
 
@@ -1731,9 +1743,9 @@ def energy_consumer_kwargs(include_runtime: bool = True):
             builds(
                 EnergyConsumerPhase,
                 **identified_object_kwargs(include_runtime),
-                phase=sampled_single_phase_kind()
+                phase=sampled_single_phase_kind(),
             ),
-            max_size=2
+            max_size=2,
         ),
         "customer_count": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         "grounded": booleans(),
@@ -1772,9 +1784,10 @@ def energy_source_kwargs(include_runtime: bool = True):
             builds(
                 EnergySourcePhase,
                 **identified_object_kwargs(include_runtime),
-                phase=sampled_single_phase_kind()
+                phase=sampled_single_phase_kind(),
             ),
-            max_size=2),
+            max_size=2,
+        ),
         "active_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "reactive_power": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "voltage_angle": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -2071,11 +2084,13 @@ def power_transformer_end_kwargs(include_runtime: bool = True):
         "g": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "g0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "phase_angle_clock": integers(min_value=0, max_value=11),
-        "ratings": lists(builds(
-            TransformerEndRatedS,
-            cooling_type=sampled_transformer_cooling_type(),
-            rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-        ), max_size=11, unique_by=lambda it: it.cooling_type),
+        "ratings": lists(
+            builds(
+                TransformerEndRatedS,
+                cooling_type=sampled_transformer_cooling_type(),
+                rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+            ), max_size=11, unique_by=lambda it: it.cooling_type,
+        ),
     }
 
 
@@ -2351,46 +2366,56 @@ def circuit_kwargs(include_runtime: bool = True):
 
 
 def sampled_wire_info(include_runtime: bool):
-    return choice([
-        builds(OverheadWireInfo, **identified_object_kwargs(include_runtime)),
-        builds(CableInfo, **identified_object_kwargs(include_runtime)),
-    ])
+    return choice(
+        [
+            builds(OverheadWireInfo, **identified_object_kwargs(include_runtime)),
+            builds(CableInfo, **identified_object_kwargs(include_runtime)),
+        ],
+    )
 
 
 def sampled_conducting_equipment(include_runtime: bool):
-    return choice([
-        # Don't add EnergySource to this list as it's used in SetPhases to start tracing, which will cause test_schema_terminal to fail.
-        builds(AcLineSegment, **identified_object_kwargs(include_runtime)),
-        builds(PowerTransformer, **identified_object_kwargs(include_runtime)),
-        builds(Breaker, **identified_object_kwargs(include_runtime)),
-        builds(Disconnector, **identified_object_kwargs(include_runtime)),
-        builds(EnergyConsumer, **identified_object_kwargs(include_runtime)),
-    ])
+    return choice(
+        [
+            # Don't add EnergySource to this list as it's used in SetPhases to start tracing, which will cause test_schema_terminal to fail.
+            builds(AcLineSegment, **identified_object_kwargs(include_runtime)),
+            builds(PowerTransformer, **identified_object_kwargs(include_runtime)),
+            builds(Breaker, **identified_object_kwargs(include_runtime)),
+            builds(Disconnector, **identified_object_kwargs(include_runtime)),
+            builds(EnergyConsumer, **identified_object_kwargs(include_runtime)),
+        ],
+    )
 
 
 def sampled_curves(include_runtime: bool):
-    return choice([
-        builds(ReactiveCapabilityCurve, **identified_object_kwargs(include_runtime))
-    ])
+    return choice(
+        [
+            builds(ReactiveCapabilityCurve, **identified_object_kwargs(include_runtime))
+        ],
+    )
 
 
 def sampled_end_device_function(include_runtime: bool):
-    return choice([
-        # Don't add EnergySource to this list as it's used in SetPhases to start tracing, which will cause test_schema_terminal to fail.
-        builds(PanDemandResponseFunction, **identified_object_kwargs(include_runtime))
-    ])
+    return choice(
+        [
+            # Don't add EnergySource to this list as it's used in SetPhases to start tracing, which will cause test_schema_terminal to fail.
+            builds(PanDemandResponseFunction, **identified_object_kwargs(include_runtime))
+        ],
+    )
 
 
 def sampled_equipment(include_runtime: bool):
-    return choice([
-        builds(AcLineSegment, **identified_object_kwargs(include_runtime)),
-        builds(PowerTransformer, **identified_object_kwargs(include_runtime)),
-        builds(Breaker, **identified_object_kwargs(include_runtime)),
-        builds(Disconnector, **identified_object_kwargs(include_runtime)),
-        builds(EnergyConsumer, **identified_object_kwargs(include_runtime)),
-        builds(EnergySource, **identified_object_kwargs(include_runtime)),
-        builds(FaultIndicator, **identified_object_kwargs(include_runtime))
-    ])
+    return choice(
+        [
+            builds(AcLineSegment, **identified_object_kwargs(include_runtime)),
+            builds(PowerTransformer, **identified_object_kwargs(include_runtime)),
+            builds(Breaker, **identified_object_kwargs(include_runtime)),
+            builds(Disconnector, **identified_object_kwargs(include_runtime)),
+            builds(EnergyConsumer, **identified_object_kwargs(include_runtime)),
+            builds(EnergySource, **identified_object_kwargs(include_runtime)),
+            builds(FaultIndicator, **identified_object_kwargs(include_runtime))
+        ],
+    )
 
 
 def sampled_equipment_container(include_runtime: bool):
@@ -2406,24 +2431,30 @@ def sampled_equipment_container(include_runtime: bool):
     return choice(available_containers)
 
 
-def sampled_hvlv_feeder(include_runtime: bool):
-    return choice([
-        builds(Feeder, **identified_object_kwargs(include_runtime)),
-        builds(LvFeeder, **identified_object_kwargs(include_runtime))
-    ])
+def sampled_hv_lv_feeder(include_runtime: bool):
+    return choice(
+        [
+            builds(Feeder, **identified_object_kwargs(include_runtime)),
+            builds(LvFeeder, **identified_object_kwargs(include_runtime))
+        ],
+    )
 
 
 def sampled_measurement(include_runtime: bool):
-    return choice([
-        builds(Accumulator, **identified_object_kwargs(include_runtime)),
-        builds(Analog, **identified_object_kwargs(include_runtime)),
-        builds(Discrete, **identified_object_kwargs(include_runtime)),
-    ])
+    return choice(
+        [
+            builds(Accumulator, **identified_object_kwargs(include_runtime)),
+            builds(Analog, **identified_object_kwargs(include_runtime)),
+            builds(Discrete, **identified_object_kwargs(include_runtime)),
+        ],
+    )
 
 
 def sampled_protected_switches(include_runtime: bool):
-    return choice([
-        builds(Breaker, **identified_object_kwargs(include_runtime)),
-        builds(LoadBreakSwitch, **identified_object_kwargs(include_runtime)),
-        builds(Recloser, **identified_object_kwargs(include_runtime))
-    ])
+    return choice(
+        [
+            builds(Breaker, **identified_object_kwargs(include_runtime)),
+            builds(LoadBreakSwitch, **identified_object_kwargs(include_runtime)),
+            builds(Recloser, **identified_object_kwargs(include_runtime))
+        ],
+    )
