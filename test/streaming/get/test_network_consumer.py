@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from time import sleep
-from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
+from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional, List
 from unittest.mock import MagicMock
 
 import grpc_testing
@@ -23,7 +23,7 @@ from streaming.get.data.hierarchy import create_hierarchy_network
 from streaming.get.data.loops import create_loops_network
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
+from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed, GrpcInteration
 from streaming.get.pb_creators import network_identified_objects
 from zepben.ewb import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
@@ -168,11 +168,8 @@ class TestNetworkConsumer:
         async def client_test():
             hierarchy = (await self.client.get_network_hierarchy()).throw_on_error().value
 
-            try:
-                _validate_hierarchy(hierarchy, expected_ns)
-                _validate_hierarchy(hierarchy, self.service)
-            except Exception:
-                pytest.fail()
+            _validate_hierarchy(hierarchy, expected_ns)
+            _validate_hierarchy(hierarchy, self.service)
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(expected_ns)))])
 
@@ -191,11 +188,8 @@ class TestNetworkConsumer:
         async def client_test():
             hierarchy = (await self.client.get_network_hierarchy(**_filters)).throw_on_error().value
 
-            try:
-                _validate_hierarchy(hierarchy, service)
-                _validate_hierarchy(hierarchy, self.service)
-            except AssertionError:
-                pytest.fail()
+            _validate_hierarchy(hierarchy, service)
+            _validate_hierarchy(hierarchy, self.service)
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(service)))])
 
@@ -297,7 +291,7 @@ class TestNetworkConsumer:
             for io in self.service.objects():
                 assert io.mrid in ns
 
-        interactions = [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns)))]
+        interactions: List[GrpcInteration] = [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns)))]
 
         for _ in ns.objects(EquipmentContainer):
             interactions.extend(
@@ -361,7 +355,7 @@ class TestNetworkConsumer:
         async def client_test():
             mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
 
-            # lvf5 wont be in the collection of returned objects as its part of the network hierarchy already
+            # lvf5 won't be in the collection of returned objects as its part of the network hierarchy already
             assert self.service.len_of() == 16
             assert len(mor.objects) == 15
             assert len(

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import traceback
 from dataclasses import dataclass
-from typing import Awaitable, Callable, List, TypeVar, Union, Optional, Iterable, Generator
+from typing import Awaitable, Callable, List, TypeVar, Optional, Iterable, Generator, Any
 
 import grpc
 import grpc_testing
@@ -15,9 +15,11 @@ from streaming.get.catching_thread import CatchingThread
 GrpcRequest = TypeVar('GrpcRequest')
 GrpcResponse = TypeVar('GrpcResponse')
 
+class GrpcInteration:
+    pass
 
 @dataclass
-class StreamGrpc:
+class StreamGrpc(GrpcInteration):
     function: str
     processors: List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]
     """
@@ -34,7 +36,7 @@ class StreamGrpc:
 
 
 @dataclass
-class UnaryGrpc:
+class UnaryGrpc(GrpcInteration):
     function: str
     processor: Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]
     """
@@ -46,9 +48,9 @@ class UnaryGrpc:
 
 
 @dataclass
-class StreamUnaryGrpc:
+class StreamUnaryGrpc(GrpcInteration):
     function: str
-    request_validators: List[Callable[[GrpcRequest], None]]
+    request_validators: List[Callable[[GrpcRequest], Any]]
     """
     Stream of requests.
     
@@ -62,7 +64,7 @@ class StreamUnaryGrpc:
 
 
 @dataclass
-class UnaryStreamGrpc:
+class UnaryStreamGrpc(GrpcInteration):
     function: str
     processor: Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]
     """
@@ -98,7 +100,7 @@ class MockServer:
         self.channel: grpc_testing.Channel = channel
         self.grpc_service: ServiceDescriptor = grpc_service
 
-    async def validate(self, client_test: Callable[[], Awaitable[None]], interactions: List[Union[StreamGrpc, UnaryGrpc, StreamUnaryGrpc, UnaryStreamGrpc]]):
+    async def validate(self, client_test: Callable[[], Awaitable[None]], interactions: List[GrpcInteration]):
         """
         Run a server that mocks RPC requests by invoking the provided `interactions` in order.
 
@@ -112,11 +114,11 @@ class MockServer:
 
         # Send the client requests. We need to wrap this in an exception logging block to get any errors from asserts in the
         # client test, as the pytest logging only give the outcome, not which line actually caused it.
-        # noinspection PyBroadException
         try:
             await client_test()
-        except Exception:
+        except Exception as ex:
             print(traceback.format_exc())
+            raise ex
 
         # Wait for the server to finish. If this times out your test, it indicates that not all expected requests were received, or the request stream
         # wasn't closed/completed.
@@ -125,7 +127,7 @@ class MockServer:
         if server.exception:
             raise server.exception
 
-    def _run_server_logic(self, interactions: List[Union[StreamGrpc, UnaryGrpc]]):
+    def _run_server_logic(self, interactions: List[GrpcInteration]):
         for i in interactions:
             if isinstance(i, StreamGrpc):
                 self._run_stream_server_logic(i)
