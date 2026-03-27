@@ -18,6 +18,20 @@ from zepben.ewb.services.network.network_service import NetworkService
 # noinspection PyUnresolvedReferences
 from .network_fixtures import *
 
+#
+# NOTE: Hypothesis is very helpful and wants to give you as much information to help you narrow down any issues as it
+#       possibly can. The unfortunate side effect of this is when:
+#       * you have a very large object being generated for you test (OK, it doesn't need to be that large).
+#       * your test can't ever succeed (that bug you introduced and the reason you have a test in the first place).
+#
+#       Hypothesis, in its infinite wisdom, spends your entire Pytest time budget trying to come up with an example of
+#       your test passing. The intent is to give you a better error message. The outcome is you loose all details of
+#       why the test failed, and get a Pytest timeout instead (after waiting of course).
+#
+#       To prevent this, we skip the Hypothesis shrink phase. This means you will  have to put up with only getting a
+#       single example of where the test failed, with a call stack that tells you where this was, and a massive speed
+#       improvement in all failing tests...
+#
 no_shrink_phases = [p for p in Phase if p != Phase.shrink]
 
 settings.register_profile("ci", max_examples=1000, phases=no_shrink_phases)
