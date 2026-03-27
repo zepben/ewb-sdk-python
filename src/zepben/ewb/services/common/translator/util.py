@@ -10,8 +10,6 @@ __all__ = [
 
 from typing import Optional, Dict
 
-# noinspection PyPackageRequirements
-# noinspection PyUnresolvedReferences
 # pylint: disable=import-error
 from google.protobuf.struct_pb2 import NullValue
 

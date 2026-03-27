@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 
 import grpc_testing
 import pytest
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.nc import nc_pb2

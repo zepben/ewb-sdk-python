@@ -30,7 +30,6 @@ __all__ = [
 
 from typing import Any, Optional
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.common.ContactDetails_pb2 import ContactDetails as PBContactDetails
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction

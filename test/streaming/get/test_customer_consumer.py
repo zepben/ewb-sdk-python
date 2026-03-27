@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 
 import grpc_testing
 import pytest
-# noinspection PyPackageRequirements
 from hypothesis import given, settings, Phase
 from zepben.protobuf.cc import cc_pb2
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject

@@ -8,7 +8,6 @@ __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb
 import inspect
 from typing import ParamSpec, TypeVar, Callable
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.struct_pb2 import NullValue
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole

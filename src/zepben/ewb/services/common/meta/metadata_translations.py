@@ -3,7 +3,6 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_data_pb2 import DataSource as PBDataSource
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo

@@ -10,7 +10,6 @@ from enum import Enum
 from typing import Type, TypeVar, Generic
 
 from google.protobuf.descriptor import EnumValueDescriptor
-# noinspection PyPackageRequirements
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
 TCimEnum = TypeVar("TCimEnum", bound=Enum)

@@ -6,10 +6,8 @@ import traceback
 from dataclasses import dataclass
 from typing import Awaitable, Callable, List, TypeVar, Union, Optional, Iterable, Generator
 
-# noinspection PyPackageRequirements
 import grpc
 import grpc_testing
-# noinspection PyPackageRequirements
 from google.protobuf.descriptor import ServiceDescriptor
 
 from streaming.get.catching_thread import CatchingThread

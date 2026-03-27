@@ -15,7 +15,6 @@ from typing import Optional, Callable, TypeVar
 
 from google.protobuf.message import Message
 from typing_extensions import ParamSpec
-# noinspection PyPackageRequirements
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
