@@ -3,19 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import booleans, builds
-
-from util import mrid_strategy
-from zepben.ewb import RegulatingCondEq, RegulatingControl, generate_id
-
-from cim.iec61970.base.wires.test_energy_connection import energy_connection_kwargs, verify_energy_connection_constructor_default, \
+from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
-
-regulating_cond_eq_kwargs = {
-    **energy_connection_kwargs,
-    "control_enabled": booleans(),
-    "regulating_control": builds(RegulatingControl, mrid=mrid_strategy)
-}
+from zepben.ewb import RegulatingCondEq, RegulatingControl, generate_id
 
 regulating_cond_eq_args = [*energy_connection_args, False, RegulatingControl(mrid=generate_id())]
 

@@ -6,7 +6,7 @@ import cProfile
 import platform
 import traceback
 from time import perf_counter, process_time
-from typing import Callable
+from typing import Callable, Any
 
 from zepben.ewb import connect_insecure
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
@@ -66,10 +66,10 @@ def run_network_hierarchy(client: SyncNetworkConsumerClient):
     _log(f"Num loops: {len(network_hierarchy.loops)}")
 
 
-def _time_client(client: SyncNetworkConsumerClient, desc: str, run: Callable[[SyncNetworkConsumerClient], None]):
+def _time_client(client: SyncNetworkConsumerClient, desc: str, run: Callable[[SyncNetworkConsumerClient], Any]):
     _time(desc, lambda: run(client))
 
-def _time(desc: str, run: Callable[[], None]):
+def _time(desc: str, run: Callable[[], Any]):
     start_perf = perf_counter()
     start_proc = process_time()
 

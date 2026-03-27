@@ -3,18 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import booleans, text
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import electronic_address_kwargs
 from zepben.ewb import ElectronicAddress
-
-
-electronic_address_kwargs = {
-    'is_primary': booleans(),
-    'description': text(alphabet=ALPHANUM),
-    'email1': text(alphabet=ALPHANUM),
-}
-
 
 electronic_address_args = ['email1', False, 'descript']
 
@@ -27,7 +18,7 @@ def test_electronic_address_constructor_default():
     assert e.email1 is None
 
 
-@given(**electronic_address_kwargs)
+@given(**electronic_address_kwargs())
 def test_electronic_address_constructor_kwargs(is_primary, description, email1):
     e = ElectronicAddress(is_primary=is_primary, description=description, email1=email1)
 

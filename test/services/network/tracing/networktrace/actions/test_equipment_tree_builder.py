@@ -29,8 +29,8 @@ async def test_equipment_tree_builder_leaves():
 
     await Tracing.set_phases().run(n)
     feeder_head = n.get("j0", ConductingEquipment)
-    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=normal)
-    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=current)
+    await Tracing.set_direction().run(feeder_head, network_state_operators=normal)
+    await Tracing.set_direction().run(feeder_head, network_state_operators=current)
     await log_directions(n.get('j0', ConductingEquipment))
 
     start = n.get("j1", ConductingEquipment)
@@ -59,8 +59,8 @@ async def test_downstream_tree():
 
     await Tracing.set_phases().run(n)
     feeder_head = n.get("j0", ConductingEquipment)
-    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=normal)
-    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=current)
+    await Tracing.set_direction().run(feeder_head, network_state_operators=normal)
+    await Tracing.set_direction().run(feeder_head, network_state_operators=current)
     await log_directions(n.get('j0', ConductingEquipment))
 
     visited_ce = []
@@ -89,7 +89,7 @@ async def test_downstream_tree():
 
     pprint.pprint(visit_counts)
 
-    root = tree_builder._roots[start]
+    root = tree_builder.roots[start]
 
     assert root is not None
     _verify_tree_asset(root, n["j1"], None, [n["ac1"], n["ac3"]])

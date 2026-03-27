@@ -12,7 +12,10 @@ from zepben.ewb.services.customer.customer_service_comparator import CustomerSer
 
 
 class TestCustomerServiceComparator(TestBaseServiceComparator):
-    validator = ServiceComparatorValidator(lambda: CustomerService(), lambda _: CustomerServiceComparator())
+    validator = ServiceComparatorValidator[CustomerService, CustomerServiceComparator](
+        create_service=lambda: CustomerService(),
+        create_comparator=lambda _: CustomerServiceComparator()
+    )
 
     def test_compare_customer(self):
         self._compare_organisation_role(Customer)

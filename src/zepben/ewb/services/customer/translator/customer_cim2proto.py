@@ -12,13 +12,13 @@ from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingS
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 from zepben.protobuf.cim.iec61970.base.domain.DateTimeInterval_pb2 import DateTimeInterval as PBDateTimeInterval
 
+from zepben.ewb import datetime_to_timestamp
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.model.cim.iec61968.customers.customer import Customer
 from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
 from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
-
 from zepben.ewb.services.common.translator.base_cim2proto import document_to_pb, organisation_role_to_pb, set_or_null, bind_to_pb
 from zepben.ewb.services.common.translator.util import mrid_or_empty
 # noinspection PyProtectedMember
@@ -87,6 +87,7 @@ def pricing_structure_to_pb(cim: PricingStructure) -> PBPricingStructure:
 def tariff_to_pb(cim: Tariff) -> PBTariff:
     return PBTariff(doc=document_to_pb(cim))
 
+
 ########################
 # IEC61970 Base Domain #
 ########################
@@ -99,7 +100,12 @@ def date_time_interval_to_pb(cim: DateTimeInterval) -> PBDateTimeInterval | None
     :param cim: The :class:`DateTimeInterval` to convert.
     :return: the new protobuf object for fluent use.
     """
-    if cim:
-        return DateTimeInterval(
-            **set_or_null(start=cim.start, end=cim.end),
-        )
+    if not cim:
+        return None
+
+    return PBDateTimeInterval(
+        **set_or_null(
+            start=datetime_to_timestamp(cim.start),
+            end=datetime_to_timestamp(cim.end)
+        ),
+    )

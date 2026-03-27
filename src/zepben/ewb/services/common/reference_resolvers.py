@@ -26,9 +26,11 @@ __all__ = [
     "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver",
     "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "ed_to_edf_resolver", "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver",
     "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver", "acls_to_cut_resolver", "cut_to_acls_resolver", "acls_to_clamp_resolver",
-    "clamp_to_acls_resolver", "asset_to_psr_resolver", "psr_to_asset_resolver"]
+    "clamp_to_acls_resolver", "asset_to_psr_resolver", "psr_to_asset_resolver", "acls_to_acls_phase_resolver", "acls_phase_to_acls_resolver",
+    "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
+    "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
@@ -123,7 +125,7 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 class ReferenceResolver(object):
     from_class: type
     to_class: type
-    resolve: Callable[[IdentifiedObject, IdentifiedObject], None]
+    resolve: Callable[[IdentifiedObject, IdentifiedObject], Any]
 
     def __eq__(self, other):
         return self.from_class is other.from_class and self.to_class is other.to_class and self.resolve is other.resolve
@@ -187,6 +189,9 @@ class UnresolvedReference(object):
 
     def __hash__(self):
         return hash((type(self), self.from_ref.mrid, self.to_mrid, self.resolver))
+
+    def __getitem__(self, item):
+        return (self.from_ref, self.to_mrid, self.resolver, self.reverse_resolver)[item]
 
 
 def _resolve_ce_term(ce, t):

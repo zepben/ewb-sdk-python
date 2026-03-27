@@ -5,7 +5,6 @@
 
 __all__ = ["analog_value_to_pb", "accumulator_value_to_pb", "discrete_value_to_pb", "measurement_value_to_pb"]
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
 from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue as PBAccumulatorValue
 from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue as PBAnalogValue

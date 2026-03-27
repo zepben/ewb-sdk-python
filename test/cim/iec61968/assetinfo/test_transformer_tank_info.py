@@ -4,22 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, generate_id
-
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+from cim.fill_fields import transformer_tank_info_kwargs
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from cim.private_collection_validator import validate_unordered
+from zepben.ewb import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, generate_id
 
-transformer_tank_info_kwargs = {
-    **asset_info_kwargs,
-    "power_transformer_info": builds(PowerTransformerInfo, mrid=mrid_strategy),
-    "transformer_end_infos": lists(builds(TransformerEndInfo, mrid=mrid_strategy), max_size=2)
-}
-
-transformer_tank_info_args = [*asset_info_args, PowerTransformerInfo(mrid=generate_id()), [TransformerEndInfo(mrid=generate_id()), TransformerEndInfo(mrid=generate_id())]]
+transformer_tank_info_args = [*asset_info_args, PowerTransformerInfo(mrid=generate_id()),
+                              [TransformerEndInfo(mrid=generate_id()), TransformerEndInfo(mrid=generate_id())]]
 
 
 def test_transformer_tank_info_constructor_default():
@@ -29,7 +22,7 @@ def test_transformer_tank_info_constructor_default():
     assert not list(tti.transformer_end_infos)
 
 
-@given(**transformer_tank_info_kwargs)
+@given(**transformer_tank_info_kwargs())
 def test_transformer_tank_info_constructor_kwargs(power_transformer_info, transformer_end_infos, **kwargs):
     tti = TransformerTankInfo(power_transformer_info=power_transformer_info, transformer_end_infos=transformer_end_infos, **kwargs)
 

@@ -3,24 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists
 from pytest import raises
 
-from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
+from cim.fill_fields import feeder_kwargs
+from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
+from util import assert_or_empty
 from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id, LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-feeder_kwargs = {
-    **equipment_container_kwargs,
-    "normal_head_terminal": builds(Terminal, mrid=mrid_strategy),
-    "normal_energizing_substation": builds(Substation, mrid=mrid_strategy),
-    "normal_energized_lv_feeders": lists(builds(LvFeeder, mrid=mrid_strategy), max_size=2),
-    "current_equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
-    "current_energized_lv_feeders": lists(builds(LvFeeder, mrid=mrid_strategy), max_size=2)
-}
 
 feeder_args = [
     *equipment_container_args,
@@ -43,22 +34,34 @@ def test_feeder_constructor_default():
     assert not list(f.current_energized_lv_feeders)
 
 
-@given(**feeder_kwargs)
-def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, normal_energized_lv_feeders, current_equipment,
-                                   current_energized_lv_feeders, **kwargs):
+@given(**feeder_kwargs())
+def test_feeder_constructor_kwargs(
+    normal_head_terminal,
+    normal_energizing_substation,
+    normal_energized_lv_feeders,
+    current_equipment,
+    current_energized_lv_feeders,
+    normal_energized_lv_substations,
+    current_energized_lv_substations,
+    **kwargs
+):
     f = Feeder(normal_head_terminal=normal_head_terminal,
                normal_energizing_substation=normal_energizing_substation,
                normal_energized_lv_feeders=normal_energized_lv_feeders,
                current_equipment=current_equipment,
                current_energized_lv_feeders=current_energized_lv_feeders,
+               normal_energized_lv_substations=normal_energized_lv_substations,
+               current_energized_lv_substations=current_energized_lv_substations,
                **kwargs)
 
     verify_equipment_container_constructor_kwargs(f, **kwargs)
     assert f.normal_head_terminal == normal_head_terminal
     assert f.normal_energizing_substation == normal_energizing_substation
-    assert list(f.normal_energized_lv_feeders) == normal_energized_lv_feeders
-    assert list(f.current_equipment) == current_equipment
-    assert list(f.current_energized_lv_feeders) == current_energized_lv_feeders
+    assert_or_empty(f.normal_energized_lv_feeders, normal_energized_lv_feeders)
+    assert_or_empty(f.current_equipment, current_equipment)
+    assert_or_empty(f.current_energized_lv_feeders, current_energized_lv_feeders)
+    assert_or_empty(f.normal_energized_lv_substations, normal_energized_lv_substations)
+    assert_or_empty(f.current_energized_lv_substations, current_energized_lv_substations)
 
 
 def test_feeder_constructor_args():
@@ -114,6 +117,7 @@ def test_current_energized_lv_feeder_collection():
         Feeder.remove_current_energized_lv_feeder,
         Feeder.clear_current_energized_lv_feeders
     )
+
 
 def test_normal_energized_lv_substations_collection():
     validate_unordered(

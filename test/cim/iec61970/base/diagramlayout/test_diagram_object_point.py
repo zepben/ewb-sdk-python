@@ -3,16 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats
 from pytest import raises
+
+from cim.fill_fields import diagram_object_point_kwargs
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-
-diagram_object_point_kwargs = {
-    "x_position": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "y_position": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
 
 diagram_object_point_args = [1.1, 2.2]
 
@@ -32,7 +26,7 @@ def test_diagram_object_point_constructor_default():
         DiagramObjectPoint(y_position=2.0)
 
 
-@given(**diagram_object_point_kwargs)
+@given(**diagram_object_point_kwargs())
 def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwargs):
     assert not kwargs
 

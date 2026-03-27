@@ -9,7 +9,7 @@ from zepben.ewb import IdentifiedObject, CustomerService, NameType, CustomerData
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
 from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
-from cim.cim_creators import *
+from cim.fill_fields import *
 from services.common.translator.base_test_translator import validate_service_translations
 
 T = TypeVar("T", bound=IdentifiedObject)
@@ -29,7 +29,7 @@ types_to_test = {
     "create_customer": create_customer(),
     "create_customer_agreement": create_customer_agreement(),
     "create_pricing_structure": create_pricing_structure(),
-    "create_tariffs": create_tariffs(),
+    "create_tariff": create_tariff(),
 
 }
 

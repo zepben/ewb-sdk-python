@@ -8,8 +8,6 @@ __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb
 import inspect
 from typing import ParamSpec, TypeVar, Callable
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from google.protobuf.struct_pb2 import NullValue
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
@@ -18,6 +16,7 @@ from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import Identifi
 from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNameType
 from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
 
+from zepben.ewb import datetime_to_timestamp
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.model.cim.iec61968.common.organisation import Organisation
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
@@ -50,15 +49,10 @@ def set_or_null(**kwargs):
 
 @bind_to_pb
 def document_to_pb(cim: Document) -> PBDocument:
-    timestamp = None
-    if cim.created_date_time:
-        timestamp = PBTimestamp()
-        timestamp.FromDatetime(cim.created_date_time)
-
     return PBDocument(
         io=identified_object_to_pb(cim),
         **set_or_null(
-            createdDateTime=timestamp,
+            createdDateTime=datetime_to_timestamp(cim.created_date_time),
             title=cim.title,
             authorName=cim.author_name,
             type=cim.type,

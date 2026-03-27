@@ -43,6 +43,7 @@ class BaseServiceComparator:
             for base_of in type_of.__bases__:
                 _find_comparisons_for_type(base_of)
 
+        # noinspection PyTypeHints
         self._compare_by_type: Dict[Type, Callable[[Any, T, T], ObjectDifference]] = {}
         _find_comparisons_for_type(type(self))
 
@@ -219,7 +220,7 @@ class BaseServiceComparator:
             diff.differences[name] = difference
 
     @staticmethod
-    def _calculate_values_diff(prop: Union[MemberDescriptorType, property], diff: ObjectDifference, to_comparable: Callable[[property], Any] = (lambda it: it)) -> Optional[ValueDifference]:
+    def _calculate_values_diff(prop: Union[MemberDescriptorType, property], diff: ObjectDifference, to_comparable: Callable[[R], Any] = (lambda it: it)) -> Optional[ValueDifference]:
         if isinstance(prop, property):
             s_val = getattr(diff.source, prop.fget.__name__) if diff.source else None
             t_val = getattr(diff.target, prop.fget.__name__) if diff.target else None

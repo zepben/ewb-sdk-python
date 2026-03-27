@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.fill_fields import load_break_switch_kwargs
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
-    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
+    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_args
 from zepben.ewb import LoadBreakSwitch, generate_id
 
-load_break_switch_kwargs = protected_switch_kwargs
 load_break_switch_args = protected_switch_args
 
 
@@ -16,7 +16,7 @@ def test_load_break_switch_constructor_default():
     verify_protected_switch_constructor_default(LoadBreakSwitch(mrid=generate_id()))
 
 
-@given(**load_break_switch_kwargs)
+@given(**load_break_switch_kwargs())
 def test_load_break_switch_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(LoadBreakSwitch(**kwargs), **kwargs)
 

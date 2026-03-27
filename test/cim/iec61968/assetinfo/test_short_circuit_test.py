@@ -3,26 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, floats
-from zepben.ewb import ShortCircuitTest, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
+from cim.fill_fields import short_circuit_test_kwargs
+from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
-
-short_circuit_test_kwargs = {
-    **transformer_test_kwargs,
-    "current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "energised_end_step": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "grounded_end_step": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "leakage_impedance": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "leakage_impedance_zero": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "loss": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "loss_zero": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "power": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "voltage": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "voltage_ohmic_part": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+from zepben.ewb import ShortCircuitTest, generate_id
 
 short_circuit_test_args = [*transformer_test_args, 1.1, 2, 3, 4.4, 5.5, 6, 7, 8, 9.9, 10.01]
 
@@ -43,7 +28,7 @@ def test_short_circuit_test_constructor_default():
     assert sct.voltage_ohmic_part is None
 
 
-@given(**short_circuit_test_kwargs)
+@given(**short_circuit_test_kwargs())
 def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grounded_end_step, leakage_impedance, leakage_impedance_zero, loss, loss_zero,
                                                power, voltage, voltage_ohmic_part, **kwargs):
     sct = ShortCircuitTest(current=current,

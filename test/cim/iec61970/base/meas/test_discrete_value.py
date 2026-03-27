@@ -3,18 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, text
-from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
+from cim.fill_fields import discrete_value_kwargs
+from cim.iec61970.base.meas.test_measurement_value import verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
-
-discrete_value_kwargs = {
-    **measurement_value_kwargs,
-    "value": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "discrete_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-}
+from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
 
 discrete_value_args = [*measurement_value_args, 1, "a"]
 
@@ -27,7 +20,7 @@ def test_discrete_value_constructor_default():
     assert not dv.discrete_mrid
 
 
-@given(**discrete_value_kwargs)
+@given(**discrete_value_kwargs())
 def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
     # noinspection PyArgumentList
     dv = DiscreteValue(

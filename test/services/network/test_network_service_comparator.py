@@ -27,8 +27,7 @@ from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, Transf
     TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
     StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
-    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind, LvSubstation, \
-    PhaseStatus
+    PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind, LvSubstation
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.directional_current_relay import DirectionalCurrentRelay
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
@@ -71,7 +70,10 @@ from zepben.ewb.services.network.network_service_comparator import NetworkServic
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
-    validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
+    validator = ServiceComparatorValidator[NetworkService, NetworkServiceComparator](
+        create_service=lambda: NetworkService(),
+        create_comparator=lambda options: NetworkServiceComparator(options),
+    )
 
     ##################################
     # Extensions IEC61968 Asset Info #
@@ -87,7 +89,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             RelayInfo.add_delay,
             RelayInfo,
             lambda _: [0.1, 0.2],
-            lambda _: [0.1, 0.3]
+            lambda _: [0.1, 0.3],
         )
 
     ################################
@@ -101,7 +103,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PanDemandResponseFunction.kind,
             PanDemandResponseFunction,
             lambda _: EndDeviceFunctionKind.demandResponse,
-            lambda _: EndDeviceFunctionKind.onRequestRead
+            lambda _: EndDeviceFunctionKind.onRequestRead,
         )
         self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
@@ -129,34 +131,39 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Loop.add_energizing_substation,
             Loop,
             lambda _: Substation(mrid="s1"),
-            lambda _: Substation(mrid="s2")
+            lambda _: Substation(mrid="s2"),
         )
 
     def test_compare_lv_feeder(self):
         self._compare_equipment_container(LvFeeder)
 
         self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
-        self.validator.validate_property(LvFeeder.normal_energizing_lv_substation, LvFeeder, lambda _: LvSubstation(mrid="lvs1"), lambda _: LvSubstation(mrid="lvs2"))
+        self.validator.validate_property(
+            LvFeeder.normal_energizing_lv_substation,
+            LvFeeder,
+            lambda _: LvSubstation(mrid="lvs1"),
+            lambda _: LvSubstation(mrid="lvs2"),
+        )
         self.validator.validate_collection(
             LvFeeder.normal_energizing_feeders,
             LvFeeder.add_normal_energizing_feeder,
             LvFeeder,
             lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
+            lambda _: Feeder(mrid="f2"),
         )
         self.validator.validate_collection(
             LvFeeder.current_energizing_feeders,
             LvFeeder.add_current_energizing_feeder,
             LvFeeder,
             lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
+            lambda _: Feeder(mrid="f2"),
         )
         self.validator.validate_collection(
             LvFeeder.current_equipment,
             LvFeeder.add_current_equipment,
             LvFeeder,
             lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
+            lambda _: Junction(mrid="j2"),
         )
 
     def test_compare_lv_substation(self):
@@ -167,21 +174,21 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             LvSubstation.add_normal_energizing_feeder,
             LvSubstation,
             lambda _: Feeder(mrid="lvf1"),
-            lambda _: Feeder(mrid="lvf2")
+            lambda _: Feeder(mrid="lvf2"),
         )
         self.validator.validate_collection(
             LvSubstation.current_energizing_feeders,
             LvSubstation.add_current_energizing_feeder,
             LvSubstation,
             lambda _: Feeder(mrid="lvf1"),
-            lambda _: Feeder(mrid="lvf2")
+            lambda _: Feeder(mrid="lvf2"),
         )
         self.validator.validate_collection(
             LvSubstation.normal_energized_lv_feeders,
             LvSubstation.add_normal_energized_lv_feeder,
             LvSubstation,
-            lambda _: Feeder(mrid="lvf1"),
-            lambda _: Feeder(mrid="lvf2")
+            lambda _: LvFeeder(mrid="lvf1"),
+            lambda _: LvFeeder(mrid="lvf2"),
         )
 
     ##################################################
@@ -201,7 +208,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             DirectionalCurrentRelay.polarizing_quantity_type,
             DirectionalCurrentRelay,
             lambda _: PolarizingQuantityType.NEGATIVE_SEQUENCE_VOLTAGE,
-            lambda _: PolarizingQuantityType.QUADRATURE_VOLTAGE
+            lambda _: PolarizingQuantityType.QUADRATURE_VOLTAGE,
         )
         self.validator.validate_property(DirectionalCurrentRelay.relay_element_phase, DirectionalCurrentRelay, lambda _: PhaseCode.A, lambda _: PhaseCode.B)
         self.validator.validate_property(DirectionalCurrentRelay.minimum_pickup_current, DirectionalCurrentRelay, lambda _: 1.1, lambda _: 2.2)
@@ -231,7 +238,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayFunction.protection_kind,
             creator,
             lambda _: ProtectionKind.JGGG,
-            lambda _: ProtectionKind.NEGATIVE_OVERCURRENT
+            lambda _: ProtectionKind.NEGATIVE_OVERCURRENT,
         )
         self.validator.validate_property(ProtectionRelayFunction.relay_delay_time, creator, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(ProtectionRelayFunction.directable, creator, lambda _: False, lambda _: True)
@@ -239,7 +246,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayFunction.power_direction,
             creator,
             lambda _: PowerDirectionKind.FORWARD,
-            lambda _: PowerDirectionKind.REVERSE
+            lambda _: PowerDirectionKind.REVERSE,
         )
 
         self.validator.validate_collection(
@@ -247,7 +254,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayFunction.add_sensor,
             creator,
             lambda _: CurrentTransformer(mrid="ct1"),
-            lambda _: CurrentTransformer(mrid="ct2")
+            lambda _: CurrentTransformer(mrid="ct2"),
         )
 
         self.validator.validate_collection(
@@ -255,7 +262,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayFunction.add_protected_switch,
             creator,
             lambda _: Breaker(mrid="b1"),
-            lambda _: Breaker(mrid="b2")
+            lambda _: Breaker(mrid="b2"),
         )
 
         self.validator.validate_collection(
@@ -263,7 +270,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayFunction.add_scheme,
             creator,
             lambda _: ProtectionRelayScheme(mrid="prs1"),
-            lambda _: ProtectionRelayScheme(mrid="prs2")
+            lambda _: ProtectionRelayScheme(mrid="prs2"),
         )
 
         self.validator.validate_indexed_collection(
@@ -287,15 +294,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             creator,
             lambda _: RelayInfo(mrid="ari1"),
             lambda _: RelayInfo(mrid="ari2"),
-            expected_differences={"relay_info"}
-        )
-
-        self.validator.validate_property(
-            ProtectionRelayFunction.relay_info,
-            creator,
-            lambda _: RelayInfo(mrid="ri1"),
-            lambda _: RelayInfo(mrid="ri2"),
-            expected_differences={"asset_info"}
         )
 
     def test_compare_protection_relay_scheme(self):
@@ -304,7 +302,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayScheme.system,
             ProtectionRelayScheme,
             lambda _: ProtectionRelaySystem(mrid="prs1"),
-            lambda _: ProtectionRelaySystem(mrid="prs2")
+            lambda _: ProtectionRelaySystem(mrid="prs2"),
         )
 
         self.validator.validate_collection(
@@ -312,7 +310,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelayScheme.add_function,
             ProtectionRelayScheme,
             lambda _: ProtectionRelayFunction(mrid="prf1"),
-            lambda _: ProtectionRelayFunction(mrid="prf2")
+            lambda _: ProtectionRelayFunction(mrid="prf2"),
         )
 
     def test_compare_protection_relay_system(self):
@@ -321,7 +319,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelaySystem.protection_kind,
             ProtectionRelaySystem,
             lambda _: ProtectionKind.JDIFF,
-            lambda _: ProtectionKind.SECTIONALIZER
+            lambda _: ProtectionKind.SECTIONALIZER,
         )
 
         self.validator.validate_collection(
@@ -329,7 +327,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectionRelaySystem.add_scheme,
             ProtectionRelaySystem,
             lambda _: ProtectionRelayScheme(mrid="prs1"),
-            lambda _: ProtectionRelayScheme(mrid="prs2")
+            lambda _: ProtectionRelayScheme(mrid="prs2"),
         )
 
     def test_compare_voltage_relay(self):
@@ -345,8 +343,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.peakShaveCharge,
-                                         lambda _: BatteryControlMode.peakShaveDischarge)
+        self.validator.validate_property(
+            BatteryControl.control_mode,
+            BatteryControl,
+            lambda _: BatteryControlMode.peakShaveCharge,
+            lambda _: BatteryControlMode.peakShaveDischarge,
+        )
 
     #######################
     # IEC61968 Asset Info #
@@ -384,7 +386,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerInfo.add_transformer_tank_info,
             PowerTransformerInfo,
             lambda _: TransformerTankInfo(mrid="tti1"),
-            lambda _: TransformerTankInfo(mrid="tti2")
+            lambda _: TransformerTankInfo(mrid="tti2"),
         )
 
     def test_compare_short_circuit_test(self):
@@ -429,7 +431,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             TransformerEndInfo.transformer_star_impedance,
             TransformerEndInfo,
             lambda _: TransformerStarImpedance(mrid="tsi1"),
-            lambda _: TransformerStarImpedance(mrid="tsi2")
+            lambda _: TransformerStarImpedance(mrid="tsi2"),
         )
 
     def test_compare_transformer_tank_info(self):
@@ -440,7 +442,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             TransformerTankInfo.add_transformer_end_info,
             TransformerTankInfo,
             lambda _: TransformerEndInfo(mrid="tei1"),
-            lambda _: TransformerEndInfo(mrid="tei2")
+            lambda _: TransformerEndInfo(mrid="tei2"),
         )
 
     def _compare_transformer_test(self, creator: Type[TransformerTest]):
@@ -458,7 +460,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(WireInfo.strand_count, creator, lambda _: "3", lambda _: "4")
         self.validator.validate_property(WireInfo.core_strand_count, creator, lambda _: "5", lambda _: "6")
         self.validator.validate_property(WireInfo.insulated, creator, lambda _: True, lambda _: False)
-        self.validator.validate_property(WireInfo.insulation_material, creator, lambda _: WireInsulationKind.doubleWireArmour, lambda _: WireInsulationKind.beltedPilc)
+        self.validator.validate_property(
+            WireInfo.insulation_material,
+            creator,
+            lambda _: WireInsulationKind.doubleWireArmour,
+            lambda _: WireInsulationKind.beltedPilc,
+        )
         self.validator.validate_property(WireInfo.insulation_thickness, creator, lambda _: 1.0, lambda _: 2.0)
 
     ###################
@@ -473,14 +480,14 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Asset.add_organisation_role,
             creator,
             lambda _: AssetOwner(mrid="a1"),
-            lambda _: AssetOwner(mrid="a2")
+            lambda _: AssetOwner(mrid="a2"),
         )
         self.validator.validate_collection(
             Asset.power_system_resources,
             Asset.add_power_system_resource,
             creator,
             lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
+            lambda _: Junction(mrid="j2"),
         )
         self.validator.validate_property(Asset.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
 
@@ -506,7 +513,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Streetlight.lamp_kind,
             Streetlight,
             lambda _: StreetlightLampKind.HIGH_PRESSURE_SODIUM,
-            lambda _: StreetlightLampKind.MERCURY_VAPOR
+            lambda _: StreetlightLampKind.MERCURY_VAPOR,
         )
         self.validator.validate_property(Streetlight.light_rating, Streetlight, lambda _: 1, lambda _: 2)
         self.validator.validate_property(Streetlight.pole, Streetlight, lambda _: Pole(mrid="x"), lambda _: Pole(mrid="y"))
@@ -526,7 +533,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Location.main_address,
             Location,
             lambda _: StreetAddress("1234", TownDetail("town", "state")),
-            lambda _: StreetAddress("1234", TownDetail("other", "state"))
+            lambda _: StreetAddress("1234", TownDetail("other", "state")),
         )
         # noinspection PyArgumentList
         self.validator.validate_indexed_collection(
@@ -534,7 +541,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Location.add_point,
             Location,
             lambda _: PositionPoint(1.0, 2.0),
-            lambda _: PositionPoint(3.0, 4.0)
+            lambda _: PositionPoint(3.0, 4.0),
         )
 
     #####################################
@@ -593,7 +600,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: UsagePoint(mrid="up1"),
             lambda _: UsagePoint(mrid="up2"),
             NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
+            options_stop_compare=True,
         )
         self.validator.validate_collection(
             EndDevice.functions,
@@ -601,7 +608,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             creator,
             lambda _: EndDeviceFunction(mrid="edf1"),
             lambda _: EndDeviceFunction(mrid="edf2"),
-            NetworkServiceComparatorOptions(compare_lv_simplification=False)
+            NetworkServiceComparatorOptions(compare_lv_simplification=False),
         )
 
     def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
@@ -627,7 +634,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Meter(mrid="m1"),
             lambda _: Meter(mrid="m2"),
             NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
+            options_stop_compare=True,
         )
         self.validator.validate_collection(
             UsagePoint.equipment,
@@ -636,7 +643,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Junction(mrid="j1"),
             lambda _: Junction(mrid="j2"),
             NetworkServiceComparatorOptions(compare_lv_simplification=False),
-            options_stop_compare=True
+            options_stop_compare=True,
         )
 
     #######################
@@ -651,7 +658,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             OperationalRestriction.add_equipment,
             OperationalRestriction,
             lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
+            lambda _: Junction(mrid="j2"),
         )
 
     #####################################
@@ -667,7 +674,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Terminal(mrid="t1"),
             lambda _: Terminal(mrid="t2"),
             NetworkServiceComparatorOptions(compare_terminals=False),
-            options_stop_compare=True
+            options_stop_compare=True,
         )
 
     def test_compare_current_transformer(self):
@@ -679,14 +686,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             CurrentTransformer,
             lambda _: CurrentTransformerInfo(mrid="acti1"),
             lambda _: CurrentTransformerInfo(mrid="acti2"),
-            expected_differences={"current_transformer_info"}
-        )
-        self.validator.validate_property(
-            CurrentTransformer.current_transformer_info,
-            CurrentTransformer,
-            lambda _: CurrentTransformerInfo(mrid="acti1"),
-            lambda _: CurrentTransformerInfo(mrid="acti2"),
-            expected_differences={"asset_info"}
         )
 
     def test_compare_fault_indicator(self):
@@ -699,21 +698,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PotentialTransformer.type,
             PotentialTransformer,
             lambda _: PotentialTransformerKind.capacitiveCoupling,
-            lambda _: PotentialTransformerKind.inductive
+            lambda _: PotentialTransformerKind.inductive,
         )
         self.validator.validate_property(
             PotentialTransformer.asset_info,
             PotentialTransformer,
             lambda _: PotentialTransformerInfo(mrid="avti1"),
             lambda _: PotentialTransformerInfo(mrid="avti2"),
-            expected_differences={"potential_transformer_info"}
-        )
-        self.validator.validate_property(
-            PotentialTransformer.potential_transformer_info,
-            PotentialTransformer,
-            lambda _: PotentialTransformerInfo(mrid="vti1"),
-            lambda _: PotentialTransformerInfo(mrid="vti2"),
-            expected_differences={"asset_info"}
         )
 
     def _compare_sensor(self, creator: Type[Sensor]):
@@ -722,7 +713,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Sensor.add_relay_function,
             creator,
             lambda _: ProtectionRelayFunction(mrid="prf1"),
-            lambda _: ProtectionRelayFunction(mrid="prf2")
+            lambda _: ProtectionRelayFunction(mrid="prf2"),
         )
         self._compare_auxiliary_equipment(creator)
 
@@ -749,7 +740,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Terminal(mrid="1"),
             lambda _: Terminal(mrid="2"),
             NetworkServiceComparatorOptions(compare_terminals=False),
-            options_stop_compare=True
+            options_stop_compare=True,
         )
 
     def test_compare_connectivity_node(self):
@@ -760,7 +751,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ConnectivityNode.add_terminal,
             ConnectivityNode,
             lambda _: Terminal(mrid="1"),
-            lambda _: Terminal(mrid="2")
+            lambda _: Terminal(mrid="2"),
         )
 
     def _compare_connectivity_node_container(self, creator: Type[ConnectivityNodeContainer]):
@@ -786,28 +777,28 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Equipment.commissioned_date,
             creator,
             lambda _: datetime.datetime.fromtimestamp(0),
-            lambda _: datetime.datetime.fromtimestamp(1)
+            lambda _: datetime.datetime.fromtimestamp(1),
         )
         self.validator.validate_collection(Equipment.containers, Equipment.add_container, creator, lambda _: Site(mrid="s1"), lambda _: Site(mrid="s2"))
         self.validator.validate_collection(
             Equipment.usage_points,
             Equipment.add_usage_point,
             creator, lambda _: UsagePoint(mrid="u1"),
-            lambda _: UsagePoint(mrid="u2")
+            lambda _: UsagePoint(mrid="u2"),
         )
         self.validator.validate_collection(
             Equipment.operational_restrictions,
             Equipment.add_operational_restriction,
             creator,
             lambda _: OperationalRestriction(mrid="o1"),
-            lambda _: OperationalRestriction(mrid="o2")
+            lambda _: OperationalRestriction(mrid="o2"),
         )
         self.validator.validate_collection(
             Equipment.current_containers,
             Equipment.add_current_container,
             creator,
             lambda _: Feeder(mrid="f1"),
-            lambda _: Feeder(mrid="f2")
+            lambda _: Feeder(mrid="f2"),
         )
 
     def _compare_equipment_container(self, creator: Type[EquipmentContainer]):
@@ -818,7 +809,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EquipmentContainer.add_equipment,
             creator,
             lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
+            lambda _: Junction(mrid="j2"),
         )
 
     def test_compare_feeder(self):
@@ -831,35 +822,35 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Feeder.add_current_equipment,
             Feeder,
             lambda _: Junction(mrid="j1"),
-            lambda _: Junction(mrid="j2")
+            lambda _: Junction(mrid="j2"),
         )
         self.validator.validate_collection(
             Feeder.normal_energized_lv_feeders,
             Feeder.add_normal_energized_lv_feeder,
             Feeder,
             lambda _: LvFeeder(mrid="lvf1"),
-            lambda _: LvFeeder(mrid="lvf2")
+            lambda _: LvFeeder(mrid="lvf2"),
         )
         self.validator.validate_collection(
             Feeder.current_energized_lv_feeders,
             Feeder.add_current_energized_lv_feeder,
             Feeder,
             lambda _: LvFeeder(mrid="lvf1"),
-            lambda _: LvFeeder(mrid="lvf2")
+            lambda _: LvFeeder(mrid="lvf2"),
         )
         self.validator.validate_collection(
             Feeder.normal_energized_lv_substations,
             Feeder.add_normal_energized_lv_substation,
             Feeder,
-            lambda _: LvFeeder(mrid="lvs1"),
-            lambda _: LvFeeder(mrid="lvs2")
+            lambda _: LvSubstation(mrid="lvs1"),
+            lambda _: LvSubstation(mrid="lvs2"),
         )
         self.validator.validate_collection(
             Feeder.current_energized_lv_substations,
             Feeder.add_current_energized_lv_substation,
             Feeder,
-            lambda _: LvFeeder(mrid="lvs1"),
-            lambda _: LvFeeder(mrid="lvs2")
+            lambda _: LvSubstation(mrid="lvs1"),
+            lambda _: LvSubstation(mrid="lvs2"),
         )
 
     def test_compare_geographical_region(self):
@@ -870,7 +861,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             GeographicalRegion.add_sub_geographical_region,
             GeographicalRegion,
             lambda _: SubGeographicalRegion(mrid="sg1"),
-            lambda _: SubGeographicalRegion(mrid="sg2")
+            lambda _: SubGeographicalRegion(mrid="sg2"),
         )
 
     def _compare_power_system_resource(self, creator: Type[PowerSystemResource]):
@@ -882,7 +873,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerSystemResource.add_asset,
             creator,
             lambda _: Pole(mrid="p1"),
-            lambda _: Pole(mrid="p2")
+            lambda _: Pole(mrid="p2"),
         )
 
     def test_compare_sub_geographical_region(self):
@@ -892,14 +883,14 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             SubGeographicalRegion.geographical_region,
             SubGeographicalRegion,
             lambda _: GeographicalRegion(mrid="g1"),
-            lambda _: GeographicalRegion(mrid="g2")
+            lambda _: GeographicalRegion(mrid="g2"),
         )
         self.validator.validate_collection(
             SubGeographicalRegion.substations,
             SubGeographicalRegion.add_substation,
             SubGeographicalRegion,
             lambda _: Substation(mrid="s1"),
-            lambda _: Substation(mrid="s2")
+            lambda _: Substation(mrid="s2"),
         )
 
     def test_compare_substation(self):
@@ -909,7 +900,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Substation.sub_geographical_region,
             Substation,
             lambda _: SubGeographicalRegion(mrid="sg1"),
-            lambda _: SubGeographicalRegion(mrid="sg2")
+            lambda _: SubGeographicalRegion(mrid="sg2"),
         )
         self.validator.validate_collection(Substation.feeders, Substation.add_feeder, Substation, lambda _: Feeder(mrid="f1"), lambda _: Feeder(mrid="f2"))
 
@@ -928,19 +919,15 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Terminal.current_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
 
         def _change_state(prop, val):
-            setattr(prop, '_phase_status_internal',  val)
+            setattr(prop, '_phase_status_internal', val)
 
-        for first, second in (
+        phase_difference_pairs = (
             (0x00000001, 0x00000002),
             (0x00000010, 0x00000020),
             (0x00000100, 0x00000200),
             (0x00001000, 0x00002000),
-        ):
-            #expected_diff = ObjectDifference()
-            #expected_diff.differences["normal_phases"] = ValueDifference(1, 2)
-
-            #self.validator.validate_compare(closed_switch, open_switch, expect_modification=difference)
-
+        )
+        for first, second in phase_difference_pairs:
             for state in (Terminal.normal_phases, Terminal.current_phases):
                 self.validator.validate_val_property(
                     state,
@@ -953,7 +940,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Terminal.connectivity_node,
             Terminal,
             lambda terminal, _: terminal.connect(cn1),
-            lambda terminal, _: terminal.connect(cn2)
+            lambda terminal, _: terminal.connect(cn2),
         )
         self.validator.validate_property(Terminal.conducting_equipment, Terminal, lambda _: Junction(mrid="j1"), lambda _: Junction(mrid="j2"))
 
@@ -1005,7 +992,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerElectronicsUnit.power_electronics_connection,
             creator,
             lambda _: PowerElectronicsConnection(mrid="pec1"),
-            lambda _: PowerElectronicsConnection(mrid="pec2")
+            lambda _: PowerElectronicsConnection(mrid="pec2"),
         )
         self.validator.validate_property(PowerElectronicsUnit.max_p, creator, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerElectronicsUnit.min_p, creator, lambda _: 1, lambda _: 2)
@@ -1066,7 +1053,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             RemoteSource.measurement,
             RemoteSource,
             lambda _: Measurement(mrid="m1"),
-            lambda _: Measurement(mrid="m2")
+            lambda _: Measurement(mrid="m2"),
         )
 
     #######################
@@ -1080,28 +1067,28 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             AcLineSegment.per_length_impedance,
             AcLineSegment,
             lambda _: PerLengthSequenceImpedance(mrid="p1"),
-            lambda _: PerLengthSequenceImpedance(mrid="p2")
+            lambda _: PerLengthSequenceImpedance(mrid="p2"),
         )
         self.validator.validate_collection(
             AcLineSegment.cuts,
             AcLineSegment.add_cut,
             AcLineSegment,
             lambda _: Cut(mrid="cut1"),
-            lambda _: Cut(mrid="cut2")
+            lambda _: Cut(mrid="cut2"),
         )
         self.validator.validate_collection(
             AcLineSegment.clamps,
             AcLineSegment.add_clamp,
             AcLineSegment,
             lambda _: Clamp(mrid="clamp1"),
-            lambda _: Clamp(mrid="clamp2")
+            lambda _: Clamp(mrid="clamp2"),
         )
         self.validator.validate_collection(
             AcLineSegment.phases,
             AcLineSegment.add_phase,
             AcLineSegment,
             lambda _: AcLineSegmentPhase(mrid="p1"),
-            lambda _: AcLineSegmentPhase(mrid="p2")
+            lambda _: AcLineSegmentPhase(mrid="p2"),
         )
 
     def test_ac_line_segment_phase(self):
@@ -1111,7 +1098,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             AcLineSegmentPhase.ac_line_segment,
             AcLineSegmentPhase,
             lambda _: AcLineSegment(mrid="c1"),
-            lambda _: AcLineSegment(mrid="c2")
+            lambda _: AcLineSegment(mrid="c2"),
         )
         self.validator.validate_property(AcLineSegmentPhase.asset_info, AcLineSegmentPhase, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"))
         self.validator.validate_property(AcLineSegmentPhase.phase, AcLineSegmentPhase, lambda _: SinglePhaseKind.A, lambda _: SinglePhaseKind.B)
@@ -1137,10 +1124,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Conductor.length, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(Conductor.design_temperature, creator, lambda _: 1, lambda _: 2)
         self.validator.validate_property(Conductor.design_rating, creator, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(Conductor.asset_info, creator, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"),
-                                         expected_differences={"wire_info"})
-        self.validator.validate_property(Conductor.wire_info, creator, lambda _: OverheadWireInfo(mrid="owi1"), lambda _: OverheadWireInfo(mrid="c2"),
-                                         expected_differences={"asset_info"})
+        self.validator.validate_property(Conductor.asset_info, creator, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"))
 
     def _compare_connector(self, creator: Type[Connector]):
         self._compare_conducting_equipment(creator)
@@ -1173,7 +1157,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EnergyConsumer.phase_connection,
             EnergyConsumer,
             lambda _: PhaseShuntConnectionKind.I,
-            lambda _: PhaseShuntConnectionKind.D
+            lambda _: PhaseShuntConnectionKind.D,
         )
         self.validator.validate_property(EnergyConsumer.q, EnergyConsumer, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(EnergyConsumer.q_fixed, EnergyConsumer, lambda _: 1.0, lambda _: 2.0)
@@ -1182,7 +1166,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EnergyConsumer.add_phase,
             EnergyConsumer,
             lambda _: EnergyConsumerPhase(mrid="ecp1"),
-            lambda _: EnergyConsumerPhase(mrid="ecp2")
+            lambda _: EnergyConsumerPhase(mrid="ecp2"),
         )
 
     def test_compare_energy_consumer_phase(self):
@@ -1192,7 +1176,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EnergyConsumerPhase.energy_consumer,
             EnergyConsumerPhase,
             lambda _: EnergyConsumer(mrid="ec1"),
-            lambda _: EnergyConsumer(mrid="ec2")
+            lambda _: EnergyConsumer(mrid="ec2"),
         )
         self.validator.validate_property(EnergyConsumerPhase.phase, EnergyConsumerPhase, lambda _: SinglePhaseKind.A, lambda _: SinglePhaseKind.B)
         self.validator.validate_property(EnergyConsumerPhase.p, EnergyConsumerPhase, lambda _: 1.0, lambda _: 2.0)
@@ -1233,7 +1217,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EnergySource.add_phase,
             EnergySource,
             lambda _: EnergySourcePhase(mrid="ecp1"),
-            lambda _: EnergySourcePhase(mrid="ecp2")
+            lambda _: EnergySourcePhase(mrid="ecp2"),
         )
 
     def test_compare_energy_source_phase(self):
@@ -1244,7 +1228,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             EnergySourcePhase.energy_source,
             EnergySourcePhase,
             lambda _: EnergySource(mrid="es1"),
-            lambda _: EnergySource(mrid="es2")
+            lambda _: EnergySource(mrid="es2"),
         )
 
     def test_compare_fuse(self):
@@ -1253,7 +1237,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Fuse.function,
             Fuse,
             lambda _: ProtectionRelayFunction(mrid="prf1"),
-            lambda _: ProtectionRelayFunction(mrid="prf2")
+            lambda _: ProtectionRelayFunction(mrid="prf2"),
         )
 
     def test_compare_ground(self):
@@ -1328,14 +1312,14 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerElectronicsConnection.add_phase,
             PowerElectronicsConnection,
             lambda _: PowerElectronicsConnectionPhase(mrid="pecp1"),
-            lambda _: PowerElectronicsConnectionPhase(mrid="pecp2")
+            lambda _: PowerElectronicsConnectionPhase(mrid="pecp2"),
         )
         self.validator.validate_collection(
             PowerElectronicsConnection.units,
             PowerElectronicsConnection.add_unit,
             PowerElectronicsConnection,
             lambda _: PowerElectronicsUnit(mrid="peu1"),
-            lambda _: PowerElectronicsUnit(mrid="peu2")
+            lambda _: PowerElectronicsUnit(mrid="peu2"),
         )
         self.validator.validate_property(PowerElectronicsConnection.max_i_fault, PowerElectronicsConnection, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerElectronicsConnection.max_q, PowerElectronicsConnection, lambda _: 1.0, lambda _: 2.0)
@@ -1376,13 +1360,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerElectronicsConnectionPhase.phase,
             PowerElectronicsConnectionPhase,
             lambda _: SinglePhaseKind.A,
-            lambda _: SinglePhaseKind.B
+            lambda _: SinglePhaseKind.B,
         )
         self.validator.validate_property(
             PowerElectronicsConnectionPhase.power_electronics_connection,
             PowerElectronicsConnectionPhase,
             lambda _: PowerElectronicsConnection(mrid="pec1"),
-            lambda _: PowerElectronicsConnection(mrid="pec2")
+            lambda _: PowerElectronicsConnection(mrid="pec2"),
         )
 
     def test_compare_power_transformer(self):
@@ -1390,10 +1374,18 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_property(PowerTransformer.vector_group, PowerTransformer, lambda _: VectorGroup.DYN11, lambda _: VectorGroup.D0)
         self.validator.validate_property(PowerTransformer.transformer_utilisation, PowerTransformer, lambda _: 0.1, lambda _: 0.9)
-        self.validator.validate_property(PowerTransformer.construction_kind, PowerTransformer, lambda _: TransformerConstructionKind.subway,
-                                         lambda _: TransformerConstructionKind.overhead)
-        self.validator.validate_property(PowerTransformer.function, PowerTransformer, lambda _: TransformerFunctionKind.isolationTransformer,
-                                         lambda _: TransformerFunctionKind.voltageRegulator)
+        self.validator.validate_property(
+            PowerTransformer.construction_kind,
+            PowerTransformer,
+            lambda _: TransformerConstructionKind.subway,
+            lambda _: TransformerConstructionKind.overhead,
+        )
+        self.validator.validate_property(
+            PowerTransformer.function,
+            PowerTransformer,
+            lambda _: TransformerFunctionKind.isolationTransformer,
+            lambda _: TransformerFunctionKind.voltageRegulator,
+        )
         self.validator.validate_indexed_collection(
             PowerTransformer.ends,
             PowerTransformer.add_end,
@@ -1407,15 +1399,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformer,
             lambda _: PowerTransformerInfo(mrid="apti1"),
             lambda _: PowerTransformerInfo(mrid="apti2"),
-            expected_differences={"power_transformer_info"}
-        )
-
-        self.validator.validate_property(
-            PowerTransformer.power_transformer_info,
-            PowerTransformer,
-            lambda _: PowerTransformerInfo(mrid="pti1"),
-            lambda _: PowerTransformerInfo(mrid="pti2"),
-            expected_differences={"asset_info"}
         )
 
     def test_compare_power_transformer_end(self):
@@ -1425,7 +1408,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerEnd.power_transformer,
             PowerTransformerEnd,
             lambda _: PowerTransformer(mrid="pt1"),
-            lambda _: PowerTransformer(mrid="pt2")
+            lambda _: PowerTransformer(mrid="pt2"),
         )
         self.validator.validate_property(PowerTransformerEnd.b, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerTransformerEnd.b0, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
@@ -1450,7 +1433,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerEnd,
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1),
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 2),
-            expected_differences={"rated_s"}
+            expected_differences={"rated_s"},
         )
 
     def _compare_protected_switch(self, creator: Type[ProtectedSwitch]):
@@ -1462,7 +1445,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ProtectedSwitch.add_relay_function,
             creator,
             lambda _: CurrentRelay(mrid="cr1"),
-            lambda _: CurrentRelay(mrid="cr2")
+            lambda _: CurrentRelay(mrid="cr2"),
         )
 
     def test_compare_ratio_tap_changer(self):
@@ -1472,7 +1455,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             RatioTapChanger.transformer_end,
             RatioTapChanger,
             lambda _: PowerTransformerEnd(mrid="pte1"),
-            lambda _: PowerTransformerEnd(mrid="pte2")
+            lambda _: PowerTransformerEnd(mrid="pte2"),
         )
         self.validator.validate_property(RatioTapChanger.step_voltage_increment, RatioTapChanger, lambda _: 1.0, lambda _: 2.0)
 
@@ -1490,7 +1473,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             RegulatingCondEq.regulating_control,
             creator,
             lambda _: RegulatingControl(mrid="rc1"),
-            lambda _: RegulatingControl(mrid="rc2")
+            lambda _: RegulatingControl(mrid="rc2"),
         )
 
     def _compare_regulating_control(self, creator: Type[RegulatingControl]):
@@ -1498,9 +1481,10 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_property(RegulatingControl.discrete, creator, lambda _: False, lambda _: True)
         self.validator.validate_property(
-            RegulatingControl.mode, creator,
+            RegulatingControl.mode,
+            creator,
             lambda _: RegulatingControlModeKind.voltage,
-            lambda _: RegulatingControlModeKind.currentFlow
+            lambda _: RegulatingControlModeKind.currentFlow,
         )
         self.validator.validate_property(RegulatingControl.monitored_phase, creator, lambda _: PhaseCode.ABC, lambda _: PhaseCode.ABCN)
         self.validator.validate_property(RegulatingControl.target_deadband, creator, lambda _: 1.0, lambda _: 2.0)
@@ -1517,7 +1501,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             RegulatingControl.add_regulating_cond_eq,
             creator,
             lambda _: RegulatingCondEq(mrid="rce1"),
-            lambda _: RegulatingCondEq(mrid="rce2")
+            lambda _: RegulatingCondEq(mrid="rce2"),
         )
 
     def _compare_rotating_machine(self, creator: Type[RotatingMachine]):
@@ -1548,13 +1532,15 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             ShuntCompensator.phase_connection,
             creator,
             lambda _: PhaseShuntConnectionKind.D,
-            lambda _: PhaseShuntConnectionKind.G
+            lambda _: PhaseShuntConnectionKind.G,
         )
         self.validator.validate_property(ShuntCompensator.sections, creator, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(ShuntCompensator.asset_info, creator, lambda _: ShuntCompensatorInfo(mrid="asci1"),
-                                         lambda _: ShuntCompensatorInfo(mrid="asci2"), expected_differences={"shunt_compensator_info"})
-        self.validator.validate_property(ShuntCompensator.shunt_compensator_info, creator, lambda _: ShuntCompensatorInfo(mrid="sci1"),
-                                         lambda _: ShuntCompensatorInfo(mrid="sci2"), expected_differences={"asset_info"})
+        self.validator.validate_property(
+            ShuntCompensator.asset_info,
+            creator,
+            lambda _: ShuntCompensatorInfo(mrid="asci1"),
+            lambda _: ShuntCompensatorInfo(mrid="asci2"),
+        )
         self.validator.validate_property(ShuntCompensator.grounding_terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
 
     def test_compare_static_var_compensator(self):
@@ -1567,7 +1553,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             StaticVarCompensator.svc_control_mode,
             StaticVarCompensator,
             lambda _: SVCControlMode.reactivePower,
-            lambda _: SVCControlMode.voltage
+            lambda _: SVCControlMode.voltage,
         )
         self.validator.validate_property(StaticVarCompensator.voltage_set_point, StaticVarCompensator, lambda _: 1, lambda _: 2)
 
@@ -1575,10 +1561,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_conducting_equipment(creator)
 
         self.validator.validate_property(Switch.rated_current, creator, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(Switch.asset_info, creator, lambda _: SwitchInfo(mrid="asi1"), lambda _: SwitchInfo(mrid="sai2"),
-                                         expected_differences={"switch_info"})
-        self.validator.validate_property(Switch.switch_info, creator, lambda _: SwitchInfo(mrid="si1"), lambda _: SwitchInfo(mrid="si2"),
-                                         expected_differences={"asset_info"})
+        self.validator.validate_property(Switch.asset_info, creator, lambda _: SwitchInfo(mrid="asi1"), lambda _: SwitchInfo(mrid="sai2"))
 
         closed_switch = Jumper(mrid="mRID")
         closed_switch.set_normally_open(False)
@@ -1591,12 +1574,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         difference = ObjectDifference(closed_switch, open_switch)
         difference.differences["isNormallyOpen"] = ValueDifference(
             {p: False for p in PhaseCode.ABCN.single_phases},
-            {p: True for p in PhaseCode.ABCN.single_phases}
+            {p: True for p in PhaseCode.ABCN.single_phases},
         )
 
         difference.differences["isOpen"] = ValueDifference(
             {p: True for p in PhaseCode.ABCN.single_phases},
-            {p: False for p in PhaseCode.ABCN.single_phases}
+            {p: False for p in PhaseCode.ABCN.single_phases},
         )
 
         self.validator.validate_compare(closed_switch, open_switch, expect_modification=difference)
@@ -1623,17 +1606,25 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(SynchronousMachine.sat_direct_trans_x, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(SynchronousMachine.x0, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(SynchronousMachine.x2, SynchronousMachine, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(SynchronousMachine.type, SynchronousMachine, lambda _: SynchronousMachineKind.generator,
-                                         lambda _: SynchronousMachineKind.motor)
-        self.validator.validate_property(SynchronousMachine.operating_mode, SynchronousMachine, lambda _: SynchronousMachineKind.generator,
-                                         lambda _: SynchronousMachineKind.motor)
+        self.validator.validate_property(
+            SynchronousMachine.type,
+            SynchronousMachine,
+            lambda _: SynchronousMachineKind.generator,
+            lambda _: SynchronousMachineKind.motor,
+        )
+        self.validator.validate_property(
+            SynchronousMachine.operating_mode,
+            SynchronousMachine,
+            lambda _: SynchronousMachineKind.generator,
+            lambda _: SynchronousMachineKind.motor,
+        )
 
         self.validator.validate_collection(
             SynchronousMachine.curves,
             SynchronousMachine.add_curve,
             SynchronousMachine,
             lambda _: ReactiveCapabilityCurve(mrid="c1"),
-            lambda _: ReactiveCapabilityCurve(mrid="c2")
+            lambda _: ReactiveCapabilityCurve(mrid="c2"),
         )
 
     def _compare_tap_changer(self, creator: Type[TapChanger]):
@@ -1646,8 +1637,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(TapChanger.neutral_u, creator, lambda _: 0, lambda _: 1)
         self.validator.validate_property(TapChanger.normal_step, creator, lambda _: 0, lambda _: 1)
         self.validator.validate_property(TapChanger.step, creator, lambda _: 0, lambda _: 1)
-        self.validator.validate_property(TapChanger.tap_changer_control, creator, lambda _: TapChangerControl(mrid="tcc1"),
-                                         lambda _: TapChangerControl(mrid="tcc2"))
+        self.validator.validate_property(
+            TapChanger.tap_changer_control,
+            creator,
+            lambda _: TapChangerControl(mrid="tcc1"),
+            lambda _: TapChangerControl(mrid="tcc2"),
+        )
 
     def test_compare_tap_changer_control(self):
         self._compare_regulating_control(TapChangerControl)
@@ -1673,15 +1668,19 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             TransformerEnd.ratio_tap_changer,
             creator,
             lambda _: RatioTapChanger(mrid="rtc1"),
-            lambda _: RatioTapChanger(mrid="rtc2")
+            lambda _: RatioTapChanger(mrid="rtc2"),
         )
-        self.validator.validate_property(TransformerEnd.terminal, creator, lambda _: Terminal(mrid="t1", conducting_equipment=PowerTransformer(mrid="t1-pt1")),
-                                         lambda _: Terminal(mrid="t2", conducting_equipment=PowerTransformer(mrid="t2-pt2")))
+        self.validator.validate_property(
+            TransformerEnd.terminal,
+            creator,
+            lambda _: Terminal(mrid="t1", conducting_equipment=PowerTransformer(mrid="t1-pt1")),
+            lambda _: Terminal(mrid="t2", conducting_equipment=PowerTransformer(mrid="t2-pt2")),
+        )
         self.validator.validate_property(
             TransformerEnd.star_impedance,
             creator,
             lambda _: TransformerStarImpedance(mrid="tsi1"),
-            lambda _: TransformerStarImpedance(mrid="tsi2")
+            lambda _: TransformerStarImpedance(mrid="tsi2"),
         )
 
     def test_compare_transformer_star_impedance(self):
@@ -1691,8 +1690,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(TransformerStarImpedance.r0, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(TransformerStarImpedance.x, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(TransformerStarImpedance.x0, TransformerStarImpedance, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(TransformerStarImpedance.transformer_end_info, TransformerStarImpedance, lambda _: TransformerEndInfo(mrid="tei1"),
-                                         lambda _: TransformerEndInfo(mrid="tei2"))
+        self.validator.validate_property(
+            TransformerStarImpedance.transformer_end_info,
+            TransformerStarImpedance,
+            lambda _: TransformerEndInfo(mrid="tei1"),
+            lambda _: TransformerEndInfo(mrid="tei2"),
+        )
 
     ###############################
     # IEC61970 InfIEC61970 Feeder #
@@ -1707,12 +1710,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Circuit.add_end_terminal,
             Circuit,
             lambda _: Terminal(mrid="t1"),
-            lambda _: Terminal(mrid="t2")
+            lambda _: Terminal(mrid="t2"),
         )
         self.validator.validate_collection(
             Circuit.end_substations,
             Circuit.add_end_substation,
             Circuit,
             lambda _: Substation(mrid="s1"),
-            lambda _: Substation(mrid="s2")
+            lambda _: Substation(mrid="s2"),
         )

@@ -5,7 +5,7 @@
 
 __all__ = ["TerminalConnectivityConnected"]
 
-from typing import List, Iterable, Optional, Set, Dict, Callable
+from typing import List, Iterable, Optional, Set, Dict, Callable, Any
 
 from zepben.ewb import Terminal, PhaseCode, SinglePhaseKind, Switch
 from zepben.ewb.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
@@ -99,7 +99,7 @@ class TerminalConnectivityConnected:
 
         return nominal_phase_paths
 
-    def _add_xy_phase_paths(self, terminal: Terminal, add_path: Callable[[SinglePhaseKind, SinglePhaseKind], None]):
+    def _add_xy_phase_paths(self, terminal: Terminal, add_path: Callable[[SinglePhaseKind, SinglePhaseKind], Any]):
         """
                 val xyPhases = cn.terminals.associateWith { it.findXyPhases() }.filterValues { it.isNotNone() }
                 val primaryPhases = cn.terminals.associateWith { it.findPrimaryPhases() }.filterValues { it.isNotNone() }

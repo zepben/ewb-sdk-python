@@ -36,7 +36,7 @@ from zepben.ewb.services.customer.customers import CustomerService
 @bind_to_cim
 def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: CustomerService):
     if vi := get_nullable(pb, 'validityInterval'):
-        cim.validity_interval=(date_time_interval_to_cim(vi, service))
+        cim.validity_interval=(date_time_interval_to_cim(vi))
 
     document_to_cim(
         pb.doc, cim, service
@@ -102,8 +102,8 @@ def tariff_to_cim(pb: PBTariff, service: CustomerService) -> Optional[Tariff]:
 ########################
 
 @bind_to_cim
-def date_time_interval_to_cim(pb: PBDateTimeInterval, service: CustomerService) -> Optional[DateTimeInterval]:
+def date_time_interval_to_cim(pb: PBDateTimeInterval) -> Optional[DateTimeInterval]:
     return DateTimeInterval(
-        start=get_nullable(pb, 'start'),
-        end=get_nullable(pb, 'end'),
+        start=sdt.ToDatetime() if (sdt := get_nullable(pb, "start")) else None,
+        end=edt.ToDatetime() if (edt := get_nullable(pb, "end")) else None,
     )

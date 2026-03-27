@@ -3,18 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import builds
-
-from util import mrid_strategy
-from zepben.ewb import OrganisationRole, Organisation, generate_id
-
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-organisation_role_kwargs = {
-    **identified_object_kwargs,
-    "organisation": builds(Organisation, mrid=mrid_strategy)
-}
+from zepben.ewb import OrganisationRole, Organisation, generate_id
 
 organisation_role_args = [*identified_object_args, Organisation(mrid=generate_id())]
 

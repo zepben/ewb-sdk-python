@@ -3,27 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, text, sampled_from, booleans
+from hypothesis.strategies import text, sampled_from, booleans
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import ALPHANUM, contact_details_kwargs
 from cim.private_collection_validator import validate_unordered_other, DuplicateBehaviour
-from streaming.get.pb_creators import lists
+from util import assert_or_empty
 from zepben.ewb import ContactMethodType, TelephoneNumber, ElectronicAddress, ContactDetails
-
-
-contact_details_kwargs = {
-    "id": text(alphabet=ALPHANUM),
-    "contact_address": text(alphabet=ALPHANUM),
-    "contact_type": text(alphabet=ALPHANUM),
-    "first_name": text(alphabet=ALPHANUM),
-    "last_name": text(alphabet=ALPHANUM),
-    "preferred_contact_method": sampled_from(ContactMethodType),
-    "is_primary": booleans(),
-    "business_name": text(alphabet=ALPHANUM),
-    "phone_numbers": lists(builds(TelephoneNumber)),
-    "electronic_addresses": lists(builds(ElectronicAddress)),
-}
-
 
 contact_details_args = [
     text(alphabet=ALPHANUM),
@@ -53,7 +38,7 @@ def test_contact_details_constructor_default():
     assert not list(c.electronic_addresses)
 
 
-@given(**contact_details_kwargs)
+@given(**contact_details_kwargs())
 def test_contact_details_constructor_kwargs(
     id,
     contact_address,
@@ -86,8 +71,8 @@ def test_contact_details_constructor_kwargs(
     assert c.preferred_contact_method == preferred_contact_method
     assert c.is_primary == is_primary
     assert c.business_name == business_name
-    assert list(c.phone_numbers) == phone_numbers
-    assert list(c.electronic_addresses) == electronic_addresses
+    assert_or_empty(c.phone_numbers, phone_numbers)
+    assert_or_empty(c.electronic_addresses, electronic_addresses)
 
 
 def test_contact_details_constructor_args():
@@ -104,6 +89,7 @@ def test_contact_details_constructor_args():
     assert list(c.phone_numbers) == contact_details_args[-2]
     assert list(c.electronic_addresses) == contact_details_args[-1]
 
+
 def test_phone_number_collection():
     def get_phone_number(it: ContactDetails, number: str):
         for tn in it.phone_numbers:
@@ -111,9 +97,11 @@ def test_phone_number_collection():
                 return tn
         raise KeyError(number)
 
+    # ContactDetails isn't an IdentifiedObject, but it has an `id` as its first arg, so it works (just with lots of type errors).
+    # noinspection PyTypeChecker
     validate_unordered_other(
         ContactDetails,
-        lambda it: TelephoneNumber(local_number=it),
+        lambda it: TelephoneNumber(local_number=str(it)),
         ContactDetails.phone_numbers,
         ContactDetails.num_phone_numbers,
         get_phone_number,
@@ -124,6 +112,7 @@ def test_phone_number_collection():
         duplicate_behaviour=DuplicateBehaviour.SUPPORTED
     )
 
+
 def test_electronic_address_collection():
     def get_electronic_address(it: ContactDetails, number: str):
         for tn in it.electronic_addresses:
@@ -131,6 +120,8 @@ def test_electronic_address_collection():
                 return tn
         raise KeyError(number)
 
+    # ContactDetails isn't an IdentifiedObject, but it has an `id` as its first arg, so it works (just with lots of type errors).
+    # noinspection PyTypeChecker
     validate_unordered_other(
         ContactDetails,
         lambda it: ElectronicAddress(email1=it),

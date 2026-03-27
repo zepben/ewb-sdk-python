@@ -4,20 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import text
+
+from cim.fill_fields import street_detail_kwargs
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-
-street_detail_kwargs = {
-    "building_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "floor_identification": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "suite_number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "display_address": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-}
 
 street_detail_args = ["a", "b", "c", "d", "e", "f", "g"]
 
@@ -34,8 +23,8 @@ def test_street_detail_constructor_default():
     assert sd.display_address is None
 
 
-@given(**street_detail_kwargs)
-def test_street_detail_constructor_kwargs(building_name, floor_identification, name, number, suite_number, type, display_address, **kwargs):
+@given(**street_detail_kwargs())
+def test_street_detail_constructor_kwargs(building_number, building_name, floor_identification, name, number, suite_number, type, display_address, **kwargs):
     assert not kwargs
 
     sd = StreetDetail(
@@ -45,7 +34,8 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
         number=number,
         suite_number=suite_number,
         type=type,
-        display_address=display_address
+        display_address=display_address,
+        building_number=building_number,
     )
 
     assert sd.building_name == building_name
@@ -55,6 +45,7 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
     assert sd.suite_number == suite_number
     assert sd.type == type
     assert sd.display_address == display_address
+    assert sd.building_number == building_number
 
 
 def test_street_detail_constructor_args():

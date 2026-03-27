@@ -5,34 +5,12 @@
 from unittest.mock import patch
 
 from hypothesis import given
-from hypothesis.strategies import integers, floats
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection, create_transformer_tank_info, \
-    create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
+from cim.fill_fields import transformer_end_info_kwargs
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
 from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest, generate_id
-
-transformer_end_info_kwargs = {
-    **asset_info_kwargs,
-    "connection_kind": sampled_winding_connection(),
-    "emergency_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "insulation_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "phase_angle_clock": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "short_term_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "transformer_tank_info": create_transformer_tank_info(),
-    "transformer_star_impedance": create_transformer_star_impedance(),
-    "energised_end_no_load_tests": create_no_load_test(),
-    "energised_end_short_circuit_tests": create_short_circuit_test(),
-    "grounded_end_short_circuit_tests": create_short_circuit_test(),
-    "open_end_open_circuit_tests": create_open_circuit_test(),
-    "energised_end_open_circuit_tests": create_open_circuit_test(),
-}
 
 transformer_end_info_args = [
     *asset_info_args,
@@ -77,7 +55,7 @@ def test_transformer_end_info_constructor_default():
     assert tei.energised_end_open_circuit_tests is None
 
 
-@given(**transformer_end_info_kwargs)
+@given(**transformer_end_info_kwargs())
 def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
                                                  transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
                                                  energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,

@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.iec61968.assetinfo.test_wire_info import wire_info_kwargs, verify_wire_info_constructor_default, \
+from cim.fill_fields import cable_info_kwargs
+from cim.iec61968.assetinfo.test_wire_info import verify_wire_info_constructor_default, \
     verify_wire_info_constructor_kwargs, verify_wire_info_constructor_args, wire_info_args
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
 
-cable_info_kwargs = wire_info_kwargs
 cable_info_args = wire_info_args
 
 
@@ -17,7 +17,7 @@ def test_cable_info_constructor_default():
     verify_wire_info_constructor_default(CableInfo(mrid=generate_id()))
 
 
-@given(**cable_info_kwargs)
+@given(**cable_info_kwargs())
 def test_cable_info_constructor_kwargs(**kwargs):
     verify_wire_info_constructor_kwargs(CableInfo(**kwargs), **kwargs)
 

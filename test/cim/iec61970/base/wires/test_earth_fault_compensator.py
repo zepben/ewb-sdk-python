@@ -2,17 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import floats, one_of, none
-from zepben.ewb import EarthFaultCompensator
-
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, conducting_equipment_args, \
+from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_args, \
     verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args
-
-earth_fault_compensator_kwargs = {
-    **conducting_equipment_kwargs,
-    "r": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-}
+from zepben.ewb import EarthFaultCompensator
 
 earth_fault_compensator_args = [*conducting_equipment_args, 1.0]
 

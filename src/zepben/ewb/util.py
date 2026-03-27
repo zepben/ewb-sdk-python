@@ -186,7 +186,10 @@ class classproperty(property):
         return classmethod(self.fget).__get__(None, owner)()
 
 
-def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
+def datetime_to_timestamp(date_time: Optional[datetime]) -> Optional[PBTimestamp]:
+    if date_time is None:
+        return None
+
     timestamp = PBTimestamp()
     timestamp.FromDatetime(date_time)
     return timestamp

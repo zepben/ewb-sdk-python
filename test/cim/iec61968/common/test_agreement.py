@@ -6,18 +6,12 @@ import datetime
 
 from hypothesis.strategies import builds, datetimes, none
 
-from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, \
+from cim.iec61968.common.test_document import verify_document_constructor_default, \
     verify_document_constructor_kwargs, verify_document_constructor_args, document_args
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
 
-
 MIN_MAX = datetime.datetime(2020, 1, 1)
-
-agreement_kwargs = {
-    **document_kwargs,
-    'validity_interval': builds(DateTimeInterval, start=datetimes(max_value=MIN_MAX) , end=none()),
-}
 
 agreement_args = [*document_args, builds(DateTimeInterval, start=datetimes(max_value=MIN_MAX), end=none())]
 

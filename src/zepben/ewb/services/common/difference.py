@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import dataclass, field
-from typing import Optional, Any, List, Dict, TypeVar
+from typing import Optional, Any, List, Dict, TypeVar, Generic
 
 from zepben.ewb import IdentifiedObject
 
@@ -29,10 +29,13 @@ class CollectionDifference(Difference):
 
 
 @dataclass()
-class ObjectDifference(Difference):
-    source: IdentifiedObject
-    target: IdentifiedObject
+class ObjectDifference(Difference, Generic[T]):
+    source: T
+    target: T
     differences: Dict[str, Difference] = field(default_factory=dict)
+
+    def __str__(self):
+        return f"source: {str(self.source)}, target: {str(self.target)}, diff: {self.differences}"
 
 
 @dataclass()

@@ -3,23 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, builds
 
-from util import mrid_strategy
-from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
-
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import transformer_star_impedance_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-transformer_star_impedance_kwargs = {
-    **identified_object_kwargs,
-    "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "r0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "transformer_end_info": builds(TransformerEndInfo, mrid=mrid_strategy)
-}
+from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
 
 transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, TransformerEndInfo(mrid=generate_id())]
 
@@ -35,7 +23,7 @@ def test_transformer_star_impedance_constructor_default():
     assert not tsi.transformer_end_info
 
 
-@given(**transformer_star_impedance_kwargs)
+@given(**transformer_star_impedance_kwargs())
 def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer_end_info, **kwargs):
     tsi = TransformerStarImpedance(
         r=r,

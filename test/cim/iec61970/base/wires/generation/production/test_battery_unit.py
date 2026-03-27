@@ -3,23 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, sampled_from, builds, lists
 
-from cim.cim_creators import MAX_32_BIT_INTEGER
-from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
+from cim.fill_fields import battery_unit_kwargs
+from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode, generate_id
-
-battery_unit_kwargs = {
-    **power_electronics_unit_kwargs,
-    "battery_state": sampled_from(BatteryStateKind),
-    "rated_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-    "stored_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-    "controls": lists(builds(BatteryControl, mrid=mrid_strategy), max_size=2)
-}
 
 battery_unit_args = [*power_electronics_unit_args, BatteryStateKind.full, 1, 2, [BatteryControl(mrid=generate_id())]]
 
@@ -34,7 +24,7 @@ def test_battery_unit_constructor_default():
     assert b.num_battery_controls() == 0
 
 
-@given(**battery_unit_kwargs)
+@given(**battery_unit_kwargs())
 def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, controls, **kwargs):
     b = BatteryUnit(
         battery_state=battery_state,
@@ -66,7 +56,7 @@ def test_battery_unit_constructor_args():
 def test_battery_control_collection():
     validate_unordered(
         BatteryUnit,
-        lambda mrid: BatteryControl(mrid),
+        BatteryControl,
         BatteryUnit.controls,
         BatteryUnit.num_battery_controls,
         BatteryUnit.get_control,

@@ -4,17 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import sampled_from
-from zepben.ewb import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind, generate_id
 
-from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
+from cim.fill_fields import potential_transformer_kwargs
+from cim.iec61970.base.auxiliaryequipment.test_sensor import verify_sensor_constructor_default, \
     verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args
-from cim.property_validator import validate_property_accessor
+from zepben.ewb import PotentialTransformer, PotentialTransformerKind, generate_id
 
-potential_transformer_kwargs = {
-    **sensor_kwargs,
-    "type": sampled_from(PotentialTransformerKind)
-}
 potential_transformer_args = [*sensor_args, PotentialTransformerKind.capacitiveCoupling]
 
 
@@ -26,7 +21,7 @@ def test_potential_transformer_constructor_default():
 
 
 # noinspection PyShadowingBuiltins
-@given(**potential_transformer_kwargs)
+@given(**potential_transformer_kwargs())
 def test_potential_transformer_constructor_kwargs(type, **kwargs):
     vt = PotentialTransformer(type=type, **kwargs)
 
@@ -41,7 +36,3 @@ def test_potential_transformer_constructor_args():
     assert potential_transformer_args[-1:] == [
         vt.type
     ]
-
-
-def test_potential_transformer_info_accessor():
-    validate_property_accessor(PotentialTransformer, PotentialTransformerInfo, PotentialTransformer.potential_transformer_info)

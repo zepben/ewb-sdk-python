@@ -3,17 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers
-from zepben.ewb import BaseVoltage, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import base_voltage_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-base_voltage_kwargs = {
-    **identified_object_kwargs,
-    "nominal_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-}
+from zepben.ewb import BaseVoltage, generate_id
 
 base_voltage_args = [*identified_object_args, 1]
 
@@ -25,7 +19,7 @@ def test_base_voltage_constructor_default():
     assert bv.nominal_voltage == 0
 
 
-@given(**base_voltage_kwargs)
+@given(**base_voltage_kwargs())
 def test_base_voltage_constructor_kwargs(nominal_voltage, **kwargs):
     bv = BaseVoltage(nominal_voltage=nominal_voltage, **kwargs)
 

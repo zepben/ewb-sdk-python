@@ -3,21 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text, lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import Pole, Streetlight, generate_id
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
+from cim.fill_fields import pole_kwargs
+from cim.iec61968.assets.test_structure import verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
 from cim.private_collection_validator import validate_unordered
-
-pole_kwargs = {
-    **structure_kwargs,
-    "classification": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "streetlights": lists(builds(Streetlight, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import Pole, Streetlight, generate_id
 
 pole_args = [*structure_args, "a", [Streetlight(mrid=generate_id())]]
 
@@ -30,7 +21,7 @@ def test_pole_constructor_default():
     assert not list(p.streetlights)
 
 
-@given(**pole_kwargs)
+@given(**pole_kwargs())
 def test_pole_constructor_kwargs(classification, streetlights, **kwargs):
     p = Pole(classification=classification,
              streetlights=streetlights,
@@ -54,7 +45,7 @@ def test_pole_constructor_args():
 def test_streetlights_collection():
     validate_unordered(
         Pole,
-        lambda mrid: Streetlight(mrid),
+        Streetlight,
         Pole.streetlights,
         Pole.num_streetlights,
         Pole.get_streetlight,

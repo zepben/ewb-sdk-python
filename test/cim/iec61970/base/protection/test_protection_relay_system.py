@@ -4,20 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, lists, sampled_from
 
-from util import mrid_strategy
-from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme, generate_id
-
-from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
+from cim.fill_fields import protection_relay_system_kwargs
+from cim.iec61970.base.core.test_equipment import equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
 from cim.private_collection_validator import validate_unordered
-
-protection_relay_system_kwargs = {
-    **equipment_kwargs,
-    "protection_kind": sampled_from(ProtectionKind),
-    "schemes": lists(builds(ProtectionRelayScheme, mrid=mrid_strategy))
-}
+from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme, generate_id
 
 protection_relay_system_args = [
     *equipment_args,
@@ -34,7 +26,7 @@ def test_protection_relay_system_constructor_default():
     assert len(list(prs.schemes)) == 0
 
 
-@given(**protection_relay_system_kwargs)
+@given(**protection_relay_system_kwargs())
 def test_protection_relay_system_constructor_kwargs(protection_kind, schemes, **kwargs):
     prs = ProtectionRelaySystem(
         protection_kind=protection_kind,

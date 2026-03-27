@@ -5,14 +5,12 @@
 from typing import Callable
 
 from pytest import raises
-from zepben.ewb import Curve, CurveData, generate_id
 
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
 from cim.private_collection_validator import validate_unordered_other
+from zepben.ewb import Curve, CurveData, generate_id
 
-# todo curve data?
-curve_kwargs = identified_object_kwargs
 curve_args = identified_object_args
 
 
@@ -65,6 +63,6 @@ def test_cant_add_duplicate_curve_data():
     _validate_duplicate_error(curve, 2, lambda it: it.add_curve_data(CurveData(2, 1.2, 2.2, 3.2)))
 
 
-def _validate_duplicate_error(curve: Curve, x: float, add_data: Callable[[Curve], None]):
+def _validate_duplicate_error(curve: Curve, x: float, add_data: Callable[[Curve], Curve]):
     with raises(ValueError, match=f"Unable to add datapoint to {curve}. x_value {x} is invalid, as data with same x_value already exist in this Curve."):
         add_data(curve)

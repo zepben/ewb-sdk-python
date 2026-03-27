@@ -2,31 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import booleans, sampled_from, floats, builds, lists
 
-from cim.cim_creators import sampled_phase_code, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
+    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq, generate_id
-
-regulating_control_kwargs = {
-    **power_system_resource_kwargs,
-    "discrete": booleans(),
-    "mode": sampled_from(RegulatingControlModeKind),
-    "monitored_phase": sampled_phase_code(),
-    "target_deadband": floats(min_value=0.0, max_value=FLOAT_MAX),
-    "target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "enabled": booleans(),
-    "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rated_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "terminal": builds(Terminal, mrid=mrid_strategy),
-    "ct_primary": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "min_target_deadband": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, mrid=mrid_strategy), max_size=2)
-}
 
 regulating_control_args = [
     *power_system_resource_args,
@@ -119,7 +99,7 @@ def test_regulating_control_regulating_conducting_equipment():
     # noinspection PyArgumentList
     validate_unordered(
         RegulatingControl,
-        lambda mrid: RegulatingCondEq(mrid),
+        RegulatingCondEq,
         RegulatingControl.regulating_conducting_equipment,
         RegulatingControl.num_regulating_cond_eq,
         RegulatingControl.get_regulating_cond_eq,

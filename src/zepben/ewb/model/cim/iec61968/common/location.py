@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["Location"]
 
-from typing import List, Optional, Generator, Callable
+from typing import List, Optional, Generator, Callable, Any
 
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
@@ -61,7 +61,7 @@ class Location(IdentifiedObject):
     def __getitem__(self, item):
         return self.get_point(item)
 
-    def for_each_point(self, action: Callable[[int, PositionPoint], None]):
+    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
         """
         Call the `action` on each :class:`PositionPoint` in the `points` collection
 

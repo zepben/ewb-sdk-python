@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["NameType"]
 
-from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional
+from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional, Any
 
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
@@ -184,7 +184,7 @@ class NameType:
         self._names_multi_index = dict()
         return self
 
-    def _get_or_create_name(self, name: str, identified_object: IdentifiedObject, update_index: Callable[[Name], None]) -> Name:
+    def _get_or_create_name(self, name: str, identified_object: IdentifiedObject, update_index: Callable[[Name], Any]) -> Name:
         #
         # NOTE: In Python, we can add names directly into the names collection of an object, so there is a chance that we just need to update the index rather
         # than create a new Name class

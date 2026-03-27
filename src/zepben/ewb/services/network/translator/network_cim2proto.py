@@ -30,8 +30,6 @@ __all__ = [
 
 from typing import Any, Optional
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.extensions.iec61968.assetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.extensions.iec61968.common.ContactDetails_pb2 import ContactDetails as PBContactDetails
 from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
@@ -174,6 +172,7 @@ from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import Transform
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 
+from zepben.ewb import datetime_to_timestamp
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import *
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
@@ -1082,10 +1081,6 @@ def curve_data_to_pb(cim: CurveData) -> PBCurveData:
 
 
 def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquipment:
-    ts = None
-    if cim.commissioned_date:
-        ts = PBTimestamp()
-        ts.FromDatetime(cim.commissioned_date)
     return PBEquipment(
         psr=power_system_resource_to_pb(cim, include_asset_info),
         inService=cim.in_service,
@@ -1095,7 +1090,7 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
         currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers],
         **set_or_null(
-            commissionedDate=ts
+            commissionedDate=datetime_to_timestamp(cim.commissioned_date)
         ),
     )
 

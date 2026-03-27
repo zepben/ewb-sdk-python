@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.fill_fields import disconnector_kwargs
 from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
-    switch_kwargs, switch_args
+    switch_args
 from zepben.ewb import Disconnector, generate_id
 
-disconnector_kwargs = switch_kwargs
 disconnector_args = switch_args
 
 
@@ -16,7 +16,7 @@ def test_disconnector_constructor_default():
     verify_switch_constructor_default(Disconnector(mrid=generate_id()))
 
 
-@given(**disconnector_kwargs)
+@given(**disconnector_kwargs())
 def test_disconnector_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(Disconnector(**kwargs), **kwargs)
 

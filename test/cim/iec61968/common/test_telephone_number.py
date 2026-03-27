@@ -3,24 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text
 
-from cim.cim_creators import ALPHANUM
+from cim.fill_fields import telephone_number_kwargs
 from zepben.ewb import TelephoneNumber
-
-
-telephone_number_kwargs = {
-    'area_code': text(alphabet=ALPHANUM),
-    'city_code': text(alphabet=ALPHANUM),
-    'country_code': text(alphabet=ALPHANUM),
-    'dial_out': text(alphabet=ALPHANUM),
-    'extension': text(alphabet=ALPHANUM),
-    'international_prefix': text(alphabet=ALPHANUM),
-    'local_number': text(alphabet=ALPHANUM),
-    'is_primary': text(alphabet=ALPHANUM),
-    'description': text(alphabet=ALPHANUM),
-}
-
 
 telephone_number_args = ['area_code', 'city_code', 'country_code', 'dial_out', 'extension',
                          'international_prefix', 'itu_phone', None, 'local_number',
@@ -43,7 +28,7 @@ def test_telephone_number_constructor_default():
     assert t.description is None
 
 
-@given(**telephone_number_kwargs)
+@given(**telephone_number_kwargs())
 def test_telephone_number_constructor_kwargs(
     area_code,
     city_code,
@@ -66,7 +51,6 @@ def test_telephone_number_constructor_kwargs(
         is_primary=is_primary,
         description=description
     )
-
 
     assert t.area_code == area_code
     assert t.city_code == city_code

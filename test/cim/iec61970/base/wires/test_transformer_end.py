@@ -3,28 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from pytest import raises
-from hypothesis.strategies import floats, booleans, builds, integers
 
-from util import mrid_strategy
-from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse, generate_id
-from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-transformer_end_kwargs = {
-    **identified_object_kwargs,
-    "grounded": booleans(),
-    "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "ratio_tap_changer": builds(RatioTapChanger, mrid=mrid_strategy),
-    "terminal": builds(Terminal, mrid=mrid_strategy),
-    "base_voltage": builds(BaseVoltage, mrid=mrid_strategy),
-    "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "star_impedance": builds(TransformerStarImpedance, mrid=mrid_strategy)
-}
+from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse, generate_id
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 transformer_end_args = [
     *identified_object_args,

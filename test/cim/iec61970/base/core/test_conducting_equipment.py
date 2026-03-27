@@ -5,20 +5,11 @@
 import sys
 
 import pytest
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal, generate_id
-
-from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
+from cim.iec61970.base.core.test_equipment import verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 from cim.private_collection_validator import validate_ordered
-
-conducting_equipment_kwargs = {
-    **equipment_kwargs,
-    "base_voltage": builds(BaseVoltage, mrid=mrid_strategy),
-    "terminals": lists(builds(Terminal, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal, generate_id
 
 conducting_equipment_args = [*equipment_args, BaseVoltage(mrid=generate_id()), [Terminal(mrid=generate_id()), Terminal(mrid=generate_id())]]
 
@@ -46,7 +37,7 @@ def verify_conducting_equipment_constructor_args(ce: ConductingEquipment):
 def test_terminals_collection():
     validate_ordered(
         ConductingEquipment,
-        lambda mrid, sn: Terminal(mrid, sequence_number=sn),
+        lambda mrid, sn: Terminal(mrid=mrid, sequence_number=sn),
         ConductingEquipment.terminals,
         ConductingEquipment.num_terminals,
         ConductingEquipment.get_terminal_by_mrid,
@@ -57,11 +48,14 @@ def test_terminals_collection():
         lambda t: t.sequence_number
     )
 
+
 def test_default_max_terminals_is_sys_maxsize():
     assert ConductingEquipment(mrid=generate_id()).max_terminals == sys.maxsize
 
+
 class SingleTerminalCE(ConductingEquipment):
     max_terminals = 1
+
 
 def test_exceeding_max_terminals_raises_exception():
     ce = SingleTerminalCE(mrid=generate_id())
@@ -69,6 +63,7 @@ def test_exceeding_max_terminals_raises_exception():
 
     with pytest.raises(ValueError):
         ce.add_terminal(Terminal(mrid=generate_id()))
+
 
 def test_adding_terminal_twice_wont_cause_max_terminals_to_raise_exception():
     ce = SingleTerminalCE(mrid=generate_id())

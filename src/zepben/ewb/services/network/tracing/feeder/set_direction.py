@@ -11,6 +11,7 @@ from functools import singledispatchmethod
 from logging import Logger
 from typing import Optional, TYPE_CHECKING, Type
 
+from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
@@ -26,7 +27,7 @@ from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing
 from zepben.ewb.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 if TYPE_CHECKING:
-    from zepben.ewb import NetworkService, Switch, ConductingEquipment
+    from zepben.ewb import NetworkService, Switch
 
 
 class SetDirection:
@@ -134,16 +135,17 @@ class SetDirection:
         for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
             if (head_terminal := terminal.conducting_equipment) is not None:
                 if not network_state_operators.is_open(head_terminal, None):
-                    await self.run_terminal(terminal, network_state_operators)
+                    await self.run(terminal, network_state_operators)
 
-    @run.register
-    async def run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
+    @run.register(Terminal)
+    @run.register(ConductingEquipment)
+    async def _(self, start: Terminal | ConductingEquipment, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """
          Apply [FeederDirection.DOWNSTREAM] from the [terminal].
 
-         :param terminal: The terminal to start applying feeder direction from.
-         :param network_state_operators: The `NetworkStateOperators` to be used when setting feeder direction
+         :param start: The ``Terminal`` or ``ConductingEquipment`` to start applying feeder direction from.
+         :param network_state_operators: The ``NetworkStateOperators`` to be used when setting feeder direction
          """
 
         return await (self._create_traversal(network_state_operators)
-                      .run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False))
+                      .run(start, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False))

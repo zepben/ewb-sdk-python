@@ -6,9 +6,8 @@ from typing import TypeVar
 
 import pytest
 
-from cim.cim_creators import create_directional_current_relay, create_hv_customer, create_ac_line_segment_phase, create_lv_substation
 from services.common.translator.base_test_translator import validate_service_translations
-from test.cim.cim_creators import *
+from test.cim.fill_fields import *
 from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
     NetworkDatabaseTables, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
@@ -231,6 +230,7 @@ types_to_test = {
     "create_circuit": create_circuit(),
 }
 
+
 @pytest.mark.timeout(20000)
 def test_network_service_translations():
     validate_service_translations(
@@ -272,6 +272,7 @@ def test_network_service_translations():
         },
         types_to_test=types_to_test,
     )
+
 
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
 def test_creates_new_name_type():

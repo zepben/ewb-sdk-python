@@ -3,22 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, sampled_from, integers
 
-from util import mrid_strategy
+from cim.fill_fields import streetlight_kwargs
+from cim.iec61968.assets.test_asset import verify_asset_constructor_default, \
+    verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
 from zepben.ewb import Streetlight, Pole, generate_id
 from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
-
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
-    verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
-
-streetlight_kwargs = {
-    **asset_kwargs,
-    "pole": builds(Pole, mrid=mrid_strategy),
-    "light_rating": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "lamp_kind": sampled_from(StreetlightLampKind)
-}
 
 streetlight_args = [*asset_args, Pole(mrid=generate_id()), 1, StreetlightLampKind.HIGH_PRESSURE_SODIUM]
 
@@ -32,7 +22,7 @@ def test_streetlight_constructor_default():
     assert p.lamp_kind == StreetlightLampKind.UNKNOWN
 
 
-@given(**streetlight_kwargs)
+@given(**streetlight_kwargs())
 def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs):
     p = Streetlight(pole=pole,
                     light_rating=light_rating,

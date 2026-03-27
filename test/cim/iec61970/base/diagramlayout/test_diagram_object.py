@@ -3,26 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds, text, floats
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import diagram_object_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other
-from util import mrid_strategy
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-
-diagram_object_kwargs = {
-    **identified_object_kwargs,
-    "diagram": builds(Diagram, mrid=mrid_strategy),
-    "identified_object_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "style": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "rotation": floats(min_value=0, max_value=360),
-    "diagram_object_points": lists(create_diagram_object_point(), max_size=2)
-}
 
 # noinspection PyArgumentList
 diagram_object_args = [*identified_object_args, Diagram(mrid=generate_id()), "a", "CB", 1.1, [DiagramObjectPoint(1.1, 2.2)]]
@@ -39,7 +28,7 @@ def test_diagram_object_constructor_default():
     assert not list(do.points)
 
 
-@given(**diagram_object_kwargs)
+@given(**diagram_object_kwargs())
 def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, style, rotation, diagram_object_points, **kwargs):
     do = DiagramObject(diagram=diagram,
                        identified_object_mrid=identified_object_mrid,

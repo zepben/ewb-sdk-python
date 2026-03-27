@@ -3,19 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import PowerTransformerInfo, TransformerTankInfo, generate_id
-
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+from cim.fill_fields import power_transformer_info_kwargs
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from cim.private_collection_validator import validate_unordered
-
-power_transformer_info_kwargs = {
-    **asset_info_kwargs,
-    "transformer_tank_infos": lists(builds(TransformerTankInfo, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import PowerTransformerInfo, TransformerTankInfo, generate_id
 
 power_transformer_info_args = [*asset_info_args, [TransformerTankInfo(mrid=generate_id()), TransformerTankInfo(mrid=generate_id())]]
 
@@ -27,7 +20,7 @@ def test_power_transformer_info_constructor_default():
     assert not list(pti.transformer_tank_infos)
 
 
-@given(**power_transformer_info_kwargs)
+@given(**power_transformer_info_kwargs())
 def test_power_transformer_info_constructor_kwargs(transformer_tank_infos, **kwargs):
     pti = PowerTransformerInfo(transformer_tank_infos=transformer_tank_infos, **kwargs)
 

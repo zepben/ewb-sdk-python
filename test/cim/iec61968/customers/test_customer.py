@@ -4,23 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds, sampled_from, text
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from util import mrid_strategy
-from zepben.ewb import Customer, CustomerKind, CustomerAgreement, generate_id
-
-from cim.iec61968.common.test_organisation_role import organisation_role_kwargs, verify_organisation_role_constructor_default, \
+from cim.fill_fields import customer_kwargs
+from cim.iec61968.common.test_organisation_role import verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \
     verify_organisation_role_constructor_args, organisation_role_args
 from cim.private_collection_validator import validate_unordered
-
-customer_kwargs = {
-    **organisation_role_kwargs,
-    "kind": sampled_from(CustomerKind),
-    "special_need": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "customer_agreements": lists(builds(CustomerAgreement, mrid=mrid_strategy), max_size=2)
-}
+from zepben.ewb import Customer, CustomerKind, CustomerAgreement, generate_id
 
 customer_args = [*organisation_role_args, CustomerKind.residential, "special", [CustomerAgreement(mrid=generate_id())]]
 
@@ -34,7 +24,7 @@ def test_customer_constructor_default():
     assert not list(c.agreements)
 
 
-@given(**customer_kwargs)
+@given(**customer_kwargs())
 def test_customer_constructor_kwargs(kind, special_need, customer_agreements, **kwargs):
     c = Customer(
         kind=kind,
@@ -63,7 +53,7 @@ def test_customer_constructor_args():
 def test_customer_agreements_collection():
     validate_unordered(
         Customer,
-        lambda mrid: CustomerAgreement(mrid),
+        CustomerAgreement,
         Customer.agreements,
         Customer.num_agreements,
         Customer.get_agreement,

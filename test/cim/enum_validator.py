@@ -5,7 +5,6 @@
 from enum import Enum
 from typing import Type, Tuple
 
-# noinspection PyPackageRequirements
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
 # noinspection PyProtectedMember

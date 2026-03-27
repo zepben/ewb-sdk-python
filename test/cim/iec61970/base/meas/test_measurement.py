@@ -3,23 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import text, builds, sampled_from
-
-from util import mrid_strategy
-from zepben.ewb import Measurement, RemoteSource, PhaseCode, UnitSymbol, generate_id
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-
-measurement_kwargs = {
-    **identified_object_kwargs,
-    "power_system_resource_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "remote_source": builds(RemoteSource, mrid=mrid_strategy),
-    "terminal_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "phases": sampled_from(PhaseCode),
-    "unit_symbol": sampled_from(UnitSymbol)
-}
+from zepben.ewb import Measurement, RemoteSource, PhaseCode, UnitSymbol, generate_id
 
 measurement_args = [*identified_object_args, "a", RemoteSource(mrid=generate_id()), "b", PhaseCode.XYN, UnitSymbol.A]
 

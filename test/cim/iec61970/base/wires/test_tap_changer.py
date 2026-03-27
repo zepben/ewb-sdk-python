@@ -5,28 +5,12 @@
 import re
 
 from hypothesis import assume
-from hypothesis.strategies import floats, booleans, integers, builds
 from pytest import raises
 
-from util import mrid_strategy
+from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
+    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from zepben.ewb import TapChangerControl, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
-
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-
-tap_changer_kwargs = {
-    **power_system_resource_kwargs,
-    "control_enabled": booleans(),
-    "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "tap_changer_control": builds(TapChangerControl, mrid=mrid_strategy),
-    "high_step": integers(min_value=100, max_value=MAX_32_BIT_INTEGER),
-    "low_step": integers(min_value=MIN_32_BIT_INTEGER, max_value=-100),
-    "neutral_step": integers(min_value=-100, max_value=100),
-    "normal_step": integers(min_value=-100, max_value=100),
-    "step": floats(min_value=-100.0, max_value=100.0)
-}
 
 tap_changer_args = [*power_system_resource_args, False, 1, TapChangerControl(mrid=generate_id()), 10, 2, 3, 4, 5.5]
 

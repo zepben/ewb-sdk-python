@@ -28,6 +28,24 @@ class LvSubstation(EquipmentContainer):
     _current_energizing_feeders_by_id: dict[str | None, 'Feeder'] | None = None
     _normal_energized_lv_feeders_by_id: dict[str | None, LvFeeder] | None = None
 
+    def __init__(
+        self,
+        normal_energizing_feeders: list['Feeder'] | None = None,
+        current_energizing_feeders: list['Feeder'] | None = None,
+        normal_energized_lv_feeders: list[LvFeeder] | None = None,
+        **kwargs
+    ):
+        super(LvSubstation, self).__init__(**kwargs)
+        if normal_energizing_feeders:
+            for lv_feeder in normal_energizing_feeders:
+                self.add_normal_energizing_feeder(lv_feeder)
+        if current_energizing_feeders:
+            for lv_feeder in current_energizing_feeders:
+                self.add_current_energizing_feeder(lv_feeder)
+        if normal_energized_lv_feeders:
+            for lv_feeder in normal_energized_lv_feeders:
+                self.add_normal_energized_lv_feeder(lv_feeder)
+
     @zbex
     @property
     def normal_energizing_feeders(self) -> Generator["Feeder", None, None]:

@@ -4,55 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
-from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import integers, builds, lists, floats, text, booleans
+from pytest import raises
 
-from util import mrid_strategy
+from cim.fill_fields import power_electronics_connection_kwargs
+from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
+    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+from cim.private_collection_validator import validate_unordered
 from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
-from cim.private_collection_validator import validate_unordered
-
-power_electronics_connection_kwargs = {
-    **regulating_cond_eq_kwargs,
-    "max_i_fault": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "p": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "q": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "max_q": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "min_q": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "inverter_standard": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "sustain_op_overvolt_limit": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "stop_at_over_freq": floats(min_value=51.0, max_value=52.0),
-    "stop_at_under_freq": floats(min_value=47.0, max_value=49.0),
-    "inv_volt_watt_resp_mode": booleans(),
-    "inv_watt_resp_v1": integers(min_value=200, max_value=300),
-    "inv_watt_resp_v2": integers(min_value=216, max_value=230),
-    "inv_watt_resp_v3": integers(min_value=235, max_value=255),
-    "inv_watt_resp_v4": integers(min_value=244, max_value=265),
-    "inv_watt_resp_p_at_v1": floats(min_value=0.0, max_value=1.0),
-    "inv_watt_resp_p_at_v2": floats(min_value=0.0, max_value=1.0),
-    "inv_watt_resp_p_at_v3": floats(min_value=0.0, max_value=1.0),
-    "inv_watt_resp_p_at_v4": floats(min_value=0.0, max_value=0.2),
-    "inv_volt_var_resp_mode": booleans(),
-    "inv_var_resp_v1": integers(min_value=200, max_value=300),
-    "inv_var_resp_v2": integers(min_value=200, max_value=300),
-    "inv_var_resp_v3": integers(min_value=200, max_value=300),
-    "inv_var_resp_v4": integers(min_value=200, max_value=300),
-    "inv_var_resp_q_at_v1": floats(min_value=0.0, max_value=0.6),
-    "inv_var_resp_q_at_v2": floats(min_value=-1.0, max_value=1.0),
-    "inv_var_resp_q_at_v3": floats(min_value=-1.0, max_value=1.0),
-    "inv_var_resp_q_at_v4": floats(min_value=-0.6, max_value=0.0),
-    "inv_reactive_power_mode": booleans(),
-    "inv_fix_reactive_power": floats(min_value=-1.0, max_value=1.0),
-    "power_electronics_units": lists(builds(BatteryUnit, mrid=mrid_strategy), max_size=2),
-    "power_electronics_connection_phases": lists(builds(PowerElectronicsConnectionPhase, mrid=mrid_strategy), max_size=2)
-}
 
 power_electronics_connection_args = [
     *regulating_cond_eq_args,
@@ -131,7 +91,7 @@ def test_power_electronics_connection_constructor_default():
     assert not list(pec.phases)
 
 
-@given(**power_electronics_connection_kwargs)
+@given(**power_electronics_connection_kwargs())
 def test_power_electronics_connection_constructor_kwargs(
     max_i_fault,
     p,
@@ -285,7 +245,7 @@ def test_power_electronics_connection_constructor_args():
 def test_power_electronics_units_collection():
     validate_unordered(
         PowerElectronicsConnection,
-        lambda mrid: PowerElectronicsUnit(mrid),
+        PowerElectronicsUnit,
         PowerElectronicsConnection.units,
         PowerElectronicsConnection.num_units,
         PowerElectronicsConnection.get_unit,
@@ -298,7 +258,7 @@ def test_power_electronics_units_collection():
 def test_power_electronics_connection_phases_collection():
     validate_unordered(
         PowerElectronicsConnection,
-        lambda mrid: PowerElectronicsConnectionPhase(mrid),
+        PowerElectronicsConnectionPhase,
         PowerElectronicsConnection.phases,
         PowerElectronicsConnection.num_phases,
         PowerElectronicsConnection.get_phase,

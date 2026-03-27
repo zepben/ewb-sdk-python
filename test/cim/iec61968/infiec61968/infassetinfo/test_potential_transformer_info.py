@@ -4,23 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, floats, integers, text
 
-from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id
-
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+from cim.fill_fields import potential_transformer_info_kwargs
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-
-potential_transformer_info_kwargs = {
-    **asset_info_kwargs,
-    "accuracy_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "nominal_ratio": builds(Ratio, floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "primary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "pt_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "rated_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "secondary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
+from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id
 
 # noinspection PyArgumentList
 potential_transformer_info_args = [*asset_info_args, "a", Ratio(1.1, 2.2), 3.3, "b", 4, 5.5]
@@ -38,7 +26,7 @@ def test_potential_transformer_info_constructor_default():
     assert vti.secondary_ratio is None
 
 
-@given(**potential_transformer_info_kwargs)
+@given(**potential_transformer_info_kwargs())
 def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_ratio, primary_ratio, pt_class, rated_voltage, secondary_ratio, **kwargs):
     vti = PotentialTransformerInfo(
         accuracy_class=accuracy_class,

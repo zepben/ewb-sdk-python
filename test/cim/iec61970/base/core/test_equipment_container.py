@@ -6,20 +6,12 @@ from typing import Generator, Type
 
 import pytest
 
-from hypothesis.strategies import builds, lists
-
-from cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
+from cim.iec61970.base.core.test_connectivity_node_container import \
     verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs, \
     verify_connectivity_node_container_constructor_args, connectivity_node_container_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
 from zepben.ewb import EquipmentContainer, Equipment, LvFeeder, Substation, generate_id, TestNetworkBuilder, NetworkStateOperators
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-equipment_container_kwargs = {
-    **connectivity_node_container_kwargs,
-    "equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2)
-}
 
 equipment_container_args = [*connectivity_node_container_args, {"e": Equipment(mrid=generate_id())}]
 
@@ -126,21 +118,21 @@ def test_current_lv_feeders():
 async def test_detects_edge_terminals_correctly():
     network = await (
         TestNetworkBuilder()
-        .from_power_transformer()   # tx0
-        .to_busbar_section()        # bbs1
-        .to_breaker()               # b2  edge of substation, feeder
-        .to_acls()                  # c3
-        .to_power_transformer()     # tx4 edge of feeder, lv substation, tx4 lv feeder
-        .to_busbar_section()        # bbs5
-        .to_breaker()               # b6  edge of lv substation, tx4 lv feeder, b6 lv feeder
-        .to_acls()                  # c7
-        .to_energy_consumer()       # ec8
+        .from_power_transformer()  # tx0
+        .to_busbar_section()  # bbs1
+        .to_breaker()  # b2  edge of substation, feeder
+        .to_acls()  # c3
+        .to_power_transformer()  # tx4 edge of feeder, lv substation, tx4 lv feeder
+        .to_busbar_section()  # bbs5
+        .to_breaker()  # b6  edge of lv substation, tx4 lv feeder, b6 lv feeder
+        .to_acls()  # c7
+        .to_energy_consumer()  # ec8
         .branch_from("tx0")
-        .to_breaker()               # b9 edge of substation
-        .to_acls()                  # c10
-        .add_feeder("b2")           # fdr11
-        .add_lv_feeder("tx4")       # lvf12
-        .add_lv_feeder("b6")        # lvf13
+        .to_breaker()  # b9 edge of substation
+        .to_acls()  # c10
+        .add_feeder("b2")  # fdr11
+        .add_lv_feeder("tx4")  # lvf12
+        .add_lv_feeder("b6")  # lvf13
         .add_lv_substation(["tx4", "bbs5", "b6"])  # lvs14
         .add_substation(["tx0", "bbs1", "b2", "b9"])  # sub15
         .build()
@@ -168,26 +160,27 @@ async def test_detects_edge_terminals_correctly():
 @pytest.mark.asyncio
 async def test_detects_edge_terminals_for_open_switch():
     network = await (TestNetworkBuilder()
-        .from_power_transformer()
-        .to_busbar_section()
-        .to_breaker()
-        .to_acls()
-        .branch_from("tx0", 1)
-        .to_acls()
-        .to_breaker(is_normally_open=True, is_open=True)
-        .to_acls()
-        .branch_from("bbs1")
-        .to_acls()
-        .to_breaker()
-        .to_acls()
-        .add_substation(["tx0", "bbs1", "b2", "c4", "b5", "c7"])
-        .build()
-    )
+                     .from_power_transformer()
+                     .to_busbar_section()
+                     .to_breaker()
+                     .to_acls()
+                     .branch_from("tx0", 1)
+                     .to_acls()
+                     .to_breaker(is_normally_open=True, is_open=True)
+                     .to_acls()
+                     .branch_from("bbs1")
+                     .to_acls()
+                     .to_breaker()
+                     .to_acls()
+                     .add_substation(["tx0", "bbs1", "b2", "c4", "b5", "c7"])
+                     .build()
+                     )
 
     sub = network['sub10']
 
     assert list(edge_equip_mrids(sub)) == ['b2', 'b5', 'c7']
     assert list(edge_equip_mrids(sub, NetworkStateOperators.CURRENT)) == ['b2', 'b5', 'c7']
+
 
 def edge_equip_mrids(ec: EquipmentContainer, state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL) -> Generator[str, None, None]:
     print("\n\nedge_terminals", list(ec.edge_terminals(state_operators)))

@@ -3,21 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds
-from zepben.ewb import Location, generate_id
-from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
-from cim.cim_creators import create_position_point
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.fill_fields import location_kwargs
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other
-
-location_kwargs = {
-    **identified_object_kwargs,
-    "main_address": builds(StreetAddress),
-    "position_points": lists(create_position_point(), max_size=2),
-}
+from zepben.ewb import Location, generate_id
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 
 location_args = [*identified_object_args, StreetAddress(), [PositionPoint(1.1, 2.2)]]
 
@@ -30,7 +23,7 @@ def test_location_constructor_default():
     assert not list(loc.points)
 
 
-@given(**location_kwargs)
+@given(**location_kwargs())
 def test_location_constructor_kwargs(main_address, position_points, **kwargs):
     loc = Location(main_address=main_address, position_points=position_points, **kwargs)
 

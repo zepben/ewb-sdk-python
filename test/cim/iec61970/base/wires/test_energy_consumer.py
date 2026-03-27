@@ -3,28 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
 
-from util import mrid_strategy
+from cim.fill_fields import energy_consumer_kwargs
+from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
+    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
+from cim.private_collection_validator import validate_unordered
 from zepben.ewb import EnergyConsumer, PhaseShuntConnectionKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
-from cim.private_collection_validator import validate_unordered
-
-energy_consumer_kwargs = {
-    **energy_connection_kwargs,
-    "energy_consumer_phases": lists(builds(EnergyConsumerPhase, mrid=mrid_strategy)),
-    "customer_count": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "grounded": booleans(),
-    "phase_connection": sampled_from(PhaseShuntConnectionKind),
-    "p": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "p_fixed": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "q": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "q_fixed": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-}
 
 energy_consumer_args = [*energy_connection_args, [EnergyConsumerPhase(mrid=generate_id())], 1, True, PhaseShuntConnectionKind.Y, 2.2, 3.3, 4.4, 5.5]
 
@@ -43,7 +28,7 @@ def test_energy_consumer_constructor_default():
     assert ec.q_fixed is None
 
 
-@given(**energy_consumer_kwargs)
+@given(**energy_consumer_kwargs())
 def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed, **kwargs):
     ec = EnergyConsumer(
         energy_consumer_phases=energy_consumer_phases,
@@ -87,7 +72,7 @@ def test_energy_consumer_constructor_args():
 def test_phases_collection():
     validate_unordered(
         EnergyConsumer,
-        lambda mrid: EnergyConsumerPhase(mrid),
+        EnergyConsumerPhase,
         EnergyConsumer.phases,
         EnergyConsumer.num_phases,
         EnergyConsumer.get_phase,

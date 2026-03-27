@@ -3,20 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers
-from zepben.ewb import ShuntCompensatorInfo, generate_id
 
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \
+from cim.fill_fields import shunt_compensator_info_kwargs
+from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args
-
-shunt_compensator_info_kwargs = {
-    **asset_info_kwargs,
-    "max_power_loss": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_reactive_power": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "rated_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-}
+from zepben.ewb import ShuntCompensatorInfo, generate_id
 
 shunt_compensator_info_args = [*asset_info_args, 1, 2, 3, 4]
 
@@ -31,7 +22,7 @@ def test_shunt_compensator_info_constructor_default():
     assert sci.rated_voltage is None
 
 
-@given(**shunt_compensator_info_kwargs)
+@given(**shunt_compensator_info_kwargs())
 def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
     sci = ShuntCompensatorInfo(max_power_loss=max_power_loss,
                                rated_current=rated_current,

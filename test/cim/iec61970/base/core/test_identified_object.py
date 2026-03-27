@@ -6,9 +6,11 @@ from collections import Counter
 from typing import Tuple
 
 import pytest
-from hypothesis.strategies import uuids, text, lists, builds
+
 from zepben.ewb import IdentifiedObject, generate_id
+from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
 #       1. verify...default verifies the constructor with no args.
@@ -17,18 +19,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 # There is a lot of overlap here, but calling both maximises the constructor combinations we check and should catch any breaking changes to
 # constructors.
 #
-from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
-
-identified_object_kwargs = {
-    "mrid": uuids(version=4).map(lambda x: str(x)),
-    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()),
-                   max_size=2,
-                   unique_by=lambda it: it.name)
-}
 
 # noinspection PyArgumentList
 identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType("nt1"), Junction(mrid=generate_id()))]]
@@ -49,9 +39,12 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
     assert io.description == description
     # Assign identified object to the names we are checking against due to no identified object requirement on Name creation
     # Note: this is due to automatic two-way association introduced in the name rejig rework
-    for name in names:
-        name.identified_object = io
-    assert list(io.names) == names
+    if names is not None:
+        for name in names:
+            name.identified_object = io
+        assert list(io.names) == names
+    else:
+        assert not list(io.names)
 
 
 def verify_identified_object_constructor_args(io: IdentifiedObject):

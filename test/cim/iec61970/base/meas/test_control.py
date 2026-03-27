@@ -3,20 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, text
 
-from util import mrid_strategy
-from zepben.ewb import Control, RemoteControl, generate_id
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
+from cim.fill_fields import control_kwargs
+from cim.iec61970.base.meas.test_io_point import verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
-
-control_kwargs = {
-    **io_point_kwargs,
-    "power_system_resource_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "remote_control": builds(RemoteControl, mrid=mrid_strategy)
-}
+from zepben.ewb import Control, RemoteControl, generate_id
 
 control_args = [*io_point_args, "a", RemoteControl(mrid=generate_id())]
 
@@ -29,7 +20,7 @@ def test_control_constructor_default():
     assert not c.remote_control
 
 
-@given(**control_kwargs)
+@given(**control_kwargs())
 def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, **kwargs):
     c = Control(power_system_resource_mrid=power_system_resource_mrid, remote_control=remote_control, **kwargs)
 

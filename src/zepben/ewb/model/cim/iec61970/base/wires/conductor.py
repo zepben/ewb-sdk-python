@@ -5,10 +5,15 @@
 
 __all__ = ["Conductor"]
 
+import sys
 from typing import Optional, TYPE_CHECKING
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    from typing_extensions import deprecated
 
-from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -20,6 +25,8 @@ class Conductor(ConductingEquipment):
     system, used to carry current between points in the power system.
     """
 
+    asset_info: 'WireInfo | None' = None
+
     length: Optional[float] = None
     """Segment length for calculating line section capabilities."""
 
@@ -30,11 +37,13 @@ class Conductor(ConductingEquipment):
     """[ZBEX] The current rating in Amperes at the specified design temperature that can be used without the conductor breaching physical network"""
 
     @property
+    @deprecated("use asset_info instead.")
     def wire_info(self):
         """The `WireInfo` for this `Conductor`"""
         return self.asset_info
 
     @wire_info.setter
+    @deprecated("use asset_info instead.")
     def wire_info(self, wi: Optional['WireInfo']):
         """
         Set the `WireInfo` for this `Conductor`
@@ -46,4 +55,4 @@ class Conductor(ConductingEquipment):
         """
         :return: True if this `Conductor` is underground.
         """
-        return isinstance(self.wire_info, CableInfo)
+        return isinstance(self.asset_info, CableInfo)

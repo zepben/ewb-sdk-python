@@ -4,28 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, floats, integers, text
-from zepben.ewb import CurrentTransformerInfo, Ratio, generate_id
 
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+from cim.fill_fields import current_transformer_info_kwargs
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-
-current_transformer_info_kwargs = {
-    **asset_info_kwargs,
-    "accuracy_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "accuracy_limit": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "core_count": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "ct_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "knee_point_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "max_ratio": builds(Ratio, floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "nominal_ratio": builds(Ratio, floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-    "primary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "secondary_fls_rating": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "secondary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "usage": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-}
+from zepben.ewb import CurrentTransformerInfo, Ratio, generate_id
 
 # noinspection PyArgumentList
 current_transformer_info_args = [*asset_info_args, "a", 1.1, 2, "b", 3, Ratio(4.4, 5.5), Ratio(6.6, 7.7), 8.8, 9, 10, 11.11, "c"]
@@ -49,7 +32,7 @@ def test_current_transformer_info_constructor_default():
     assert cti.usage is None
 
 
-@given(**current_transformer_info_kwargs)
+@given(**current_transformer_info_kwargs())
 def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_limit, core_count, ct_class, knee_point_voltage, max_ratio, nominal_ratio,
                                                      primary_ratio, rated_current, secondary_fls_rating, secondary_ratio, usage, **kwargs):
     cti = CurrentTransformerInfo(

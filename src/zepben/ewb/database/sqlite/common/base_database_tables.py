@@ -7,7 +7,7 @@ __all__ = ["TSqliteTable", "BaseDatabaseTables"]
 
 from abc import ABC
 from sqlite3 import Connection, Cursor, ProgrammingError
-from typing import Dict, TypeVar, Type, Generator, Callable, Optional
+from typing import Dict, TypeVar, Type, Generator, Callable, Optional, Any
 
 from zepben.ewb.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.ewb.database.sqlite.tables.exceptions import MissingTableConfigException
@@ -90,7 +90,7 @@ class BaseDatabaseTables(ABC):
         except TypeError:
             raise MissingTableConfigException("INTERNAL ERROR: Statements have not been prepared. You must call `prepare_insert_statements` first.")
 
-    def for_each_table(self, action: Callable[[SqliteTable], None]):
+    def for_each_table(self, action: Callable[[SqliteTable], Any]):
         """
         Call the `action` on each table.
 

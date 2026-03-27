@@ -4,19 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds
 
-from util import mrid_strategy
-from zepben.ewb import OperationalRestriction, Equipment, generate_id
-
-from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
+from cim.fill_fields import operational_restriction_kwargs
+from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from cim.private_collection_validator import validate_unordered
-
-operational_restriction_kwargs = {
-    **document_kwargs,
-    "equipment": lists(builds(Equipment, mrid=mrid_strategy), max_size=2),
-}
+from zepben.ewb import OperationalRestriction, Equipment, generate_id
 
 operational_restriction_args = [*document_args, [Equipment(mrid=generate_id())]]
 
@@ -28,7 +21,7 @@ def test_operational_restriction_constructor_default():
     assert not list(or_.equipment)
 
 
-@given(**operational_restriction_kwargs)
+@given(**operational_restriction_kwargs())
 def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
     or_ = OperationalRestriction(
         equipment=equipment,

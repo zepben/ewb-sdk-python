@@ -3,24 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis.strategies import text, builds, lists
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
+from cim.iec61968.assets.test_asset_container import verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
 from cim.private_collection_validator import validate_unordered
-from util import mrid_strategy
+from util import assert_or_empty
 from zepben.ewb import Location, generate_id
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
-
-end_device_kwargs = {
-    **asset_container_kwargs,
-    "customer_mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "service_location": builds(Location, mrid=mrid_strategy),
-    "usage_points": lists(builds(UsagePoint, mrid=mrid_strategy), max_size=2)
-}
 
 end_device_args = [*asset_container_args, "a", Location(mrid=generate_id()), [UsagePoint(mrid=generate_id())]]
 
@@ -32,11 +22,12 @@ def verify_end_device_constructor_default(ed: EndDevice):
     assert not list(ed.usage_points)
 
 
-def verify_end_device_constructor_kwargs(ed: EndDevice, customer_mrid, service_location, usage_points, **kwargs):
+def verify_end_device_constructor_kwargs(ed: EndDevice, customer_mrid, service_location, usage_points, functions, **kwargs):
     verify_asset_container_constructor_kwargs(ed, **kwargs)
     assert ed.customer_mrid == customer_mrid
     assert ed.service_location == service_location
-    assert list(ed.usage_points) == usage_points
+    assert_or_empty(ed.usage_points, usage_points)
+    assert_or_empty(ed.functions, functions)
 
 
 def verify_end_device_constructor_args(ed: EndDevice):
@@ -51,7 +42,7 @@ def verify_end_device_constructor_args(ed: EndDevice):
 def test_usage_points_collection():
     validate_unordered(
         EndDevice,
-        lambda mrid: UsagePoint(mrid),
+        UsagePoint,
         EndDevice.usage_points,
         EndDevice.num_usage_points,
         EndDevice.get_usage_point,
@@ -64,7 +55,7 @@ def test_usage_points_collection():
 def test_end_device_function_collection():
     validate_unordered(
         EndDevice,
-        lambda mrid: EndDeviceFunction(mrid),
+        EndDeviceFunction,
         EndDevice.functions,
         EndDevice.num_functions,
         EndDevice.get_function,

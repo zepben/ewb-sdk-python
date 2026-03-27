@@ -7,11 +7,10 @@ from __future__ import annotations
 
 __all__ = ["AcLineSegment"]
 
-from functools import singledispatchmethod
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, Generator, TYPE_CHECKING
 
-from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
+from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 
@@ -42,7 +41,7 @@ class AcLineSegment(Conductor):
     per_length_impedance: 'PerLengthImpedance | None' = None
     """A `zepben.ewb.model.cim.iec61970.base.wires.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: list['Cut'] | None= None
+    _cuts: list['Cut'] | None = None
     _clamps: list['Clamp'] | None = None
     _phases: list['AcLineSegmentPhase'] | None = None
 
@@ -198,8 +197,10 @@ class AcLineSegment(Conductor):
         if not cut.ac_line_segment:
             cut.ac_line_segment = self
 
-        require(cut.ac_line_segment is self,
-                lambda: f"Cut {cut} references another AcLineSegment {cut.ac_line_segment}, expected {str(self)}.")
+        require(
+            cut.ac_line_segment is self,
+            lambda: f"Cut {cut} references another AcLineSegment {cut.ac_line_segment}, expected {str(self)}.",
+        )
         return False
 
     def _validate_clamp(self, clamp: 'Clamp') -> bool:
@@ -216,12 +217,14 @@ class AcLineSegment(Conductor):
         if not clamp.ac_line_segment:
             clamp.ac_line_segment = self
 
-        require(clamp.ac_line_segment is self,
-                lambda: f"Clamp {clamp} references another AcLineSegment {clamp.ac_line_segment}, expected {str(self)}.")
+        require(
+            clamp.ac_line_segment is self,
+            lambda: f"Clamp {clamp} references another AcLineSegment {clamp.ac_line_segment}, expected {str(self)}.",
+        )
         return False
 
     @property
-    def phases(self) -> Generator['Phase', None, None]:
+    def phases(self) -> Generator['AcLineSegmentPhase', None, None]:
         """
         The individual phase models for this AcLineSegment. The returned collection is read only.
         """
@@ -300,4 +303,4 @@ class AcLineSegment(Conductor):
         for it in self._phases:
             if it.phase == phase:
                 return it.asset_info
-        return self.wire_info
+        return self.asset_info

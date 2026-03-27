@@ -6,7 +6,7 @@
 __all__ = ['StepAction', 'StepActionWithContextValue', 'StepActionFunc']
 
 from abc import abstractmethod
-from typing import TypeVar, Generic, Callable, final
+from typing import TypeVar, Generic, Callable, final, Any
 
 from zepben.ewb.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 from zepben.ewb.services.network.tracing.traversal.step_context import StepContext
@@ -14,7 +14,7 @@ from zepben.ewb.services.network.tracing.traversal.step_context import StepConte
 T = TypeVar('T')
 U = TypeVar('U')
 
-StepActionFunc = Callable[[T, StepContext], None]
+StepActionFunc = Callable[[T, StepContext], Any]
 
 
 class StepAction(Generic[T]):

@@ -9,7 +9,7 @@ import tempfile
 from abc import ABC, abstractmethod
 from collections import Counter
 from sqlite3 import Connection
-from typing import TypeVar, Optional, Callable, Generic
+from typing import TypeVar, Optional, Callable, Generic, Any
 
 import pytest
 
@@ -98,7 +98,7 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
         self,
         write_service: Optional[TService] = None,
         read_service: Optional[TService] = None,
-        validate_read: Optional[Callable[[TService], None]] = None,
+        validate_read: Optional[Callable[[TService], Any]] = None,
     ):
         write_service = write_service or self.create_service()
         read_service = read_service or self.create_service()
@@ -120,7 +120,7 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
             else:
                 assert not status, "Database read should have failed"
 
-    async def _validate_unresolved_failure(self, expected_source: str, expected_target: str, add_deferred_reference: Callable[[TService], None]):
+    async def _validate_unresolved_failure(self, expected_source: str, expected_target: str, add_deferred_reference: Callable[[TService], Any]):
         service = self.create_service()
         # Add an unresolved reference that should trigger the post load check.
         add_deferred_reference(service)

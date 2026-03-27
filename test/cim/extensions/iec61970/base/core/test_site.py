@@ -5,11 +5,11 @@
 import pytest
 from hypothesis import given
 
-from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
+from cim.fill_fields import site_kwargs
+from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.ewb import Site, TestNetworkBuilder, Equipment, AssignToLvFeeders, LvFeeder, NetworkStateOperators, generate_id
 
-site_kwargs = equipment_container_kwargs
 site_args = equipment_container_args
 
 
@@ -17,13 +17,14 @@ def test_site_constructor_default():
     verify_equipment_container_constructor_default(Site(mrid=generate_id()))
 
 
-@given(**site_kwargs)
+@given(**site_kwargs())
 def test_site_constructor_kwargs(**kwargs):
     verify_equipment_container_constructor_kwargs(Site(**kwargs), **kwargs)
 
 
 def test_site_constructor_args():
     verify_equipment_container_constructor_args(Site(*site_args))
+
 
 @pytest.mark.asyncio
 async def test_find_lv_feeders_excludes_open_switches():

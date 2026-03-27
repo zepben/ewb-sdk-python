@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime, timedelta
-from typing import List, Callable, Generator
+from typing import List, Callable, Generator, Any
 
 import grpc_testing
 import pytest
@@ -61,7 +61,7 @@ class TestQueryNetworkStateClient:
     async def test_can_report_batch_status(self):
         status = BatchSuccessful(1234)
 
-        def mock_service() -> List[Callable[[GrpcRequest], None]]:
+        def mock_service() -> List[Callable[[GrpcRequest], Any]]:
             def validate_request(request: GrpcRequest):
                 assert request.messageId == status.batch_id
 

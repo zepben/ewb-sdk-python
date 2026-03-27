@@ -16,6 +16,18 @@
       <option name="MAX_LINES_AROUND_BLOCK_ELEMENTS" value="0" />
       <option name="MIN_LINES_AROUND_BLOCK_ELEMENTS" value="2" />
     </Markdown>
+    <Python>
+      <option name="DICT_NEW_LINE_AFTER_LEFT_BRACE" value="true" />
+      <option name="DICT_NEW_LINE_BEFORE_RIGHT_BRACE" value="true" />
+      <option name="LIST_NEW_LINE_AFTER_LEFT_BRACKET" value="true" />
+      <option name="LIST_NEW_LINE_BEFORE_RIGHT_BRACKET" value="true" />
+      <option name="SET_NEW_LINE_AFTER_LEFT_BRACE" value="true" />
+      <option name="SET_NEW_LINE_BEFORE_RIGHT_BRACE" value="true" />
+      <option name="TUPLE_NEW_LINE_AFTER_LEFT_PARENTHESIS" value="true" />
+      <option name="TUPLE_NEW_LINE_BEFORE_RIGHT_PARENTHESIS" value="true" />
+      <option name="USE_TRAILING_COMMA_IN_PARAMETER_LIST" value="true" />
+      <option name="USE_TRAILING_COMMA_IN_ARGUMENTS_LIST" value="true" />
+    </Python>
     <TypeScriptCodeStyleSettings version="0">
       <option name="SPACES_WITHIN_OBJECT_LITERAL_BRACES" value="true" />
       <option name="SPACES_WITHIN_IMPORTS" value="true" />
@@ -43,6 +55,10 @@
     </codeStyleSettings>
     <codeStyleSettings language="Python">
       <option name="BLANK_LINES_AFTER_IMPORTS" value="0" />
+      <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
+      <option name="CALL_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
+      <option name="METHOD_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
+      <option name="METHOD_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
       </indentOptions>

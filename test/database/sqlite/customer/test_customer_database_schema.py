@@ -7,7 +7,7 @@ from typing import TypeVar
 
 from hypothesis import given, settings, HealthCheck
 
-from cim.cim_creators import create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariffs
+from cim.fill_fields import create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariff
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 from zepben.ewb import IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
@@ -64,6 +64,6 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
         await self._validate_schema(SchemaNetworks().customer_services_of(PricingStructure, pricing_structure))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(tariffs=create_tariffs(False))
+    @given(tariffs=create_tariff(False))
     async def test_schema_tariffs(self, tariffs):
         await self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs))

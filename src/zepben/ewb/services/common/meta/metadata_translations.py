@@ -3,21 +3,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_data_pb2 import DataSource as PBDataSource
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
-from zepben.ewb import DataSource, ServiceInfo
+from zepben.ewb import DataSource, ServiceInfo, datetime_to_timestamp
 
 
 def data_source_to_pb(ds: DataSource) -> PBDataSource:
-    ts = PBTimestamp()
-    ts.FromDatetime(ds.timestamp)
     return PBDataSource(
         source=ds.source,
         version=ds.version,
-        timestamp=ts
+        timestamp=datetime_to_timestamp(ds.timestamp)
     )
 
 

@@ -3,21 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists
 
-from util import mrid_strategy
-from zepben.ewb import Loop, Circuit, Substation, generate_id
-
+from cim.fill_fields import loop_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
-    verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args
+    verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered
-
-loop_kwargs = {
-    **identified_object_kwargs,
-    "circuits": lists(builds(Circuit, mrid=mrid_strategy)),
-    "substations": lists(builds(Substation, mrid=mrid_strategy)),
-    "energizing_substations": lists(builds(Substation, mrid=mrid_strategy))
-}
+from zepben.ewb import Loop, Circuit, Substation, generate_id
 
 loop_args = [*identified_object_args, [Circuit(mrid=generate_id())], [Substation(mrid=generate_id())], [Substation(mrid=generate_id())]]
 
@@ -31,7 +22,7 @@ def test_loop_constructor_default():
     assert not list(loop.energizing_substations)
 
 
-@given(**loop_kwargs)
+@given(**loop_kwargs())
 def test_loop_constructor_kwargs(circuits, substations, energizing_substations, **kwargs):
     loop = Loop(
         circuits=circuits,

@@ -2,20 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import integers, floats
-from zepben.ewb import Switch, SinglePhaseKind, SwitchInfo, generate_id
-
-from cim.cim_creators import MAX_32_BIT_INTEGER
-from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
+from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from cim.property_validator import validate_property_accessor
-
-switch_kwargs = {
-    **conducting_equipment_kwargs,
-    "rated_current": floats(min_value=0, max_value=MAX_32_BIT_INTEGER),
-    "_open": integers(min_value=0, max_value=15),
-    "_normally_open": integers(min_value=0, max_value=15),
-}
+from zepben.ewb import Switch, SinglePhaseKind, generate_id
 
 switch_args = [*conducting_equipment_args, 1.1, 2, 3]
 
@@ -44,10 +33,6 @@ def verify_switch_constructor_args(s: Switch):
         s._open,
         s._normally_open
     ]
-
-
-def test_switch_info_accessor():
-    validate_property_accessor(Switch, SwitchInfo, Switch.switch_info)
 
 
 def test_open_states():

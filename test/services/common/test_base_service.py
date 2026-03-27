@@ -179,7 +179,7 @@ def test_unresolved_references(service: BaseService):
     assert service.num_unresolved_references() == 4
     _add_and_check(service, plsi1, acls1, "per_length_impedance")
     assert service.num_unresolved_references() == 3
-    _add_and_check(service, ci1, acls1, "wire_info")
+    _add_and_check(service, ci1, acls1, "asset_info")
     assert service.num_unresolved_references() == 2
     _add_and_check(service, t1, acls1, "terminals")
     assert service.num_unresolved_references() == 1

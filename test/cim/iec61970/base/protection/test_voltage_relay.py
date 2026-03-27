@@ -4,13 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
+from cim.fill_fields import voltage_relay_kwargs
+from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
 from zepben.ewb import VoltageRelay, generate_id
-
-voltage_relay_kwargs = {
-    **protection_relay_function_kwargs
-}
 
 voltage_relay_args = [*protection_relay_function_args]
 
@@ -21,7 +18,7 @@ def test_voltage_relay_constructor_default():
     verify_protection_relay_function_constructor_default(vr)
 
 
-@given(**voltage_relay_kwargs)
+@given(**voltage_relay_kwargs())
 def test_voltage_relay_constructor_kwargs(**kwargs):
     vr = VoltageRelay(**kwargs)
     verify_protection_relay_function_constructor_kwargs(vr, **kwargs)

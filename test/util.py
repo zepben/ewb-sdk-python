@@ -6,9 +6,12 @@
 import importlib
 import pkgutil
 from concurrent import futures
+from typing import Generator, TypeVar, Callable, Any, Optional
 
 import grpc
 from hypothesis.strategies import uuids
+
+T = TypeVar("T")
 
 
 def all_subclasses(cls, package):
@@ -59,5 +62,18 @@ def grpc_aio_server():
 
     return server, host
 
+
+def assert_or_empty(
+    gen: Generator[T, None, None],
+    arg: list[T] | None,
+    sorted_by: Optional[Callable[[T], Any]] = None,
+    sort_reversed: bool = False,
+) -> list[T] | None:
+    actual = list(gen)
+    expected = arg or []
+    if sorted_by:
+        expected.sort(key=sorted_by, reverse=sort_reversed)
+
+    assert actual == expected
 
 mrid_strategy = uuids(version=4).map(lambda x: str(x))
