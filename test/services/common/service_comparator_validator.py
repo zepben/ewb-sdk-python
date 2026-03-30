@@ -2,17 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from types import MemberDescriptorType
-from typing import Optional, Any, Callable, TypeVar, Union, Type, Set, Generic, TypeAlias
 
 from __future__ import annotations
 
 __all__ = ["ServiceComparatorValidator"]
 
-from typing import Optional, Any, Callable, TypeVar, Union, Set, Protocol, Generic, overload, Type, Concatenate
+from typing import Optional, Any, Callable, TypeVar, Union, Set, Generic, Type, Concatenate, TypeAlias
 
 from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
-                        Difference, ReferenceDifference, ValueDifference, IndexedDifference, TIdentifiable, BaseServiceComparator, Identifiable)
+                        Difference, ReferenceDifference, ValueDifference, IndexedDifference, TIdentifiable)
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions
 
@@ -102,9 +100,9 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_property(
         self,
-        prop: Property | R,  # Isn't actually R, but that is what the type checker thinks when passing class member references.
+        prop: property | R,  # Isn't actually R, but that is what the type checker thinks when passing class member references.
         creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
-        create_value: Callable[[TIdentifiablet], R],
+        create_value: Callable[[TIdentifiable], R],
         create_other_value: Callable[[TIdentifiable], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
@@ -131,7 +129,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_val_property(
         self,
-        prop: Property,
+        prop: property,
         creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
         change_state: Callable[[TIdentifiable, R], Any],
         other_change_state: Callable[[TIdentifiable, R], Any],
@@ -159,7 +157,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_collection(
         self,
-        prop: Property,
+        prop: property,
         add_to_collection: TAddr[TIdentifiable, R],
         creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
         create_item: Callable[[TIdentifiable], R],
@@ -266,7 +264,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_indexed_collection(
         self,
-        prop: Property,
+        prop: property,
         add_to_collection: TAddr,
         creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
         create_item: Callable[[TIdentifiable], R],
@@ -332,12 +330,12 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
     def validate_unordered_collection(
         self,
-        prop: Property,
+        prop: property,
         add_to_collection: TAddr,
         creator: Type[TIdentifiable] | Callable[[str], TIdentifiable],  # Update to TCreator[TIdentifiable] when available.
-        create_item_1: Callable[[K], R],
-        create_item_2: Callable[[K], R],
-        create_diff_item_1: Callable[[K], R],
+        create_item_1: Callable[[TIdentifiable], R],
+        create_item_2: Callable[[TIdentifiable], R],
+        create_diff_item_1: Callable[[TIdentifiable], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
