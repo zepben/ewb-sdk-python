@@ -3,13 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from sqlite3 import Connection
-from unittest.mock import Mock, create_autospec, call
+from unittest.mock import Mock, create_autospec, call, AsyncMock
 
 import pytest
 
 from capture_mock_sequence import CaptureMockSequence
 from zepben.ewb import NetworkDatabaseReader, NetworkService, MetadataCollectionReader, NetworkServiceReader, TableVersion, SetDirection, SetPhases, \
-    PhaseInferrer, AssignToFeeders, AssignToLvFeeders, Equipment, Feeder, EnergySource
+    PhaseInferrer, AssignToFeeders, AssignToLvFeeders, Equipment, Feeder, EnergySource, NetworkStateOperators
 
 
 class TestNetworkDatabaseReader:
@@ -25,10 +25,15 @@ class TestNetworkDatabaseReader:
         self.table_version = create_autospec(TableVersion)
 
         self.set_direction = create_autospec(SetDirection)
+        self.set_direction.run = AsyncMock(SetDirection.run)
         self.set_phases = create_autospec(SetPhases)
+        self.set_phases.run = AsyncMock(SetPhases.run)
         self.phase_inferrer = create_autospec(PhaseInferrer)
+        self.phase_inferrer.run = AsyncMock(PhaseInferrer.run)
         self.assign_to_feeders = create_autospec(AssignToFeeders)
+        self.assign_to_feeders.run = AsyncMock(AssignToFeeders.run)
         self.assign_to_lv_feeders = create_autospec(AssignToLvFeeders)
+        self.assign_to_lv_feeders.run = AsyncMock(AssignToLvFeeders.run)
 
         # NOTE: Setting SUPPORTED_VERSION via `.return_value` here means it is not read correctly by the class and the underlying mock is used for
         #       comparison, so set the value directly instead. This has the side effect that it won't be tracked by the mock manager.
@@ -76,7 +81,6 @@ class TestNetworkDatabaseReader:
     # NOTE: We don't do an exhaustive test of reading objects as this is done via the schema test.
     #
 
-    @pytest.mark.skip()  # FIXME:
     async def test_calls_expected_processors_including_post_processes(self):
         assert await self.reader.load(), "Should have loaded"
 
@@ -109,13 +113,20 @@ class TestNetworkDatabaseReader:
             call.service_reader.load(),
 
             call.service.unresolved_references(),
-            call.service.unresolved_references().__iter__,
+            call.service.unresolved_references().__iter__(),
 
-            call.assign_to_feeders.run(self.service),
-            call.assign_to_lv_feeders.run(self.service),
-            call.set_direction.run(self.service),
-            call.set_phases.run(self.service),
-            call.phase_inferrer.run(self.service),
+            call.assign_to_feeders.run(self.service, NetworkStateOperators.NORMAL),
+            call.assign_to_feeders.run(self.service, NetworkStateOperators.CURRENT),
+            call.assign_to_lv_feeders.run(self.service, NetworkStateOperators.NORMAL),
+            call.assign_to_lv_feeders.run(self.service, NetworkStateOperators.CURRENT),
+            call.set_direction.run(self.service, NetworkStateOperators.NORMAL),
+            call.set_direction.run(self.service, NetworkStateOperators.CURRENT),
+            call.set_phases.run(self.service, NetworkStateOperators.NORMAL),
+            call.set_phases.run(self.service, NetworkStateOperators.CURRENT),
+            call.phase_inferrer.run(self.service, NetworkStateOperators.NORMAL),
+            call.phase_inferrer.run(self.service, NetworkStateOperators.CURRENT),
+            call.phase_inferrer.run(self.service, NetworkStateOperators.NORMAL).__iter__(),
+            call.phase_inferrer.run(self.service, NetworkStateOperators.CURRENT).__iter__(),
 
             # calls for _validate_equipment_containers()
             call.service.objects(Equipment),

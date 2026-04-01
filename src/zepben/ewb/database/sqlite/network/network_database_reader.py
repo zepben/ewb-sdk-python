@@ -81,27 +81,27 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         #       into two passes, we can just assign the equipment to feeders before we set the directions.
         #
         self._logger.info("Assigning equipment to feeders...")
-        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.assign_to_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to feeders.")
 
         self._logger.info("Assigning equipment to LV feeders...")
-        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.assign_to_lv_feeders.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to LV feeders.")
 
         self._logger.info("Applying feeder direction to network...")
-        await self.set_feeder_direction.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.set_feeder_direction.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Feeder direction applied to network.")
 
         self._logger.info("Applying phases to network...")
-        await self.set_phases.run(self.service, network_state_operators=NetworkStateOperators.NORMAL)
-        await self.set_phases.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+        await self.set_phases.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_phases.run(self.service, NetworkStateOperators.CURRENT)
         if self.infer_phases:
             self._log_inferred_phases(
-                await self.phase_inferrer.run(self.service, network_state_operators=NetworkStateOperators.NORMAL),
-                await self.phase_inferrer.run(self.service, network_state_operators=NetworkStateOperators.CURRENT)
+                await self.phase_inferrer.run(self.service, NetworkStateOperators.NORMAL),
+                await self.phase_inferrer.run(self.service, NetworkStateOperators.CURRENT)
             )
 
         self._logger.info("Phasing applied to network.")
