@@ -158,6 +158,6 @@ def test_unordered_list_comparison_with_objects():
 
 def _create_name_type(name_type: str, desc: str, name: str, io_mrid: str) -> NameType:
     # noinspection PyArgumentList
-    nt = NameType(name_type, desc)
+    nt = NameType(name=name_type, description=desc)
     nt.get_or_add_name(name, Junction(mrid=io_mrid))
     return nt

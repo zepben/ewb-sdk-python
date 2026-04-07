@@ -18,22 +18,19 @@ from zepben.ewb.streaming.grpc.grpc import GrpcClient
 from zepben.ewb.util import datetime_to_timestamp
 
 
-class QueryNetworkStateClient(GrpcClient):
+class QueryNetworkStateClient(GrpcClient[QueryNetworkStateServiceStub]):
     """
     A client class that provides functionality to interact with the gRPC service for querying network states.
     A gRPC channel or stub must be provided.
     """
 
-    _stub: QueryNetworkStateServiceStub = None
-
     def __init__(self, channel=None, stub: QueryNetworkStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=QueryNetworkStateServiceStub(channel))
         else:
-            self._stub = QueryNetworkStateServiceStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
     async def get_current_states(self, query_id: int, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
         """

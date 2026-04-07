@@ -8,31 +8,35 @@ from __future__ import annotations
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
 from abc import abstractmethod
-from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
+from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, AsyncGenerator, Type, Generator, cast
 
+from typing_extensions import deprecated
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
-from zepben.ewb import BaseService, IdentifiedObject, UnsupportedOperationException, ServiceInfo
+from zepben.ewb import BaseService, UnsupportedOperationException, ServiceInfo
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
+from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.ewb.streaming.grpc.grpc import GrpcClient, GrpcResult
 
-T = TypeVar('T', bound=IdentifiedObject)
+T = TypeVar('T', bound=Identifiable)
+TStub = TypeVar('TStub')
 
 
 @dataclass()
-class MultiObjectResult(object):
+class MultiObjectResult(Generic[T]):
     objects: Dict[str, T] = dict()
     failed: Set[str] = set()
 
 
 ServiceType = TypeVar('ServiceType', bound=BaseService)
-PBIdentifiedObject = TypeVar('PBIdentifiedObject')
+PBIdentifiable = TypeVar('PBIdentifiable')
 GrpcRequest = TypeVar('GrpcRequest')
 
 
-class CimConsumerClient(GrpcClient, Generic[ServiceType]):
+class CimConsumerClient(GrpcClient[TStub], Generic[ServiceType, TStub]):
     """
     Base class that defines some helpful functions when producer clients are sending to the server.
 
@@ -46,7 +50,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         T: The base service to send objects from.
     """
 
-    __service_info: Optional[ServiceInfo]
+    __service_info: ServiceInfo | None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -60,6 +64,37 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         """
         raise NotImplementedError()
 
+    async def get_identifiable(self, mrid: str) -> GrpcResult[Identifiable]:
+        """
+        Retrieve the object with the given `mRID` and store the result in the `service`.
+
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered by `addErrorHandler`.
+
+        Returns a :class:`GrpcResult` with a result of one of the following:
+            - When `GrpcResult.wasSuccessful`, the item found, accessible via `GrpcResult.value`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`. One of:
+                - :class:`NoSuchElementException` if the object could not be found.
+                - The gRPC error that occurred while retrieving the object
+        """
+        return await self._get_identifiable(mrid)
+
+    async def get_identifiables(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        """
+        Retrieve the objects with the given `mRIDs` and store the results in the `service`.
+
+        Exceptions that occur during processing will be caught and passed to all error handlers that have been registered by `addErrorHandler`.
+
+        @return A :class:`GrpcResult` with a result of one of the following:
+            - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
+              found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed`
+              (see `BaseService.add`).
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
+
+        Note the :class:`CimConsumerClient` warning in this case.
+        """
+        return await self._get_identifiables(mrids)
+
+    @deprecated("Use get_identifiable() instead")
     async def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject]:
         """
         Retrieve the object with the given `mRID` and store the result in the `service`.
@@ -72,8 +107,9 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
                 - :class:`NoSuchElementException` if the object could not be found.
                 - The gRPC error that occurred while retrieving the object
         """
-        return await self._get_identified_object(mrid)
+        return cast(GrpcResult[IdentifiedObject], await self._get_identifiable(mrid))
 
+    @deprecated("Use get_identifiables() instead")
     async def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the objects with the given `mRIDs` and store the results in the `service`.
@@ -88,25 +124,25 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
         Note the :class:`CimConsumerClient` warning in this case.
         """
-        return await self._get_identified_objects(mrids)
+        return await self._get_identifiables(mrids)
 
-    async def _get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    async def _get_identifiable(self, mrid: str) -> GrpcResult[Identifiable | None]:
         async def rpc():
-            async for io, _ in self._process_identified_objects([mrid]):
+            async for io, _ in self._process_identifiables([mrid]):
                 return io
             else:
                 raise ValueError(f"No object with mRID {mrid} could be found.")
 
         return await self.try_rpc(rpc)
 
-    async def _get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+    async def _get_identifiables(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         async def rpc():
-            return await self._process_extract_results(mrids, self._process_identified_objects(set(mrids)))
+            return await self._process_extract_results(mrids, self._process_identifiables(set(mrids)))
 
         return await self.try_rpc(rpc)
 
     @abstractmethod
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identifiables(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable, str] | None, None]:
         #
         # NOTE: this is a stupid test that is meant to fail to make sure we never yield, but we need to have the yield to make it return the generator.
         #
@@ -114,28 +150,28 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
             yield
         raise NotImplementedError()
 
-    CIM_TYPE = TypeVar("CIM_TYPE", bound=IdentifiedObject)
+    CIM_TYPE = TypeVar("CIM_TYPE", bound=Identifiable)
 
-    def _extract_identified_object(self,
-                                   desc: str,
-                                   pb_io: PBIdentifiedObject,
-                                   pb_type_to_cim: Dict[str, Type[CIM_TYPE]],
-                                   check_presence: bool = True) -> Tuple[Optional[IdentifiedObject], str]:
+    def _extract_identifiable(self,
+                              desc: str,
+                              pb_io: PBIdentifiable,
+                              pb_type_to_cim: Dict[str, Type[CIM_TYPE]],
+                              check_presence: bool = True) -> Tuple[Identifiable | None, str]:
         """
-        Add a :class:`CustomerIdentifiedObject` to the service. Will convert from protobuf to CIM type.
+        Add a :class:`CustomerIdentifiable` to the service. Will convert from protobuf to CIM type.
 
         Parameters
-            - `pb_io` - The wrapped identified object returned by the server.
-            - `pb_type_to_cim` - The mapping of wrapped identified object types to CIM objects.
+            - `pb_io` - The wrapped identifiable returned by the server.
+            - `pb_type_to_cim` - The mapping of wrapped identifiable types to CIM objects.
             - `check_presence` - Whether to check if `cio` already exists in the service and skip if it does.
 
         Raises :class:`UnsupportedOperationException` if `pb_io` was invalid/unset.
         """
-        io_type = pb_io.WhichOneof("identifiedObject")
+        io_type = pb_io.WhichOneof("identifiable")
         if io_type:
             cim_type = pb_type_to_cim.get(io_type, None)
             if cim_type is None:
-                raise UnsupportedOperationException(f"Identified object type '{io_type}' is not supported by the {desc} service")
+                raise UnsupportedOperationException(f"Identifiable type '{io_type}' is not supported by the {desc} service")
 
             pb = getattr(pb_io, io_type)
             if check_presence:
@@ -149,11 +185,13 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
             # noinspection PyUnresolvedReferences
             return self.service.add_from_pb(pb), pb.mrid()
         else:
-            raise UnsupportedOperationException(f"Received a {desc} identified object where no field was set")
+            raise UnsupportedOperationException(f"Received a {desc} identifiable where no field was set")
 
     @staticmethod
-    async def _process_extract_results(mrids: Optional[Iterable[str]],
-                                       extracted: AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]) -> MultiObjectResult:
+    async def _process_extract_results(
+        mrids: Iterable[str] | None,
+        extracted: AsyncGenerator[Tuple[Identifiable | None, str], None]
+    ) -> MultiObjectResult:
         results = {}
         if mrids is None:
             failed = set()

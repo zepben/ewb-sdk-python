@@ -116,9 +116,9 @@ class MockServer:
         # client test, as the pytest logging only give the outcome, not which line actually caused it.
         try:
             await client_test()
-        except Exception as ex:
+        except Exception as e:
             print(traceback.format_exc())
-            raise ex
+            raise e
 
         # Wait for the server to finish. If this times out your test, it indicates that not all expected requests were received, or the request stream
         # wasn't closed/completed.

@@ -12,7 +12,7 @@ from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 # noinspection PyArgumentList
-name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
+name_args = ["1", NameType(name="nt1"), Junction(mrid=generate_id())]
 
 
 #
@@ -26,18 +26,9 @@ name_args = ["1", NameType("nt1"), Junction(mrid=generate_id())]
 def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
     assert not kwargs, f"found unexpected args: {kwargs}"
 
-    n = Name(name, type, identified_object)
+    n = Name(name=name, type=type, identified_object=identified_object)
 
     assert n.name == name
     assert n.type == type
     assert n.identified_object == identified_object
-
-
-def test_name_constructor_args():
-    n = Name(*name_args)
-
-    assert name_args == [
-        n.name,
-        n.type,
-        n.identified_object
-    ]
+    assert n.mrid == f"{n.name}-{n.type.name}-{n.identified_object.mrid}"

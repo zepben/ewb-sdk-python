@@ -78,7 +78,7 @@ from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
@@ -125,7 +125,7 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 class ReferenceResolver(object):
     from_class: type
     to_class: type
-    resolve: Callable[[IdentifiedObject, IdentifiedObject], Any]
+    resolve: Callable[[Identifiable, Identifiable], None]
 
     def __eq__(self, other):
         return self.from_class is other.from_class and self.to_class is other.to_class and self.resolve is other.resolve
@@ -140,16 +140,16 @@ class ReferenceResolver(object):
 @dataclass(frozen=True, eq=False, slots=True)
 class BoundReferenceResolver(object):
     """
-    :var from_obj: Identified object from which to resolve the reference.
+    :var from_obj: Identifiable from which to resolve the reference.
     :var resolver: Reference resolver to use.
     :var reverse_resolver: Reference resolver to use for the reverse.
     """
-    from_obj: IdentifiedObject
+    from_obj: Identifiable
     resolver: ReferenceResolver
     reverse_resolver: Optional[ReferenceResolver]
 
     def __eq__(self, other):
-        """ We only do a reference check for `from_obj` to avoid expensive equality checks on `IdentifiedObjects`. """
+        """ We only do a reference check for `from_obj` to avoid expensive equality checks on `Identifiables`. """
         if self.reverse_resolver is None and other.reverse_resolver is None:
             return self.from_obj is other.from_obj and self.resolver == other.resolver
         elif self.reverse_resolver is not None and other.reverse_resolver is not None:
@@ -175,7 +175,7 @@ class BoundReferenceResolver(object):
 
 @dataclass(frozen=True, eq=False, slots=True)
 class UnresolvedReference(object):
-    from_ref: IdentifiedObject
+    from_ref: Identifiable
     to_mrid: str
     resolver: ReferenceResolver
     reverse_resolver: Optional[ReferenceResolver] = None

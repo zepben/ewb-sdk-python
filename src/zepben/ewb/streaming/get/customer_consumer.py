@@ -8,19 +8,20 @@ from __future__ import annotations
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple
 
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
+from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiablesRequest, GetCustomersForContainerRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
-from zepben.ewb import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo
+from zepben.ewb import CustomerService, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
 
 
-class CustomerConsumerClient(CimConsumerClient[CustomerService]):
+class CustomerConsumerClient(CimConsumerClient[CustomerService, CustomerConsumerStub]):
     """
     Consumer client for a :class:`CustomerService`.
 
@@ -37,16 +38,13 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     def service(self) -> CustomerService:
         return self.__service
 
-    _stub: CustomerConsumerStub = None
-
     def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
-        super().__init__(error_handlers=error_handlers, timeout=timeout)
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
-            self._stub = stub
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=stub)
+        elif channel is not None:
+            super().__init__(error_handlers=error_handlers, timeout=timeout, stub=CustomerConsumerStub(channel))
         else:
-            self._stub = CustomerConsumerStub(channel)
+            raise ValueError("Must provide either a channel or a stub")
 
         self.__service = CustomerService()
 
@@ -65,32 +63,32 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable | None, str], None]:
         if not mrids:
             return
 
         responses = self._stub.getCustomersForContainer(self._batch_send(GetCustomersForContainerRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for cio in response.identifiedObjects:
-                yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
+            for cio in response.identifiables:
+                yield self._extract_identifiable("customer", cio, _cio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identifiables(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Identifiable | None, str], None]:
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
+        responses = self._stub.getIdentifiables(self._batch_send(GetIdentifiablesRequest(), mrids), timeout=self.timeout)
         async for response in responses:
-            for cio in response.identifiedObjects:
-                yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
+            for cio in response.identifiables:
+                yield self._extract_identifiable("customer", cio, _cio_type_to_cim)
 
 
 class SyncCustomerConsumerClient(CustomerConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
-        return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
+    def get_identifiable(self, mrid: str) -> GrpcResult[Identifiable | None]:
+        return get_event_loop().run_until_complete(super()._get_identifiable(mrid))
 
-    def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super()._get_identified_objects(mrids))
+    def get_identifiables(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super()._get_identifiables(mrids))
 
     def get_customers_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_customers_for_containers({mrid}))

@@ -241,6 +241,12 @@ def test_contains(service: BaseService):
     assert breaker.mrid in service
     assert service.get(breaker.mrid)
 
+    assert breaker in service
+
+    not_added_breaker = Breaker(mrid=generate_id())
+
+    assert not_added_breaker not in service
+
     assert "unknown" not in service
     with pytest.raises(KeyError):
         service.get("unknown")

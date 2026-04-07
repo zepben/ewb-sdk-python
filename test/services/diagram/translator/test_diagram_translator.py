@@ -2,16 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
-
-from zepben.ewb import IdentifiedObject, DiagramService, NameType, DiagramDatabaseTables, TableDiagramObjectPoints
-from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
-from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 from cim.fill_fields import *
 from services.common.translator.base_test_translator import validate_service_translations
-
-T = TypeVar("T", bound=IdentifiedObject)
+from zepben.ewb import DiagramService, NameType, DiagramDatabaseTables, TableDiagramObjectPoints
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
+from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 types_to_test = {
 
@@ -43,7 +39,7 @@ def test_diagram_service_translations():
 
 def test_creates_new_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyUnresolvedReferences
     cim = DiagramService().add_from_pb(pb)
@@ -54,10 +50,10 @@ def test_creates_new_name_type():
 
 def test_updates_existing_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyArgumentList
-    nt = NameType("nt1 name")
+    nt = NameType(name="nt1 name")
     ds = DiagramService()
     ds.add_name_type(nt)
     # noinspection PyUnresolvedReferences

@@ -5,7 +5,7 @@
 from dataclasses import dataclass, field
 from typing import Optional, Any, List, Dict, TypeVar, Generic
 
-from zepben.ewb import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 T = TypeVar("T")
 
@@ -40,8 +40,8 @@ class ObjectDifference(Difference, Generic[T]):
 
 @dataclass()
 class ReferenceDifference(Difference):
-    source: Optional[IdentifiedObject]
-    target_value: Optional[IdentifiedObject]
+    source: Optional[Identifiable]
+    target_value: Optional[Identifiable]
 
 
 @dataclass()

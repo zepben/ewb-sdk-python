@@ -187,14 +187,14 @@ functions on the service provided when requesting identified objects.
 from zepben.ewb import NetworkService, SyncNetworkConsumerClient, resolver
 
 def get_with_base_voltage(service: NetworkService, client: SyncNetworkConsumerClient, mrid: str):
-    equipment = client.get_identified_object(mrid).result
+    equipment = client.get_identifiable(mrid).result
     if not equipment:
         return
 
     # Get all base voltage relationships
     mrids = list(service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment)))
     if mrids:
-        client.get_identified_object(mrids[0])
+        client.get_identifiable(mrids[0])
 ```
 
 You can also query the services UnresolvedReferences in the following ways:
@@ -202,15 +202,15 @@ You can also query the services UnresolvedReferences in the following ways:
 ```python
 # To get unresolved references pointing from `equipment` to other objects:
 for ref in service.get_unresolved_references_from(equipment.mrid):
-    await client.get_identified_object(service, ref.to_mrid)
+    await client.get_identifiable(service, ref.to_mrid)
 
 # To get unresolved references pointing to `equipment`:
 for ref in service.get_unresolved_references_to(equipment.mrid):
-    await client.get_identified_object(service, ref.from_ref.mrid)
+    await client.get_identifiable(service, ref.from_ref.mrid)
 
 # Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
 for ref in service.unresolved_references():
-    await client.get_identified_object(service, ref.to_mrid)
+    await client.get_identifiable(service, ref.to_mrid)
 ```
 
 ## Service metadata

@@ -21,7 +21,9 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 #
 
 # noinspection PyArgumentList
-identified_object_args = ["test_mrid", "test_name", "test_description", [Name("1", NameType("nt1"), Junction(mrid=generate_id()))]]
+identified_object_args = [
+    "test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]
+]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
@@ -59,7 +61,7 @@ def verify_identified_object_constructor_args(io: IdentifiedObject):
 def test_user_can_add_names_to_identified_object():
     identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
-    name_type = NameType("type")
+    name_type = NameType(name="type")
     assert identified_object.num_names() == 0
 
     identified_object.add_name(name_type, "1")
@@ -112,9 +114,9 @@ def test_get_names_obtains_all_names_of_a_identified_object_with_a_given_name_ty
     identified_object, name_type = _create_multiple_base_names()
 
     # noinspection PyArgumentList
-    name_type2 = NameType("type2")
+    name_type2 = NameType(name="type2")
     # noinspection PyArgumentList
-    name_type3 = NameType("type3")
+    name_type3 = NameType(name="type3")
     identified_object.add_name(name_type2, "1")
 
     assert len(identified_object.get_names(name_type)) == 3
@@ -158,7 +160,7 @@ def test_clear_names_removes_all_names_from_the_identified_object_and_the_name_t
 def test_user_can_add_the_same_name_back_after_it_has_been_removed():
     identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
-    name_type = NameType("type")
+    name_type = NameType(name="type")
 
     identified_object.add_name(name_type, "1")
     name1 = identified_object.get_name("type", "1")
@@ -172,7 +174,7 @@ def test_user_can_add_the_same_name_back_after_it_has_been_removed():
 def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
     identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
-    name_type = NameType("type")
+    name_type = NameType(name="type")
 
     identified_object.add_name(name_type, "1")
     name1 = identified_object.get_name("type", "1")
@@ -187,10 +189,15 @@ def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
     assert identified_object.num_names() == 1
 
 
+def test_clearing_empty_names():
+    # This tests the resolution of a bug when you cleared an empty names collection.
+    Junction(mrid=generate_id()).clear_names()
+
+
 def _create_multiple_base_names() -> Tuple[IdentifiedObject, NameType]:
     identified_object = IdentifiedObject(mrid=generate_id())
     # noinspection PyArgumentList
-    name_type = NameType("type")
+    name_type = NameType(name="type")
 
     identified_object.add_name(name_type, "1")
     identified_object.add_name(name_type, "2")

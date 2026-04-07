@@ -2,13 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
 
 import pytest
 
 from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.fill_fields import *
-from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
+from zepben.ewb import PowerTransformerEnd, PowerTransformer, NetworkService, NetworkServiceComparator, NameType, \
     NetworkDatabaseTables, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
@@ -20,8 +19,6 @@ from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_
 from zepben.ewb.database.sqlite.tables.extensions.iec61968.common.table_contact_details_telephone_numbers import TableContactDetailsTelephoneNumbers
 from zepben.ewb.database.sqlite.tables.iec61968.metering.table_usage_points_contact_details import TableUsagePointsContactDetails
 from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
-
-T = TypeVar("T", bound=IdentifiedObject)
 
 types_to_test = {
     ##################################
@@ -277,7 +274,7 @@ def test_network_service_translations():
 # NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
 def test_creates_new_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyUnresolvedReferences
     cim = NetworkService().add_from_pb(pb)
@@ -288,10 +285,10 @@ def test_creates_new_name_type():
 
 def test_updates_existing_name_type():
     # noinspection PyArgumentList, PyUnresolvedReferences
-    pb = NameType("nt1 name", "nt1 desc").to_pb()
+    pb = NameType(name="nt1 name", description="nt1 desc").to_pb()
 
     # noinspection PyArgumentList
-    nt = NameType("nt1 name")
+    nt = NameType(name="nt1 name")
     ns = NetworkService()
     ns.add_name_type(nt)
     # noinspection PyUnresolvedReferences

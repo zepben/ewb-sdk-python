@@ -7,7 +7,7 @@ __all__ = ["NetworkCimWriter"]
 
 from typing import Optional, Type, TypeVar
 
-from zepben.ewb import IdentifiedObject
+from zepben.ewb import Identifiable
 from zepben.ewb.database.sql.sql_table import SqlTable
 from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.extensions.prepared_statement import PreparedStatement
@@ -321,14 +321,18 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 TSqlTable = TypeVar('TSqlTable', bound=SqlTable)
 
+
 def db_wrapper(table: Type[TSqlTable]):
     def wrapper(func):
-        def _inner(self, io: IdentifiedObject, *args, **kwargs):
+        def _inner(self, io: Identifiable, *args, **kwargs):
             _table: TSqlTable = self._database_tables.get_table(table)
             _insert = self._database_tables.get_insert(table)
             return func(self, io, *args, table=_table, insert=_insert, **kwargs)
+
         return _inner
+
     return wrapper
+
 
 class NetworkCimWriter(BaseCimWriter):
     """
@@ -577,7 +581,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableProtectionRelayFunctions,
         insert: PreparedStatement,
         protection_relay_function: ProtectionRelayFunction,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.model.query_index, protection_relay_function.model)
         insert.add_value(table.reclosing.query_index, protection_relay_function.reclosing)
@@ -603,7 +607,7 @@ class NetworkCimWriter(BaseCimWriter):
         self,
         protection_relay_function: ProtectionRelayFunction,
         sequence_number: int,
-        threshold: RelaySetting
+        threshold: RelaySetting,
     ) -> bool:
         table = self._database_tables.get_table(TableProtectionRelayFunctionThresholds)
         insert = self._database_tables.get_insert(TableProtectionRelayFunctionThresholds)
@@ -924,7 +928,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableAssetOrganisationRoles,
         insert: PreparedStatement,
         asset_organisation_role: AssetOrganisationRole,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_organisation_role(table, insert, asset_organisation_role, description)
 
@@ -969,7 +973,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableElectronicAddresses,
         insert: PreparedStatement,
         electronic_address: ElectronicAddress,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.email_1.query_index, electronic_address.email1)
         insert.add_value(table.is_primary.query_index, electronic_address.is_primary)
@@ -999,7 +1003,7 @@ class NetworkCimWriter(BaseCimWriter):
         location: Location,
         field: TableLocationStreetAddressField,
         street_address: Optional[StreetAddress],
-        description: str
+        description: str,
     ) -> bool:
         if street_address is None:
             return True
@@ -1028,7 +1032,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableStreetAddresses,
         insert: PreparedStatement,
         street_address: StreetAddress,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.postal_code.query_index, street_address.postal_code)
         insert.add_value(table.po_box.query_index, street_address.po_box)
@@ -1155,8 +1159,13 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._save_asset_container(table, insert, end_device, description)
 
-    def _save_end_device_function(self, table: TableEndDeviceFunctions, insert: PreparedStatement, end_device_function: EndDeviceFunction,
-                                  description: str) -> bool:
+    def _save_end_device_function(
+        self,
+        table: TableEndDeviceFunctions,
+        insert: PreparedStatement,
+        end_device_function: EndDeviceFunction,
+        description: str,
+    ) -> bool:
         insert.add_value(table.enabled.query_index, end_device_function.enabled)
 
         return self._save_asset_function(table, insert, end_device_function, description)
@@ -1234,7 +1243,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableAuxiliaryEquipment,
         insert: PreparedStatement,
         auxiliary_equipment: AuxiliaryEquipment,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(auxiliary_equipment.terminal))
 
@@ -1315,7 +1324,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableConductingEquipment,
         insert: PreparedStatement,
         conducting_equipment: ConductingEquipment,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.base_voltage_mrid.query_index, self._mrid_or_none(conducting_equipment.base_voltage))
 
@@ -1339,7 +1348,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableConnectivityNodeContainers,
         insert: PreparedStatement,
         connectivity_node_container: ConnectivityNodeContainer,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_power_system_resource(table, insert, connectivity_node_container, description)
 
@@ -1379,7 +1388,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableEquipmentContainers,
         insert: PreparedStatement,
         equipment_container: EquipmentContainer,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_connectivity_node_container(table, insert, equipment_container, description)
 
@@ -1397,7 +1406,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(feeder.normal_head_terminal))
         insert.add_value(
             table.normal_energizing_substation_mrid.query_index,
-            self._mrid_or_none(feeder.normal_energizing_substation)
+            self._mrid_or_none(feeder.normal_energizing_substation),
         )
 
         return self._save_equipment_container(table, insert, feeder, "feeder")
@@ -1420,7 +1429,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TablePowerSystemResources,
         insert: PreparedStatement,
         power_system_resource: PowerSystemResource,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.location_mrid.query_index, self._mrid_or_none(power_system_resource.location))
         insert.add_value(table.num_controls.query_index, power_system_resource.num_controls)
@@ -1440,7 +1449,7 @@ class NetworkCimWriter(BaseCimWriter):
 
         insert.add_value(
             table.geographical_region_mrid.query_index,
-            self._mrid_or_none(sub_geographical_region.geographical_region)
+            self._mrid_or_none(sub_geographical_region.geographical_region),
         )
 
         return self._save_identified_object(table, insert, sub_geographical_region, "sub-geographical region")
@@ -1517,7 +1526,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableEquivalentEquipment,
         insert: PreparedStatement,
         equivalent_equipment: EquivalentEquipment,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_conducting_equipment(table, insert, equivalent_equipment, description)
 
@@ -1563,7 +1572,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TablePowerElectronicsUnits,
         insert: PreparedStatement,
         power_electronics_unit: PowerElectronicsUnit,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.power_electronics_connection_mrid.query_index, self._mrid_or_none(power_electronics_unit.power_electronics_connection))
         insert.add_value(table.max_p.query_index, power_electronics_unit.max_p)
@@ -1652,7 +1661,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableMeasurements,
         insert: PreparedStatement,
         measurement: Measurement,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.power_system_resource_mrid.query_index, measurement.power_system_resource_mrid)
         insert.add_value(table.remote_source_mrid.query_index, self._mrid_or_none(measurement.remote_source))
@@ -1846,7 +1855,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableEarthFaultCompensators,
         insert: PreparedStatement,
         earth_fault_compensator: EarthFaultCompensator,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.r.query_index, earth_fault_compensator.r)
 
@@ -1857,7 +1866,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableEnergyConnections,
         insert: PreparedStatement,
         energy_connection: EnergyConnection,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_conducting_equipment(table, insert, energy_connection, description)
 
@@ -2079,7 +2088,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TablePerLengthImpedances,
         insert: PreparedStatement,
         per_length_impedance: PerLengthImpedance,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_per_length_line_parameter(table, insert, per_length_impedance, description)
 
@@ -2088,7 +2097,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TablePerLengthLineParameters,
         insert: PreparedStatement,
         per_length_line_parameter: PerLengthLineParameter,
-        description: str
+        description: str,
     ) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
@@ -2220,7 +2229,7 @@ class NetworkCimWriter(BaseCimWriter):
 
         insert.add_value(
             table.power_electronics_connection_mrid.query_index,
-            self._mrid_or_none(power_electronics_connection_phase.power_electronics_connection)
+            self._mrid_or_none(power_electronics_connection_phase.power_electronics_connection),
         )
         insert.add_value(table.p.query_index, power_electronics_connection_phase.p)
         insert.add_value(table.phase.query_index, power_electronics_connection_phase.phase.short_name)
@@ -2334,7 +2343,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableRegulatingCondEq,
         insert: PreparedStatement,
         regulating_cond_eq: RegulatingCondEq,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.control_enabled.query_index, regulating_cond_eq.control_enabled)
         insert.add_value(table.regulating_control_mrid.query_index, self._mrid_or_none(regulating_cond_eq.regulating_control))
@@ -2346,7 +2355,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableRegulatingControls,
         insert: PreparedStatement,
         regulating_control: RegulatingControl,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.discrete.query_index, regulating_control.discrete)
         insert.add_value(table.mode.query_index, regulating_control.mode.short_name)
@@ -2368,7 +2377,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableRotatingMachines,
         insert: PreparedStatement,
         rotating_machine: RotatingMachine,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.rated_power_factor.query_index, rotating_machine.rated_power_factor)
         insert.add_value(table.rated_s.query_index, rotating_machine.rated_s)
@@ -2403,7 +2412,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableShuntCompensators,
         insert: PreparedStatement,
         shunt_compensator: ShuntCompensator,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.shunt_compensator_info_mrid.query_index, self._mrid_or_none(shunt_compensator.asset_info))
         insert.add_value(table.grounded.query_index, shunt_compensator.grounded)
@@ -2524,7 +2533,7 @@ class NetworkCimWriter(BaseCimWriter):
         table: TableTransformerEnds,
         insert: PreparedStatement,
         transformer_end: TransformerEnd,
-        description: str
+        description: str,
     ) -> bool:
         insert.add_value(table.end_number.query_index, transformer_end.end_number)
         insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(transformer_end.terminal))
@@ -2678,7 +2687,7 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_protection_relay_function_to_protected_switch_association(
         self,
         protection_relay_function: ProtectionRelayFunction,
-        protected_switch: ProtectedSwitch
+        protected_switch: ProtectedSwitch,
     ) -> bool:
         table = self._database_tables.get_table(TableProtectionRelayFunctionsProtectedSwitches)
         insert = self._database_tables.get_insert(TableProtectionRelayFunctionsProtectedSwitches)
@@ -2700,7 +2709,7 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_protection_relay_scheme_to_protection_relay_function_association(
         self,
         protection_relay_scheme: ProtectionRelayScheme,
-        protection_relay_function: ProtectionRelayFunction
+        protection_relay_function: ProtectionRelayFunction,
     ) -> bool:
         table = self._database_tables.get_table(TableProtectionRelaySchemesProtectionRelayFunctions)
         insert = self._database_tables.get_insert(TableProtectionRelaySchemesProtectionRelayFunctions)
@@ -2713,7 +2722,7 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_synchronous_machine_to_reactive_capability_curve_association(
         self,
         synchronous_machine: SynchronousMachine,
-        reactive_capability_curve: ReactiveCapabilityCurve
+        reactive_capability_curve: ReactiveCapabilityCurve,
     ) -> bool:
         table = self._database_tables.get_table(TableSynchronousMachinesReactiveCapabilityCurves)
         insert = self._database_tables.get_insert(TableSynchronousMachinesReactiveCapabilityCurves)

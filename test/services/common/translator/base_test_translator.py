@@ -18,7 +18,7 @@ from zepben.ewb.database.sqlite.tables.table_version import TableVersion
 from zepben.ewb.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import TIdentifiable
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.services.common.base_service import BaseService
@@ -27,8 +27,6 @@ from zepben.ewb.services.common.reference_resolvers import shunt_compensator_to_
 from zepben.ewb.services.customer.customers import CustomerService
 from zepben.ewb.services.diagram.diagrams import DiagramService
 from zepben.ewb.services.network.network_service import NetworkService
-
-T = TypeVar("T", bound=IdentifiedObject)
 
 _excluded_base_tables: Set[Type[SqliteTable]] = {TableVersion, TableMetadataDataSources, TableNameTypes, TableNames}
 
@@ -120,7 +118,7 @@ def _format_validation_error(description: str, classes: Set[str]) -> str:
     return f"\n{description}: {classes}\n" if classes else ""
 
 
-def _remove_unsent_references(cim: T):
+def _remove_unsent_references(cim: TIdentifiable):
     if isinstance(cim, EquipmentContainer):
         cim.clear_equipment()
         cim.clear_current_equipment()
@@ -132,7 +130,7 @@ def _remove_unsent_references(cim: T):
         cim.clear_terminals()
 
 
-def _add_with_unresolved_references(service: BaseService, cim: T) -> T:
+def _add_with_unresolved_references(service: BaseService, cim: TIdentifiable) -> TIdentifiable:
     # We need to convert the populated item before we check the differences so we can complete the unresolved references.
     # noinspection PyUnresolvedReferences
     converted_cim = service.add_from_pb(cim.to_pb())
