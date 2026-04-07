@@ -14,7 +14,7 @@ from typing import TypeVar, Optional, Callable, Generic, Any
 import pytest
 
 from database.sqlite.schema_utils import SchemaNetworks, assume_non_blank_street_address_details
-from zepben.ewb import MetadataCollection, IdentifiedObject, Location, BaseService, BaseServiceComparator
+from zepben.ewb import MetadataCollection, Identifiable, Location, BaseService, BaseServiceComparator
 from zepben.ewb.database.sqlite.common.base_database_reader import BaseDatabaseReader
 from zepben.ewb.database.sqlite.common.base_database_writer import BaseDatabaseWriter
 from zepben.ewb.database.sqlite.tables.table_version import TableVersion
@@ -50,7 +50,7 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
         pass
 
     @abstractmethod
-    def create_identified_object(self) -> IdentifiedObject:
+    def create_identifiable(self) -> Identifiable:
         pass
 
     @pytest.fixture(autouse=True)
@@ -72,13 +72,13 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
         read_service = self.create_service()
 
         # We add a copy of the junction to the read services to create an mRID conflict.
-        identified_object = self.create_identified_object()
-        write_service.add(identified_object)
-        read_service.add(identified_object)
+        identifiable = self.create_identifiable()
+        write_service.add(identifiable)
+        read_service.add(identifiable)
 
         await self._validate_write_read(write_service, read_service=read_service)
 
-        assert f"Failed to load {identified_object}. Unable to add to service '{read_service.name}': duplicate MRID" in self.caplog.text
+        assert f"Failed to load {identifiable}. Unable to add to service '{read_service.name}': duplicate MRID" in self.caplog.text
 
     async def _validate_schema(self, expected_service: TService):
         #

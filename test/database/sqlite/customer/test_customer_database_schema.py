@@ -10,11 +10,11 @@ from hypothesis import given, settings, HealthCheck
 from cim.fill_fields import create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariff
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.ewb import IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
+from zepben.ewb import Identifiable, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
     CustomerDatabaseWriter, CustomerService
 from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
-T = TypeVar("T", bound=IdentifiedObject)
+T = TypeVar("T", bound=Identifiable)
 
 
 # pylint: disable=too-many-public-methods
@@ -32,7 +32,7 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     def create_comparator(self) -> TComparator:
         return CustomerServiceComparator()
 
-    def create_identified_object(self) -> IdentifiedObject:
+    def create_identifiable(self) -> Identifiable:
         return Customer(mrid="test")
 
     ###################

@@ -31,7 +31,7 @@ from cim.fill_fields import create_cable_info, create_no_load_test, create_open_
     create_hv_customer, create_lv_substation, create_ac_line_segment_phase
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.ewb import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitTest, PowerTransformerInfo, \
+from zepben.ewb import Identifiable, AcLineSegment, NoLoadTest, OpenCircuitTest, PowerTransformerInfo, \
     ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, Pole, Streetlight, Location, Organisation, \
     OperationalRestriction, BaseVoltage, ConnectivityNode, Feeder, Site, Substation, Terminal, \
     EquivalentBranch, Control, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
@@ -113,7 +113,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     def create_comparator(self) -> TComparator:
         return NetworkServiceComparator()
 
-    def create_identified_object(self) -> IdentifiedObject:
+    def create_identifiable(self) -> Identifiable:
         return Junction(mrid="test")
 
     @unittest.skip("Only load real files on demand, not as part of the actual test suite")
