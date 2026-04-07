@@ -87,6 +87,7 @@
   `None` when optional.
 * Fixed an error in `PhaseCode` when adding `NONE` which previously resulted in `NONE` instead of the existing `PhaseCode`.
 * `BaseService.__contains__`` will now return `false` when passed an `Identifiable` that is not in the service, instead of raising a `KeyError`
+* Clearing the names from an `IdentifiedObject` with no names no longer raises a `TypeError`.
 
 ### Notes
 * Deprecated the `customer_identified_object` function, please use the replacement `customer_identifiable`.

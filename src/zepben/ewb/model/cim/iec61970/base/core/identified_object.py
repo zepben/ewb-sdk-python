@@ -195,7 +195,7 @@ class IdentifiedObject(Identifiable):
 
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         """
-        for name in list(self._names):
+        for name in list(self._names or []):
             self.remove_name(name)
         self._names = None
 

@@ -21,7 +21,9 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 #
 
 # noinspection PyArgumentList
-identified_object_args = ["test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]]
+identified_object_args = [
+    "test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]
+]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
@@ -185,6 +187,11 @@ def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
     dupe_name1 = identified_object.get_name(name_type, "1")
     assert name1 is not dupe_name1
     assert identified_object.num_names() == 1
+
+
+def test_clearing_empty_names():
+    # This tests the resolution of a bug when you cleared an empty names collection.
+    Junction(mrid=generate_id()).clear_names()
 
 
 def _create_multiple_base_names() -> Tuple[IdentifiedObject, NameType]:
