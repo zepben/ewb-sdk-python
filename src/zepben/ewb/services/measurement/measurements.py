@@ -7,13 +7,9 @@ from __future__ import annotations
 
 __all__ = ["MeasurementService"]
 
-from typing import List, Optional, Generator, TYPE_CHECKING
+from typing import List, Optional, Generator
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
-
-if TYPE_CHECKING:
-    from zepben.ewb import IdentifiedObject
-
 
 class MeasurementService:
 
@@ -30,6 +26,6 @@ class MeasurementService:
     def len_of(self, t: type = None) -> int:
         return len([m for m in self._measurements if isinstance(m, t)]) if t is not None else len(self._measurements)
 
-    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
+    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[MeasurementValue, None, None]:
         for m in self._measurements:
             yield m
