@@ -9,7 +9,7 @@ __all__ = ["ServiceComparatorValidator"]
 
 from typing import Optional, Any, Callable, TypeVar, Union, Set, Generic, Type, TypeAlias
 
-from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
+from zepben.ewb import (IdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
                         Difference, ReferenceDifference, ValueDifference, IndexedDifference, TIdentifiable)
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions
@@ -338,7 +338,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None,
-    ) -> TIdentifiedObject:
+    ) -> TIdentifiable:
         source_empty = creator("mRID")
         target_empty = creator("mRID")
         self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
@@ -422,7 +422,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        # This is being returned to bind the TIdentifiedObject correctly.
+        # This is being returned to bind the TIdentifiable correctly.
         return source_empty
 
     @staticmethod

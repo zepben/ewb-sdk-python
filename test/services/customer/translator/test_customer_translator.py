@@ -2,17 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
-
-from zepben.ewb import IdentifiedObject, CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
-    TablePricingStructuresTariffs
-from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
-from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
 from cim.fill_fields import *
 from services.common.translator.base_test_translator import validate_service_translations
-
-T = TypeVar("T", bound=IdentifiedObject)
+from zepben.ewb import CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
+    TablePricingStructuresTariffs
+from zepben.ewb.services.common.translator.base_proto2cim import get_nullable
+from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
 types_to_test = {
 

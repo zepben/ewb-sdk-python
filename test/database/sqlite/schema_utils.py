@@ -3,16 +3,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
-from typing import TypeVar, Type, Optional
+from typing import Type, Optional
 
 from hypothesis import assume
 
-from zepben.ewb import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumer, \
+from zepben.ewb import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, TIdentifiedObject, EnergyConsumer, \
     EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, OrganisationRole, \
     Customer, CustomerAgreement, PricingStructure, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, \
     EquipmentContainer, Name, PowerSystemResource, Substation, Terminal, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, \
     AcLineSegment, PowerElectronicsConnection, PowerTransformer, TransformerStarImpedance, Circuit, Loop, LvFeeder, ProtectedSwitch, RegulatingCondEq, \
-    RegulatingControl, ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, \
+    RegulatingControl, ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiable, \
     SynchronousMachine, BatteryUnit, generate_id, LinearShuntCompensator
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
@@ -30,8 +30,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase
 from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-
-T = TypeVar("T", bound=IdentifiedObject)
 
 
 def assume_non_blank_street_address_details(address: Optional[StreetAddress]):
@@ -70,7 +68,7 @@ class SchemaNetworks:
 
         return metadata_collection
 
-    def customer_services_of(self, factory: Type[T], filled: T) -> CustomerService:
+    def customer_services_of(self, factory: Type[TIdentifiable], filled: TIdentifiable) -> CustomerService:
         customer_service = CustomerService()
         customer_service.add(factory("empty"))
 
@@ -79,7 +77,7 @@ class SchemaNetworks:
 
         return customer_service
 
-    def diagram_services_of(self, factory: Type[T], filled: T) -> DiagramService:
+    def diagram_services_of(self, factory: Type[TIdentifiable], filled: TIdentifiable) -> DiagramService:
         diagram_service = DiagramService()
         diagram_service.add(factory("empty"))
 
@@ -88,7 +86,7 @@ class SchemaNetworks:
 
         return diagram_service
 
-    def network_services_of(self, factory: Type[T], filled: T) -> NetworkService:
+    def network_services_of(self, factory: Type[TIdentifiable], filled: TIdentifiable) -> NetworkService:
         network_service = NetworkService()
         network_service.add(self._fill_required(network_service, factory("empty")))
 
@@ -98,7 +96,7 @@ class SchemaNetworks:
         return network_service
 
     @staticmethod
-    def _fill_required(service: NetworkService, io: T) -> T:
+    def _fill_required(service: NetworkService, io: TIdentifiable) -> TIdentifiable:
         if isinstance(io, EnergyConsumerPhase):
             ec = EnergyConsumer(mrid=generate_id())
             ec.add_phase(io)
@@ -113,7 +111,7 @@ class SchemaNetworks:
         return io
 
     @staticmethod
-    def _add_with_references(filled: T, service: BaseService):
+    def _add_with_references(filled: TIdentifiable, service: BaseService):
         service.add(filled)
 
         ##################################
