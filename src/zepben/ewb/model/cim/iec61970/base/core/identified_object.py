@@ -17,7 +17,7 @@ from zepben.ewb.util import require, nlen, ngen, safe_remove
 
 logger = logging.getLogger(__name__)
 
-TIdentifiedObject = TypeVar("TIdentifiedObject")
+TIdentifiedObject = TypeVar("TIdentifiedObject", bound="IdentifiedObject")
 """
 Generic type of IdentifiedObject which can be used for type hinting generics.
 """
