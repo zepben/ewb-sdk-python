@@ -7,6 +7,10 @@ from unittest.mock import MagicMock, Mock
 from zepben.ewb import NetworkTraceStep, ConductingEquipment, StepContext
 
 
+#
+# TODO: This seems busted, and there are other copies of this lying around. Some time and understanding is required to
+#       merge these all into the same call that works as expected.
+#
 def mock_nts(path: NetworkTraceStep.Path=None,
              num_terminal_steps=0,
              num_equipment_steps=0,
@@ -21,6 +25,10 @@ def mock_nts(path: NetworkTraceStep.Path=None,
     return nts
 
 
+#
+# TODO: This seems busted, and there are other copies of this lying around. Some time and understanding is required to
+#       merge these all into the same call that works as expected.
+#
 def mock_nts_path(to_equipment: ConductingEquipment=None,
                   traced_internally: bool=None):
     if traced_internally:

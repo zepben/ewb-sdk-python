@@ -2,15 +2,17 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable
 from unittest.mock import MagicMock
 
 from zepben.ewb import Switch, SinglePhaseKind, NetworkTraceStep, ConductingEquipment, StepContext
 from zepben.ewb.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
 
 
-
-def mock_nts(step_type: NetworkTraceStep.Type=None, path:NetworkTraceStep.Path=None) -> NetworkTraceStep:
+#
+# TODO: This should be moved into utils, but there is already a copy there that seems busted, so some time and
+#       understanding is required to resolve this.
+#
+def mock_nts(step_type: NetworkTraceStep.Type = None, path: NetworkTraceStep.Path = None) -> NetworkTraceStep:
     next_step = MagicMock(spec=NetworkTraceStep)
     if step_type:
         next_step.type = lambda: step_type
@@ -20,19 +22,31 @@ def mock_nts(step_type: NetworkTraceStep.Type=None, path:NetworkTraceStep.Path=N
 
     return next_step
 
-def mock_nts_path(to_equipment: ConductingEquipment=None) -> NetworkTraceStep.Path:
+
+#
+# TODO: This should be moved into utils, but there is already a copy there that seems busted, so some time and
+#       understanding is required to resolve this.
+#
+def mock_nts_path(to_equipment: ConductingEquipment = None) -> NetworkTraceStep.Path:
     next_path = MagicMock(spec=NetworkTraceStep.Path)
     if to_equipment:
         next_path.to_equipment = to_equipment
 
     return next_path
 
-def should_queue_params(next_step, next_context=None, current_step=None, current_context=None
-                        ) -> (NetworkTraceStep, StepContext, NetworkTraceStep, StepContext):
+
+def should_queue_params(
+    next_step,
+    next_context=None,
+    current_step=None,
+    current_context=None,
+) -> tuple[NetworkTraceStep, StepContext, NetworkTraceStep, StepContext]:
     return next_step, next_context or MagicMock(), current_step or MagicMock(), current_context or MagicMock()
+
 
 def _is_open(switch: Switch, phase: SinglePhaseKind) -> bool:
     pass
+
 
 class TestOpenCondition:
     def test_always_queues_external_steps(self):

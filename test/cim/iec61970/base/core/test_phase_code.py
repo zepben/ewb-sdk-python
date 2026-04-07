@@ -85,6 +85,10 @@ class TestPhaseCode:
         assert PhaseCode.ABCN + SinglePhaseKind.X == PhaseCode.NONE
         assert PhaseCode.ABCN + PhaseCode.X == PhaseCode.NONE
 
+        # Can add with NONE.
+        assert PhaseCode.NONE + SinglePhaseKind.A == PhaseCode.A
+        assert PhaseCode.B + SinglePhaseKind.NONE == PhaseCode.B
+
     def test_minus(self):
         assert PhaseCode.ABCN - SinglePhaseKind.B == PhaseCode.ACN
         assert PhaseCode.ABCN - PhaseCode.AN == PhaseCode.BC
@@ -95,3 +99,6 @@ class TestPhaseCode:
         assert PhaseCode.AB - PhaseCode.C == PhaseCode.AB
 
         assert PhaseCode.ABCN - PhaseCode.ABCN == PhaseCode.NONE
+
+        assert PhaseCode.NONE - SinglePhaseKind.A == PhaseCode.NONE
+        assert PhaseCode.B - SinglePhaseKind.NONE == PhaseCode.B

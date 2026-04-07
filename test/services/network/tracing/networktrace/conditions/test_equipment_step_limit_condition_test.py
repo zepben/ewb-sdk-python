@@ -8,6 +8,10 @@ from zepben.ewb import NetworkTraceStep
 from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 
 
+#
+# TODO: This should be moved into utils, but there is already a copy there that seems busted, so some time and
+#       understanding is required to resolve this.
+#
 def mock_nts(num_terminal_steps=0, num_equipment_steps=0):
     return NetworkTraceStep(MagicMock(spec=NetworkTraceStep.Path), num_terminal_steps, num_equipment_steps, None)
 

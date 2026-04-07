@@ -14,9 +14,18 @@
   * `ProtectionRelayFunction.relay_info`
   * `ShuntCompensator.shunt_compensator_info`
   * `Switch.switch_info`
+* The `ShuntCompensator.groundingTerminal` must now:
+  * Belong to the `ShuntCompensator`. Assigning a `Terminal` to `ShuntCompensator.groundingTerminal` will now set the terminals `conductingEquipment` to the
+    `ShuntCompensator` if it isn't set, and throw an `IllegalArgumentException` if it is assigned to a different `ConductingEquipment`.
+  * Be in the `ShuntCompensator.terminals` collection, and will be added automatically if it is missing on assignment, which in turn will update the
+    `sequenceNumber` of the `Terminal` if it is `0`.
+  * Have phases `N`.
+* Phase paths through a `ShuntCompensator` now add paths for mismatched phases between the grounding and normal terminals. This works in the same way as the
+  `PowerTransformer`. This will only impact traces that are tracking the included phase paths, and will allow traces that previously stopped at the
+  `ShuntCompensator` to continue. You should use the new `stopOnShuntCompensatorGround` condition to maintain current behaviour.
 
 ### New Features
-* None.
+* Added `Conditions.stopOnShuntCompensatorGround`, a new condition to prevent tracing through a `ShuntCompensator` using its grounding terminal.
 
 ### Enhancements
 * Added sequence unpacking support for `UnresolvedReference` and `ObjectDifference`.
@@ -29,6 +38,7 @@
 ### Fixes
 * Fixed the packing and unpacking of timestamps for `Agreement.validity_interval` in gRPC messages. Fix also ensures all other timestamps correctly support
   `None` when optional.
+* Fixed an error in `PhaseCode` when adding `NONE` which previously resulted in `NONE` instead of the existing `PhaseCode`.
 
 ### Notes
 * None.

@@ -10,7 +10,7 @@ import pytest
 
 from services.network.test_data.looping_network import create_looping_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.ewb import ConductingEquipment, Tracing, NetworkStateOperators
+from zepben.ewb import ConductingEquipment, Tracing, NetworkStateOperators, TestNetworkBuilder
 from zepben.ewb import downstream, NetworkTraceActionType
 from zepben.ewb.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.ewb.services.network.tracing.networktrace.actions.tree_node import TreeNode
@@ -19,7 +19,9 @@ from zepben.ewb.services.network.tracing.networktrace.actions.tree_node import T
 def test_accessing_leaves_when_not_calculated_raises_exception():
     builder = EquipmentTreeBuilder()
     with pytest.raises(AttributeError):
+        # noinspection PyStatementEffect
         builder.leaves
+
 
 @pytest.mark.asyncio
 async def test_equipment_tree_builder_leaves():
@@ -39,7 +41,7 @@ async def test_equipment_tree_builder_leaves():
     trace = (
         Tracing.network_trace_branching(
             network_state_operators=normal,
-            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT
+            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
         )
         .add_condition(downstream())
         .add_step_action(tree_builder)
@@ -71,7 +73,7 @@ async def test_downstream_tree():
     trace = (
         Tracing.network_trace_branching(
             network_state_operators=normal,
-            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT
+            action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
         )
         .add_condition(downstream())
         .add_step_action(tree_builder)
@@ -190,11 +192,40 @@ async def test_downstream_tree():
     assert _find_node_depths(root, "ac16") == [8, 9, 11, 14]
 
 
+@pytest.mark.asyncio
+async def test_builds_tree_for_empty_feeder():
+    n = await (
+        TestNetworkBuilder()
+        .from_breaker()  # b0
+        .add_feeder("b0")
+        .build()
+    )
+
+    b0 = n.get("b0", ConductingEquipment)
+    await log_directions(b0)
+
+    start: ConductingEquipment = n["b0"]
+    assert start is not None
+
+    tree_builder = EquipmentTreeBuilder()
+    await (
+        Tracing.network_trace_branching()
+        .add_condition(downstream())
+        .add_step_action(tree_builder)
+        .run(start)
+    )
+
+    root = tree_builder.roots[start]
+
+    assert root is not None
+    _verify_tree_asset(root, n["b0"], None, [])
+
+
 def _verify_tree_asset(
     tree_node: TreeNode,
     expected_asset: Optional[ConductingEquipment],
     expected_parent: Optional[ConductingEquipment],
-    expected_children: List[ConductingEquipment]
+    expected_children: List[ConductingEquipment],
 ):
     assert tree_node.identified_object is expected_asset
 

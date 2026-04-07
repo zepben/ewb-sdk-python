@@ -17,6 +17,7 @@ Property = Union[MemberDescriptorType, property]
 
 TAddr: TypeAlias = Callable[[TIdentifiedObject, R], TIdentifiedObject] | Callable[[R], TIdentifiedObject]
 
+
 #
 # NOTE: Should be using the following with TCreator[TIdentifiedObject] in the functions, but Python
 #       3.10 and PyCharm don't like passing TCreator[TIdentifiedObject] to bind correctly, so until
@@ -41,7 +42,7 @@ class ServiceComparatorValidator(Generic[TService, C]):
         expect_modification: Optional[ObjectDifference] = None,
         expect_missing_from_target: Optional[NameType] = None,
         expect_missing_from_source: Optional[NameType] = None,
-        options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions()
+        options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
     ):
         source_service = self.create_service()
         target_service = self.create_service()
@@ -73,13 +74,16 @@ class ServiceComparatorValidator(Generic[TService, C]):
         expect_modification: Optional[ObjectDifference] = None,
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         if not expect_modification:
             expect_modification = ObjectDifference(source, target)
 
         diff = self.create_comparator(NetworkServiceComparatorOptions()).compare_objects(source, target)
         if expected_differences:
+            found_expected = {k for (k, v) in diff.differences.items() if k in expected_differences}
+            assert len(found_expected) == len(expected_differences), \
+                f"Expected: {expected_differences}, only found {found_expected}. What happened to {expected_differences - found_expected}?"
             diff.differences = {k: v for (k, v) in diff.differences.items() if k not in expected_differences}
 
         assert diff == expect_modification, f"Actual:\n{diff}\n    vs\nExpected:\n{expect_modification}"
@@ -91,12 +95,12 @@ class ServiceComparatorValidator(Generic[TService, C]):
     def validate_property(
         self,
         prop: Property | R,  # Isn't actually R, but that is what the type checker thinks when passing class member references.
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         create_value: Callable[[TIdentifiedObject], R],
         create_other_value: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         subject = creator("mRID")
         matching = creator("mRID")
@@ -108,21 +112,24 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
         self.validate_compare(subject, matching, options=options, options_stop_compare=options_stop_compare)
 
-        diff = ObjectDifference(subject, modified, {
-            _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
-        })
+        diff = ObjectDifference(
+            subject, modified,
+            {
+                _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
+            },
+        )
 
         self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_val_property(
         self,
         prop: Property,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         change_state: Callable[[TIdentifiedObject, R], Any],
         other_change_state: Callable[[TIdentifiedObject, R], Any],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         subject = creator("mRID")
         matching = creator("mRID")
@@ -134,21 +141,24 @@ class ServiceComparatorValidator(Generic[TService, C]):
 
         self.validate_compare(subject, matching, options=options, options_stop_compare=options_stop_compare)
 
-        diff = ObjectDifference(subject, modified, {
-            _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
-        })
+        diff = ObjectDifference(
+            subject, modified,
+            {
+                _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_collection(
         self,
         prop: Property,
         add_to_collection: TAddr[TIdentifiedObject, R],
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -163,30 +173,42 @@ class ServiceComparatorValidator(Generic[TService, C]):
         self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
         self.validate_compare(in_source, in_target, options=options, options_stop_compare=options_stop_compare)
 
-        diff = ObjectDifference(in_source, target_empty, {
-            _prop_name(prop): CollectionDifference(missing_from_target=[next(_get_prop(in_source, prop))])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_empty,
+            {
+                _prop_name(prop): CollectionDifference(missing_from_target=[next(_get_prop(in_source, prop))])
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(source_empty, in_target, {
-            _prop_name(prop): CollectionDifference(missing_from_source=[next(_get_prop(in_target, prop))])
-        })
+        diff = ObjectDifference(
+            source_empty,
+            in_target,
+            {
+                _prop_name(prop): CollectionDifference(missing_from_source=[next(_get_prop(in_target, prop))])
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(in_source, in_target_difference, {
-            _prop_name(prop): CollectionDifference(
-                missing_from_source=[next(_get_prop(in_target_difference, prop))],
-                missing_from_target=[next(_get_prop(in_source, prop))]
-            )
-        })
+        diff = ObjectDifference(
+            in_source,
+            in_target_difference,
+            {
+                _prop_name(prop): CollectionDifference(
+                    missing_from_source=[next(_get_prop(in_target_difference, prop))],
+                    missing_from_target=[next(_get_prop(in_source, prop))],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_name_collection(
         self,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -204,34 +226,46 @@ class ServiceComparatorValidator(Generic[TService, C]):
         self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
         self.validate_compare(in_source, in_target, options=options, options_stop_compare=options_stop_compare)
 
-        diff = ObjectDifference(in_source, target_empty, {
-            _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_empty,
+            {
+                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))])
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(source_empty, in_target, {
-            _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_source=[next(_get_prop(in_target, IdentifiedObject.names))])
-        })
+        diff = ObjectDifference(
+            source_empty,
+            in_target,
+            {
+                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_source=[next(_get_prop(in_target, IdentifiedObject.names))])
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(in_source, in_target_difference, {
-            _prop_name(IdentifiedObject.names): CollectionDifference(
-                missing_from_source=[next(_get_prop(in_target_difference, IdentifiedObject.names))],
-                missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))]
-            )
-        })
+        diff = ObjectDifference(
+            in_source,
+            in_target_difference,
+            {
+                _prop_name(IdentifiedObject.names): CollectionDifference(
+                    missing_from_source=[next(_get_prop(in_target_difference, IdentifiedObject.names))],
+                    missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_indexed_collection(
         self,
         prop: Property,
         add_to_collection: TAddr,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ):
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -249,25 +283,43 @@ class ServiceComparatorValidator(Generic[TService, C]):
         def get_item(obj) -> Optional[R]:
             return next(_get_prop(obj, prop), None)
 
-        diff = ObjectDifference(in_source, target_empty, {
-            _prop_name(prop): CollectionDifference(missing_from_target=[
-                IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), None))
-            ])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_empty,
+            {
+                _prop_name(prop): CollectionDifference(
+                    missing_from_target=[
+                        IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), None))
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(source_empty, in_target, {
-            _prop_name(prop): CollectionDifference(missing_from_source=[
-                IndexedDifference(0, self._get_value_or_reference_difference(None, get_item(in_target)))
-            ])
-        })
+        diff = ObjectDifference(
+            source_empty,
+            in_target,
+            {
+                _prop_name(prop): CollectionDifference(
+                    missing_from_source=[
+                        IndexedDifference(0, self._get_value_or_reference_difference(None, get_item(in_target)))
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(in_source, target_different, {
-            _prop_name(prop): CollectionDifference(modifications=[
-                IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), get_item(target_different)))
-            ])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_different,
+            {
+                _prop_name(prop): CollectionDifference(
+                    modifications=[
+                        IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), get_item(target_different)))
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
     K = TypeVar('K')
@@ -277,13 +329,13 @@ class ServiceComparatorValidator(Generic[TService, C]):
         self,
         prop: Property,
         add_to_collection: TAddr,
-        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject], # Update to TCreator[TIdentifiedObject] when available.
+        creator: Type[TIdentifiedObject] | Callable[[str], TIdentifiedObject],  # Update to TCreator[TIdentifiedObject] when available.
         create_item_1: Callable[[K], R],
         create_item_2: Callable[[K], R],
         create_diff_item_1: Callable[[K], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
-        expected_differences: Set[str] = None
+        expected_differences: Set[str] = None,
     ) -> TIdentifiedObject:
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -320,20 +372,32 @@ class ServiceComparatorValidator(Generic[TService, C]):
         def get_item_2(it):
             return list(_get_prop(it, prop))[-1]
 
-        diff = ObjectDifference(in_source, target_empty, {
-            _prop_name(prop): CollectionDifference(missing_from_target=[
-                self._get_value_or_reference_difference(get_item_1(in_source), None),
-                self._get_value_or_reference_difference(get_item_2(in_source), None)
-            ])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_empty,
+            {
+                _prop_name(prop): CollectionDifference(
+                    missing_from_target=[
+                        self._get_value_or_reference_difference(get_item_1(in_source), None),
+                        self._get_value_or_reference_difference(get_item_2(in_source), None)
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
-        diff = ObjectDifference(source_empty, in_target_same_order, {
-            _prop_name(prop): CollectionDifference(missing_from_source=[
-                self._get_value_or_reference_difference(None, get_item_1(in_target_same_order)),
-                self._get_value_or_reference_difference(None, get_item_2(in_target_same_order))
-            ])
-        })
+        diff = ObjectDifference(
+            source_empty,
+            in_target_same_order,
+            {
+                _prop_name(prop): CollectionDifference(
+                    missing_from_source=[
+                        self._get_value_or_reference_difference(None, get_item_1(in_target_same_order)),
+                        self._get_value_or_reference_difference(None, get_item_2(in_target_same_order))
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         target_different = creator("mRID")
@@ -343,11 +407,17 @@ class ServiceComparatorValidator(Generic[TService, C]):
         item2 = create_item_2(target_different)
         add_to_collection(target_different, item2)
 
-        diff = ObjectDifference(in_source, target_different, {
-            _prop_name(prop): CollectionDifference(modifications=[
-                self._get_value_or_reference_difference(get_item_1(in_source), get_item_1(target_different)),
-            ])
-        })
+        diff = ObjectDifference(
+            in_source,
+            target_different,
+            {
+                _prop_name(prop): CollectionDifference(
+                    modifications=[
+                        self._get_value_or_reference_difference(get_item_1(in_source), get_item_1(target_different)),
+                    ],
+                )
+            },
+        )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         # This is being returned to bind the TIdentifiedObject correctly.
@@ -360,10 +430,21 @@ class ServiceComparatorValidator(Generic[TService, C]):
         else:
             return ValueDifference(source, target)
 
-    def _validate_expected(self, diff: ObjectDifference, options: NetworkServiceComparatorOptions, options_stop_compare: bool = False,
-                           expected_differences: Set[str] = None):
-        self.validate_compare(diff.source, diff.target, expect_modification=diff, options=options, options_stop_compare=options_stop_compare,
-                              expected_differences=expected_differences)
+    def _validate_expected(
+        self,
+        diff: ObjectDifference,
+        options: NetworkServiceComparatorOptions,
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None,
+    ):
+        self.validate_compare(
+            diff.source,
+            diff.target,
+            expect_modification=diff,
+            options=options,
+            options_stop_compare=options_stop_compare,
+            expected_differences=expected_differences,
+        )
 
 
 def _prop_name(prop: Property) -> str:

@@ -3,6 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
+
 __all__ = ["ShuntCompensator"]
 
 import sys
@@ -12,8 +14,10 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
@@ -47,8 +51,13 @@ class ShuntCompensator(RegulatingCondEq):
     grounded: Optional[bool] = None
     nom_u: Optional[int] = None
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
-    grounding_terminal: 'Terminal | None' = None
+    _grounding_terminal: 'Terminal | None' = None
     sections: Optional[float] = None
+
+    def __init__(self, grounding_terminal=None, **kwargs):
+        super(ShuntCompensator, self).__init__(**kwargs)
+        if grounding_terminal is not None:
+            self.grounding_terminal = grounding_terminal
 
     @property
     @deprecated("use asset_info instead.")
@@ -64,3 +73,25 @@ class ShuntCompensator(RegulatingCondEq):
         `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`
         """
         self.asset_info = sci
+
+    @property
+    def grounding_terminal(self) -> Optional[Terminal]:
+        """[ZBEX] The terminal connecting to grounded network."""
+        return self._grounding_terminal
+
+    @grounding_terminal.setter
+    def grounding_terminal(self, terminal: Optional[Terminal]):
+        if terminal is None:
+            self._grounding_terminal = None
+            return
+
+        if terminal.conducting_equipment is None:
+            terminal.conducting_equipment = self
+
+        require(terminal.conducting_equipment == self, lambda: "The grounding terminal must belong to this ShuntCompensator.")
+        require(terminal.phases == PhaseCode.N, lambda: "The grounding terminal must used nominal phases `N`.")
+
+        if terminal not in self.terminals:
+            self.add_terminal(terminal)
+
+        self._grounding_terminal = terminal
