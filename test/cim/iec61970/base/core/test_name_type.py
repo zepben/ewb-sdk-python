@@ -34,6 +34,7 @@ def test_name_type_constructor_kwargs(name, description, **kwargs):
     assert nt.name == name
     assert nt.description == description
     assert not list(nt.names)
+    assert nt.mrid == nt.name
 
 
 
