@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["ServiceComparatorValidator"]
 
-from typing import Optional, Any, Callable, TypeVar, Union, Set, Generic, Type, Concatenate, TypeAlias
+from typing import Optional, Any, Callable, TypeVar, Union, Set, Generic, Type, TypeAlias
 
 from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
                         Difference, ReferenceDifference, ValueDifference, IndexedDifference, TIdentifiable)
@@ -15,8 +15,7 @@ from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions
 
 TService = TypeVar("TService", bound=BaseService)
-TOtherCreator = Callable[[str], Any]
-C = TypeVar("C")
+TComparator = TypeVar("TComparator")
 T = TypeVar("T")
 R = TypeVar("R")
 TCreator = Union[Callable[[str], T], T]
@@ -33,11 +32,11 @@ TAddr: TypeAlias = Callable[[TIdentifiable, R], TIdentifiable] | Callable[[R], T
 #
 
 
-class ServiceComparatorValidator(Generic[TService, C]):
+class ServiceComparatorValidator(Generic[TService, TComparator]):
     create_service: Callable[[], TService]
-    create_comparator: Callable[[NetworkServiceComparatorOptions], C]
+    create_comparator: Callable[[NetworkServiceComparatorOptions], TComparator]
 
-    def __init__(self, create_service: Callable[[], BaseService], create_comparator: Callable[[NetworkServiceComparatorOptions], C]):
+    def __init__(self, create_service: Callable[[], BaseService], create_comparator: Callable[[NetworkServiceComparatorOptions], TComparator]):
         self.create_service = create_service
         self.create_comparator = create_comparator
 
