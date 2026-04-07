@@ -41,14 +41,14 @@ class Identifiable(metaclass=ABCMeta):
     @overload
     def _validate_reference(self, other: T, get_identifier: Callable[[Callable], str], getter: Callable[[str], T | None], type_description: Callable[[], str]) -> bool: ...
 
-    # FIXME: in python 3.11, the IdentifiedObject type hint can be replaced with Self, and this can all be moved into the class def.
+    # FIXME: in python 3.11, the Identifiable type hint can be replaced with Self, and this can all be moved into the class def.
     #  @singledispatchmethod
     def _validate_reference(self, other: 'Identifiable | T', getter: Callable[[str], 'Identifiable | T'], type_description: Callable[[], str] | str, get_identifier: Callable[[...], str]=None) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function.
 
         :param other: The object to look up with the getter using its mRID.
-        :param getter: A function that takes an mRID and returns an `IdentifiedObject`, and throws a `KeyError` if it couldn't be found.
+        :param getter: A function that takes an mRID and returns an `Identifiable`, and throws a `KeyError` if it couldn't be found.
         :param type_description: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
         :param get_identifier: The function to retrieve the identifier from `other`.
         :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
@@ -76,7 +76,7 @@ class Identifiable(metaclass=ABCMeta):
 
         :param other: The object to look up with the getter using its mRID.
         :param field: The value of the field from `other` that needs to be validated.
-        :param getter: A function that takes `field` and returns an `IdentifiedObject`, and throws an `IndexError` if it couldn't be found.
+        :param getter: A function that takes `field` and returns an `Identifiable`, and throws an `IndexError` if it couldn't be found.
         :param field_name: The name of the field to use for the lazily generated error message.
         :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
         :raises ValueError: If the object retrieved from `getter` is not `other`.
