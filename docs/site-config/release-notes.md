@@ -2,6 +2,7 @@
 
 | Version            | Released              |
 | ------------------ | --------------------- |
+|[1.3.0](#130)| `13 April 2026` |
 |[1.2.0](#120)| `03 March 2026` |
 |[1.1.0](#110)| `21 January 2026` |
 | [1.0.4](#104)      | `14 November 2025`    |
@@ -59,6 +60,107 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.3.0]
+
+### Breaking Changes
+* Updated `SetDirection` to correctly use the `@singledispatchmethod` registration `run` instead of the old `run_terminal`. Simply replace your `run_terminal`
+  call with `run`.
+* `EquipmentTreeBuilder.roots` is now a `dict` keyed by the `start_item` rather than a `Generator`. This allows better lookup of root items when you are looking
+  for an explicit items tree.
+* Renamed `PanDemandResponseFunction` constructor argument `appliances` -> `appliance` to match the class property.
+* Deprecated the following side-hustle shadowy names for `PowerSystemResource.asset_info`, just use `asset_info` directly:
+  * `Conductor.wire_info`
+  * `CurrentTransformer.current_transformer_info`
+  * `PotentialTransformer.potential_transformer_info`
+  * `PowerTransformer.power_transformer_info`
+  * `ProtectionRelayFunction.relay_info`
+  * `ShuntCompensator.shunt_compensator_info`
+  * `Switch.switch_info`
+* The `ShuntCompensator.groundingTerminal` must now:
+  * Belong to the `ShuntCompensator`. Assigning a `Terminal` to `ShuntCompensator.groundingTerminal` will now set the terminals `conductingEquipment` to the
+    `ShuntCompensator` if it isn't set, and throw an `IllegalArgumentException` if it is assigned to a different `ConductingEquipment`.
+  * Be in the `ShuntCompensator.terminals` collection, and will be added automatically if it is missing on assignment, which in turn will update the
+    `sequenceNumber` of the `Terminal` if it is `0`.
+  * Have phases `N`.
+* Phase paths through a `ShuntCompensator` now add paths for mismatched phases between the grounding and normal terminals. This works in the same way as the
+  `PowerTransformer`. This will only impact traces that are tracking the included phase paths, and will allow traces that previously stopped at the
+  `ShuntCompensator` to continue. You should use the new `stopOnShuntCompensatorGround` condition to maintain current behaviour.
+* `NameType` and `Name` now require constructor args to be supplied as kwargs only.
+* `GrpcClient` now requires a `stub` to be passed into its constructor as a kw only arg.
+* `BaseService` functions `__contains__`, `get`, `add` and `remove` have replaced their `identified_object` parameters with
+  `identifiable: Identifiable`.
+* `BaseService` members and functions that used to reference `IdentifiedObject` now use `Identifiable` instead.
+* `MultiObjectResult.objects` is now a `dict[str, Identifiable]`. This will cause problems if you are explicitly expecting an `IdentifiedObject` to be
+  returned via a consumer client call without any further type narrowing.
+* Private function `CimConsumerClient.extract_identified_objects` has been renamed to `extract_identifiables`.
+* `ReferenceDifference` members `source` and `target_value` now reference `Identifiable`.
+* Renamed the following gRPC messages and attributes to support identifiable objects that don't descend from `IdentifiedObject` (such as `DataSet`):
+  * In the `cc` protos:
+    * `CustomerConsumer.getIdentifiedObjects` -> `CustomerConsumer.getIdentifiables`
+    * `GetIdentifiedObjectsRequest` -> `GetIdentifiablesRequest`
+    * `GetIdentifiedObjectsResponse` -> `GetIdentifiablesResponse`
+    * `GetIdentifiablesResponse.identified_objects` -> `GetIdentifiablesResponse.identifiables`
+    * `CustomerIdentifiedObject` -> `CustomerIdentifiable`
+    * `CustomerIdentifiable.identified_object` -> `CustomerIdentifiable.identifiable`
+    * `GetCustomersForContainerResponse.identified_object` -> `GetCustomersForContainerResponse.identifiable`
+  * In the `dc` protos:
+    * `DiagramConsumer.getIdentifiedObjects` -> `DiagramConsumer.getIdentifiables`
+    * `GetIdentifiedObjectsRequest` -> `GetIdentifiablesRequest`
+    * `GetIdentifiedObjectsResponse` -> `GetIdentifiablesResponse`
+    * `GetIdentifiablesResponse.identified_objects` -> `GetIdentifiablesResponse.identifiables`
+    * `DiagramIdentifiedObject` -> `DiagramIdentifiable`
+    * `DiagramIdentifiable.identified_object` -> `DiagramIdentifiable.identifiable`
+    * `GetDiagramObjectsResponse.identified_object` -> `GetDiagramObjectsResponse.identifiable`
+  * In the `nc` protos:
+    * `NetworkConsumer.getIdentifiedObjects` -> `NetworkConsumer.getIdentifiables`
+    * `GetIdentifiedObjectsRequest` -> `GetIdentifiablesRequest`
+    * `GetIdentifiedObjectsResponse` -> `GetIdentifiablesResponse`
+    * `GetIdentifiablesResponse.identified_objects` -> `GetIdentifiablesResponse.identifiables`
+    * `NetworkIdentifiedObject` -> `NetworkIdentifiable`
+    * `NetworkIdentifiable.identified_object` -> `NetworkIdentifiable.identifiable`
+    * `GetEquipmentForContainersResponse.identified_object` -> `GetEquipmentForContainersResponse.identifiable`
+    * `GetEquipmentForRestrictionResponse.identified_object` -> `GetEquipmentForRestrictionResponse.identifiable`
+
+### New Features
+* Added `Conditions.stopOnShuntCompensatorGround`, a new condition to prevent tracing through a `ShuntCompensator` using its grounding terminal.
+* Added `Identifiable` interface which defines `mrid`.
+* Anything implementing `Identifiable` can now be added to a `BaseService`.
+* `NameType` and `Name` now implement `Identifiable`. Their mRID will be set to `<name>` and `<name>-<type.name>-<identified_object.mrid>`.
+* Promoted `BaseServiceReader`, `BaseServiceWriter`, `BaseCimReader`, `BaseCollectionReader`, `BaseCollectionWriter`, and `BaseServiceReader` to the public API.
+* Added `customerIdentifiable` to replace `customer_identified_object` with support for `Identifiable` object types in the future.
+* Added `diagramIdentifiable` to replace `diagram_identified_object` with support for `Identifiable` object types in the future.
+* Added `networkIdentifiable` to replace `network_identified_object` with support for `Identifiable` object types in the future.
+* Added the following functions to all `CimConsumerClient` descendants:
+  * `get_identifiable` which replaces the now deprecated `get_identified_object`.
+  * `get_identifiables` which replaces the now deprecated `get_identified_objects`.
+
+### Enhancements
+* Added sequence unpacking support for `UnresolvedReference` and `ObjectDifference`.
+* `SetDirection.run` now supports `ConductingEquipment`.
+* Fixed types on all overrides for `PowerSystemResource.asset_info`, removing the need to shadow them with type specific variants.
+* You can now pass a list of `TransformerEndRatedS` to the `PowerTransformerEnd` constructor via the `ratings` argument.
+* Updated all `Callable` type signatures for callables with unused return values to accept `Any` instead of `None`. The return is still unused, but requiring
+  `None` raises types errors if anything is actually returned.
+* `IdentifiedObject`, `Name` and `NameType` now extends `Identifiable`.
+* `BaseServiceComparator` will now compare all `Identifiable` objects that have been added, not just `IdentifiedObject` objects.
+
+### Fixes
+* Fixed the packing and unpacking of timestamps for `Agreement.validity_interval` in gRPC messages. Fix also ensures all other timestamps correctly support
+  `None` when optional.
+* Fixed an error in `PhaseCode` when adding `NONE` which previously resulted in `NONE` instead of the existing `PhaseCode`.
+* `BaseService.__contains__`` will now return `false` when passed an `Identifiable` that is not in the service, instead of raising a `KeyError`
+* Clearing the names from an `IdentifiedObject` with no names no longer raises a `TypeError`.
+
+### Notes
+* Deprecated the `customer_identified_object` function, please use the replacement `customer_identifiable`.
+* Deprecated the `diagram_identified_object` function, please use the replacement `diagram_identifiable`.
+* Deprecated the `network_identified_object` function, please use the replacement `network_identifiable`.
+* Deprecated the following functions on all `CimConsumerClient` descendants:
+  * `get_identified_object` which has been replaced with `get_identifiable`.
+  * `get_identified_objects` which has been replaced with `get_identifiables`.
 
 ---
 

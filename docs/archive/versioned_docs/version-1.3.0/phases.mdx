@@ -1,0 +1,89 @@
+---
+id: sdk-phases
+title: Phases and Feeder Directions
+---
+
+There are three different types of phases stored/calculated by the SDK:
+
+| Phase Type | SDK Field                 | Field Type  | Description                                                                                                                                                                                                                |
+|------------|---------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Nominal    | `Terminal.phases`         | `PhaseCode` | The nominal phases of the network indicate how the network is connected. The nominal phases can include the "unknown" phases `X` and `Y`. <br/><br/>This is the phase field that you are most likely to be interested in.  |
+| Normal     | `Terminal.normal_phases`  | `Traced`    | The normal phases indicate the energised phases of the network in its normal state. There will not be any unknown phases in the normal phases, however; any de-energised areas of the network will not have normal phases. |
+| Current    | `Terminal.current_phases` | `Traced`    | The current phases indicate the energised phases of the network in the current state. It has the same caveats as the normal phases.                                                                                        |
+
+There are two different feeder directions calculated by the SDK:
+
+| Feeder Direction Type | SDK Field                           | Field Type        | Description                                                             |
+|-----------------------|-------------------------------------|-------------------|-------------------------------------------------------------------------|
+| Normal                | `Terminal.normal_feeder_direction`  | `FeederDirection` | The direction of the feeder head with the network in its normal state.  |
+| Current               | `Terminal.current_feeder_direction` | `FeederDirection` | The direction of the feeder head with the network in its current state. |
+
+## Traced Phases
+
+Traced phases should be considered '_read-only_' (even though they have setters). The traced phases will be automatically set if you load a database from disk,
+otherwise you should make use of the `SetPhases` class. If you are implementing network modification algorithms, you can also make use of the `RemovePhases`
+class if required.
+
+There are two methods for accessing the traced phases:
+1. As a `PhaseCode`. If the traced phases do not form a valid phase code this will return `null`.
+2. Per nominal phase.
+
+```python
+class PhaseLogger:
+    @staticmethod
+    def log_phases(terminal: Terminal):
+        phase_code = terminal.normal_phases.as_phase_code()
+        if phase_code:
+            print(f"Found phases for {terminal}. nominal: {terminal.phases}, normal: {phase_code}")
+        else:
+            print(f"Found partial phases {terminal}:")
+            for nominalPhase in terminal.phases:
+                print(f"   nominal: {nominalPhase}, normal: {terminal.normal_phases[nominalPhase]}")
+```
+
+## Feeder Direction
+
+Feeder direction can be set to one of the following values:
+
+| Value        | Description                                                                                                               |
+|--------------|---------------------------------------------------------------------------------------------------------------------------|
+| `UPSTREAM`   | Traversing from this terminal will lead you towards the feeder head.                                                      |
+| `DOWNSTREAM` | Traversing from this terminal will lead you away from the feeder head.                                                    |
+| `BOTH`       | This terminal is part of a loop and traversing from this terminal can both lead you towards or away from the feeder head. |
+| `NONE`       | This terminal is not on a feeder. e.g. De-energised sections or EHV.                                                      |
+
+_**NOTE**_: A terminal only has a single feeder direction for each state of the network, so if there is unganged switching, not all nominal phases may
+trace in the direction specified. A direction of `BOTH` can be formed from some phases tracing `UPSTREAM`, with others tracing `DOWNSTREAM`.
+
+```python
+class DirectionLogger:
+    @staticmethod
+    def log_direction(terminal: Terminal):
+        print(f"{terminal}: normal={terminal.normal_feeder_direction}, current={terminal.current_feeder_direction}")
+```
+
+## Previous Versions
+
+Previously, traced phases and feeder directions were stored together and could only be accessed per nominal phase. Below are some examples of converting from
+the old format to the current:
+
+```Python
+# Old
+class PhaseAndDirectionLoggerOld:
+    @staticmethod
+    def log(terminal: Terminal):
+        print(f"{terminal}:")
+        for phase in terminal.phases.single_phases:
+            nps = normal_phases(terminal, phase)
+            cps = current_phases(terminal, phase)
+
+            print(f"   {phase}: n:{nps.phase()}:{nps.direction()}, c:{cps.phase()}:{cps.direction()}")
+
+# Becomes
+class PhaseAndDirectionLoggerOld:
+    @staticmethod
+    def log(terminal: Terminal):
+        print(f"{terminal}: dn:{terminal.normal_feeder_direction}, dc:{terminal.current_feeder_direction}")
+        for phase in terminal.phases:
+            print(f"   {phase}: n:{terminal.normal_phases[phase]}, c:{terminal.current_phases[phase]}")
+```
