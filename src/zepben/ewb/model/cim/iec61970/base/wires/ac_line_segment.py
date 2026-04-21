@@ -300,7 +300,10 @@ class AcLineSegment(Conductor):
 
         :param phase: the phase to retrieve [WireInfo] for.
         """
-        for it in self._phases:
-            if it.phase == phase:
-                return it.asset_info
-        return self.asset_info
+        if self._phases:
+            for it in self._phases:
+                if it.phase == phase:
+                    return it.asset_info
+            return self.asset_info
+        else:
+            return self.asset_info

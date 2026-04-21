@@ -1,5 +1,5 @@
 # Zepben Python SDK
-## [1.4.0] - UNRELEASED
+## [1.3.1] - UNRELEASED
 ### Breaking Changes
 * None.
 
@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* `AcLineSegment.wire_info_for_phase` will no longer throw an exception if an `AcLineSegment` has no `phases` specified.
 
 ### Notes
 * None.

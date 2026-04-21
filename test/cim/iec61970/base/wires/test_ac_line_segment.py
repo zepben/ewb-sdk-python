@@ -116,6 +116,14 @@ def test_ac_line_segment_phases():
     )
 
 
+def test_wire_info_for_phase_with_null_phases():
+    acls = AcLineSegment(mrid=generate_id())
+    assert acls.wire_info_for_phase(SinglePhaseKind.A) is None
+    assert acls.wire_info_for_phase(SinglePhaseKind.B) is None
+    assert acls.wire_info_for_phase(SinglePhaseKind.C) is None
+    assert acls.wire_info_for_phase(SinglePhaseKind.N) is None
+
+
 def test_retrieves_wire_info_for_phase():
     wi = OverheadWireInfo(mrid=generate_id())
     (acls := AcLineSegment(mrid=generate_id())).asset_info = wi
@@ -136,3 +144,7 @@ def test_retrieves_wire_info_for_phase():
     assert acls.wire_info_for_phase(SinglePhaseKind.Y) == wi
     assert acls.wire_info_for_phase(SinglePhaseKind.s1) == wi
     assert acls.wire_info_for_phase(SinglePhaseKind.s2) == wi
+
+    wiN = OverheadWireInfo(mrid=generate_id())
+    acls.add_phase(AcLineSegmentPhase(mrid=generate_id(), ac_line_segment=acls, phase=SinglePhaseKind.N, asset_info=wiN))
+    assert acls.wire_info_for_phase(SinglePhaseKind.N) == wiN
