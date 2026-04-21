@@ -2,6 +2,7 @@
 
 | Version            | Released              |
 | ------------------ | --------------------- |
+|[1.3.1](#131)| `21 April 2026` |
 |[1.3.0](#130)| `13 April 2026` |
 |[1.2.0](#120)| `03 March 2026` |
 |[1.1.0](#110)| `21 January 2026` |
@@ -60,6 +61,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.3.1]
+
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* `AcLineSegment.wire_info_for_phase` will no longer throw an exception if an `AcLineSegment` has no `phases` specified.
+
+### Notes
+* None.
 
 ---
 
