@@ -1,37 +1,38 @@
-![Build Status](https://img.shields.io/github/actions/workflow/status/zepben/evolve-sdk-python/python-lib-snapshot.yml)
-[![codecov](https://codecov.io/gh/zepben/evolve-sdk-python/branch/main/graph/badge.svg?token=B0WNRMMR77)](https://codecov.io/gh/zepben/evolve-sdk-python)
+![Build Status](https://img.shields.io/github/actions/workflow/status/zepben/ewb-sdk-python/python-lib-snapshot.yml)
+[![codecov](https://codecov.io/gh/zepben/ewb-sdk-python/branch/main/graph/badge.svg?token=B0WNRMMR77)](https://codecov.io/gh/zepben/ewb-sdk-python)python-sdk
 
-# Zepben Evolve Python SDK #
-The Python Evolve SDK contains everything necessary to communicate with a [Zepben EWB Server](https://github.com/zepben/energy-workbench-server). See the complete [Evolve Python SDK Documentation](https://zepben.github.io/evolve/docs/python-sdk/) for more details.
+# Zepben EWB Python SDK
 
-# Requirements #
+The Python EWB SDK contains everything necessary to communicate with a Zepben Energy Workbench Server. See the complete [EWB Python SDK Documentation](https://zepben.github.io/evolve/docs/ewb-sdk-python/) for more details.
+
+## Requirements
 
 - Python 3.10 or later
 
-# Installation #
+## Installation
 
-```
+```shell
 pip install zepben.ewb
 ```
 
-# Building #
+## Building
 
-```
+```shell
 python setup.py bdist_wheel
 ```
-    
-# Usage #
 
-See [Evolve Python SDK Documentation](https://zepben.github.io/evolve/docs/python-sdk/).
+## Usage
 
-# Zepben Auth Library #
+See [EWB Python SDK Documentation](https://zepben.github.io/evolve/docs/ewb-sdk-python/).
+
+### Zepben Auth Library
 
 This library provides Authentication mechanisms for Zepben SDKs used with Energy Workbench and other Zepben services.
 
 Typically, this library will be used by the SDKs to plug into connection mechanisms. It is unlikely that end users will
 need to use this library directly.
 
-# Example Usage #
+#### Example Usage
 
 ```python
 from zepben.ewb.client import get_token_fetcher
@@ -49,7 +50,6 @@ authenticator.token_request_data.update({
     'client_secret': 'W.Tt5KSzX6Q28lksdajflkajsdflkjaslkdjfxx',
     'client_id': 'asdaf98798-0584-41c3-b30c-1f9874596da',
     'scope': '9873498234-e217-4c8f-abf6-9789889987/.default'})
-#
 
 print(authenticator.fetch_token())
 ```
