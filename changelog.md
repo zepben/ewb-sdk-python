@@ -10,8 +10,8 @@
 * None.
 
 ### Fixes
-* None.
 * EquipmentTreeBuilder no longer overwrites existing leaves with children.
+* Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.
 
 ### Notes
 * None.

@@ -8,7 +8,8 @@ import pytest
 
 from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators
+from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, \
+    LinearShuntCompensator, Terminal
 from zepben.ewb.exceptions import TracingException, PhaseException
 
 
@@ -551,13 +552,6 @@ async def test_can_back_trace_through_xn_xy_transformer_spur():
     validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN, PhaseCode.AB)
 
 
-def _set_normal_phase(terminal_index, from_phase: SPK, to_phase: SPK):
-    def action(ce: ConductingEquipment):
-        list(ce.terminals)[terminal_index].normal_phases[from_phase] = to_phase
-
-    return action
-
-
 @pytest.mark.asyncio
 async def test_can_set_phases_from_an_unknown_nominal_phase():
     """
@@ -624,6 +618,47 @@ async def test_energises_around_dropped_phase_dual_transformer_loop():
     validate_phases_from_term_or_equip(ns, 'tx9', PhaseCode.A, PhaseCode.ABN)
     validate_phases_from_term_or_equip(ns, 'c10', PhaseCode.ABN, PhaseCode.ABN)
     validate_phases_from_term_or_equip(ns, 'c11', PhaseCode.ABN, PhaseCode.ABN)
+
+
+@pytest.mark.asyncio
+async def test_doesnt_set_phases_either_way_through_a_grounding_terminal_of_a_shunt_compensator():
+        #
+        # s0 11--c1--21 lsc2 21--c3--2
+        #
+        # s4 11--c5--21 lsc6 21--c7--2
+        #
+
+        def set_grounding_terminal(lsc: LinearShuntCompensator, terminal_index: int):
+            terminal = list(lsc.terminals)[terminal_index]
+            terminal.phases = PhaseCode.N
+            lsc.grounding_terminal = terminal
+
+        ns = await (TestNetworkBuilder()
+            .from_source() # s0
+            .to_acls() # c1
+            .to_other(LinearShuntCompensator, default_mrid_prefix = "lsc", action= lambda it: set_grounding_terminal(it, -1)) # lsc2
+            .to_acls(PhaseCode.N) # c3
+            .from_source(PhaseCode.N) # s4
+            .to_acls(PhaseCode.N) # c5
+            .to_other(LinearShuntCompensator, default_mrid_prefix = "lsc", action= lambda it: set_grounding_terminal(it, 0)) # lcs6
+            .to_acls() # c7
+            .build()
+        )
+
+        validate_phases_from_term_or_equip(ns, "c1", PhaseCode.ABC, PhaseCode.ABC)
+        validate_phases_from_term_or_equip(ns, "lsc2", PhaseCode.ABC, PhaseCode.NONE)
+        validate_phases_from_term_or_equip(ns, "c3", PhaseCode.NONE, PhaseCode.NONE)
+        validate_phases_from_term_or_equip(ns, "c5", PhaseCode.N, PhaseCode.N)
+        validate_phases_from_term_or_equip(ns, "lsc6", PhaseCode.N, PhaseCode.NONE)
+        validate_phases_from_term_or_equip(ns, "c7", PhaseCode.NONE, PhaseCode.NONE)
+
+
+def _set_normal_phase(terminal_index: int, from_phase: SPK, to_phase: SPK):
+    def action(ce: ConductingEquipment):
+        terminal = list(ce.terminals)[terminal_index]
+        terminal.normal_phases[from_phase] = to_phase
+
+    return action
 
 
 async def _validate_tx_phases(
