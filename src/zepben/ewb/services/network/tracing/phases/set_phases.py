@@ -11,7 +11,7 @@ from collections.abc import Sequence
 from functools import singledispatchmethod
 from typing import Union, Set, Iterable, List, Type, TYPE_CHECKING, Optional, Callable, Any
 
-from zepben.ewb import PhaseStatus, add_neutral
+from zepben.ewb import PhaseStatus, add_neutral, stop_on_shunt_compensator_ground
 from zepben.ewb.exceptions import TracingException, PhaseException
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
@@ -55,7 +55,7 @@ class SetPhases:
         self,
         target: Union[NetworkService, Terminal],
         phases: Union[PhaseCode, Iterable[SinglePhaseKind]] = None,
-        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
     ):
         """
 
@@ -70,7 +70,7 @@ class SetPhases:
     async def _(
         self,
         network: NetworkService,
-        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
     ):
         """
         Apply phases and flow from all energy sources in the network.
@@ -94,7 +94,7 @@ class SetPhases:
         start_terminal: Terminal,
         phases: Union[PhaseCode, List[SinglePhaseKind], Set[SinglePhaseKind]] = None,
         network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
-        seed_terminal: Terminal = None
+        seed_terminal: Terminal = None,
     ):
         """
         Apply phases to the `start_terminal` and flow, optionally specifying a `seed_terminal`. If specified, the `seed_terminal`
@@ -124,7 +124,7 @@ class SetPhases:
                 if len(phases) != len(start_terminal.phases.single_phases):
                     raise TracingException(
                         f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {start_terminal} with nominal phases {start_terminal.phases.name}. "
-                        f"Number of phases to apply must match the number of nominal phases. Found {len(phases)}, expected {len(start_terminal.phases.single_phases)}"
+                        f"Number of phases to apply must match the number of nominal phases. Found {len(phases)}, expected {len(start_terminal.phases.single_phases)}",
                     )
                 self._apply_phases(phases, start_terminal, network_state_operators)
                 await self._run_terminals([start_terminal], network_state_operators=network_state_operators)
@@ -137,7 +137,7 @@ class SetPhases:
         from_terminal: Terminal,
         to_terminal: Terminal,
         phases: List[SinglePhaseKind] = None,
-        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
     ):
         """
         Apply nominal phases from the `from_terminal` to the `to_terminal`.
@@ -190,8 +190,8 @@ class SetPhases:
         await network_trace.run(
             terminal,
             self.PhasesToFlow(
-                [NominalPhasePath(SinglePhaseKind.NONE, it) for it in terminal.phases]
-            ), can_stop_on_start_item=False
+                [NominalPhasePath(SinglePhaseKind.NONE, it) for it in terminal.phases],
+            ), can_stop_on_start_item=False,
         )
 
         # This is called in a loop so we need to reset it for each call. We choose to do this after to release the memory
@@ -207,7 +207,7 @@ class SetPhases:
     def _create_network_trace(
         self,
         state_operators: Type[NetworkStateOperators],
-        partially_energised_transformers: Set[PowerTransformer]
+        partially_energised_transformers: Set[PowerTransformer],
     ) -> NetworkTrace[PhasesToFlow]:
 
         def step_action(nts, ctx):
@@ -232,11 +232,10 @@ class SetPhases:
                 name=f'SetPhases({state_operators.description})',
                 queue_factory=lambda: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 branch_queue_factory=lambda: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases),
-                compute_data=self._compute_next_phases_to_flow(state_operators)
+                compute_data=self._compute_next_phases_to_flow(state_operators),
             )
-            .add_queue_condition(
-                lambda next_step, x, y, z: len(next_step.data.nominal_phase_paths) > 0
-            )
+            .add_queue_condition(lambda next_step, x, y, z: len(next_step.data.nominal_phase_paths) > 0)
+            .add_queue_condition(stop_on_shunt_compensator_ground())
             .add_step_action(step_action)
         )
 
@@ -250,8 +249,8 @@ class SetPhases:
                     state_operators,
                     next_path.from_terminal,
                     next_path.to_terminal,
-                    self._nominal_phase_path_to_phases(step.data.nominal_phase_paths)
-                )
+                    self._nominal_phase_path_to_phases(step.data.nominal_phase_paths),
+                ),
             )
 
         return ComputeData(inner)
@@ -260,7 +259,7 @@ class SetPhases:
     def _apply_phases(
         phases: List[SinglePhaseKind],
         terminal: Terminal,
-        state_operators: Type[NetworkStateOperators]
+        state_operators: Type[NetworkStateOperators],
     ):
         traced_phases = state_operators.phase_status(terminal)
         for i, nominal_phase in enumerate(terminal.phases.single_phases):
@@ -271,7 +270,7 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        phases: Sequence[SinglePhaseKind] = None
+        phases: Sequence[SinglePhaseKind] = None,
     ) -> List[NominalPhasePath]:
 
         if phases is None:
@@ -290,7 +289,7 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         terminal: Terminal,
         phases: Sequence[SinglePhaseKind],
-        internal_flow: bool
+        internal_flow: bool,
     ) -> Set[SinglePhaseKind]:
 
         if internal_flow:
@@ -304,7 +303,7 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        nominal_phase_paths: List[NominalPhasePath]
+        nominal_phase_paths: List[NominalPhasePath],
     ) -> bool:
 
         if (from_terminal.conducting_equipment == to_terminal.conducting_equipment
@@ -319,7 +318,7 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        nominal_phase_paths: List[NominalPhasePath]
+        nominal_phase_paths: List[NominalPhasePath],
     ) -> bool:
 
         from_phases = state_operators.phase_status(from_terminal)
@@ -338,7 +337,7 @@ class SetPhases:
         from_terminal: Terminal,
         to_terminal: Terminal,
         nominal_phase_paths: List[NominalPhasePath] = None,
-        allow_suspect_flow: bool = False
+        allow_suspect_flow: bool = False,
     ) -> bool:
 
         paths = nominal_phase_paths or self._get_nominal_phase_paths(state_operators, from_terminal, to_terminal)
@@ -361,12 +360,16 @@ class SetPhases:
         flow_phases = (p for p in paths if p.from_phase == SinglePhaseKind.NONE)
         add_phases = (p for p in paths if p.from_phase != SinglePhaseKind.NONE)
         for p in flow_phases:
-            self._try_add_phase(from_terminal, from_phases, to_terminal, to_phases, p.to_phase, allow_suspect_flow,
-                                lambda: updated_phases.append(True))
+            self._try_add_phase(
+                from_terminal, from_phases, to_terminal, to_phases, p.to_phase, allow_suspect_flow,
+                lambda: updated_phases.append(True),
+            )
 
         for p in add_phases:
-            self._try_set_phase(from_phases[p.from_phase], from_terminal, from_phases, p.from_phase,
-                                to_terminal, to_phases, p.to_phase, lambda: updated_phases.append(True))
+            self._try_set_phase(
+                from_phases[p.from_phase], from_terminal, from_phases, p.from_phase,
+                to_terminal, to_phases, p.to_phase, lambda: updated_phases.append(True),
+            )
 
         return any(updated_phases)
 
@@ -375,11 +378,13 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        paths: List[NominalPhasePath]
+        paths: List[NominalPhasePath],
     ) -> bool:
 
-        updated_phases = self._flow_straight_phases(state_operators, from_terminal, to_terminal,
-                                                    [it for it in paths if it != add_neutral])
+        updated_phases = self._flow_straight_phases(
+            state_operators, from_terminal, to_terminal,
+            [it for it in paths if it != add_neutral],
+        )
 
         # Only add the neutral if we added a phases to the transformer, otherwise you will flag an energised neutral
         #  with no active phases. We check to see if we need to add the neutral to prevent adding it when we traverse
@@ -399,7 +404,7 @@ class SetPhases:
         to_terminal: Terminal,
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
-        on_success: Callable[[], Any]
+        on_success: Callable[[], Any],
     ):
         try:
             if phase != SinglePhaseKind.NONE and to_phases.__setitem__(to_, phase):
@@ -417,13 +422,13 @@ class SetPhases:
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
         allow_suspect_flow: bool,
-        on_success: Callable[[], Any]
+        on_success: Callable[[], Any],
     ):
         # The phases that can be added are ABCN and Y, so for all cases other than Y we can just use the added phase. For
         #   Y we need to look at what the phases on the other side of the transformer are to determine what has been added.
 
         phase = _unless_none(
-            to_phases[to_], _to_y_phase(from_phases[from_terminal.phases.single_phases[0]], allow_suspect_flow)
+            to_phases[to_], _to_y_phase(from_phases[from_terminal.phases.single_phases[0]], allow_suspect_flow),
         ) if to_ == SinglePhaseKind.Y else to_
 
         self._try_set_phase(phase, from_terminal, from_phases, SinglePhaseKind.NONE, to_terminal, to_phases, to_, on_success)
@@ -435,7 +440,7 @@ class SetPhases:
         from_: SinglePhaseKind,
         to_terminal: Terminal,
         to_phases: PhaseStatus,
-        to_: SinglePhaseKind
+        to_: SinglePhaseKind,
     ):
         phase_desc = f'{from_.name}' if from_ == to_ else f'path {from_.name} to {to_.name}'
 
@@ -452,7 +457,7 @@ class SetPhases:
         raise PhaseException(
             f"Attempted to flow conflicting phase {from_phases[from_].name} onto {to_phases[to_].name} on nominal phase {phase_desc}. This occurred while " +
             f"flowing {terminal_desc}. This is often caused by missing open points, or incorrect phases in upstream equipment that should be " +
-            "corrected in the source data."
+            "corrected in the source data.",
         )
 
 

@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.
 
 ### Notes
 * None.
