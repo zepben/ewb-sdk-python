@@ -10,13 +10,10 @@ The extension is optional: if gcc is not available or compilation fails,
 the package still installs and falls back to the pure-Python implementation.
 """
 
-import os
-import sys
 import sysconfig
 from pathlib import Path
 
 from setuptools import Extension, setup, find_packages
-
 TRACING_DIR = Path("src/zepben/ewb/services/network/tracing")
 C_SOURCE = TRACING_DIR / "_tracing_c.c"
 EXT_DIR = TRACING_DIR / "_tracing_c_ext"
@@ -33,9 +30,10 @@ if C_SOURCE.exists():
     )
     ext_modules = [extension]
 else:
-    ext_modules = []
+    raise Exception("C source not found")
 
 setup(
+    name="zwpben.ewb",
     packages=find_packages(where="src"),
     ext_modules=ext_modules,
 )
