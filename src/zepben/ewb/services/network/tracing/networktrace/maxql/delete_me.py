@@ -5,8 +5,8 @@
 import asyncio
 import json
 
-from zepben.evolve import connect_with_token, NetworkConsumerClient, NetworkTrace
-from zepben.evolve.services.network.tracing.networktrace.maxql.parser import MaxQLRunner
+from zepben.ewb import connect_with_token, NetworkConsumerClient, NetworkTrace
+from zepben.ewb.services.network.tracing.networktrace.maxql.parser import MaxQLRunner
 
 # TODO: THIS IS A LIVE TEST FILE, IF YOU SEE THIS IN A PR, IT SHOULD BE DELETED!
 tests = [

@@ -11,14 +11,14 @@ import pathlib
 from typing import TypedDict, Tuple, Any, Callable, Union, Literal, TYPE_CHECKING
 from lark import Lark, Tree, Token
 
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import downstream, upstream
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing
+from zepben.ewb.services.network.tracing.networktrace.conditions.conditions import downstream, upstream
+from zepben.ewb.services.network.tracing.networktrace.network_trace import NetworkTrace
 
 if TYPE_CHECKING:
-    from zepben.evolve.streaming.get.network_consumer import NetworkConsumerClient
-    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-    from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+    from zepben.ewb.streaming.get.network_consumer import NetworkConsumerClient
+    from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
+    from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
 ComparisonType = Literal['<', '<=', '=', '>', '>=', 'like']

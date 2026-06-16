@@ -251,6 +251,7 @@ from zepben.ewb.services.network.network_service import *
 
 from zepben.ewb.services.network.network_state import *
 from zepben.ewb.services.network.tracing.busbranch_trace import *
+from zepben.ewb.services.network.tracing.networktrace.maxql.parser import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_action_type import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_queue_next import *
