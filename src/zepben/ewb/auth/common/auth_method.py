@@ -25,4 +25,5 @@ class AuthMethod(Enum):
     SELF = "self"
     AUTH0 = "AUTH0"
     ENTRAID = "ENTRAID"
+    KEYCLOAK = "KEYCLOAK"
     OAUTH = "OAUTH"
