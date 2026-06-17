@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import diagram_object_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other
+from hypothesis import given
+
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
@@ -45,17 +45,6 @@ def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, styl
     assert list(do.points) == diagram_object_points
 
 
-def test_diagram_object_constructor_args():
-    do = DiagramObject(*diagram_object_args)
-
-    verify_identified_object_constructor_args(do)
-    assert diagram_object_args[-5:] == [
-        do.diagram,
-        do.identified_object_mrid,
-        do.style,
-        do.rotation,
-        list(do.points)
-    ]
 
 
 def test_points_collection():

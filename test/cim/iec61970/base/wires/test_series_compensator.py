@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import series_compensator_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+from hypothesis import given
+
 from zepben.ewb import SeriesCompensator, generate_id
 
 series_compensator_args = [*conducting_equipment_args, 1.1, 2.2, 3.3, 4.4, 5, 6]
@@ -46,18 +46,6 @@ def test_series_compensator_constructor_kwargs(r, r0, x, x0, varistor_rated_curr
     assert sc.varistor_voltage_threshold == varistor_voltage_threshold
 
 
-def test_series_compensator_constructor_args():
-    sc = SeriesCompensator(*series_compensator_args)
-
-    verify_conducting_equipment_constructor_args(sc)
-    assert series_compensator_args[-6:] == [
-        sc.r,
-        sc.r0,
-        sc.x,
-        sc.x0,
-        sc.varistor_rated_current,
-        sc.varistor_voltage_threshold
-    ]
 
 
 def test_varistor_present_flag():

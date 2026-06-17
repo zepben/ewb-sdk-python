@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import energy_consumer_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import EnergyConsumer, PhaseShuntConnectionKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
@@ -53,20 +53,6 @@ def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_cou
     assert ec.q_fixed == q_fixed
 
 
-def test_energy_consumer_constructor_args():
-    ec = EnergyConsumer(*energy_consumer_args)
-
-    verify_energy_connection_constructor_args(ec)
-    assert energy_consumer_args[-8:] == [
-        list(ec.phases),
-        ec.customer_count,
-        ec.grounded,
-        ec.phase_connection,
-        ec.p,
-        ec.p_fixed,
-        ec.q,
-        ec.q_fixed
-    ]
 
 
 def test_phases_collection():

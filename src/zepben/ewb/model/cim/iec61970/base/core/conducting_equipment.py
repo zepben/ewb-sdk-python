@@ -5,6 +5,11 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+from dataclasses import field
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ['ConductingEquipment']
 
 import sys
@@ -18,7 +23,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-class ConductingEquipment(Equipment):
+@zb_dataclass
+class ConductingEquipment(Equipment, metaclass=ABCMeta):
     """
     Abstract class, should only be used through subclasses.
     The parts of the AC power system that are designed to carry current or that are conductively connected through
@@ -35,11 +41,11 @@ class ConductingEquipment(Equipment):
     used for transformers.
     """
 
-    _terminals: List[Terminal] = []
+    _terminals: List[Terminal] = field(default_factory=list)
     max_terminals = int(sys.maxsize)
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConductingEquipment, self).__init__(**kwargs)
+    def __init__(self, *args, terminals: List[Terminal] = None, **kwargs):
+        super(ConductingEquipment, self).__init__(*args, **kwargs)
         if terminals:
             for term in terminals:
                 if term.conducting_equipment is None:
@@ -140,8 +146,10 @@ class ConductingEquipment(Equipment):
         if self._validate_terminal(terminal):
             return self
 
-        require(self.num_terminals() < self.max_terminals,
-                lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).")
+        require(
+            self.num_terminals() < self.max_terminals,
+            lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).",
+        )
 
         if terminal.sequence_number == 0:
             terminal.sequence_number = self.num_terminals() + 1
@@ -193,6 +201,8 @@ class ConductingEquipment(Equipment):
         if not terminal.conducting_equipment:
             terminal.conducting_equipment = self
 
-        require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
+        require(
+            terminal.conducting_equipment is self,
+            lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.",
+        )
         return False

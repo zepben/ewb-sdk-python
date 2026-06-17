@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2024 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["Measurement"]
 
@@ -15,7 +18,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 
 
-class Measurement(IdentifiedObject):
+@zb_dataclass
+class Measurement(IdentifiedObject, metaclass=ABCMeta):
     """
     A Measurement represents any measured, calculated or non-measured non-calculated quantity. Any piece of equipment
     may contain Measurements, e.g. a substation may have temperature measurements and door open indications,

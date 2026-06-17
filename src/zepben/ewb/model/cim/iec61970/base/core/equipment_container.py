@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ['EquipmentContainer']
 
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
@@ -23,7 +27,8 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class EquipmentContainer(ConnectivityNodeContainer):
+@zb_dataclass
+class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
     """
     A modeling construct to provide a root class for containing equipment.
     Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
@@ -32,8 +37,8 @@ class EquipmentContainer(ConnectivityNodeContainer):
     _equipment: Optional[Dict[str, Equipment]] = None
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __init__(self, equipment: List[Equipment] = None, **kwargs):
-        super(EquipmentContainer, self).__init__(**kwargs)
+    def __init__(self, *args, equipment: List[Equipment] = None, **kwargs):
+        super(EquipmentContainer, self).__init__(*args, **kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)

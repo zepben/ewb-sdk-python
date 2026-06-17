@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import shunt_compensator_info_kwargs
 from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args
+from hypothesis import given
+
 from zepben.ewb import ShuntCompensatorInfo, generate_id
 
 shunt_compensator_info_args = [*asset_info_args, 1, 2, 3, 4]
@@ -37,13 +37,3 @@ def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current
     assert sci.rated_voltage == rated_voltage
 
 
-def test_shunt_compensator_info_constructor_args():
-    sci = ShuntCompensatorInfo(*shunt_compensator_info_args)
-
-    verify_asset_info_constructor_args(sci)
-    assert shunt_compensator_info_args[-4:] == [
-        sci.max_power_loss,
-        sci.rated_current,
-        sci.rated_reactive_power,
-        sci.rated_voltage
-    ]

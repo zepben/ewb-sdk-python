@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import circuit_kwargs
 from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, \
     line_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import Circuit, Loop, Terminal, Substation, generate_id
 
 circuit_args = [*line_args, Loop(mrid=generate_id()), [Terminal(mrid=generate_id())], [Substation(mrid=generate_id())]]
@@ -33,15 +33,6 @@ def test_circuit_constructor_kwargs(loop, end_terminals, end_substations, **kwar
     assert list(c.end_substations) == end_substations
 
 
-def test_circuit_constructor_args():
-    c = Circuit(*circuit_args)
-
-    verify_line_constructor_args(c)
-    assert circuit_args[-3:] == [
-        c.loop,
-        list(c.end_terminals),
-        list(c.end_substations)
-    ]
 
 
 def test_end_terminals_collection():

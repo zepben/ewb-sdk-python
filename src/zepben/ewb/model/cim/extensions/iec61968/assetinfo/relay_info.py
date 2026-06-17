@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["RelayInfo"]
 
 from typing import Optional, List, Generator, Callable, Any
@@ -14,6 +16,7 @@ from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.util import ngen, nlen, safe_remove, require
 
 
+@zb_dataclass
 @zbex
 class RelayInfo(AssetInfo):
     """Relay Datasheet Information."""
@@ -26,8 +29,8 @@ class RelayInfo(AssetInfo):
 
     _reclose_delays: Optional[List[float]] = None
 
-    def __init__(self, reclose_delays: Optional[List[float]] = None, **kwargs):
-        super(RelayInfo, self).__init__(**kwargs)
+    def __init__(self, *args, reclose_delays: Optional[List[float]] = None, **kwargs):
+        super(RelayInfo, self).__init__(*args, **kwargs)
         if reclose_delays:
             for index, delay in enumerate(reclose_delays):
                 self.add_delay(delay, index)

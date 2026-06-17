@@ -10,6 +10,8 @@ from cim.iec61970.base.core.test_equipment import verify_equipment_constructor_d
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 from cim.private_collection_validator import validate_ordered
 from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal, generate_id
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 conducting_equipment_args = [*equipment_args, BaseVoltage(mrid=generate_id()), [Terminal(mrid=generate_id()), Terminal(mrid=generate_id())]]
 
@@ -52,7 +54,7 @@ def test_terminals_collection():
 def test_default_max_terminals_is_sys_maxsize():
     assert ConductingEquipment(mrid=generate_id()).max_terminals == sys.maxsize
 
-
+@zb_dataclass
 class SingleTerminalCE(ConductingEquipment):
     max_terminals = 1
 

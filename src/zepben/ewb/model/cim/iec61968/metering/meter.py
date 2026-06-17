@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["Meter"]
 
@@ -10,6 +12,7 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
 
+@zb_dataclass
 class Meter(EndDevice):
     """
     Physical asset that performs the metering role of the usage point. Used for measuring consumption and detection of events.

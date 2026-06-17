@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import short_circuit_test_kwargs
 from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
+from hypothesis import given
+
 from zepben.ewb import ShortCircuitTest, generate_id
 
 short_circuit_test_args = [*transformer_test_args, 1.1, 2, 3, 4.4, 5.5, 6, 7, 8, 9.9, 10.01]
@@ -56,19 +56,3 @@ def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grou
     assert sct.voltage_ohmic_part == voltage_ohmic_part
 
 
-def test_short_circuit_test_constructor_args():
-    sct = ShortCircuitTest(*short_circuit_test_args)
-
-    verify_transformer_test_constructor_args(sct)
-    assert short_circuit_test_args[-10:] == [
-        sct.current,
-        sct.energised_end_step,
-        sct.grounded_end_step,
-        sct.leakage_impedance,
-        sct.leakage_impedance_zero,
-        sct.loss,
-        sct.loss_zero,
-        sct.power,
-        sct.voltage,
-        sct.voltage_ohmic_part
-    ]

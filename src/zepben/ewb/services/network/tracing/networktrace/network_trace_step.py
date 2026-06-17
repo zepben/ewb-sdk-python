@@ -5,9 +5,10 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 __all__ = ['NetworkTraceStep']
 
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional, FrozenSet
 

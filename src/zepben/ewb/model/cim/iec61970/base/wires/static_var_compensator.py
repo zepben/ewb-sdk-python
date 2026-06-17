@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["StaticVarCompensator"]
 
@@ -11,6 +13,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import Regulati
 from zepben.ewb.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 
+@zb_dataclass
 class StaticVarCompensator(RegulatingCondEq):
     """
     A facility for providing variable and controllable shunt reactive power.The SVC typically consists of a step-down transformer, filter, thyristor-controlled reactor,

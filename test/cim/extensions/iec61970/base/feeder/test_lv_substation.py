@@ -2,13 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import lv_substation_kwargs
 from cim.iec61970.base.core.test_equipment_container import equipment_container_args, \
     verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
 from util import assert_or_empty
+
 from zepben.ewb import generate_id, LvFeeder, Feeder, Terminal, PowerTransformer, Fuse
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
@@ -40,8 +40,6 @@ def test_lv_substation_constructor_kwargs(
     assert_or_empty(lv_sub.normal_energized_lv_feeders, normal_energized_lv_feeders)
 
 
-def test_lv_substation_constructor_args():
-    verify_equipment_container_constructor_args(LvSubstation(*lv_substation_args))
 
 
 def test_normal_energized_lv_feeder_collection():

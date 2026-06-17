@@ -3,10 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from cim.fill_fields import ratio_kwargs
 from hypothesis import given
 from pytest import raises
 
-from cim.fill_fields import ratio_kwargs
 from zepben.ewb import Ratio
 
 ratio_args = [9.0, 6.0]
@@ -37,14 +37,6 @@ def test_ratio_constructor_kwargs(denominator, numerator, **kwargs):
     assert ratio.numerator == numerator
 
 
-def test_ratio_constructor_args():
-    ratio = Ratio(*ratio_args)
-
-    # non-alphabetic order is due to mathematical convention (numerator before denominator)
-    assert ratio_args[-2:] == [
-        ratio.numerator,
-        ratio.denominator
-    ]
 
 
 def test_quotient_nonzero_denominator():

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["DiagramObject"]
 
 from typing import Optional, List, Generator, Callable, TYPE_CHECKING, Any
@@ -16,6 +18,7 @@ from zepben.ewb.util import nlen, ngen, require, safe_remove
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
+@zb_dataclass
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything
@@ -37,8 +40,8 @@ class DiagramObject(IdentifiedObject):
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
 
-    def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
-        super(DiagramObject, self).__init__(**kwargs)
+    def __init__(self, *args, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
+        super(DiagramObject, self).__init__(*args, **kwargs)
         if diagram:
             self.diagram = diagram
         if diagram_object_points:

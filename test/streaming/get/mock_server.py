@@ -9,7 +9,6 @@ from typing import Awaitable, Callable, List, TypeVar, Optional, Iterable, Gener
 import grpc
 import grpc_testing
 from google.protobuf.descriptor import ServiceDescriptor
-
 from streaming.get.catching_thread import CatchingThread
 
 GrpcRequest = TypeVar('GrpcRequest')

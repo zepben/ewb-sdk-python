@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import protection_relay_system_kwargs
 from cim.iec61970.base.core.test_equipment import equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme, generate_id
 
 protection_relay_system_args = [
@@ -39,14 +39,6 @@ def test_protection_relay_system_constructor_kwargs(protection_kind, schemes, **
     assert list(prs.schemes) == schemes
 
 
-def test_protection_relay_system_constructor_args():
-    prs = ProtectionRelaySystem(*protection_relay_system_args)
-
-    verify_equipment_constructor_args(prs)
-    assert protection_relay_system_args[-2:] == [
-        prs.protection_kind,
-        list(prs.schemes)
-    ]
 
 
 def test_schemes_collection():

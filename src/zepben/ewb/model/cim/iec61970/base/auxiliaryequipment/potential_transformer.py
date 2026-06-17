@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["PotentialTransformer"]
 
@@ -19,6 +21,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 
 
+@zb_dataclass
 class PotentialTransformer(Sensor):
     """
     Instrument transformer (also known as Voltage Transformer) used to measure electrical qualities of the circuit that

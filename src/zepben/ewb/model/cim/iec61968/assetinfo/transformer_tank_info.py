@@ -4,6 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["TransformerTankInfo"]
 
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 
+@zb_dataclass
 class TransformerTankInfo(AssetInfo):
     """Set of transformer tank data, from an equipment library."""
 
@@ -27,8 +30,8 @@ class TransformerTankInfo(AssetInfo):
     _transformer_end_infos: Optional[List[TransformerEndInfo]] = None
     """Data for all the ends described by this transformer tank data."""
 
-    def __init__(self, transformer_end_infos: List[TransformerEndInfo] = None, **kwargs):
-        super(TransformerTankInfo, self).__init__(**kwargs)
+    def __init__(self, *args, transformer_end_infos: List[TransformerEndInfo] = None, **kwargs):
+        super(TransformerTankInfo, self).__init__(*args, **kwargs)
         if transformer_end_infos:
             for tei in transformer_end_infos:
                 self.add_transformer_end_info(tei)

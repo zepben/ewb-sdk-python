@@ -3,9 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from cim.fill_fields import street_address_kwargs
 from hypothesis import given
 
-from cim.fill_fields import street_address_kwargs
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
@@ -32,12 +32,3 @@ def test_street_address_constructor_kwargs(postal_code, town_detail, po_box, str
     assert sa.street_detail == street_detail
 
 
-def test_street_address_constructor_args():
-    sa = StreetAddress(*street_address_args)
-
-    assert street_address_args[-4:] == [
-        sa.postal_code,
-        sa.town_detail,
-        sa.po_box,
-        sa.street_detail
-    ]

@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import loop_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import Loop, Circuit, Substation, generate_id
 
 loop_args = [*identified_object_args, [Circuit(mrid=generate_id())], [Substation(mrid=generate_id())], [Substation(mrid=generate_id())]]
@@ -37,15 +37,6 @@ def test_loop_constructor_kwargs(circuits, substations, energizing_substations, 
     assert list(loop.energizing_substations) == energizing_substations
 
 
-def test_loop_constructor_args():
-    loop = Loop(*loop_args)
-
-    verify_identified_object_constructor_args(loop)
-    assert loop_args[-3:] == [
-        list(loop.circuits),
-        list(loop.substations),
-        list(loop.energizing_substations)
-    ]
 
 
 def test_circuits_collection():

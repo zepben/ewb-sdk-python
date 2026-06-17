@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2024 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["Document"]
 
@@ -11,7 +14,8 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
-class Document(IdentifiedObject):
+@zb_dataclass
+class Document(IdentifiedObject, metaclass=ABCMeta):
     """
     Parent class for different groupings of information collected and managed as a part of a business process.
     It will frequently contain references to other objects, such as assets, people and power system resources.

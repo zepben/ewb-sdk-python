@@ -5,12 +5,15 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["Terminal"]
 
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from zepben.ewb import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -23,6 +26,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 
 
+@zb_dataclass
 class Terminal(AcDcTerminal):
     """
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
@@ -54,8 +58,8 @@ class Terminal(AcDcTerminal):
     _normal_phases: PhaseStatus = None
     _current_phases: PhaseStatus = None
 
-    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
-        super(Terminal, self).__init__(**kwargs)
+    def __init__(self, *args, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
+        super(Terminal, self).__init__(*args, **kwargs)
 
         self._normal_phases = PhaseStatus(self)
 
@@ -119,8 +123,9 @@ class Terminal(AcDcTerminal):
     def connectivity_node_id(self):
         return self.connectivity_node.mrid if self.connectivity_node is not None else None
 
+
     def __repr__(self):
-        return f"Terminal{{{self.mrid}}}"
+        return IdentifiedObject.__repr__(self)
 
     def get_switch(self):
         """

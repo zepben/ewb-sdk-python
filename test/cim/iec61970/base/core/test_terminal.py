@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import terminal_kwargs
 from cim.iec61970.base.core.test_ac_dc_terminal import verify_ac_dc_terminal_constructor_default, \
     verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
+from hypothesis import given
+
 from zepben.ewb import Terminal, ConnectivityNode, ConductingEquipment, PhaseCode, generate_id, NetworkService, Junction
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 
@@ -63,19 +63,6 @@ def test_terminal_constructor_kwargs(
     assert t.connectivity_node == connectivity_node
 
 
-def test_terminal_constructor_args():
-    t = Terminal(*terminal_args)
-
-    verify_ac_dc_terminal_constructor_args(t)
-    expected_args = [
-        t.conducting_equipment,
-        t.phases,
-        t.sequence_number,
-        t.normal_feeder_direction,
-        t.current_feeder_direction,
-        t.connectivity_node
-    ]
-    assert (terminal_args[-len(expected_args):] == expected_args)
 
 
 def test_connectivity():

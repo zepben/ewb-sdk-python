@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["LvFeeder"]
 
 import typing
@@ -15,12 +17,13 @@ from zepben.ewb.model.cim.iec61970.base.core.equipment_container import Equipmen
 from zepben.ewb.util import safe_remove_by_id, nlen, ngen
 
 if typing.TYPE_CHECKING:
-    from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+
+@zb_dataclass
 @zbex
 class LvFeeder(EquipmentContainer):
     """
@@ -52,13 +55,14 @@ class LvFeeder(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_head_terminal: Terminal = None,
         normal_energizing_feeders: List[Feeder] = None,
         current_equipment: List[Equipment] = None,
         current_energizing_feeders: List[Feeder] = None,
         **kwargs
     ):
-        super(LvFeeder, self).__init__(**kwargs)
+        super(LvFeeder, self).__init__(*args, **kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
         if normal_energizing_feeders:

@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["RegulatingControl"]
 
 from typing import Optional, List, Generator, Iterable, TYPE_CHECKING
@@ -19,7 +23,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
 
-class RegulatingControl(PowerSystemResource):
+@zb_dataclass
+class RegulatingControl(PowerSystemResource, metaclass=ABCMeta):
     """
     Specifies a set of equipment that works together to control a power system quantity such as voltage or flow. Remote bus voltage control is possible by
     specifying the controlled terminal located at some place remote from the controlling equipment. The specified terminal shall be associated with the
@@ -107,8 +112,8 @@ class RegulatingControl(PowerSystemResource):
     _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
-    def __init__(self, regulating_conducting_equipment: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
-        super(RegulatingControl, self).__init__(**kwargs)
+    def __init__(self, *args, regulating_conducting_equipment: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
+        super(RegulatingControl, self).__init__(*args, **kwargs)
         if regulating_conducting_equipment is not None:
             for eq in regulating_conducting_equipment:
                 self.add_regulating_cond_eq(eq)

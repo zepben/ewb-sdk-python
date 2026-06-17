@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import distance_relay_kwargs
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
+from hypothesis import given
+
 from zepben.ewb import DistanceRelay, generate_id
 
 distance_relay_args = [*protection_relay_function_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
@@ -65,18 +65,3 @@ def test_distance_relay_constructor_kwargs(
     assert dr.operation_phase_angle3 == operation_phase_angle3
 
 
-def test_distance_relay_constructor_args():
-    dr = DistanceRelay(*distance_relay_args)
-
-    verify_protection_relay_function_constructor_args(dr)
-    assert distance_relay_args[-9:] == [
-        dr.backward_blind,
-        dr.backward_reach,
-        dr.backward_reactance,
-        dr.forward_blind,
-        dr.forward_reach,
-        dr.forward_reactance,
-        dr.operation_phase_angle1,
-        dr.operation_phase_angle2,
-        dr.operation_phase_angle3
-    ]

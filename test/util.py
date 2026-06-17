@@ -21,21 +21,37 @@ def all_subclasses(cls, package):
     :param package: The package to find classes under
     :return: A set of all concrete implementations of `cls` under `package`
     """
-    y = set()
+    y = {}
+
+    def add_by_name(c: type):
+        y[c.__name__] = c
 
     def find_subclasses(recurse_cls):
+
+        found = False
+        children = {}
         for c in recurse_cls.__subclasses__():
-            # The abstract check doesn't work the same in python, so we add all items and remove the ones that are parent classes below.
-            # Checking for ABC in bases works if all classes are marked with ABC, but this is not compatible with using dataclassy.
-            if c.__module__.startswith(package):
-                y.add(c)
-            find_subclasses(c)
+            name = c.__name__
+            if name in children:
+                if len(children[name].__subclasses__()) < len(c.__subclasses__()):
+                    children[name] = c
+            else:
+                children[name] = c
+
+        for c in children.values():
+            # Metaclasses don't properly work for abstraction denotion (need abstract methods)
+            # So we can use inheritance checks instead
+            rec = find_subclasses(c)
+            found = rec or found
+        if not found and recurse_cls.__module__.startswith(package):
+            add_by_name(recurse_cls)
+            return True
+
+        return found
 
     find_subclasses(cls)
 
-    # The abstract check doesn't work the same in python, so remove all parent classes we added above.
-    supers = {it.__mro__[1] for it in y}
-    return {it for it in y if it not in supers}
+    return set(y.values())
 
 
 def import_submodules(package: str, recursive=True):

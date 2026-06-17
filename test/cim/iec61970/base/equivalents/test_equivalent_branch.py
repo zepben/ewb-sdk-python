@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import equivalent_branch_kwargs
 from cim.iec61970.base.equivalents.test_equivalent_equipment import verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
+from hypothesis import given
+
 from zepben.ewb import EquivalentBranch, generate_id
 
 equivalent_branch_args = [*equivalent_equipment_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, 11.11, 12.21, 13.31, 14.41, 15.51, 16.61]
@@ -77,25 +77,3 @@ def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negati
     assert t.zero_x21 == zero_x21
 
 
-def test_equivalent_branch_constructor_args():
-    t = EquivalentBranch(*equivalent_branch_args)
-
-    verify_equivalent_equipment_constructor_args(t)
-    assert equivalent_branch_args[-16:] == [
-        t.negative_r12,
-        t.negative_r21,
-        t.negative_x12,
-        t.negative_x21,
-        t.positive_r12,
-        t.positive_r21,
-        t.positive_x12,
-        t.positive_x21,
-        t.r,
-        t.r21,
-        t.x,
-        t.x21,
-        t.zero_r12,
-        t.zero_r21,
-        t.zero_x12,
-        t.zero_x21
-    ]

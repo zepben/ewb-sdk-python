@@ -22,8 +22,6 @@ def test_site_constructor_kwargs(**kwargs):
     verify_equipment_container_constructor_kwargs(Site(**kwargs), **kwargs)
 
 
-def test_site_constructor_args():
-    verify_equipment_container_constructor_args(Site(*site_args))
 
 
 @pytest.mark.asyncio

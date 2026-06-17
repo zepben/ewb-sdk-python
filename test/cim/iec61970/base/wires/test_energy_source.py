@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import energy_source_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
 
 energy_source_args = [
@@ -136,38 +136,6 @@ def test_energy_source_constructor_kwargs(energy_source_phases, active_power, re
     assert es.x0_max == x0_max
 
 
-def test_energy_source_constructor_args():
-    es = EnergySource(*energy_source_args)
-
-    verify_energy_connection_constructor_args(es)
-    assert energy_source_args[-26:] == [
-        list(es.phases),
-        es.active_power,
-        es.reactive_power,
-        es.voltage_angle,
-        es.voltage_magnitude,
-        es.p_max,
-        es.p_min,
-        es.r,
-        es.r0,
-        es.rn,
-        es.x,
-        es.x0,
-        es.xn,
-        es.is_external_grid,
-        es.r_min,
-        es.rn_min,
-        es.r0_min,
-        es.x_min,
-        es.xn_min,
-        es.x0_min,
-        es.r_max,
-        es.rn_max,
-        es.r0_max,
-        es.x_max,
-        es.xn_max,
-        es.x0_max
-    ]
 
 
 def test_phases_collection():

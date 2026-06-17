@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["ShortCircuitTest"]
 
@@ -10,6 +12,7 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
 
 
+@zb_dataclass
 class ShortCircuitTest(TransformerTest):
     """
     Short-circuit test results determine mesh impedance parameters. They include load losses and leakage impedances. For three-phase windings, the excitation

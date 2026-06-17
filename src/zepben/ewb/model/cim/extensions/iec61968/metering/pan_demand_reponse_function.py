@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["PanDemandResponseFunction"]
 
@@ -14,6 +16,7 @@ from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndD
 from zepben.ewb.util import require
 
 
+@zb_dataclass
 @zbex
 class PanDemandResponseFunction(EndDeviceFunction):
     """
@@ -25,8 +28,8 @@ class PanDemandResponseFunction(EndDeviceFunction):
 
     _appliance_bitmask: Optional[int] = None
 
-    def __init__(self, appliance: Union[int, ControlledAppliance] = None, **kwargs):
-        super(PanDemandResponseFunction, self).__init__(**kwargs)
+    def __init__(self, *args, appliance: Union[int, ControlledAppliance] = None, **kwargs):
+        super(PanDemandResponseFunction, self).__init__(*args, **kwargs)
         if appliance is not None:
             self.appliance = appliance
 

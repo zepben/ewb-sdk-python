@@ -38,11 +38,6 @@ def test_datetime_interval_constructor_kwargs():
     assert dti.end == datetime_interval_kwargs['end']
 
 
-def test_datetime_interval_constructor_args():
-    dti = DateTimeInterval(*datetime_interval_args)
-
-    assert dti.start == datetime_interval_args[-2]
-    assert dti.end == datetime_interval_args[-1]
 
 def test_must_have_a_valid_start_or_end():
     with pytest.raises(ValueError, match="The start time must be before the end time."):

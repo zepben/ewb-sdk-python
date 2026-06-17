@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["SynchronousMachine"]
 
@@ -15,6 +17,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 
 
+@zb_dataclass
 class SynchronousMachine(RotatingMachine):
     """
     An electromechanical device that operates with shaft rotating synchronously with the network. It is a single machine operating either as a generator or
@@ -104,11 +107,11 @@ class SynchronousMachine(RotatingMachine):
     operating_mode: SynchronousMachineKind = SynchronousMachineKind.UNKNOWN
     """Current mode of operation."""
 
-    def __init__(self, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
+    def __init__(self, *args, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
         """
         `reactive_capability_curves` A list of `ReactiveCapabilityCurve`s to associate with this `SynchronousMachine`.
         """
-        super(SynchronousMachine, self).__init__(**kwargs)
+        super(SynchronousMachine, self).__init__(*args, **kwargs)
         if curves:
             for rcc in curves:
                 self.add_curve(rcc)

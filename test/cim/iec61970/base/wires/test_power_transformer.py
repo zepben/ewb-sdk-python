@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-from pytest import raises
-
 from cim.fill_fields import power_transformer_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+from hypothesis import given
+from pytest import raises
+
 from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, TransformerConstructionKind, TransformerFunctionKind, \
     Terminal, generate_id
 
@@ -58,17 +58,6 @@ def test_power_transformer_constructor_kwargs(
     assert pt.function == function
 
 
-def test_power_transformer_constructor_args():
-    pt = PowerTransformer(*power_transformer_args)
-
-    verify_conducting_equipment_constructor_args(pt)
-    assert power_transformer_args[-5:] == [
-        pt.vector_group,
-        list(pt.ends),
-        pt.transformer_utilisation,
-        pt.construction_kind,
-        pt.function
-    ]
 
 
 def test_get_end_by_terminal():

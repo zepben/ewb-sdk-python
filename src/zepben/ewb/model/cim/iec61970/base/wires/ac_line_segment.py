@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["AcLineSegment"]
 
 from typing import Optional, Generator, TYPE_CHECKING
@@ -17,12 +19,11 @@ from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
     from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
-    from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
-    from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
+@zb_dataclass
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,

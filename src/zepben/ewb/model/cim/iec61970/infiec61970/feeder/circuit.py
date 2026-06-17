@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["Circuit"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@zb_dataclass
 class Circuit(Line):
     """Missing description"""
 
@@ -25,8 +28,8 @@ class Circuit(Line):
     _end_terminals: Optional[List[Terminal]] = None
     _end_substations: Optional[List[Substation]] = None
 
-    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
-        super(Circuit, self).__init__(**kwargs)
+    def __init__(self, *args, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
+        super(Circuit, self).__init__(*args, **kwargs)
         if end_terminals:
             for term in end_terminals:
                 self.add_end_terminal(term)

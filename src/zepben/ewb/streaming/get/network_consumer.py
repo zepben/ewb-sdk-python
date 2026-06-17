@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 
 import warnings
@@ -30,7 +32,6 @@ from zepben.ewb import NetworkService, Organisation, Location, OperationalRestri
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
@@ -72,7 +73,7 @@ MAX_64_BIT_INTEGER = 9223372036854775807
 @dataclass(slots=True)
 class NetworkResult:
     network_service: Optional[NetworkService]
-    failed: Set[str] = set()
+    failed: Set[str] = field(default_factory=set)
 
 
 @dataclass(slots=True)

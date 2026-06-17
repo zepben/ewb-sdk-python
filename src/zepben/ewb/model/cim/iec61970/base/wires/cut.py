@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["Cut"]
 
@@ -13,6 +15,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@zb_dataclass
 class Cut(Switch):
     """
     A cut separates a line segment into two parts. The cut appears as a switch inserted between these two parts and connects them together. As the cut is

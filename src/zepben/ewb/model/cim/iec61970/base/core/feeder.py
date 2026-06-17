@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["Feeder"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
@@ -22,6 +24,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@zb_dataclass
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.
@@ -48,6 +51,7 @@ class Feeder(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_head_terminal: Terminal = None,
         normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
@@ -55,9 +59,9 @@ class Feeder(EquipmentContainer):
         current_energized_lv_feeders: List[LvFeeder] = None,
         normal_energized_lv_substations: List[LvSubstation] = None,
         current_energized_lv_substations: List[LvSubstation] = None,
-        **kwargs
+        **kwargs,
     ):
-        super(Feeder, self).__init__(**kwargs)
+        super(Feeder, self).__init__(*args, **kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
         if normal_energizing_substation:

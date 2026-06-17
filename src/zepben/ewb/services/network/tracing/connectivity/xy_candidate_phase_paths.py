@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from dataclasses import dataclass, field
+
 
 __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is_after"]
 
@@ -10,7 +12,6 @@ from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
 from zepben.ewb import SinglePhaseKind, PhaseCode
-from zepben.ewb.dataclassy import dataclass
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """
@@ -57,12 +58,12 @@ class XyCandidatePhasePaths:
     Used to track the candidate and know paths for XY phase connectivity.
     """
 
-    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = {}
+    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = field(default_factory=dict)
     """
     Map of nominal phase to known phase.
     """
 
-    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = {}
+    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = field(default_factory=dict)
     """
     Map of nominal phase to list of candidate phases.
     """

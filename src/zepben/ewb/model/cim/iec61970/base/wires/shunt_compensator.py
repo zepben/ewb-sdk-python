@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["ShuntCompensator"]
 
 import sys
@@ -24,7 +28,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-class ShuntCompensator(RegulatingCondEq):
+@zb_dataclass
+class ShuntCompensator(RegulatingCondEq, metaclass=ABCMeta):
     """
     A shunt capacitor or reactor or switchable bank of shunt capacitors or reactors. A section of a shunt compensator
     is an individual capacitor or reactor.  A negative value for reactivePerSection indicates that the compensator is
@@ -54,8 +59,8 @@ class ShuntCompensator(RegulatingCondEq):
     _grounding_terminal: 'Terminal | None' = None
     sections: Optional[float] = None
 
-    def __init__(self, grounding_terminal=None, **kwargs):
-        super(ShuntCompensator, self).__init__(**kwargs)
+    def __init__(self, *args, grounding_terminal = None, **kwargs):
+        super(ShuntCompensator, self).__init__(*args, **kwargs)
         if grounding_terminal is not None:
             self.grounding_terminal = grounding_terminal
 

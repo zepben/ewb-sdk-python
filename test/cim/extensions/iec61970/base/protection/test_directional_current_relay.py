@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import directional_current_relay_kwargs
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_args, verify_protection_relay_function_constructor_kwargs
+from hypothesis import given
+
 from zepben.ewb import PolarizingQuantityType, PhaseCode, generate_id, DirectionalCurrentRelay
 
 directional_current_relay_args = [
@@ -66,14 +66,3 @@ def test_directional_current_relay_constructor_kwargs(
     assert dcr.time_delay_1 == time_delay_1
 
 
-def test_directional_current_relay_constructor_args():
-    dcr = DirectionalCurrentRelay(*directional_current_relay_args)
-
-    verify_protection_relay_function_constructor_args(dcr)
-    assert dcr.directional_characteristic_angle == directional_current_relay_args[-7]
-    assert dcr.polarizing_quantity_type == directional_current_relay_args[-6]
-    assert dcr.relay_element_phase == directional_current_relay_args[-5]
-    assert dcr.minimum_pickup_current == directional_current_relay_args[-4]
-    assert dcr.current_limit_1 == directional_current_relay_args[-3]
-    assert dcr.inverse_time_flag == directional_current_relay_args[-2]
-    assert dcr.time_delay_1 == directional_current_relay_args[-1]

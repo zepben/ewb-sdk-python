@@ -2,14 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-from pytest import raises
-
 from cim.fill_fields import feeder_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+from pytest import raises
 from util import assert_or_empty
+
 from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id, LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
@@ -64,20 +64,6 @@ def test_feeder_constructor_kwargs(
     assert_or_empty(f.current_energized_lv_substations, current_energized_lv_substations)
 
 
-def test_feeder_constructor_args():
-    f = Feeder(*feeder_args)
-
-    verify_equipment_container_constructor_args(f)
-
-    assert feeder_args[-5:-3] == [
-        f.normal_head_terminal,
-        f.normal_energizing_substation
-    ]
-    # We use a different style of matching here as the passed in args for current_equipment and normal_energized_lv_feeders
-    # are maps and the stored collections are lists.
-    assert list(f.current_equipment) == list(feeder_args[-3].values())
-    assert list(f.normal_energized_lv_feeders) == list(feeder_args[-2].values())
-    assert list(f.current_energized_lv_feeders) == list(feeder_args[-1].values())
 
 
 def test_current_equipment_collection():

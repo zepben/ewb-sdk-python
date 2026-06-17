@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim", "organisation_role_to_cim",
            "BaseProtoToCim", "add_to_service_or_none", "bind_to_cim", "get_nullable"]
 
@@ -22,7 +24,6 @@ from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import Identifi
 from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNameType
 from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.common.organisation import Organisation

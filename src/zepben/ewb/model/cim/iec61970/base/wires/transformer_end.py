@@ -1,7 +1,10 @@
+from abc import ABCMeta
 #  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["TransformerEnd"]
 
@@ -17,7 +20,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
-class TransformerEnd(IdentifiedObject):
+
+@zb_dataclass
+class TransformerEnd(IdentifiedObject, metaclass=ABCMeta):
     """
     A conducting connection point of a power transformer. It corresponds to a physical transformer winding terminal.
     In earlier CIM versions, the TransformerWinding class served a similar purpose, but this class is more flexible
@@ -50,8 +55,8 @@ class TransformerEnd(IdentifiedObject):
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
-    def __init__(self, terminal: Optional['Terminal'] = None, **kwargs):
-        super(TransformerEnd, self).__init__(**kwargs)
+    def __init__(self, *args, terminal: Optional['Terminal'] = None, **kwargs):
+        super(TransformerEnd, self).__init__(*args, **kwargs)
         if terminal is not None:
             self.terminal = terminal
 

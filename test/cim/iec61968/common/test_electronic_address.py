@@ -2,9 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from cim.fill_fields import electronic_address_kwargs
 from hypothesis import given
 
-from cim.fill_fields import electronic_address_kwargs
 from zepben.ewb import ElectronicAddress
 
 electronic_address_args = ['email1', False, 'descript']
@@ -27,9 +27,3 @@ def test_electronic_address_constructor_kwargs(is_primary, description, email1):
     assert e.email1 == email1
 
 
-def test_electronic_address_constructor_args():
-    e = ElectronicAddress(*electronic_address_args)
-
-    assert e.email1 == electronic_address_args[-3]
-    assert e.is_primary == electronic_address_args[-2]
-    assert e.description == electronic_address_args[-1]

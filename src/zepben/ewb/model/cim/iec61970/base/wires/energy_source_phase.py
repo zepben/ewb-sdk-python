@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["EnergySourcePhase"]
 
@@ -14,6 +16,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_source import EnergySource
 
 
+@zb_dataclass
 class EnergySourcePhase(PowerSystemResource):
     """
     A single phase of an energy source.
@@ -27,8 +30,8 @@ class EnergySourcePhase(PowerSystemResource):
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
 
-    def __init__(self, energy_source: 'EnergySource' = None, **kwargs):
-        super(EnergySourcePhase, self).__init__(**kwargs)
+    def __init__(self, *args, energy_source: 'EnergySource' = None, **kwargs):
+        super(EnergySourcePhase, self).__init__(*args, **kwargs)
         if energy_source:
             self.energy_source = energy_source
 

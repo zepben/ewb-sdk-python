@@ -5,12 +5,13 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 __all__ = ["NetworkHierarchy"]
 
 from typing import Dict
 
 from zepben.ewb import Circuit, Loop, Substation
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["PricingStructure"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
 
 
+@zb_dataclass
 class PricingStructure(Document):
     """
     Grouping of pricing components and prices used in the creation of customer charges and the eligibility
@@ -31,8 +34,8 @@ class PricingStructure(Document):
 
     code: str | None = None
 
-    def __init__(self, tariffs: List[Tariff] = None, **kwargs):
-        super(PricingStructure, self).__init__(**kwargs)
+    def __init__(self, *args, tariffs: List[Tariff] = None, **kwargs):
+        super(PricingStructure, self).__init__(*args, **kwargs)
         if tariffs:
             for tariff in tariffs:
                 self.add_tariff(tariff)

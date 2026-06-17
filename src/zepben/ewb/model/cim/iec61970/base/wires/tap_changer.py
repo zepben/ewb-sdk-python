@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["TapChanger"]
 
@@ -14,7 +17,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 
 
-class TapChanger(PowerSystemResource):
+@zb_dataclass
+class TapChanger(PowerSystemResource, metaclass=ABCMeta):
     """
     Mechanism for changing transformer winding tap positions.
     """
@@ -34,8 +38,8 @@ class TapChanger(PowerSystemResource):
     _normal_step: Optional[int] = None
     _step: Optional[float] = None
 
-    def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
-        super(TapChanger, self).__init__(**kwargs)
+    def __init__(self, *args, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
+        super(TapChanger, self).__init__(*args, **kwargs)
         if high_step is not None:
             self._high_step = high_step
         if low_step is not None:

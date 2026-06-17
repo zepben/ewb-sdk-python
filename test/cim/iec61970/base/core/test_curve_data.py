@@ -2,10 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from cim.fill_fields import curve_data_kwargs
 from hypothesis import given
 from pytest import raises
 
-from cim.fill_fields import curve_data_kwargs
 from zepben.ewb import CurveData
 
 curve_data_args = [1.1, 2.2, 3.3, 4.4]
@@ -44,12 +44,3 @@ def test_curve_data_constructor_kwargs(x_value, y1_value, y2_value, y3_value, **
     assert curve_data.y3_value == y3_value
 
 
-def test_curve_data_constructor_args():
-    curve_data = CurveData(*curve_data_args)
-
-    assert curve_data_args[-4:] == [
-        curve_data.x_value,
-        curve_data.y1_value,
-        curve_data.y2_value,
-        curve_data.y3_value
-    ]

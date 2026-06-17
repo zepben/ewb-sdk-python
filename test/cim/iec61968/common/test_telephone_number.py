@@ -2,9 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from cim.fill_fields import telephone_number_kwargs
 from hypothesis import given
 
-from cim.fill_fields import telephone_number_kwargs
 from zepben.ewb import TelephoneNumber
 
 telephone_number_args = ['area_code', 'city_code', 'country_code', 'dial_out', 'extension',
@@ -63,16 +63,3 @@ def test_telephone_number_constructor_kwargs(
     assert t.description == description
 
 
-def test_telephone_number_constructor_args():
-    t = TelephoneNumber(*telephone_number_args)
-
-    assert t.area_code == telephone_number_args[-11]
-    assert t.city_code == telephone_number_args[-10]
-    assert t.country_code == telephone_number_args[-9]
-    assert t.dial_out == telephone_number_args[-8]
-    assert t.extension == telephone_number_args[-7]
-    assert t.international_prefix == telephone_number_args[-6]
-    assert t.itu_phone == telephone_number_args[-5]
-    assert t.local_number == telephone_number_args[-3]
-    assert t.is_primary == telephone_number_args[-2]
-    assert t.description == telephone_number_args[-1]

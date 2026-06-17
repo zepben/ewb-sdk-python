@@ -10,13 +10,14 @@ import pytest
 from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 
 from test.util import all_subclasses
-from zepben.ewb.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType
 from zepben.ewb.auth import ZepbenTokenFetcher
 
 from zepben.ewb import GrpcChannelBuilder, GrpcConnectionException, GrpcClient
+from dataclasses import dataclass
+
 
 _TWENTY_MEGABYTES = 1024 * 1024 * 20
 DEFAULT_GRPC_CHANNEL_MAX_RECEIVE_MESSAGE_LENGTH = ("grpc.max_receive_message_length", _TWENTY_MEGABYTES)

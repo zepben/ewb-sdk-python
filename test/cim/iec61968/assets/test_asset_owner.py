@@ -2,11 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
+import pytest
 from cim.fill_fields import asset_owner_kwargs
 from cim.iec61968.assets.test_asset_organisation_role import verify_asset_organisation_role_constructor_default, \
     verify_asset_organisation_role_constructor_kwargs, verify_asset_organisation_role_constructor_args, asset_organisation_role_args
+from hypothesis import given
+
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
 
@@ -22,5 +23,6 @@ def test_asset_owner_constructor_kwargs(**kwargs):
     verify_asset_organisation_role_constructor_kwargs(AssetOwner(**kwargs), **kwargs)
 
 
+@pytest.mark.skip(reason="Args init deprecated for dataclasses")
 def test_asset_owner_constructor_args():
     verify_asset_organisation_role_constructor_args(AssetOwner(*asset_owner_args))

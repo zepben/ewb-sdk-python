@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["ProtectionRelaySystem"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 
 
+@zb_dataclass
 @zbex
 class ProtectionRelaySystem(Equipment):
     """
@@ -30,8 +33,8 @@ class ProtectionRelaySystem(Equipment):
 
     _schemes: Optional[List[ProtectionRelayScheme]] = None
 
-    def __init__(self, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
-        super(ProtectionRelaySystem, self).__init__(**kwargs)
+    def __init__(self, *args, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
+        super(ProtectionRelaySystem, self).__init__(*args, **kwargs)
         if schemes is not None:
             for scheme in schemes:
                 self.add_scheme(scheme)

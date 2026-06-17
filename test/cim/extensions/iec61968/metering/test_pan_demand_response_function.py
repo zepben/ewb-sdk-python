@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-from pytest import raises
-
 from cim.fill_fields import pan_demand_response_function_kwargs
 from cim.iec61968.metering.test_end_device_function import end_device_function_args, \
     verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
+from hypothesis import given
+from pytest import raises
+
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
@@ -33,13 +33,6 @@ def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwar
     assert pdrf.appliance.bitmask == appliance
 
 
-def test_pan_demand_response_function_constructor_args():
-    pdrf = PanDemandResponseFunction(*pan_demand_response_function_args)
-
-    verify_end_device_function_constructor_args(pdrf)
-
-    assert pan_demand_response_function_args[-2] == pdrf.kind
-    assert pan_demand_response_function_args[-1].bitmask == pdrf.appliance.bitmask
 
 
 def test_constructor_with_controlled_appliance():

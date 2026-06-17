@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
+from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
+    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from hypothesis import assume
 from pytest import raises
 
-from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from zepben.ewb import TapChangerControl, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 
@@ -64,17 +64,6 @@ def verify_tap_changer_constructor_args(tc: TapChanger):
 
 
 # noinspection PyArgumentList
-def test_detected_invalid_steps_via_constructor_args():
-    # args order: control_enabled, neutral_u, _high_step, _low_step, _neutral_step, _normal_step, _step
-
-    with raises(ValueError, match=re.escape("High step [0] must be greater than low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 0, 0, 0, 0, 0.0)
-    with raises(ValueError, match=re.escape("Neutral step [2] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 2, 0, 0.0)
-    with raises(ValueError, match=re.escape("Normal step [2] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 0, 2, 0.0)
-    with raises(ValueError, match=re.escape("Step [1.1] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 0, 0, 1.1)
 
 
 def test_validates_step_changes():

@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import no_load_test_kwargs
 from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
+from hypothesis import given
+
 from zepben.ewb import NoLoadTest, generate_id
 
 no_load_test_args = [*transformer_test_args, 1, 2.2, 3.3, 4, 5]
@@ -40,14 +40,3 @@ def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current
     assert nlt.loss_zero == loss_zero
 
 
-def test_no_load_test_constructor_args():
-    nlt = NoLoadTest(*no_load_test_args)
-
-    verify_transformer_test_constructor_args(nlt)
-    assert no_load_test_args[-5:] == [
-        nlt.energised_end_voltage,
-        nlt.exciting_current,
-        nlt.exciting_current_zero,
-        nlt.loss,
-        nlt.loss_zero
-    ]

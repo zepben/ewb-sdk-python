@@ -33,14 +33,6 @@ def test_per_length_phase_impedance_constructor_kwargs(data, **kwargs):
     assert_or_empty(plpi.data, data)
 
 
-def test_per_length_phase_impedance_constructor_args():
-    # noinspection PyArgumentList
-    plpi = PerLengthPhaseImpedance(*per_length_phase_impedance_args)
-
-    verify_per_length_impedance_constructor_args(plpi)
-    assert per_length_phase_impedance_args[-1:] == [
-        list(plpi.data),
-    ]
 
 
 @pytest.mark.timeout(10000)

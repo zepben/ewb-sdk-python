@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
@@ -17,6 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
+@zb_dataclass
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.
@@ -27,8 +30,8 @@ class SubGeographicalRegion(IdentifiedObject):
 
     _substations: Optional[List[Substation]] = None
 
-    def __init__(self, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(**kwargs)
+    def __init__(self, *args, substations: List[Substation] = None, **kwargs):
+        super(SubGeographicalRegion, self).__init__(*args, **kwargs)
         if substations:
             for sub in substations:
                 self.add_substation(sub)

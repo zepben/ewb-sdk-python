@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import operational_restriction_kwargs
 from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import OperationalRestriction, Equipment, generate_id
 
 operational_restriction_args = [*document_args, [Equipment(mrid=generate_id())]]
@@ -32,13 +32,6 @@ def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
     assert list(or_.equipment) == equipment
 
 
-def test_operational_restriction_constructor_args():
-    or_ = OperationalRestriction(*operational_restriction_args)
-
-    verify_document_constructor_args(or_)
-    assert operational_restriction_args[-1:] == [
-        list(or_.equipment)
-    ]
 
 
 def test_equipment_collection():

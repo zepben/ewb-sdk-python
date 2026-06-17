@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import discrete_value_kwargs
 from cim.iec61970.base.meas.test_measurement_value import verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
+from hypothesis import given
+
 from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
 
 discrete_value_args = [*measurement_value_args, 1, "a"]
@@ -34,12 +34,3 @@ def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
     assert dv.discrete_mrid == discrete_mrid
 
 
-def test_discrete_value_constructor_args():
-    # noinspection PyArgumentList
-    dv = DiscreteValue(*discrete_value_args)
-
-    verify_measurement_value_constructor_args(dv)
-    assert discrete_value_args[-2:] == [
-        dv.value,
-        dv.discrete_mrid
-    ]

@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["Switch"]
 
 import sys
@@ -40,7 +44,8 @@ def _check_open(current_state: int, phase: SinglePhaseKind = None) -> bool:
         return (current_state & phase.bit_mask) != 0
 
 
-class Switch(ConductingEquipment):
+@zb_dataclass
+class Switch(ConductingEquipment, metaclass=ABCMeta):
     """
     A generic device designed to close, or open, or both, one or more electric circuits.
     All switches are two terminal devices including grounding switches.

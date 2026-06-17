@@ -5,12 +5,13 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["ConnectivityResult", "terminal_compare"]
 
 from operator import attrgetter
 from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -32,7 +33,7 @@ def terminal_compare(terminal: Terminal, other: Terminal):
 Terminal.__lt__ = terminal_compare
 
 
-@dataclass(slots=True, init=False)
+@zb_dataclass
 class ConnectivityResult:
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.

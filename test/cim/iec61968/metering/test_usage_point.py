@@ -3,13 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import usage_point_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered, validate_unordered_other
+from hypothesis import given
 from util import assert_or_empty
+
 from zepben.ewb import Location, Equipment, PhaseCode, generate_id
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
@@ -68,21 +68,6 @@ def test_usage_point_constructor_kwargs(
     assert_or_empty(up.contacts, contacts)
 
 
-def test_usage_point_constructor_args():
-    up = UsagePoint(*usage_point_args)
-
-    verify_identified_object_constructor_args(up)
-
-    assert usage_point_args[-8:] == [
-        up.usage_point_location,
-        up.is_virtual,
-        up.connection_category,
-        up.rated_power,
-        up.approved_inverter_capacity,
-        up.phase_code,
-        list(up.equipment),
-        list(up.end_devices)
-    ]
 
 
 def test_equipment_collection():

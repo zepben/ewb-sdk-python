@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ['PowerSystemResource']
 
 from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
@@ -18,7 +22,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
 
 
-class PowerSystemResource(IdentifiedObject):
+
+@zb_dataclass
+class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
     """
     Abstract class, should only be used through subclasses.
     A power system resource can be an item of equipment such as a switch, an equipment container containing many individual
@@ -37,8 +43,8 @@ class PowerSystemResource(IdentifiedObject):
 
     _assets: Optional[List[Asset]] = None
 
-    def __init__(self, assets: Iterable[Asset] = None, **kwargs):
-        super(PowerSystemResource, self).__init__(**kwargs)
+    def __init__(self, *args, assets: Iterable[Asset] = None, **kwargs):
+        super(PowerSystemResource, self).__init__(*args, **kwargs)
         if assets:
             for asset in assets:
                 self.add_asset(asset)

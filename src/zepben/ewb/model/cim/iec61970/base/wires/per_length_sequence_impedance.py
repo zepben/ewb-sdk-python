@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["PerLengthSequenceImpedance"]
 
@@ -10,6 +12,7 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 
 
+@zb_dataclass
 class PerLengthSequenceImpedance(PerLengthImpedance):
     """
     Sequence impedance and admittance parameters per unit length, for transposed lines of 1, 2, or 3 phases.

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["CustomerAgreement"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
@@ -17,6 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 
 
+@zb_dataclass
 class CustomerAgreement(Agreement):
     """
     Agreement between the customer and the service supplier to pay for service at a specific service location. It
@@ -29,8 +32,8 @@ class CustomerAgreement(Agreement):
 
     _pricing_structures: Optional[List[PricingStructure]] = None
 
-    def __init__(self, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
-        super(CustomerAgreement, self).__init__(**kwargs)
+    def __init__(self, *args, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
+        super(CustomerAgreement, self).__init__(*args, **kwargs)
         if customer:
             self.customer = customer
         if pricing_structures:

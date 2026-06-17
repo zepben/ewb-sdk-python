@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import substation_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import Substation, Feeder, Loop, Circuit, generate_id
 
 substation_args = [
@@ -48,17 +48,6 @@ def test_substation_constructor_kwargs(sub_geographical_region, normal_energized
     assert list(cn.circuits) == circuits
 
 
-def test_substation_constructor_args():
-    cn = Substation(*substation_args)
-
-    verify_equipment_container_constructor_args(cn)
-    assert substation_args[-5:] == [
-        cn.sub_geographical_region,
-        list(cn.feeders),
-        list(cn.loops),
-        list(cn.energized_loops),
-        list(cn.circuits)
-    ]
 
 
 def test_normal_energized_feeders_collection():

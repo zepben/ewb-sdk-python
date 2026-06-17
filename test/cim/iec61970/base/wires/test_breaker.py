@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import breaker_kwargs
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_args
+from hypothesis import given
+
 from zepben.ewb import Breaker, Substation, Terminal, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
@@ -28,13 +28,6 @@ def test_breaker_constructor_kwargs(in_transit_time, **kwargs):
     assert br.in_transit_time == in_transit_time
 
 
-def test_breaker_constructor_args():
-    br = Breaker(*breaker_args)
-    verify_protected_switch_constructor_args(br)
-
-    assert breaker_args[-1:] == [
-        br.in_transit_time
-    ]
 
 
 def test_is_substation_breaker_when_associated_with_a_substation_equipment():

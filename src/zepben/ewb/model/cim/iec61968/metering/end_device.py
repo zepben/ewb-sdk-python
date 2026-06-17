@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["EndDevice"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
@@ -18,7 +22,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 
 
-class EndDevice(AssetContainer):
+@zb_dataclass
+class EndDevice(AssetContainer, metaclass=ABCMeta):
     """
     Asset container that performs one or more end device functions. One type of end device is a meter which can perform
     metering, load management, connect/disconnect, accounting functions, etc. Some end devices, such as ones monitoring
@@ -43,8 +48,8 @@ class EndDevice(AssetContainer):
 
     _functions: Optional[List[EndDeviceFunction]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
-        super(EndDevice, self).__init__(**kwargs)
+    def __init__(self, *args, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
+        super(EndDevice, self).__init__(*args, **kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)

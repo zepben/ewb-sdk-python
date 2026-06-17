@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-from hypothesis.strategies import text, sampled_from, booleans
-
 from cim.fill_fields import ALPHANUM, contact_details_kwargs
 from cim.private_collection_validator import validate_unordered_other, DuplicateBehaviour
+from hypothesis import given
+from hypothesis.strategies import text, sampled_from, booleans
 from util import assert_or_empty
+
 from zepben.ewb import ContactMethodType, TelephoneNumber, ElectronicAddress, ContactDetails
 
 contact_details_args = [
@@ -75,19 +75,6 @@ def test_contact_details_constructor_kwargs(
     assert_or_empty(c.electronic_addresses, electronic_addresses)
 
 
-def test_contact_details_constructor_args():
-    c = ContactDetails(*contact_details_args)
-
-    assert c.id == contact_details_args[-10]
-    assert c.contact_address == contact_details_args[-9]
-    assert c.contact_type == contact_details_args[-8]
-    assert c.first_name == contact_details_args[-7]
-    assert c.last_name == contact_details_args[-6]
-    assert c.preferred_contact_method == contact_details_args[-5]
-    assert c.is_primary == contact_details_args[-4]
-    assert c.business_name == contact_details_args[-3]
-    assert list(c.phone_numbers) == contact_details_args[-2]
-    assert list(c.electronic_addresses) == contact_details_args[-1]
 
 
 def test_phone_number_collection():

@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["ProtectedSwitch"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
@@ -16,7 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
-class ProtectedSwitch(Switch):
+@zb_dataclass
+class ProtectedSwitch(Switch, metaclass=ABCMeta):
     """
     A ProtectedSwitch is a switching device that can be operated by :class:`ProtectionRelayFunction`.
     """
@@ -28,10 +33,11 @@ class ProtectedSwitch(Switch):
 
     def __init__(
         self,
+        *args,
         relay_functions: Iterable[ProtectionRelayFunction] = None,
         **kwargs
     ):
-        super(ProtectedSwitch, self).__init__(**kwargs)
+        super(ProtectedSwitch, self).__init__(*args, **kwargs)
 
         # breaking_capacity is handled via dataclassy.
         if relay_functions is not None:

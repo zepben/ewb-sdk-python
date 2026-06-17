@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["PowerTransformerEnd"]
 
 import warnings
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 
 
+@zb_dataclass
 class PowerTransformerEnd(TransformerEnd):
     """
     A PowerTransformerEnd is associated with each Terminal of a PowerTransformer.
@@ -84,8 +87,8 @@ class PowerTransformerEnd(TransformerEnd):
     Should not be used directly, instead use add_rating and get_rating functions. 
     """
 
-    def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, ratings: list[TransformerEndRatedS] = None, **kwargs):
-        super(PowerTransformerEnd, self).__init__(**kwargs)
+    def __init__(self, *args, power_transformer: PowerTransformer = None, rated_s: int = None, ratings: list[TransformerEndRatedS] = None, **kwargs):
+        super(PowerTransformerEnd, self).__init__(*args, **kwargs)
         if power_transformer:
             self.power_transformer = power_transformer
         if self._s_ratings:

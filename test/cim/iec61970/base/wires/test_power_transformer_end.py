@@ -95,29 +95,6 @@ def test_power_transformer_end_constructor_kwargs(
     assert pte.phase_angle_clock == phase_angle_clock
 
 
-def test_power_transformer_end_constructor_args():
-    pte = PowerTransformerEnd(*power_transformer_end_args)
-
-    verify_transformer_end_constructor_args(pte)
-    assert power_transformer_end_args[-13:-11] == [
-        pte.power_transformer,
-        pte.rated_s
-    ]
-    # We use a different style of matching here as the passed in arg for rated_s is translated to a TransformerEndRatedS.
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, power_transformer_end_args[-12])]
-    assert power_transformer_end_args[-11:] == [
-        pte.rated_u,
-        pte.r,
-        pte.x,
-        pte.r0,
-        pte.x0,
-        pte.g,
-        pte.g0,
-        pte.b,
-        pte.b0,
-        pte.connection_kind,
-        pte.phase_angle_clock
-    ]
 
 
 def test_power_transformer_end_s_ratings():

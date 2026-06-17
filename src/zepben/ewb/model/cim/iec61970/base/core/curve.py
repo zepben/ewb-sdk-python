@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2024 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["Curve"]
 
@@ -12,18 +15,19 @@ from zepben.ewb.model.cim.iec61970.base.core.identified_object import Identified
 from zepben.ewb.util import require, ngen, nlen, safe_remove
 
 
-class Curve(IdentifiedObject):
+@zb_dataclass
+class Curve(IdentifiedObject, metaclass=ABCMeta):
     """
     The Curve class is a multipurpose functional relationship between an independent variable (X-axis) and dependent (Y-axis) variables.
     """
 
     _data: Optional[List[CurveData]] = None
 
-    def __init__(self, data: List[CurveData] = None, **kwargs):
+    def __init__(self, *args, data: List[CurveData] = None, **kwargs):
         """
         `data` A list of `CurveData`s to associate with this `Curve`.
         """
-        super(Curve, self).__init__(**kwargs)
+        super(Curve, self).__init__(*args, **kwargs)
         if data:
             for curve_data in data:
                 self.add_curve_data(curve_data)

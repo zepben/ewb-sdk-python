@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import tariff_kwargs
 from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
+from hypothesis import given
+
 from zepben.ewb import Tariff, generate_id
 
 tariff_args = document_args
@@ -22,5 +22,3 @@ def test_tariff_constructor_kwargs(**kwargs):
     verify_document_constructor_kwargs(Tariff(**kwargs), **kwargs)
 
 
-def test_tariff_constructor_args():
-    verify_document_constructor_args(Tariff(*tariff_args))

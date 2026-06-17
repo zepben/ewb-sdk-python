@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["PowerElectronicsUnit"]
 
@@ -13,7 +16,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 
 
-class PowerElectronicsUnit(Equipment):
+@zb_dataclass
+class PowerElectronicsUnit(Equipment, metaclass=ABCMeta):
     """
     A generating unit or battery or aggregation that connects to the AC network using power electronics rather than rotating machines.
     """

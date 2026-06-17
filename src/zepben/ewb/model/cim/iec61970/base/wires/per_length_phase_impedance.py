@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["PerLengthPhaseImpedance"]
 
@@ -13,6 +15,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePha
 from zepben.ewb.util import require, ngen, nlen, safe_remove, none
 
 
+@zb_dataclass
 class PerLengthPhaseImpedance(PerLengthImpedance):
     """
     Impedance and admittance parameters per unit length for n-wire unbalanced lines, in matrix form.
@@ -20,11 +23,11 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
     _data: Optional[List[PhaseImpedanceData]] = None
 
-    def __init__(self, data: List[PhaseImpedanceData] = None, **kwargs):
+    def __init__(self, *args, data: List[PhaseImpedanceData] = None, **kwargs):
         """
         `data` A list of `PhaseImpedanceData`s to associate with this `PerLengthPhaseImpedance`.
         """
-        super(PerLengthPhaseImpedance, self).__init__(**kwargs)
+        super(PerLengthPhaseImpedance, self).__init__(*args, **kwargs)
         if data:
             for phase_data in data:
                 self.add_data(phase_data)

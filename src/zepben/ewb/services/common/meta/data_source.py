@@ -2,10 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from dataclasses import dataclass, field
+
 
 __all__ = ["DataSource"]
 
-from dataclasses import dataclass
 from datetime import datetime
 
 
@@ -13,4 +14,4 @@ from datetime import datetime
 class DataSource(object):
     source: str
     version: str
-    timestamp: datetime = datetime.now()
+    timestamp: datetime = field(default_factory=datetime.now)

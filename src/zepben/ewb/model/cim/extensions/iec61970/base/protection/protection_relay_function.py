@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["ProtectionRelayFunction"]
 
 import sys
@@ -29,8 +33,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 
 
+@zb_dataclass
 @zbex
-class ProtectionRelayFunction(PowerSystemResource):
+class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     """
     [ZBEX]
     A function that a relay implements to protect equipment.
@@ -66,17 +71,8 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     _thresholds: Optional[List[RelaySetting]] = None
 
-    def __init__(
-        self,
-        sensors: Iterable[Sensor] = None,
-        protected_switches: Iterable[ProtectedSwitch] = None,
-        schemes: Iterable[ProtectionRelayScheme] = None,
-        time_limits: Iterable[float] = None,
-        thresholds: Iterable[RelaySetting] = None,
-        relay_info: RelayInfo | None = None,
-        **kwargs
-    ):
-        super(ProtectionRelayFunction, self).__init__(**kwargs)
+    def __init__(self, *args, sensors: Iterable[Sensor] = None, protected_switches: Iterable[ProtectedSwitch] = None, schemes: Iterable[ProtectionRelayScheme] = None, time_limits: Iterable[float] = None, thresholds: Iterable[RelaySetting] = None, relay_info: RelayInfo | None = None, **kwargs):
+        super(ProtectionRelayFunction, self).__init__(*args, **kwargs)
 
         if sensors is not None:
             for sensor in sensors:

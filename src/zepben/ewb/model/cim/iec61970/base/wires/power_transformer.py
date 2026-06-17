@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["PowerTransformer"]
 
 import sys
@@ -26,6 +28,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
+@zb_dataclass
 class PowerTransformer(ConductingEquipment):
     """
     An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing
@@ -84,8 +87,8 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
-    def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
-        super(PowerTransformer, self).__init__(**kwargs)
+    def __init__(self, *args, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
+        super(PowerTransformer, self).__init__(*args, **kwargs)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 if end.power_transformer is None:

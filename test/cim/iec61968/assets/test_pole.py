@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import pole_kwargs
 from cim.iec61968.assets.test_structure import verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import Pole, Streetlight, generate_id
 
 pole_args = [*structure_args, "a", [Streetlight(mrid=generate_id())]]
@@ -32,14 +32,6 @@ def test_pole_constructor_kwargs(classification, streetlights, **kwargs):
     assert list(p.streetlights) == streetlights
 
 
-def test_pole_constructor_args():
-    p = Pole(*pole_args)
-
-    verify_structure_constructor_args(p)
-    assert pole_args[-2:] == [
-        p.classification,
-        list(p.streetlights)
-    ]
 
 
 def test_streetlights_collection():

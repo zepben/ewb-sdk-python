@@ -2,10 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from cim.fill_fields import position_point_kwargs
 from hypothesis import given
 from pytest import raises
 
-from cim.fill_fields import position_point_kwargs
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 position_point_args = [1.1, 2.2]
@@ -36,13 +36,6 @@ def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
     assert pp.y_position == y_position
 
 
-def test_position_point_constructor_args():
-    pp = PositionPoint(*position_point_args)
-
-    assert position_point_args[-2:] == [
-        pp.x_position,
-        pp.y_position
-    ]
 
 
 def test_position_point_constructor_validates():

@@ -3,9 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from cim.fill_fields import town_detail_kwargs
 from hypothesis import given
 
-from cim.fill_fields import town_detail_kwargs
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
 town_detail_args = ["a", "b", "c"]
@@ -30,14 +30,6 @@ def test_town_detail_constructor_kwargs(name, state_or_province, country, **kwar
     assert td.country == country
 
 
-def test_town_detail_constructor_args():
-    td = TownDetail(*town_detail_args)
-
-    assert town_detail_args[-3:] == [
-        td.name,
-        td.state_or_province,
-        td.country
-    ]
 
 
 def test_all_fields_empty():

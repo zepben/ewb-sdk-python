@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 __all__ = [
     "BusBranchNetworkCreationValidator",
     "BusBranchNetworkCreator",
@@ -15,7 +17,6 @@ __all__ = [
 
 import abc
 from collections import Counter
-from dataclasses import dataclass, field
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable, TYPE_CHECKING
 

@@ -2,13 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import battery_unit_kwargs
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import BatteryUnit, BatteryStateKind, BatteryControl, BatteryControlMode, generate_id
 
 battery_unit_args = [*power_electronics_unit_args, BatteryStateKind.full, 1, 2, [BatteryControl(mrid=generate_id())]]
@@ -41,16 +41,6 @@ def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, contr
     assert list(b.controls) == controls
 
 
-def test_battery_unit_constructor_args():
-    b = BatteryUnit(*battery_unit_args)
-
-    verify_power_electronics_unit_constructor_args(b)
-    assert battery_unit_args[-4:] == [
-        b.battery_state,
-        b.rated_e,
-        b.stored_e,
-        list(b.controls)
-    ]
 
 
 def test_battery_control_collection():

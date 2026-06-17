@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import control_kwargs
 from cim.iec61970.base.meas.test_io_point import verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
+from hypothesis import given
+
 from zepben.ewb import Control, RemoteControl, generate_id
 
 control_args = [*io_point_args, "a", RemoteControl(mrid=generate_id())]
@@ -29,11 +29,3 @@ def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, 
     assert c.remote_control == remote_control
 
 
-def test_control_constructor_args():
-    c = Control(*control_args)
-
-    verify_io_point_constructor_args(c)
-    assert control_args[-2:] == [
-        c.power_system_resource_mrid,
-        c.remote_control
-    ]

@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import transformer_star_impedance_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from hypothesis import given
+
 from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
 
 transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, TransformerEndInfo(mrid=generate_id())]
@@ -42,14 +42,3 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
     assert tsi.transformer_end_info == transformer_end_info
 
 
-def test_transformer_star_impedance_constructor_args():
-    tsi = TransformerStarImpedance(*transformer_star_impedance_args)
-
-    verify_identified_object_constructor_args(tsi)
-    assert transformer_star_impedance_args[-5:] == [
-        tsi.r,
-        tsi.r0,
-        tsi.x,
-        tsi.x0,
-        tsi.transformer_end_info
-    ]

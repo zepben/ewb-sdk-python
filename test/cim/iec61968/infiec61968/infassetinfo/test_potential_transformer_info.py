@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import potential_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+from hypothesis import given
+
 from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id
 
 # noinspection PyArgumentList
@@ -47,15 +47,3 @@ def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_r
     assert vti.secondary_ratio == secondary_ratio
 
 
-def test_potential_transformer_info_constructor_args():
-    vti = PotentialTransformerInfo(*potential_transformer_info_args)
-
-    verify_asset_info_constructor_args(vti)
-    assert potential_transformer_info_args[-6:] == [
-        vti.accuracy_class,
-        vti.nominal_ratio,
-        vti.primary_ratio,
-        vti.pt_class,
-        vti.rated_voltage,
-        vti.secondary_ratio
-    ]

@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import transformer_tank_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, generate_id
 
 transformer_tank_info_args = [*asset_info_args, PowerTransformerInfo(mrid=generate_id()),
@@ -30,13 +30,6 @@ def test_transformer_tank_info_constructor_kwargs(power_transformer_info, transf
     assert list(tti.transformer_end_infos) == transformer_end_infos
 
 
-def test_transformer_tank_info_constructor_args():
-    tti = TransformerTankInfo(*transformer_tank_info_args)
-
-    verify_asset_info_constructor_args(tti)
-    assert transformer_tank_info_args[-1:] == [
-        list(tti.transformer_end_infos)
-    ]
 
 
 def test_transformer_tank_info_collection():

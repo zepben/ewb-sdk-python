@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import pricing_structure_kwargs
 from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import PricingStructure, Tariff, generate_id
 
 pricing_structure_args = [*document_args, [Tariff(mrid=generate_id())], "asd"]
@@ -35,14 +35,6 @@ def test_pricing_structure_constructor_kwargs(tariffs, code, **kwargs):
     assert ps.code == code
 
 
-def test_pricing_structure_constructor_args():
-    ps = PricingStructure(*pricing_structure_args)
-
-    verify_document_constructor_args(ps)
-    assert pricing_structure_args[-2:] == [
-        list(ps.tariffs),
-        ps.code
-    ]
 
 
 def test_tariffs_collection():

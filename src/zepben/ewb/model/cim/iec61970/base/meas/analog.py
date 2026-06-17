@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["Analog"]
 
@@ -10,6 +12,7 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
+@zb_dataclass
 class Analog(Measurement):
     """Analog represents an analog Measurement."""
 

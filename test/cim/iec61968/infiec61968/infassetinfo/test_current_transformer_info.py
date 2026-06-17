@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import current_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+from hypothesis import given
+
 from zepben.ewb import CurrentTransformerInfo, Ratio, generate_id
 
 # noinspection PyArgumentList
@@ -66,21 +66,3 @@ def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_li
     assert cti.usage == usage
 
 
-def test_current_transformer_info_constructor_args():
-    cti = CurrentTransformerInfo(*current_transformer_info_args)
-
-    verify_asset_info_constructor_args(cti)
-    assert [
-               cti.accuracy_class,
-               cti.accuracy_limit,
-               cti.core_count,
-               cti.ct_class,
-               cti.knee_point_voltage,
-               cti.max_ratio,
-               cti.nominal_ratio,
-               cti.primary_ratio,
-               cti.rated_current,
-               cti.secondary_fls_rating,
-               cti.secondary_ratio,
-               cti.usage
-           ] == current_transformer_info_args[-12:]

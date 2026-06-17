@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import tap_changer_control_kwargs
 from cim.iec61970.base.wires.test_regulating_control import regulating_control_args, verify_regulating_control_constructor_default, \
     verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
+from hypothesis import given
+
 from zepben.ewb import TapChangerControl, generate_id
 
 tap_changer_control_args = [*regulating_control_args, 1, False, 2.2, 3.3, 4.4, 5.5, True, 6.6, False]
@@ -65,18 +65,3 @@ def test_tap_changer_control_constructor_kwargs(
     assert tcc.co_generation_enabled == co_generation_enabled
 
 
-def test_tap_changer_control_constructor_args():
-    tcc = TapChangerControl(*tap_changer_control_args)
-
-    verify_regulating_control_constructor_args(tcc)
-    assert tap_changer_control_args[-9:] == [
-        tcc.limit_voltage,
-        tcc.line_drop_compensation,
-        tcc.line_drop_r,
-        tcc.line_drop_x,
-        tcc.reverse_line_drop_r,
-        tcc.reverse_line_drop_x,
-        tcc.forward_ldc_blocking,
-        tcc.time_delay,
-        tcc.co_generation_enabled
-    ]

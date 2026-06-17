@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from hypothesis import given
-
 from cim.fill_fields import customer_agreement_kwargs
 from cim.iec61968.common.test_agreement import verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import CustomerAgreement, Customer, PricingStructure, generate_id
 
 customer_agreement_args = [*agreement_args, Customer(mrid=generate_id()), [PricingStructure(mrid=generate_id())]]
@@ -35,14 +35,6 @@ def test_customer_agreement_constructor_kwargs(customer, pricing_structures, **k
     assert list(ca.pricing_structures) == pricing_structures
 
 
-def test_customer_agreement_constructor_args():
-    ca = CustomerAgreement(*customer_agreement_args)
-
-    verify_agreement_constructor_args(ca)
-    assert [
-               ca.customer,
-               list(ca.pricing_structures)
-           ] == customer_agreement_args[-2:]
 
 
 def test_pricing_structures_collection():

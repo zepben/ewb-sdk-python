@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["Control"]
 
@@ -13,6 +15,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_control import RemoteControl
 
 
+@zb_dataclass
 class Control(IoPoint):
     """
     Control is used for supervisory/device control. It represents control outputs that are used to change the state in a

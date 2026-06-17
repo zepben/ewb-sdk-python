@@ -5,9 +5,10 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 __all__ = ["PhaseStatus"]
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode

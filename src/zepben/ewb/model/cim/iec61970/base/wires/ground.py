@@ -2,12 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["Ground"]
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 
+@zb_dataclass
 class Ground(ConductingEquipment):
     """
     A point where the system is grounded used for connecting conducting equipment to ground. The power system model can have any number of grounds.

@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
-from hypothesis import given
-
 from cim.fill_fields import ac_line_segment_kwargs
 from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
     verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_args
 from cim.private_collection_validator import validate_unordered
+from hypothesis import given
+
 from zepben.ewb import AcLineSegment, generate_id, SinglePhaseKind, OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
@@ -36,13 +36,6 @@ def test_ac_line_segment_constructor_kwargs(per_length_impedance, **kwargs):
     assert als.per_length_phase_impedance != per_length_impedance
 
 
-def test_ac_line_segment_constructor_args():
-    als = AcLineSegment(*ac_line_segment_args)
-
-    verify_conductor_constructor_args(als)
-    assert ac_line_segment_args[-1:] == [
-        als.per_length_impedance
-    ]
 
 
 def test_properties():

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["GeographicalRegion"]
 
 from typing import Optional, List, Generator
@@ -14,14 +16,15 @@ from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubG
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 
 
+@zb_dataclass
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
     _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
 
-    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
-        super(GeographicalRegion, self).__init__(**kwargs)
+    def __init__(self, *args, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
+        super(GeographicalRegion, self).__init__(*args, **kwargs)
         if sub_geographical_regions:
             for sgr in sub_geographical_regions:
                 self.add_sub_geographical_region(sgr)

@@ -2,10 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from cim.fill_fields import diagram_object_point_kwargs
 from hypothesis import given
 from pytest import raises
 
-from cim.fill_fields import diagram_object_point_kwargs
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
 diagram_object_point_args = [1.1, 2.2]
@@ -36,10 +36,3 @@ def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwarg
     assert dop.y_position == y_position
 
 
-def test_diagram_object_point_constructor_args():
-    dop = DiagramObjectPoint(*diagram_object_point_args)
-
-    assert diagram_object_point_args[-2:] == [
-        dop.x_position,
-        dop.y_position
-    ]

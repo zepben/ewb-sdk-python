@@ -4,6 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["UsagePoint"]
 
@@ -20,6 +22,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 
+@zb_dataclass
 class UsagePoint(IdentifiedObject):
     """
     Logical or physical point in the network to which readings or events may be attributed.
@@ -58,8 +61,8 @@ class UsagePoint(IdentifiedObject):
     _end_devices: list[EndDevice] | None = None
     _contacts: list[ContactDetails] | None = None
 
-    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
-        super(UsagePoint, self).__init__(**kwargs)
+    def __init__(self, *args, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
+        super(UsagePoint, self).__init__(*args, **kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)
@@ -205,6 +208,7 @@ class UsagePoint(IdentifiedObject):
             return next((it for it in self.contacts if it.id == _id))
         except StopIteration:
             raise KeyError(_id)
+
 
     def add_contact(self, contact: ContactDetails) -> UsagePoint:
         """Add a `ContactDetails` to this `UsagePoint`"""

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["Diagram"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
+@zb_dataclass
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation
@@ -32,8 +35,8 @@ class Diagram(IdentifiedObject):
 
     _diagram_objects: Optional[Dict[str, DiagramObject]] = None
 
-    def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
-        super(Diagram, self).__init__(**kwargs)
+    def __init__(self, *args, diagram_objects: List[DiagramObject] = None, **kwargs):
+        super(Diagram, self).__init__(*args, **kwargs)
         if diagram_objects:
             for obj in diagram_objects:
                 self.add_diagram_object(obj)

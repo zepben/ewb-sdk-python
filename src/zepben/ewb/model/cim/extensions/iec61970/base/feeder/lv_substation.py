@@ -3,6 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ['LvSubstation']
 
 from typing import Generator, TYPE_CHECKING
@@ -15,6 +17,8 @@ from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFee
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
+
+@zb_dataclass
 @zbex
 class LvSubstation(EquipmentContainer):
     """
@@ -31,12 +35,13 @@ class LvSubstation(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_energizing_feeders: list['Feeder'] | None = None,
         current_energizing_feeders: list['Feeder'] | None = None,
         normal_energized_lv_feeders: list[LvFeeder] | None = None,
         **kwargs
     ):
-        super(LvSubstation, self).__init__(**kwargs)
+        super(LvSubstation, self).__init__(*args, **kwargs)
         if normal_energizing_feeders:
             for lv_feeder in normal_energizing_feeders:
                 self.add_normal_energizing_feeder(lv_feeder)

@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import patch
 
-from hypothesis import given
-
 from cim.fill_fields import transformer_end_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
+from hypothesis import given
+
 from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest, generate_id
 
@@ -99,28 +99,6 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
     assert tei.energised_end_open_circuit_tests is energised_end_open_circuit_tests
 
 
-def test_transformer_end_info_constructor_args():
-    tei = TransformerEndInfo(*transformer_end_info_args)
-
-    verify_asset_info_constructor_args(tei)
-    assert transformer_end_info_args[-16:] == [
-        tei.connection_kind,
-        tei.emergency_s,
-        tei.end_number,
-        tei.insulation_u,
-        tei.phase_angle_clock,
-        tei.r,
-        tei.rated_s,
-        tei.rated_u,
-        tei.short_term_s,
-        tei.transformer_tank_info,
-        tei.transformer_star_impedance,
-        tei.energised_end_no_load_tests,
-        tei.energised_end_short_circuit_tests,
-        tei.grounded_end_short_circuit_tests,
-        tei.open_end_open_circuit_tests,
-        tei.energised_end_open_circuit_tests
-    ]
 
 
 def test_populates_resistance_reactance_off_end_star_impedance_if_available():

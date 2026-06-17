@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-
 from cim.fill_fields import current_relay_kwargs
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
+from hypothesis import given
+
 from zepben.ewb import CurrentRelay, ProtectionKind, generate_id
 
 current_relay_args = [*protection_relay_function_args, 1.1, True, 2.2]
@@ -36,12 +36,3 @@ def test_current_relay_constructor_kwargs(current_limit_1, inverse_time_flag, ti
     assert cr.time_delay_1 == time_delay_1
 
 
-def test_current_relay_constructor_args():
-    cr = CurrentRelay(*current_relay_args)
-
-    verify_protection_relay_function_constructor_args(cr)
-    assert current_relay_args[-3:] == [
-        cr.current_limit_1,
-        cr.inverse_time_flag,
-        cr.time_delay_1
-    ]

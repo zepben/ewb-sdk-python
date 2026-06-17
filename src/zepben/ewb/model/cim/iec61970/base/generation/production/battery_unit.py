@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 
 __all__ = ["BatteryUnit"]
 
@@ -16,11 +18,12 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 
+@zb_dataclass
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
 
-    def __init__(self, controls: List['BatteryControl'] = None, **kwargs):
-        super(BatteryUnit, self).__init__(**kwargs)
+    def __init__(self, *args, controls: List['BatteryControl'] = None, **kwargs):
+        super(BatteryUnit, self).__init__(*args, **kwargs)
         if controls:
             for bc in controls:
                 self.add_control(bc)

@@ -5,11 +5,14 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["GrpcResult", "GrpcClient"]
 
+from multiprocessing.connection import default_family
 from typing import TypeVar, Generic, Callable, List, Union, Coroutine, Any
-
-from zepben.ewb.dataclassy import dataclass
 
 T = TypeVar("T")
 
@@ -81,9 +84,10 @@ class GrpcResult(Generic[T]):
 
 TStub = TypeVar("TStub")
 
-@dataclass(init=False, slots=True)
+
+@zb_dataclass
 class GrpcClient(Generic[TStub]):
-    error_handlers: List[Callable[[Exception], bool]] = []
+    error_handlers: List[Callable[[Exception], bool]] = field(default_factory=list)
 
     timeout: int = 0
     '''Timeout for client gRPC requests'''

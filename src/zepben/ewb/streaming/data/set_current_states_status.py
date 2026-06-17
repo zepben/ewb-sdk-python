@@ -2,12 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from dataclasses import dataclass
+
 
 __all__ = ["SetCurrentStatesStatus", "BatchSuccessful", "BatchFailure", "BatchNotProcessed", "StateEventFailure", "StateEventInvalidMrid",
            "StateEventUnknownMrid", "StateEventDuplicateMrid", "StateEventUnsupportedPhasing", "StateEventUnsupportedMrid"]
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import List, Optional, Tuple, Any
 
 from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, BatchFailure as PBBatchFailure, \

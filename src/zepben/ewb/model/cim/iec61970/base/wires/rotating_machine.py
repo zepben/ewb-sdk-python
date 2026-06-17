@@ -1,7 +1,10 @@
+from abc import ABCMeta
+
 #  Copyright 2024 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 __all__ = ["RotatingMachine"]
 
@@ -10,7 +13,8 @@ from typing import Optional
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
 
-class RotatingMachine(RegulatingCondEq):
+@zb_dataclass
+class RotatingMachine(RegulatingCondEq, metaclass=ABCMeta):
     """
     A rotating machine which may be used as a generator or motor.
     """

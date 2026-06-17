@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["IdentifiedObject", "TIdentifiedObject"]
 
 import logging
@@ -22,7 +26,9 @@ TIdentifiedObject = TypeVar("TIdentifiedObject", bound="IdentifiedObject")
 Generic type of IdentifiedObject which can be used for type hinting generics.
 """
 
-class IdentifiedObject(Identifiable):
+
+@zb_dataclass
+class IdentifiedObject(Identifiable, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.
     Everything should extend this class, however it's not mandated that every subclass must use all the fields
@@ -45,8 +51,10 @@ class IdentifiedObject(Identifiable):
 
     # TODO: Missing num_diagram_objects: int = None  def has_diagram_objects(self): return (self.num_diagram_objects or 0) > 0
 
-    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
-        super(IdentifiedObject, self).__init__(**kwargs)
+    def __init__(self, mrid: str, *args, names: Optional[List[Name]] = None, **kwargs):
+        # This init requires mrid, Identifiable requires it to be passed only if one exists
+        # So we denote it in the signature, then immediately send it up to the super constructor
+        super(IdentifiedObject, self).__init__(mrid=mrid, *args, **kwargs)
         if not self.mrid or not self.mrid.strip():
             raise ValueError("You must provide an mRID for this object.")
 
@@ -59,6 +67,9 @@ class IdentifiedObject(Identifiable):
         if self.name:
             return f'{class_name}{{{self.mrid}|{self.name}}}'
         return f'{class_name}{{{self.mrid}}}'
+
+    def __repr__(self):
+        return self.__str__()
 
     @property
     def names(self) -> Generator[Name, None, None]:

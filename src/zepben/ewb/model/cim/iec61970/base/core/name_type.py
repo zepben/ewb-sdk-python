@@ -5,6 +5,10 @@
 
 from __future__ import annotations
 
+from dataclasses import field
+
+from zepben.ewb.dataclass_descriptors import BackedDescriptor, remove_descriptor_annotations, zb_dataclass
+
 __all__ = ["NameType"]
 
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional, Any
@@ -16,6 +20,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
+
+@zb_dataclass
+@remove_descriptor_annotations
 class NameType(Identifiable):
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
@@ -26,27 +33,17 @@ class NameType(Identifiable):
     typically are unique among them.
     """
 
-    name: str
-    """Name of the name type."""
+    # Need a local reference for the name descriptor to pick up - identical to Identifiable's mrid
+    mrid: str = field(default="")
 
-    @property
-    def mrid(self) -> str:
-        return self.name
-
-    def __getattribute__(self, item):
-        # This is a workaround for self.mrid being a property, when we're expecting a string.
-        if item == "mrid":
-            return object.__getattribute__(self, 'mrid').fget(self)
-        return object.__getattribute__(self, item)
+    # Simply shadow the mrid field. Equivalent to @property with get/set pointing to self.mrid
+    name: str = BackedDescriptor(mrid)
 
     description: Optional[str] = None
     """Description of the name type."""
 
-    _names_index: Dict[str, Name] = dict()
-    _names_multi_index: Dict[str, List[Name]] = dict()
-
-    def __str__(self):
-        return f"NameType(name='{self.name}', description='{self.description}')"
+    _names_index: Dict[str, Name] = field(default_factory=dict)
+    _names_multi_index: Dict[str, List[Name]] = field(default_factory=dict)
 
     @property
     def names(self) -> Generator[Name, None, None]:

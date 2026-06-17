@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
+
 __all__ = ["OperationalRestriction"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 
+@zb_dataclass
 class OperationalRestriction(Document):
     """
     A document that can be associated with equipment to describe any sort of restrictions compared with the
@@ -29,8 +32,8 @@ class OperationalRestriction(Document):
     """
     _equipment: Optional[List[Equipment]] = None
 
-    def __init__(self, equipment: List[Equipment] = None, **kwargs):
-        super(OperationalRestriction, self).__init__(**kwargs)
+    def __init__(self, *args, equipment: List[Equipment] = None, **kwargs):
+        super(OperationalRestriction, self).__init__(*args, **kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)
