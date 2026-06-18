@@ -3,13 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ['LvSubstation']
 
 from typing import Generator, TYPE_CHECKING
 
 from zepben.ewb import ngen, nlen, safe_remove_by_id, get_by_mrid
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder

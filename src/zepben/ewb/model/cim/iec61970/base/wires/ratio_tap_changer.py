@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["RatioTapChanger"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 
 if TYPE_CHECKING:

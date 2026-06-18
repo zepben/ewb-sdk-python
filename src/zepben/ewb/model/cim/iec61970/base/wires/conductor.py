@@ -2,14 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 
 __all__ = ["Conductor"]
 
 from abc import ABCMeta
 import sys
 from typing import Optional, TYPE_CHECKING
+
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:

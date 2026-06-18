@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ['AcLineSegmentPhase']
 
 from typing import TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind

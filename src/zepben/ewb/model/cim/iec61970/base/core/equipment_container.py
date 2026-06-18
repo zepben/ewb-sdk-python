@@ -5,14 +5,13 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ['EquipmentContainer']
+
+from abc import ABCMeta
 
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
 

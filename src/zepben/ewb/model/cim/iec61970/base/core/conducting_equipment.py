@@ -5,16 +5,14 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-from dataclasses import field
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ['ConductingEquipment']
 
+from abc import ABCMeta
+from dataclasses import field
 import sys
 from typing import List, Optional, Generator, TYPE_CHECKING, Union
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import get_by_mrid, require, ngen
 

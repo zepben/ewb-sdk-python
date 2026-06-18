@@ -4,13 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 
 __all__ = ["UsagePoint"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode

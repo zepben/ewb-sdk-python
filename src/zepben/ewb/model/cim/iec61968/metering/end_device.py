@@ -5,14 +5,13 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["EndDevice"]
+
+from abc import ABCMeta
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
 

@@ -2,11 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclasses import dataclass, field
-
 
 __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is_after"]
 
+from dataclasses import dataclass, field
 from collections import Counter
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType

@@ -5,15 +5,14 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["IdentifiedObject", "TIdentifiedObject"]
+
+from abc import ABCMeta
 
 import logging
 from typing import List, Generator, Optional, overload, TypeVar
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType

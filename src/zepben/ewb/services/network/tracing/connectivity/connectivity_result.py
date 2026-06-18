@@ -5,13 +5,12 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["ConnectivityResult", "terminal_compare"]
 
 from operator import attrgetter
 from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind

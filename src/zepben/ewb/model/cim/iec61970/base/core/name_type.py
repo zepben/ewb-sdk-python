@@ -5,14 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import field
-
-from zepben.ewb.dataclass_descriptors import BackedDescriptor, remove_descriptor_annotations, zb_dataclass
-
 __all__ = ["NameType"]
 
+from dataclasses import field
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable, Optional, Any
 
+from zepben.ewb.dataclass_descriptors import BackedDescriptor, remove_descriptor_annotations, zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 

@@ -2,11 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclasses import field
-
-from zepben.ewb.dataclass_descriptors import DataclassBase, zb_dataclass
 
 __all__ = ["Identifiable", "TIdentifiable"]
+
+from dataclasses import field
 
 import uuid
 from abc import ABCMeta
@@ -14,6 +13,7 @@ from argparse import ArgumentError
 from typing import TypeVar, overload, Callable, Any
 
 from zepben.ewb import require
+from zepben.ewb.dataclass_descriptors import DataclassBase, zb_dataclass
 
 TIdentifiable = TypeVar('TIdentifiable')
 

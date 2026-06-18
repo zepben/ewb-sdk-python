@@ -2,13 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 
 __all__ = ["BatteryUnit"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit

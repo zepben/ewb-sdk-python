@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = ["NetworkHierarchy"]
 
+from dataclasses import dataclass
 from typing import Dict
 
 from zepben.ewb import Circuit, Loop, Substation

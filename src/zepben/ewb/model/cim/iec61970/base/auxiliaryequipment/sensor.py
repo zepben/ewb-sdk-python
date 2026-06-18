@@ -5,14 +5,12 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["Sensor"]
 
+from abc import ABCMeta
 from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 

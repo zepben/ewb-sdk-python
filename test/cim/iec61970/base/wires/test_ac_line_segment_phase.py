@@ -8,6 +8,7 @@ from cim.iec61970.base.core.test_power_system_resource import verify_power_syste
 from hypothesis import given
 
 from zepben.ewb import generate_id, AcLineSegment, SinglePhaseKind
+
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 
 ac_line_segment_phase_args = [*power_system_resource_args, SinglePhaseKind.A, 0, AcLineSegment(mrid=generate_id())]

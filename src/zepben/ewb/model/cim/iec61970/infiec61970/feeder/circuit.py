@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["Circuit"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.line import Line
 from zepben.ewb.util import ngen, get_by_mrid, safe_remove, nlen
 

@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["PowerTransformerInfo"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove

@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["Name"]
 
 from typing import TYPE_CHECKING, Optional
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 if TYPE_CHECKING:

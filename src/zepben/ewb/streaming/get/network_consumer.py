@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 
+from dataclasses import dataclass, field
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
@@ -66,6 +65,7 @@ from zepben.ewb.services.network.network_state import NetworkState
 from zepben.ewb.streaming.get.included_energized_containers import IncludedEnergizedContainers
 from zepben.ewb.streaming.get.included_energizing_containers import IncludedEnergizingContainers
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
+
 
 MAX_64_BIT_INTEGER = 9223372036854775807
 

@@ -8,6 +8,7 @@ from cim.iec61970.base.meas.test_measurement import verify_measurement_construct
 from hypothesis import given
 
 from zepben.ewb import generate_id
+
 from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
 
 analog_args = measurement_args

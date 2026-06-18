@@ -2,13 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 
 __all__ = ["SynchronousMachine"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove

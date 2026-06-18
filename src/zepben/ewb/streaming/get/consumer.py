@@ -5,13 +5,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
+from dataclasses import dataclass, field
 from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, AsyncGenerator, Type, Generator, cast
-
 from typing_extensions import deprecated
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse

@@ -2,8 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 
 __all__ = ["PotentialTransformer"]
 
@@ -14,6 +12,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 

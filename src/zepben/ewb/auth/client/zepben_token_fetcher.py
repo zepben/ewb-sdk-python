@@ -6,6 +6,7 @@
 
 __all__ = ["ZepbenTokenFetcher", "create_token_fetcher", "get_token_fetcher", "create_token_fetcher_managed_identity"]
 
+from dataclasses import dataclass, field, InitVar
 import warnings
 from dataclasses import dataclass, field, InitVar
 from datetime import datetime
@@ -278,7 +279,7 @@ def create_token_fetcher_managed_identity(identity_url: str, verify_auth: bool) 
     Most fields of the token fetcher will be unused, as they exist only for fetching tokens from token endpoints.
     _request_token is overridden to use a simplified function which simply given an URL to fetch tokens from will return
     a token for a host with a valid managed identity.
-    
+
     :param identity_url: The URL to fetch a token from. Should contain the resource ID. Typically looks like:
     "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=5ffcfee6-34cd-4c5c-bb7e-c5261d739341"
     :param verify_auth: Whether to verify certificates for the identity_url. Only applies for https URLs.

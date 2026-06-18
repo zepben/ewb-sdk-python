@@ -2,14 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclasses import dataclass
-
-from zepben.ewb.dataclass_descriptors import DataclassBase
 
 __all__ = ["ContactDetails"]
 
+from dataclasses import dataclass
 from typing import Generator, Any
 
+from zepben.ewb.dataclass_descriptors import DataclassBase
 from zepben.ewb.util import ngen, nlen
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress

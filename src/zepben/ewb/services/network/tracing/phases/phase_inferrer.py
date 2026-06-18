@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = ["PhaseInferrer"]
 
+from dataclasses import dataclass
 from typing import Dict, Callable, List, Set, Awaitable, Type, TYPE_CHECKING
 
 from zepben.ewb import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, \

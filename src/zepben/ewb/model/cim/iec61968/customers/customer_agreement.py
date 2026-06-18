@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["CustomerAgreement"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 

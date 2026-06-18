@@ -5,12 +5,9 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["ProtectionRelayFunction"]
 
+from abc import ABCMeta
 import sys
 import warnings
 from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING, Any
@@ -19,6 +16,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex

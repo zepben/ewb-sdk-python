@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = [
     "acls_to_pli_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver", "streetlight_to_pole_resolver",
     "aux_equip_to_term_resolver", "cond_equip_to_bv_resolver", "cond_equip_to_terminal_resolver", "conductor_to_wire_info_resolver",
@@ -32,6 +30,7 @@ __all__ = [
     "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
     "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
 
+from dataclasses import dataclass
 from typing import Callable, Optional
 
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo

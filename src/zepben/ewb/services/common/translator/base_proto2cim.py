@@ -5,11 +5,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim", "organisation_role_to_cim",
            "BaseProtoToCim", "add_to_service_or_none", "bind_to_cim", "get_nullable"]
 
+from dataclasses import dataclass
 import functools
 import inspect
 from abc import ABCMeta

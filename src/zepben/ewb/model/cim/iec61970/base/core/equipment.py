@@ -5,15 +5,14 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ['Equipment']
+
+from abc import ABCMeta
 
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder

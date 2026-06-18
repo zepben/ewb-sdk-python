@@ -5,14 +5,12 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["ProtectedSwitch"]
 
+from abc import ABCMeta
 from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 from zepben.ewb.util import get_by_mrid, ngen, nlen, safe_remove
 

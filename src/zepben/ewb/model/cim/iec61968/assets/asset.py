@@ -5,14 +5,12 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["Asset"]
 
+from abc import ABCMeta
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
 

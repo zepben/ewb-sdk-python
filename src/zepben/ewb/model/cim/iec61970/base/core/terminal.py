@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["Terminal"]
 
 from typing import Optional, Generator
@@ -14,6 +12,7 @@ from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
 from zepben.ewb import IdentifiedObject
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode

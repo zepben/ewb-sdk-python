@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = ["ServiceInfo"]
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:

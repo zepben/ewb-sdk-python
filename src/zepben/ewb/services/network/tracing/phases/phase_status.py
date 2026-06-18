@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 __all__ = ["PhaseStatus"]
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
@@ -41,11 +40,11 @@ class PhaseStatus:
     """
     The underlying implementation value tracking the phase status for nominal phases of a terminal.
     It is exposed internally for data serialisation and debugging within official EWB libraries and utilities.
-    
+
     This property should be considered internal and not for public use as the underlying
     data structure to store the status could change at any time (and thus be a breaking change).
     Use directly at your own risk.
-    
+
     See ``TracedPhasesBitManipulation`` for details on bit representation for phase_status_internal and how we track phases status.
     """
 

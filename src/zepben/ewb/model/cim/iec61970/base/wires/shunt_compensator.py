@@ -5,12 +5,9 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta
-
-from zepben.ewb.dataclass_descriptors import zb_dataclass
-
 __all__ = ["ShuntCompensator"]
 
+from abc import ABCMeta
 import sys
 from typing import Optional, TYPE_CHECKING
 if sys.version_info >= (3, 13):
@@ -18,6 +15,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
