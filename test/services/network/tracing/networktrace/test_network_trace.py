@@ -7,14 +7,14 @@ import sys
 import unittest
 DEFAULT_RECURSION_LIMIT = sys.getrecursionlimit()
 
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
+from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths  # noqa: E402
 from zepben.ewb import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, \
-    Tracing, StepActionWithContextValue, EnergyConsumer, generate_id
-from zepben.ewb.testing.test_network_builder import TestNetworkBuilder
+    Tracing, StepActionWithContextValue, EnergyConsumer, generate_id  # noqa: E402
+from zepben.ewb.testing.test_network_builder import TestNetworkBuilder  # noqa: E402
 
 Terminal.__add__ = PathTerminal.__add__
 Terminal.__sub__ = PathTerminal.__sub__

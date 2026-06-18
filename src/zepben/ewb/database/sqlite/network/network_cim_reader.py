@@ -66,14 +66,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.static_var_compensator import Stat
 from zepben.ewb.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
-
-# `assert_never` changed packages with the release of 3.11, so import it from the old spot while we still support 3.9 and 3.10.
-v = sys.version_info
-if v.major == 3 and v.minor < 11:
-    from typing_extensions import assert_never
-else:
-    from typing import assert_never
-
 from zepben.ewb.database.sqlite.common.base_cim_reader import BaseCimReader
 from zepben.ewb.database.sqlite.extensions.result_set import ResultSet
 from zepben.ewb.database.sqlite.tables.associations.loop_substation_relationship import LoopSubstationRelationship
@@ -349,6 +341,14 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind im
 from zepben.ewb.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.ewb.services.common import resolver
 from zepben.ewb.services.network.network_service import NetworkService
+
+# `assert_never` changed packages with the release of 3.11, so import it from the old spot while we still support 3.9 and 3.10.
+v = sys.version_info
+if v.major == 3 and v.minor < 11:
+    from typing_extensions import assert_never
+else:
+    from typing import assert_never
+
 
 
 class NetworkCimReader(BaseCimReader):

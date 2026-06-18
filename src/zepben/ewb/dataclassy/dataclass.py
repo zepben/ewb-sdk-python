@@ -160,7 +160,7 @@ def _generate_new(annotations: Dict, defaults: Dict, user_init: bool, gen_kwargs
 
 # generic method implementations common to all data classes
 # these are currently relatively inefficient - it would be better to cache an expression for a class' tuple
-from .functions import values, fields
+from .functions import values, fields  # noqa: E402
 
 
 def __eq__(self: DataClass, other: DataClass):
