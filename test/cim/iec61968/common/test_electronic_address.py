@@ -25,5 +25,3 @@ def test_electronic_address_constructor_kwargs(is_primary, description, email1):
     assert e.is_primary == is_primary
     assert e.description == description
     assert e.email1 == email1
-
-

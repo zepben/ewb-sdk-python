@@ -19,5 +19,3 @@ def test_load_break_switch_constructor_default():
 @given(**load_break_switch_kwargs())
 def test_load_break_switch_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(LoadBreakSwitch(**kwargs), **kwargs)
-
-

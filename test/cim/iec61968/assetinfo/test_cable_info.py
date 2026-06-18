@@ -20,5 +20,3 @@ def test_cable_info_constructor_default():
 @given(**cable_info_kwargs())
 def test_cable_info_constructor_kwargs(**kwargs):
     verify_wire_info_constructor_kwargs(CableInfo(**kwargs), **kwargs)
-
-

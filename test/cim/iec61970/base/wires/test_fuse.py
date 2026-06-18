@@ -23,5 +23,3 @@ def test_fuse_constructor_kwargs(function, **kwargs):
     f = Fuse(function=function, **kwargs)
     verify_switch_constructor_kwargs(f, **kwargs)
     assert f.function == function
-
-

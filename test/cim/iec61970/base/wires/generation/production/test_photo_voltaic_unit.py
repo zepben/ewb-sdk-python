@@ -20,5 +20,3 @@ def test_photo_voltaic_unit_constructor_default():
 @given(**photo_voltaic_unit_kwargs())
 def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PhotoVoltaicUnit(**kwargs), **kwargs)
-
-

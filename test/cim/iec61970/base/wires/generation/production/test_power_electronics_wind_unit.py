@@ -20,5 +20,3 @@ def test_power_electronics_wind_unit_constructor_default():
 @given(**power_electronics_wind_unit_kwargs())
 def test_power_electronics_wind_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PowerElectronicsWindUnit(**kwargs), **kwargs)
-
-

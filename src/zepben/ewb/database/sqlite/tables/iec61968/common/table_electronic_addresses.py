@@ -7,8 +7,8 @@ __all__ = ["TableElectronicAddresses"]
 
 from abc import ABC
 
-from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 from zepben.ewb.database.sql.column import Column, Type, Nullable
+from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
 class TableElectronicAddresses(SqliteTable, ABC):

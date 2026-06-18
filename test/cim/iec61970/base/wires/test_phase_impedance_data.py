@@ -46,5 +46,3 @@ def test_phase_impedance_data_constructor_kwargs(from_phase, to_phase, b, g, r, 
     assert phase_impedance_data.g == g
     assert phase_impedance_data.r == r
     assert phase_impedance_data.x == x
-
-

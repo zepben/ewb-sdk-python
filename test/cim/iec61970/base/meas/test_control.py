@@ -27,5 +27,3 @@ def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, 
     verify_io_point_constructor_kwargs(c, **kwargs)
     assert c.power_system_resource_mrid == power_system_resource_mrid
     assert c.remote_control == remote_control
-
-

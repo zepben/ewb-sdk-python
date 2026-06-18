@@ -20,5 +20,3 @@ def test_accumulator_constructor_default():
 @given(**accumulator_kwargs())
 def test_accumulator_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Accumulator(**kwargs), **kwargs)
-
-

@@ -32,5 +32,3 @@ def test_accumulator_value_constructor_kwargs(value, accumulator_mrid, **kwargs)
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
     assert av.accumulator_mrid == accumulator_mrid
-
-

@@ -19,5 +19,3 @@ def test_disconnector_constructor_default():
 @given(**disconnector_kwargs())
 def test_disconnector_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(Disconnector(**kwargs), **kwargs)
-
-

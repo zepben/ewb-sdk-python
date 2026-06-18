@@ -20,5 +20,3 @@ def test_junction_constructor_default():
 @given(**junction_kwargs())
 def test_junction_constructor_kwargs(**kwargs):
     verify_connector_constructor_kwargs(Junction(**kwargs), **kwargs)
-
-

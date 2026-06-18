@@ -32,5 +32,3 @@ def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
     verify_measurement_value_constructor_kwargs(dv, **kwargs)
     assert dv.value == value
     assert dv.discrete_mrid == discrete_mrid
-
-

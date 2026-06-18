@@ -34,5 +34,3 @@ def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwarg
 
     assert dop.x_position == x_position
     assert dop.y_position == y_position
-
-

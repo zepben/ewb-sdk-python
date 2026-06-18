@@ -45,5 +45,3 @@ def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_r
     assert vti.pt_class == pt_class
     assert vti.rated_voltage == rated_voltage
     assert vti.secondary_ratio == secondary_ratio
-
-

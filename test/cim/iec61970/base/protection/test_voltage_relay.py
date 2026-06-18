@@ -22,5 +22,3 @@ def test_voltage_relay_constructor_default():
 def test_voltage_relay_constructor_kwargs(**kwargs):
     vr = VoltageRelay(**kwargs)
     verify_protection_relay_function_constructor_kwargs(vr, **kwargs)
-
-

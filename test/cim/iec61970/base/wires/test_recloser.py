@@ -19,5 +19,3 @@ def test_recloser_constructor_default():
 @given(**recloser_kwargs())
 def test_recloser_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(Recloser(**kwargs), **kwargs)
-
-

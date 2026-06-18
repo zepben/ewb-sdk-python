@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Generator, List
 
-from zepben.ewb.database.sqlite.tables.iec61968.common.table_street_addresses import TableStreetAddresses
 from zepben.ewb.database.sql.column import Type, Column, Nullable
+from zepben.ewb.database.sqlite.tables.iec61968.common.table_street_addresses import TableStreetAddresses
 
 
 class TableContactDetailsStreetAddresses(TableStreetAddresses):

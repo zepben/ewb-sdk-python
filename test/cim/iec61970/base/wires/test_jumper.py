@@ -19,5 +19,3 @@ def test_jumper_constructor_default():
 @given(**jumper_kwargs())
 def test_jumper_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(Jumper(**kwargs), **kwargs)
-
-

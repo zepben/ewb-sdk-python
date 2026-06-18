@@ -20,5 +20,3 @@ def test_fault_indicator_constructor_default():
 @given(**fault_indicator_kwargs())
 def test_fault_indicator_constructor_kwargs(**kwargs):
     verify_auxiliary_equipment_constructor_kwargs(FaultIndicator(**kwargs), **kwargs)
-
-

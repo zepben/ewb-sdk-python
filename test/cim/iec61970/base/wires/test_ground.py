@@ -21,5 +21,3 @@ def test_ground_constructor_default():
 @given(**ground_kwargs())
 def test_ground_constructor_kwargs(**kwargs):
     verify_conducting_equipment_constructor_kwargs(Ground(**kwargs), **kwargs)
-
-

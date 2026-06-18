@@ -25,5 +25,3 @@ def test_remote_source_constructor_kwargs(measurement, **kwargs):
 
     verify_remote_point_constructor_kwargs(c, **kwargs)
     assert c.measurement == measurement
-
-

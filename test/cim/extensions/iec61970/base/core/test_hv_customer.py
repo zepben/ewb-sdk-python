@@ -20,5 +20,3 @@ def test_hv_customer_constructor_default():
 @given(**hv_customer_kwargs())
 def test_hv_customer_constructor_kwargs(**kwargs):
     verify_equipment_container_constructor_kwargs(HvCustomer(**kwargs), **kwargs)
-
-

@@ -75,5 +75,3 @@ def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negati
     assert t.zero_r21 == zero_r21
     assert t.zero_x12 == zero_x12
     assert t.zero_x21 == zero_x21
-
-

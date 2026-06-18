@@ -31,5 +31,3 @@ def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_incr
     verify_tap_changer_constructor_kwargs(rtc, **kwargs)
     assert rtc.transformer_end == transformer_end
     assert rtc.step_voltage_increment == step_voltage_increment
-
-

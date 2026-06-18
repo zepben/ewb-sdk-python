@@ -32,5 +32,3 @@ def test_analog_value_constructor_kwargs(value, analog_mrid, **kwargs):
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
     assert av.analog_mrid == analog_mrid
-
-

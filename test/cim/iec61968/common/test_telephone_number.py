@@ -61,5 +61,3 @@ def test_telephone_number_constructor_kwargs(
     assert t.local_number == local_number
     assert t.is_primary == is_primary
     assert t.description == description
-
-

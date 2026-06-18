@@ -30,5 +30,3 @@ def test_street_address_constructor_kwargs(postal_code, town_detail, po_box, str
     assert sa.town_detail == town_detail
     assert sa.po_box == po_box
     assert sa.street_detail == street_detail
-
-

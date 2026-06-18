@@ -34,5 +34,3 @@ def test_current_relay_constructor_kwargs(current_limit_1, inverse_time_flag, ti
     assert cr.current_limit_1 == current_limit_1
     assert cr.inverse_time_flag == inverse_time_flag
     assert cr.time_delay_1 == time_delay_1
-
-

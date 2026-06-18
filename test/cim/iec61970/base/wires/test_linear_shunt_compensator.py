@@ -49,5 +49,3 @@ def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_secti
     assert lsc.b_per_section == b_per_section
     assert lsc.g0_per_section == g0_per_section
     assert lsc.g_per_section == g_per_section
-
-

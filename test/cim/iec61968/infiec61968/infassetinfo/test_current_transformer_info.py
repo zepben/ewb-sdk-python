@@ -64,5 +64,3 @@ def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_li
     assert cti.secondary_fls_rating == secondary_fls_rating
     assert cti.secondary_ratio == secondary_ratio
     assert cti.usage == usage
-
-

@@ -38,5 +38,3 @@ def test_battery_control_constructor_kwargs(charging_rate, discharging_rate, res
     assert bc.discharging_rate == discharging_rate
     assert bc.reserve_percent == reserve_percent
     assert bc.control_mode == control_mode
-
-

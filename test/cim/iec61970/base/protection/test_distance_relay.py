@@ -63,5 +63,3 @@ def test_distance_relay_constructor_kwargs(
     assert dr.operation_phase_angle1 == operation_phase_angle1
     assert dr.operation_phase_angle2 == operation_phase_angle2
     assert dr.operation_phase_angle3 == operation_phase_angle3
-
-

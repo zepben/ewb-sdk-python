@@ -38,5 +38,3 @@ def test_static_var_compensator_constructor_kwargs(capacitive_rating, inductive_
     assert svc.q == q
     assert svc.svc_control_mode == svc_control_mode
     assert svc.voltage_set_point == voltage_set_point
-
-

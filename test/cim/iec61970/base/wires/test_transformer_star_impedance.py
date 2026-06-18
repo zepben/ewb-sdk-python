@@ -40,5 +40,3 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
     assert tsi.x == x
     assert tsi.x0 == x0
     assert tsi.transformer_end_info == transformer_end_info
-
-

@@ -25,5 +25,3 @@ def test_base_voltage_constructor_kwargs(nominal_voltage, **kwargs):
 
     verify_identified_object_constructor_kwargs(bv, **kwargs)
     assert bv.nominal_voltage == nominal_voltage
-
-

@@ -35,5 +35,3 @@ def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current
     assert sci.rated_current == rated_current
     assert sci.rated_reactive_power == rated_reactive_power
     assert sci.rated_voltage == rated_voltage
-
-

@@ -27,5 +27,3 @@ def test_potential_transformer_constructor_kwargs(type, **kwargs):
 
     verify_sensor_constructor_kwargs(vt, **kwargs)
     assert vt.type == type
-
-

@@ -29,5 +29,3 @@ def test_analog_constructor_kwargs(positive_flow_in, **kwargs):
 
     verify_measurement_constructor_kwargs(ana, **kwargs)
     assert ana.positive_flow_in == positive_flow_in
-
-

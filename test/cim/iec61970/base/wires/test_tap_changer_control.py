@@ -63,5 +63,3 @@ def test_tap_changer_control_constructor_kwargs(
     assert tcc.forward_ldc_blocking == forward_ldc_blocking
     assert tcc.time_delay == time_delay
     assert tcc.co_generation_enabled == co_generation_enabled
-
-

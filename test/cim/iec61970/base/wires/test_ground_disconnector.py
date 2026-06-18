@@ -19,5 +19,3 @@ def test_ground_disconnector_constructor_default():
 @given(**ground_disconnector_kwargs())
 def test_ground_disconnector_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(GroundDisconnector(**kwargs), **kwargs)
-
-

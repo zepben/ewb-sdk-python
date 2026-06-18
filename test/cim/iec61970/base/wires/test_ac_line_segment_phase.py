@@ -35,5 +35,3 @@ def test_ac_line_segment_phase_constructor_kwargs(phase, sequence_number, ac_lin
     assert als.phase == phase
     assert als.sequence_number == sequence_number
     assert als.ac_line_segment == ac_line_segment
-
-

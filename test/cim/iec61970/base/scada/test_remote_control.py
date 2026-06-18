@@ -26,5 +26,3 @@ def test_remote_control_constructor_kwargs(control, **kwargs):
 
     verify_remote_point_constructor_kwargs(rc, **kwargs)
     assert rc.control == control
-
-

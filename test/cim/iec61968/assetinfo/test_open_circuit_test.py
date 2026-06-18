@@ -38,5 +38,3 @@ def test_open_circuit_test_constructor_kwargs(energised_end_step, energised_end_
     assert test.open_end_step == open_end_step
     assert test.open_end_voltage == open_end_voltage
     assert test.phase_shift == phase_shift
-
-

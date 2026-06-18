@@ -28,5 +28,3 @@ def test_switch_info_constructor_kwargs(rated_interrupting_time, **kwargs):
 
     verify_asset_info_constructor_kwargs(si, **kwargs)
     assert si.rated_interrupting_time == rated_interrupting_time
-
-

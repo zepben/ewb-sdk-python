@@ -41,5 +41,3 @@ def test_per_length_sequence_impedance_constructor_kwargs(r, x, bch, gch, r0, x0
     assert plsi.x0 == x0
     assert plsi.b0ch == b0ch
     assert plsi.g0ch == g0ch
-
-

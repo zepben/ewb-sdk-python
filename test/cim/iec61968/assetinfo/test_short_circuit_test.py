@@ -54,5 +54,3 @@ def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grou
     assert sct.power == power
     assert sct.voltage == voltage
     assert sct.voltage_ohmic_part == voltage_ohmic_part
-
-

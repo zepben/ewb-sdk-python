@@ -24,5 +24,3 @@ def test_meter_constructor_default():
 @given(**meter_kwargs())
 def test_meter_constructor_kwargs(**kwargs):
     verify_end_device_constructor_kwargs(Meter(**kwargs), **kwargs)
-
-

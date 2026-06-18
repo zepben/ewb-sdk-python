@@ -20,5 +20,3 @@ def test_overhead_wire_info_constructor_default():
 @given(**overhead_wire_info_kwargs())
 def test_overhead_wire_info_constructor_kwargs(**kwargs):
     verify_wire_info_constructor_kwargs(OverheadWireInfo(**kwargs), **kwargs)
-
-

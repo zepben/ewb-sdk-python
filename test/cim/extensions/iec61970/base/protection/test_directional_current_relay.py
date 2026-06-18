@@ -64,5 +64,3 @@ def test_directional_current_relay_constructor_kwargs(
     assert dcr.current_limit_1 == current_limit_1
     assert dcr.inverse_time_flag == inverse_time_flag
     assert dcr.time_delay_1 == time_delay_1
-
-

@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Generator, List
 
-from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_power_system_resources import TablePowerSystemResources
 from zepben.ewb.database.sql.column import Column, Nullable
+from zepben.ewb.database.sqlite.tables.iec61970.base.core.table_power_system_resources import TablePowerSystemResources
 
 
 class TableAcLineSegmentPhases(TablePowerSystemResources):

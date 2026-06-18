@@ -38,5 +38,3 @@ def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current
     assert nlt.exciting_current_zero == exciting_current_zero
     assert nlt.loss == loss
     assert nlt.loss_zero == loss_zero
-
-

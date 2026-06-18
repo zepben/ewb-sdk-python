@@ -33,5 +33,3 @@ def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs)
     assert p.pole == pole
     assert p.light_rating == light_rating
     assert p.lamp_kind == lamp_kind
-
-

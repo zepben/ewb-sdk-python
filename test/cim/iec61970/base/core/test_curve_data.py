@@ -42,5 +42,3 @@ def test_curve_data_constructor_kwargs(x_value, y1_value, y2_value, y3_value, **
     assert curve_data.y1_value == y1_value
     assert curve_data.y2_value == y2_value
     assert curve_data.y3_value == y3_value
-
-

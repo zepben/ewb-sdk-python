@@ -26,5 +26,3 @@ def test_current_transformer_constructor_kwargs(core_burden, **kwargs):
 
     verify_sensor_constructor_kwargs(ct, **kwargs)
     assert ct.core_burden == core_burden
-
-
