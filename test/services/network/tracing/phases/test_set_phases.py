@@ -561,7 +561,7 @@ async def test_can_set_phases_from_an_unknown_nominal_phase():
         .to_acls(PhaseCode.ABC) \
         .network
 
-    acls = n['c0']
+    n['c0']  # noqa: F841
     t = get_t(n, 'c0', 2)
     t.normal_phases[SPK.X] = SPK.A
     t.current_phases[SPK.X] = SPK.A

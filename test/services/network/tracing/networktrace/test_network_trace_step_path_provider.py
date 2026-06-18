@@ -745,7 +745,6 @@ class TestNetworkTraceStepPathProvider:
                    .with_clamp(length_from_terminal_1=2.0)  # c1-clamp2
                    .to_breaker()  # b2
                    ).network
-        segment: AcLineSegment = network['c1']
 
         return network
 
