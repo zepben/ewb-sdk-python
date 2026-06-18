@@ -67,5 +67,23 @@ ignore = [
     "E741",  # ambiguous-variable-name
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"src/zepben/ewb/__init__.py" = ["F403"]  # star-imports are intentional here
+"src/zepben/ewb/auth/__init__.py" = ["F403"]
+"src/zepben/ewb/database/sqlite/common/base_database_tables.py" = ["F403"]
+"src/zepben/ewb/database/sqlite/customer/customer_database_tables.py" = ["F403"]
+"src/zepben/ewb/database/sqlite/diagram/diagram_database_tables.py" = ["F403"]
+"src/zepben/ewb/database/sqlite/network/network_database_tables.py" = ["F403"]
+"src/zepben/ewb/services/common/resolver.py" = ["F403"]
+"src/zepben/ewb/services/network/translator/network_cim2proto.py" = ["F403"]
+"src/zepben/ewb/services/network/translator/network_proto2cim.py" = ["F403"]
+"test/cim/fill_fields.py" = ["F403"]
+"test/conftest.py" = ["F403"]
+"test/services/network/translator/test_network_translator.py" = ["F403"]
+"test/streaming/get/pb_creators.py" = ["F403"]
+"src/zepben/ewb/examples/__init__.py" = ["F403"]
+"test/services/customer/translator/test_customer_translator.py" = ["F403"]
+"test/services/diagram/translator/test_diagram_translator.py" = ["F403"]
+
 [tool.setuptools.packages.find]
     where = ["src/"]
