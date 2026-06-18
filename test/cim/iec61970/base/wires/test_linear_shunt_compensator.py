@@ -5,7 +5,7 @@
 
 from cim.fill_fields import linear_shunt_compensator_kwargs
 from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
-    verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_args
+    verify_shunt_compensator_constructor_kwargs, shunt_compensator_args
 from hypothesis import given
 
 from zepben.ewb import generate_id, PhaseCode

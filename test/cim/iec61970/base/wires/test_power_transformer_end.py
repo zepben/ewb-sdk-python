@@ -10,7 +10,7 @@ from pytest import raises
 
 from cim.fill_fields import power_transformer_end_kwargs
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
-    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_args
+    verify_transformer_end_constructor_kwargs, transformer_end_args
 from cim.private_collection_validator import validate_unordered_other
 from util import assert_or_empty
 from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType, generate_id

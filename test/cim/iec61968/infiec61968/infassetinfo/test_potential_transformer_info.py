@@ -5,7 +5,7 @@
 
 from cim.fill_fields import potential_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
-    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+    verify_asset_info_constructor_kwargs, asset_info_args
 from hypothesis import given
 
 from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id

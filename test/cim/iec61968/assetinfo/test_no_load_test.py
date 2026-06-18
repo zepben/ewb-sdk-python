@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import no_load_test_kwargs
 from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
-    verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
+    verify_transformer_test_constructor_kwargs, transformer_test_args
 from hypothesis import given
 
 from zepben.ewb import NoLoadTest, generate_id

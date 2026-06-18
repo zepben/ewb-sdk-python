@@ -6,7 +6,7 @@
 from cim.fill_fields import customer_kwargs
 from cim.iec61968.common.test_organisation_role import verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \
-    verify_organisation_role_constructor_args, organisation_role_args
+    organisation_role_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

@@ -5,7 +5,7 @@
 
 from cim.fill_fields import customer_agreement_kwargs
 from cim.iec61968.common.test_agreement import verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
-    verify_agreement_constructor_args, agreement_args
+    agreement_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

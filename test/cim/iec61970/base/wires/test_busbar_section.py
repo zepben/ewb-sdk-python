@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import busbar_section_kwargs
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
-    verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_args
+    verify_connector_constructor_kwargs, connector_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

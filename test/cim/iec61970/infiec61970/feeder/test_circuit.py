@@ -4,8 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.fill_fields import circuit_kwargs
-from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, \
-    line_args
+from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, line_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

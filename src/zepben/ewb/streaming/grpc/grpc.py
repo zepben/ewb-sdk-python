@@ -9,7 +9,6 @@ __all__ = ["GrpcResult", "GrpcClient"]
 
 from dataclasses import dataclass, field
 
-from multiprocessing.connection import default_family
 from typing import TypeVar, Generic, Callable, List, Union, Coroutine, Any
 
 from zepben.ewb.dataclass_descriptors import zb_dataclass

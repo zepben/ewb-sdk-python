@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import overhead_wire_info_kwargs
 from cim.iec61968.assetinfo.test_wire_info import verify_wire_info_constructor_default, \
-    verify_wire_info_constructor_kwargs, verify_wire_info_constructor_args, wire_info_args
+    verify_wire_info_constructor_kwargs, wire_info_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

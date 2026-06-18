@@ -7,7 +7,7 @@ from hypothesis import given
 
 from cim.fill_fields import site_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
-    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+    verify_equipment_container_constructor_kwargs, equipment_container_args
 from zepben.ewb import Site, TestNetworkBuilder, Equipment, AssignToLvFeeders, LvFeeder, NetworkStateOperators, generate_id
 
 site_args = equipment_container_args

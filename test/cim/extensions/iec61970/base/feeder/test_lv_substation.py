@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import lv_substation_kwargs
 from cim.iec61970.base.core.test_equipment_container import equipment_container_args, \
-    verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args
+    verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 from util import assert_or_empty

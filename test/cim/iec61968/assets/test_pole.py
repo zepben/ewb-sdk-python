@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import pole_kwargs
 from cim.iec61968.assets.test_structure import verify_structure_constructor_default, \
-    verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
+    verify_structure_constructor_kwargs, structure_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

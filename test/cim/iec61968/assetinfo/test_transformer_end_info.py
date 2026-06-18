@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from cim.fill_fields import transformer_end_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
-    verify_asset_info_constructor_args, asset_info_args
+    asset_info_args
 from hypothesis import given
 
 from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \

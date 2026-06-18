@@ -5,7 +5,7 @@
 
 from cim.fill_fields import meter_kwargs
 from cim.iec61968.metering.test_end_device import verify_end_device_constructor_default, verify_end_device_constructor_kwargs, \
-    verify_end_device_constructor_args, end_device_args
+    end_device_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

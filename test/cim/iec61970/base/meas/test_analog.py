@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import analog_kwargs
 from cim.iec61970.base.meas.test_measurement import verify_measurement_constructor_default, \
-    verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
+    verify_measurement_constructor_kwargs, measurement_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

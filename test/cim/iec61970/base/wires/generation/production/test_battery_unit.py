@@ -4,8 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import battery_unit_kwargs
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import \
-    verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
-    power_electronics_unit_args
+    verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, power_electronics_unit_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

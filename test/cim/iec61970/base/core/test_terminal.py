@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import terminal_kwargs
 from cim.iec61970.base.core.test_ac_dc_terminal import verify_ac_dc_terminal_constructor_default, \
-    verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
+    verify_ac_dc_terminal_constructor_kwargs, ac_dc_terminal_args
 from hypothesis import given
 
 from zepben.ewb import Terminal, ConnectivityNode, ConductingEquipment, PhaseCode, generate_id, NetworkService, Junction

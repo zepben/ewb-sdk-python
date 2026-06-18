@@ -19,6 +19,7 @@ if typing.TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
 
 

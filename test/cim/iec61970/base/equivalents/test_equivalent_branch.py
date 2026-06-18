@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import equivalent_branch_kwargs
 from cim.iec61970.base.equivalents.test_equivalent_equipment import verify_equivalent_equipment_constructor_default, \
-    verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
+    verify_equivalent_equipment_constructor_kwargs, equivalent_equipment_args
 from hypothesis import given
 
 from zepben.ewb import EquivalentBranch, generate_id

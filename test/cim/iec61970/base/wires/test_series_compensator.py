@@ -5,7 +5,7 @@
 
 from cim.fill_fields import series_compensator_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+    verify_conducting_equipment_constructor_kwargs, conducting_equipment_args
 from hypothesis import given
 
 from zepben.ewb import SeriesCompensator, generate_id

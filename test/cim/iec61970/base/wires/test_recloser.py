@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import recloser_kwargs
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
-    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_args
+    verify_protected_switch_constructor_kwargs, protected_switch_args
 from hypothesis import given
 
 from zepben.ewb import Recloser, generate_id

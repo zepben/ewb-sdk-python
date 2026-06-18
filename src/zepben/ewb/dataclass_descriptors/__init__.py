@@ -4,5 +4,5 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-from .dataclass_base import DataclassBase, zb_dataclass
-from .descriptor_fix import BackedDescriptor, remove_descriptor_annotations
+from .dataclass_base import DataclassBase as DataclassBase, zb_dataclass as zb_dataclass
+from .descriptor_fix import BackedDescriptor as BackedDescriptor, remove_descriptor_annotations as remove_descriptor_annotations

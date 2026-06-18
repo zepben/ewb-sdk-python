@@ -5,7 +5,7 @@
 
 from cim.fill_fields import potential_transformer_kwargs
 from cim.iec61970.base.auxiliaryequipment.test_sensor import verify_sensor_constructor_default, \
-    verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args
+    verify_sensor_constructor_kwargs, sensor_args
 from hypothesis import given
 
 from zepben.ewb import PotentialTransformer, PotentialTransformerKind, generate_id

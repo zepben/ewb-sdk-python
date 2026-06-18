@@ -5,7 +5,7 @@
 
 from cim.fill_fields import tariff_kwargs
 from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
-    verify_document_constructor_args, document_args
+    document_args
 from hypothesis import given
 
 from zepben.ewb import Tariff, generate_id

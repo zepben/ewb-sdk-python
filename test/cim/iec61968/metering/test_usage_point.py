@@ -5,7 +5,7 @@
 
 from cim.fill_fields import usage_point_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs, identified_object_args
 from cim.private_collection_validator import validate_unordered, validate_unordered_other
 from hypothesis import given
 from util import assert_or_empty

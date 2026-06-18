@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import ratio_tap_changer_kwargs
 from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
-    verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_args, assume_step_values
+    verify_tap_changer_constructor_kwargs, tap_changer_args, assume_step_values
 from hypothesis import given
 
 from zepben.ewb import generate_id

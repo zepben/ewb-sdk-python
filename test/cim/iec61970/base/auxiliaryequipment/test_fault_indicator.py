@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import fault_indicator_kwargs
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import verify_auxiliary_equipment_constructor_default, \
-    verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
+    verify_auxiliary_equipment_constructor_kwargs, auxiliary_equipment_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

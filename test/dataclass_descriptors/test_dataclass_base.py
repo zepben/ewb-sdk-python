@@ -50,7 +50,7 @@ def test_dataclass_base():
     # positional arg
     assert obj.mrid == mrid
     # type overriding
-    assert type(obj.x) == float
+    assert type(obj.x) is float
     # default values
     assert obj.x == 42.0
     # kwargs

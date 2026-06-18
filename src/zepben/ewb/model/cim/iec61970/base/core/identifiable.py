@@ -50,7 +50,7 @@ class Identifiable(DataclassBase, metaclass=ABCMeta):
         return hash(self.mrid)
 
     def __eq__(self, other):
-        return  type(other) == type(self) and self.mrid == other.mrid
+        return type(other) is type(self) and self.mrid == other.mrid
 
     @overload
     def _validate_reference(self, other: 'Identifiable', getter: Callable[[str], 'Identifiable | None'], type_description: str) -> bool: ...

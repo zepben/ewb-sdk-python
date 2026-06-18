@@ -6,7 +6,7 @@ import re
 
 from cim.fill_fields import power_electronics_connection_kwargs
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+    verify_regulating_cond_eq_constructor_kwargs, regulating_cond_eq_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 from pytest import raises

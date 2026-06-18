@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import ac_line_segment_phase_kwargs
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, verify_power_system_resource_constructor_kwargs, \
-    verify_power_system_resource_constructor_args, power_system_resource_args
+    power_system_resource_args
 from hypothesis import given
 
 from zepben.ewb import generate_id, AcLineSegment, SinglePhaseKind

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import discrete_value_kwargs
 from cim.iec61970.base.meas.test_measurement_value import verify_measurement_value_constructor_default, \
-    verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
+    verify_measurement_value_constructor_kwargs, measurement_value_args
 from hypothesis import given
 
 from zepben.ewb.model.cim.iec61970.base.meas.discrete_value import DiscreteValue

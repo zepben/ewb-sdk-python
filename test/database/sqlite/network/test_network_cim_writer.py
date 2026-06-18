@@ -7,7 +7,7 @@ from unittest.mock import create_autospec
 
 from util import import_submodules, all_subclasses
 from zepben.ewb import TableEquipmentEquipmentContainers, PreparedStatement, NetworkDatabaseTables, NetworkCimWriter, EquipmentContainer, Site, Substation, \
-    Circuit, Feeder, LvFeeder, Junction, generate_id
+    Circuit, Feeder, LvFeeder, Junction
 from zepben.ewb.model.cim.extensions.iec61970.base.core.hv_customer import HvCustomer
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 

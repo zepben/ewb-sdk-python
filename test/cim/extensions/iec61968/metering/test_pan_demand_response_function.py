@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import pan_demand_response_function_kwargs
 from cim.iec61968.metering.test_end_device_function import end_device_function_args, \
-    verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
+    verify_end_device_function_constructor_default
 from hypothesis import given
 from pytest import raises
 

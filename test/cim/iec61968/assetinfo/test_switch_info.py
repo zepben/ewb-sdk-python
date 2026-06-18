@@ -3,8 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import switch_info_kwargs
-from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
-    verify_asset_info_constructor_args
+from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs
 from hypothesis import given
 
 from zepben.ewb import SwitchInfo, generate_id

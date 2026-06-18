@@ -7,7 +7,7 @@ from hypothesis import given
 
 from cim.fill_fields import per_length_phase_impedance_kwargs
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
-    verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_args
+    verify_per_length_impedance_constructor_kwargs, per_length_impedance_args
 from cim.private_collection_validator import validate_unordered_other
 from util import assert_or_empty
 from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, generate_id

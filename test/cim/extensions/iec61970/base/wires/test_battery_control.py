@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import battery_control_kwargs
 from cim.iec61970.base.wires.test_regulating_control import regulating_control_args, verify_regulating_control_constructor_default, \
-    verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
+    verify_regulating_control_constructor_kwargs
 from hypothesis import given
 
 from zepben.ewb import BatteryControl, BatteryControlMode, generate_id

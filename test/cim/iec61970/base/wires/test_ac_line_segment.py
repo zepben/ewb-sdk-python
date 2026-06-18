@@ -5,7 +5,7 @@
 import pytest
 from cim.fill_fields import ac_line_segment_kwargs
 from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
-    verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_args
+    verify_conductor_constructor_kwargs, conductor_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

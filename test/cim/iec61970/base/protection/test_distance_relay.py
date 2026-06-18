@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import distance_relay_kwargs
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
-    verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
+    verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs
 from hypothesis import given
 
 from zepben.ewb import DistanceRelay, generate_id

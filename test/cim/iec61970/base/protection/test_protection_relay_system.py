@@ -5,7 +5,7 @@
 
 from cim.fill_fields import protection_relay_system_kwargs
 from cim.iec61970.base.core.test_equipment import equipment_args, verify_equipment_constructor_default, \
-    verify_equipment_constructor_kwargs, verify_equipment_constructor_args
+    verify_equipment_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

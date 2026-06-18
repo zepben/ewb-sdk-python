@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import protection_relay_scheme_kwargs
 from cim.iec61970.base.core.test_identified_object import identified_object_args, verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 

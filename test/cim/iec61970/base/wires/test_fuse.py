@@ -3,8 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import fuse_kwargs
-from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
-    switch_args
+from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, switch_args
 from hypothesis import given
 
 from zepben.ewb import Fuse, ProtectionRelayFunction, generate_id

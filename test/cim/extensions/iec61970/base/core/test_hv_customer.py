@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import hv_customer_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs, \
-    verify_equipment_container_constructor_args, equipment_container_args
+    equipment_container_args
 from hypothesis import given
 
 from zepben.ewb import generate_id

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import streetlight_kwargs
 from cim.iec61968.assets.test_asset import verify_asset_constructor_default, \
-    verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
+    verify_asset_constructor_kwargs, asset_args
 from hypothesis import given
 
 from zepben.ewb import Streetlight, Pole, generate_id

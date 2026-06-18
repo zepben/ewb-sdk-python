@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import static_var_compensator_kwargs
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+    verify_regulating_cond_eq_constructor_kwargs, regulating_cond_eq_args
 from hypothesis import given
 
 from zepben.ewb import SVCControlMode, StaticVarCompensator, generate_id

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.fill_fields import energy_consumer_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
+    verify_energy_connection_constructor_kwargs, energy_connection_args
 from cim.private_collection_validator import validate_unordered
 from hypothesis import given
 
