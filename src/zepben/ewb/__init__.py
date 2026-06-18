@@ -243,8 +243,7 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
 
 from zepben.ewb.model.resistance_reactance import *
 
-from zepben.ewb.services.network.tracing.util import *
-
+from zepben.ewb.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.ewb.services.network.translator.network_proto2cim import *
 from zepben.ewb.services.network.translator.network_cim2proto import *
 from zepben.ewb.services.network.network_service import *

@@ -21,6 +21,7 @@ from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.services.common.base_service import BaseService
 from zepben.ewb.services.common.meta.metadata_collection import MetadataCollection
+from zepben.ewb.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.ewb.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 
 if TYPE_CHECKING:
@@ -241,7 +242,6 @@ class NetworkService(BaseService):
         Get the primary source for this network. All directions are applied relative to this EnergySource
         Returns The primary EnergySource
         """
-        # noinspection PyUnresolvedReferences
         return [source for source in self._objects_by_type[EnergySource].values() if source.is_external_grid]
 
     def add_connectivity_node(self, mrid: str):
