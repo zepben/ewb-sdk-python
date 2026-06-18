@@ -4,16 +4,33 @@
 * None.
 
 ### New Features
-* None.
+* Added a `lint` tox environment that runs `ruff check .` to enforce code quality standards. The test environments now depend on lint passing first, so CI will fail if any new lint violations are introduced.
 
 ### Enhancements
-* None.
+* Added `ruff` as a dependency for the `lint` tox environment.
+* Configured ruff with ignores for `F405`, `E731`, `E741`, and `E722`.
+* Added `per-file-ignores` for intentional star-imports in `__init__.py` files and resolver modules.
+* Added `skip_install = true` to the lint environment to avoid installing package dependencies that aren't needed for linting.
+* Added E402 noqa comments for intentional mid-file imports used to avoid circular dependency issues in `dataclassy/dataclass.py`, `context_value_computer.py`, `queue_condition.py`, `direction_logger.py`, and `test_network_trace.py`.
 
 ### Fixes
 * Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.
+* **E721**: Replaced `is`/`is not` type checks with `isinstance()` in `base_service_comparator.py` and `traversal.py`.
+* **F821**: Deleted dead `services/network/tracing/util.py` file. Fixed undefined names by importing `EnergySource` directly, importing `Generic` where needed, and importing customer types in `test_customer_consumer.py`.
+* **F811**: Removed unused `lv_substation` module import and resolved shadowed variable names in `equipment_container_state_operators.py`, `test_clear_direction.py`, `test_network_trace_step_path_provider.py`, `test_set_phases.py`, and `test_util.py`.
+* **E712**: Replaced `== True`/`== False` comparisons with proper truth checks.
+* **F822**: Fixed empty string in `__all__` declarations.
+* **E701**: Fixed multiple statements on one line.
+* **F901**: Fixed `raise` without arguments.
+* **F541**: Fixed F-strings missing placeholders.
+* **F841**: Removed unused variables.
+* **F401**: Removed unused imports across multiple files.
+* **F403**: Resolved star-import usage by adding per-file-ignores in `pyproject.toml` for modules that intentionally use `from module import *`.
+* **E402**: Added inline `noqa` comments for intentional module-level imports placed mid-file to avoid circular import issues.
 
 ### Notes
-* None.
+* The lint environment requires `ruff` to be installed. Run `tox -e lint` to check code quality.
+* The full test suite (`tox`) now requires lint to pass before running tests.
 
 ## [1.3.1] - 2026-04-21
 ### Breaking Changes
