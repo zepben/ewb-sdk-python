@@ -84,19 +84,19 @@ def test_connectivity():
 
     assert terminal.connectivity_node is None
     assert terminal.connectivity_node_id is None
-    assert terminal.connected == False
+    assert not terminal.connected
 
     terminal.connect(connectivity_node)
 
     assert terminal.connectivity_node == connectivity_node
     assert terminal.connectivity_node_id is connectivity_node.mrid
-    assert terminal.connected == True
+    assert terminal.connected
 
     terminal.disconnect()
 
     assert terminal.connectivity_node is None
     assert terminal.connectivity_node_id is None
-    assert terminal.connected == False
+    assert not terminal.connected
 
 
 def test_connected_terminals():
