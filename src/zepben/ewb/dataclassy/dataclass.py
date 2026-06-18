@@ -150,7 +150,7 @@ def _generate_new(annotations: Dict, defaults: Dict, user_init: bool, gen_kwargs
 
     # generate the function
     signature = f'def __new__(cls, {parameters}):'
-    body = [f'self = object.__new__(cls)', *assignments, 'return self']
+    body = ['self = object.__new__(cls)', *assignments, 'return self']
 
     exec('\n\t'.join([signature, *body]), {}, defaults)
     function = defaults.pop('__new__')

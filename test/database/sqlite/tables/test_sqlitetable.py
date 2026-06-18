@@ -27,8 +27,8 @@ def test_ddl():
     assert x.select_sql == "SELECT test_column, test_column_2 FROM test_table"
     assert x.prepared_insert_sql == "INSERT INTO test_table (test_column, test_column_2) VALUES (?, ?)"
     assert x.prepared_update_sql == "UPDATE test_table SET test_column = ?, test_column_2 = ?"
-    assert x.create_indexes_sql == [f"CREATE UNIQUE INDEX test_table_test_column ON test_table (test_column)",
-                                    f"CREATE INDEX test_table_test_column_2 ON test_table (test_column_2)"]
+    assert x.create_indexes_sql == ["CREATE UNIQUE INDEX test_table_test_column ON test_table (test_column)",
+                                    "CREATE INDEX test_table_test_column_2 ON test_table (test_column_2)"]
 
 
 def test_create_column_set_raises_on_invalid_column_name():

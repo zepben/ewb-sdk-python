@@ -37,7 +37,7 @@ class StepAction(Generic[T]):
         :raises Exception: If ``cls.apply`` is overridden
         """
         if 'apply' in cls.__dict__.keys():
-            raise Exception(f"method 'apply' should not be directly overridden, override '_apply' instead.")
+            raise Exception("method 'apply' should not be directly overridden, override '_apply' instead.")
         super().__init_subclass__()
 
     @final

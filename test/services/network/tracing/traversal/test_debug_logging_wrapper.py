@@ -128,7 +128,7 @@ class TestDebugLoggingWrappers:
         # Check count starts at 1, and double adding the same condition doesn't increment count
         with self._log_handler() as handler:
             wrapped_condition.should_stop(False, False)
-            assert handler.log_list.get() == f"root: my desc: should_stop(1)=True [item=False, context=False]"
+            assert handler.log_list.get() == "root: my desc: should_stop(1)=True [item=False, context=False]"
 
         condition2 = StopCondition(lambda item, context: True)
         wrapped_condition2 = logging_wrapper.wrap(condition2)
@@ -136,11 +136,11 @@ class TestDebugLoggingWrappers:
         with self._log_handler() as handler:
             # check the new condition is marked as "2"
             wrapped_condition2.should_stop(False, False)
-            assert handler.log_list.get() == f"root: my desc: should_stop(2)=True [item=False, context=False]"
+            assert handler.log_list.get() == "root: my desc: should_stop(2)=True [item=False, context=False]"
 
             # check the original condition hasnt changed from "1"
             wrapped_condition.should_stop(False, False)
-            assert handler.log_list.get() == f"root: my desc: should_stop(1)=True [item=False, context=False]"
+            assert handler.log_list.get() == "root: my desc: should_stop(1)=True [item=False, context=False]"
 
         # check that adding the original condition to a new logger works, and resets the count.
         logging_wrapper2 = DebugLoggingWrapper('my desc', self.logger)
@@ -150,11 +150,11 @@ class TestDebugLoggingWrappers:
 
         with self._log_handler() as handler:
             wrapped_original_condition.should_stop(False, False)
-            assert handler.log_list.get() == f"root: my desc: should_stop(1)=True [item=False, context=False]"
+            assert handler.log_list.get() == "root: my desc: should_stop(1)=True [item=False, context=False]"
 
             # check the new condition is marked as "2"
             wrapped_original_condition2.should_stop(False, False)
-            assert handler.log_list.get() == f"root: my desc: should_stop(2)=True [item=False, context=False]"
+            assert handler.log_list.get() == "root: my desc: should_stop(2)=True [item=False, context=False]"
 
     def test_wrapping(self):
         wrapper = DebugLoggingWrapper("hmmm", self.logger)

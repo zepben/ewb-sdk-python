@@ -22,7 +22,7 @@ class CaptureMockSequence:
 
         mock_call_len = len(mock_calls)
         if mock_call_len != len(expected_calls):
-            print(f'call sequence lengths not the same\n\n +++++++++++ \n\n')
+            print('call sequence lengths not the same\n\n +++++++++++ \n\n')
             if mock_call_len > len(expected_calls):
                 enum_list = mock_calls
                 cmp_list = expected_calls

@@ -81,7 +81,7 @@ def test_create_token_fetcher_bad_response(mock_get):
 @mock.patch('zepben.ewb.auth.client.zepben_token_fetcher.requests.get',
             side_effect=lambda *args, **kwargs: MockResponse(None, 200, reason='test reason', text='test text'))
 def test_create_token_fetcher_missing_json(mock_get):
-    with pytest.raises(AuthException, match=f"Expected JSON response from https://testaddress:443/ewb/auth, but got: test text.") as exc_info:
+    with pytest.raises(AuthException, match="Expected JSON response from https://testaddress:443/ewb/auth, but got: test text.") as exc_info:
         create_token_fetcher("https://testaddress:443/ewb/auth")
 
     assert exc_info.value.status_code == 200
@@ -169,7 +169,7 @@ class TestZepbenTokenFetcher:
 
         mock_post.assert_not_called()  # POST request is not made before get_token() is called
 
-        with pytest.raises(AuthException, match=f"Token fetch failed, Error was: test reason test text") as exc_info:
+        with pytest.raises(AuthException, match="Token fetch failed, Error was: test reason test text") as exc_info:
             token_fetcher.fetch_token()
 
         assert exc_info.value.status_code == 404
@@ -192,7 +192,7 @@ class TestZepbenTokenFetcher:
 
         mock_post.assert_not_called()  # POST request is not made before get_token() is called
 
-        with pytest.raises(AuthException, match=f'Response did not contain expected JSON - response was: test text'):
+        with pytest.raises(AuthException, match='Response did not contain expected JSON - response was: test text'):
             token_fetcher.fetch_token()
 
         mock_post.assert_called_once_with(
@@ -214,7 +214,7 @@ class TestZepbenTokenFetcher:
 
         mock_post.assert_not_called()  # POST request is not made before get_token() is called
 
-        with pytest.raises(AuthException, match=f'fail - test error description'):
+        with pytest.raises(AuthException, match='fail - test error description'):
             token_fetcher.fetch_token()
 
         mock_post.assert_called_once_with(
