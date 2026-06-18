@@ -4,8 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import Mock
 
-import pytest
-
 
 class CaptureMockSequence:
 

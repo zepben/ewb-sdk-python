@@ -7,7 +7,7 @@
 __all__ = ["ZepbenTokenFetcher", "create_token_fetcher", "get_token_fetcher", "create_token_fetcher_managed_identity"]
 
 import warnings
-from dataclasses import dataclass, Field, field, InitVar
+from dataclasses import dataclass, field, InitVar
 from datetime import datetime
 from typing import Optional, Callable
 

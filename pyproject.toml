@@ -85,6 +85,7 @@ ignore = [
 "src/zepben/ewb/examples/__init__.py" = ["F403"]
 "test/services/customer/translator/test_customer_translator.py" = ["F403"]
 "test/services/diagram/translator/test_diagram_translator.py" = ["F403"]
+"src/zepben/ewb/dataclassy/*" = ["F401"]
 
 [tool.setuptools.packages.find]
     where = ["src/"]

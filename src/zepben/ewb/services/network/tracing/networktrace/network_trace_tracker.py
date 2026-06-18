@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Set, Any, FrozenSet
+from typing import Any, FrozenSet
 
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind

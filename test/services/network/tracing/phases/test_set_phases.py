@@ -7,8 +7,7 @@ from typing import Union, List
 import pytest
 
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, \
-    LinearShuntCompensator, Terminal
+from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, LinearShuntCompensator
 from zepben.ewb.exceptions import TracingException, PhaseException
 
 

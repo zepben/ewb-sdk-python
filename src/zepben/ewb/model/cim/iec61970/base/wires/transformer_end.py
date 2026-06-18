@@ -13,7 +13,6 @@ from zepben.ewb.util import require
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
-    from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
     from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 

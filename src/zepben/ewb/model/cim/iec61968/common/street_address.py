@@ -6,7 +6,6 @@
 __all__ = ["StreetAddress"]
 
 from dataclasses import dataclass
-from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
