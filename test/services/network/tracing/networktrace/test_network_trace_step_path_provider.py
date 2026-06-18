@@ -5,7 +5,6 @@
 from typing import Generator, Iterable
 
 import pytest
-from pytest_subtests.plugin import subtests
 
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode

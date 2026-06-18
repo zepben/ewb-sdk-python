@@ -11,7 +11,6 @@ from abc import abstractmethod
 from functools import singledispatchmethod
 from typing import Generator, TYPE_CHECKING, overload
 
-from zepben.ewb.model.cim.extensions.iec61970.base.feeder import lv_substation
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
