@@ -50,8 +50,8 @@ class StopConditionWithContextValue(StopCondition[T], ContextValueComputer[T]):
 
     @abstractmethod
     def compute_initial_value(self, item: T):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def compute_next_value(self, next_item: T, current_item: T, current_value):
-        raise NotImplemented
+        raise NotImplementedError
