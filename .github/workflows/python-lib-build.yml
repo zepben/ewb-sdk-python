@@ -9,4 +9,5 @@ jobs:
     uses: zepben/.github/.github/workflows/python-build.yml@main
     with:
       private: false
+      python-versions-to-test: "['3.10', '3.11', '3.12']"
     secrets: inherit
