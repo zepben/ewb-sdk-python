@@ -181,4 +181,3 @@ class ContactDetails:
             self._phone_numbers == other._phone_numbers,
             self._electronic_addresses == other._electronic_addresses,
         ))
-    
