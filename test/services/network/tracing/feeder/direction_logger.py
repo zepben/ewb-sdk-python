@@ -11,7 +11,7 @@ from zepben.ewb import ConductingEquipment, Tracing
 
 T = TypeVar('T')
 
-from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.ewb.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep  # noqa: E402
 
 
 async def log_directions(*conducting_equipment: ConductingEquipment):

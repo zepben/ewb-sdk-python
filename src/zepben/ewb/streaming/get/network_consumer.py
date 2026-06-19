@@ -10,7 +10,7 @@ __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, TypeVar, Awaitable, cast, overload, Type
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, TypeVar, Awaitable, cast, overload, Generic
 
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse

@@ -51,7 +51,7 @@ class EwbDataFilePaths(ABC):
         :param database_date: The :class:`date` required in the path.
         :return: The :class:`Path` to the directory for the `database_date`.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def find_closest(
         self,
@@ -151,7 +151,7 @@ class EwbDataFilePaths(ABC):
 
         :return: generator of child items.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def resolve_database(self, path: Path) -> Path:
@@ -161,7 +161,7 @@ class EwbDataFilePaths(ABC):
         :param path: :class:`Path` to the source database file.
         :return: :class:`Path` to the local database file.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def _check_exists(self, descendants: List[Path], database_type: DatabaseType, database_date: date) -> bool:
         """

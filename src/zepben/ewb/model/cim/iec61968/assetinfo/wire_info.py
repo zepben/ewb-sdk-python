@@ -5,8 +5,6 @@
 
 __all__ = ["WireInfo"]
 
-from typing import Optional
-
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_material_kind import WireMaterialKind
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo

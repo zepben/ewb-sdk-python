@@ -33,7 +33,7 @@ class ContextValueComputer(Generic[T]):
         :param item: The starting item for which to compute the initial context value.
         :return: The initial context value associated with the starting item.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def compute_next_value(self, next_item: T, current_item: T, current_value):
@@ -45,7 +45,7 @@ class ContextValueComputer(Generic[T]):
         :param current_value: The current context value associated with the current item.
         :return: The updated context value for the next item.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def get_context_value(self, context: StepContext):
         """
@@ -58,6 +58,6 @@ class ContextValueComputer(Generic[T]):
 
 
 # these imports are here to stop circular imports
-from zepben.ewb.services.network.tracing.traversal.stop_condition import StopCondition
-from zepben.ewb.services.network.tracing.traversal.step_action import StepAction
-from zepben.ewb.services.network.tracing.traversal.queue_condition import QueueCondition
+from zepben.ewb.services.network.tracing.traversal.stop_condition import StopCondition  # noqa: E402
+from zepben.ewb.services.network.tracing.traversal.step_action import StepAction  # noqa: E402
+from zepben.ewb.services.network.tracing.traversal.queue_condition import QueueCondition  # noqa: E402

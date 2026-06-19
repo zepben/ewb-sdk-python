@@ -184,7 +184,7 @@ class TestFindSwerEquipment:
             print(f'Extras: {[e.mrid for e in extra]} from expected results')
 
         if len(results) != len(expected):
-            pytest.fail(f'results dont match expected:')
+            pytest.fail('results dont match expected:')
 
         assert not missing or extra
 

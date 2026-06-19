@@ -55,7 +55,7 @@ class SqlTable(metaclass=ABCMeta):
         """
         The SQL statement that should be executed to create the table in the database.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def prepared_insert_sql(self):
@@ -74,7 +74,7 @@ class SqlTable(metaclass=ABCMeta):
         The SQL statement that should be executed to create the indexes for the table in the database. Should be executed after all
         entries are inserted into the table.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def select_sql(self):

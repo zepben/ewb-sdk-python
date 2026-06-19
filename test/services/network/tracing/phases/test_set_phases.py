@@ -6,10 +6,8 @@ from typing import Union, List
 
 import pytest
 
-from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, \
-    LinearShuntCompensator, Terminal
+from zepben.ewb import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, LinearShuntCompensator
 from zepben.ewb.exceptions import TracingException, PhaseException
 
 
@@ -562,7 +560,7 @@ async def test_can_set_phases_from_an_unknown_nominal_phase():
         .to_acls(PhaseCode.ABC) \
         .network
 
-    acls = n['c0']
+    n['c0']  # noqa: F841
     t = get_t(n, 'c0', 2)
     t.normal_phases[SPK.X] = SPK.A
     t.current_phases[SPK.X] = SPK.A

@@ -30,7 +30,7 @@ __all__ = [
     "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
     "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
 
-from typing import Callable, Optional, Any
+from typing import Callable, Optional
 
 from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo

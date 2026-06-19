@@ -17,7 +17,7 @@ from streaming.get.data.metadata import create_metadata, create_metadata_respons
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed
 from streaming.get.pb_creators import customer_identified_objects
-from zepben.ewb import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
+from zepben.ewb import CustomerConsumerClient, BaseService, IdentifiedObject, Customer, CustomerAgreement, Organisation, PricingStructure, Tariff
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')

@@ -41,7 +41,7 @@ class LocalEwbDataFilePaths(EwbDataFilePaths):
         if create_path:
             self._create_directories_func(base_dir)
 
-        require(is_directory(base_dir), lambda: f"base_dir must be a directory")
+        require(is_directory(base_dir), lambda: "base_dir must be a directory")
 
     def create_directories(self, database_date: date) -> Path:
         date_path = self._base_dir.joinpath(str(database_date))

@@ -8,9 +8,7 @@ import pytest
 from zepben.ewb import Equipment, TestNetworkBuilder, BaseVoltage, Tracing, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, \
     ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, \
     ConductingEquipment, generate_id
-from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
-from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 

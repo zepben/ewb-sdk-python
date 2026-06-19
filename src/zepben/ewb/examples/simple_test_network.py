@@ -29,7 +29,6 @@ async def simple_test_network() -> NetworkService:
     point3 = PositionPoint(x_position=149.12840360920450, y_position=-35.277171304657690)
 
     loc1 = Location().add_point(point1)
-    loc2 = Location().add_point(point2)
     loc3 = Location().add_point(point3)
 
     # PerLengthSequenceImpedance

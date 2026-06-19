@@ -5,7 +5,6 @@
 from typing import Generator, Iterable
 
 import pytest
-from pytest_subtests.plugin import subtests
 
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -746,7 +745,6 @@ class TestNetworkTraceStepPathProvider:
                    .with_clamp(length_from_terminal_1=2.0)  # c1-clamp2
                    .to_breaker()  # b2
                    ).network
-        segment: AcLineSegment = network['c1']
 
         return network
 

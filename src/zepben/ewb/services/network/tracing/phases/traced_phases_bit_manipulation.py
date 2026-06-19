@@ -40,11 +40,16 @@ class TracedPhasesBitManipulation:
     @staticmethod
     def get(status: int, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         match ((status >> nominal_phase.byte_selector()) & 15):
-            case 1: return SinglePhaseKind.A
-            case 2: return SinglePhaseKind.B
-            case 4: return SinglePhaseKind.C
-            case 8: return SinglePhaseKind.N
-            case _: return SinglePhaseKind.NONE
+            case 1:
+                return SinglePhaseKind.A
+            case 2:
+                return SinglePhaseKind.B
+            case 4:
+                return SinglePhaseKind.C
+            case 8:
+                return SinglePhaseKind.N
+            case _:
+                return SinglePhaseKind.NONE
 
     @staticmethod
     def set(status: int, nominal_phase: SinglePhaseKind, single_phase_kind: SinglePhaseKind) -> int:

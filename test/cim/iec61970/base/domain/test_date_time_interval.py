@@ -24,7 +24,7 @@ datetime_interval_args = [
 def test_datetime_interval_constructor_default():
     with pytest.raises(ValueError, match="You must provide a start or end time."):
         # noinspection PyUnusedLocal
-        dti = DateTimeInterval()
+        dti = DateTimeInterval()  # noqa: F841
 
     a = DateTimeInterval(start=datetime(2020, 1, 1))
     b = DateTimeInterval(end=datetime(2020, 1, 1))

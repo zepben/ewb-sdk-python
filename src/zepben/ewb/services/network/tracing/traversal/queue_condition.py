@@ -41,7 +41,7 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
         Returns `True` if the `next_tem` should be queued; `False` otherwise.
         """
 
-        raise NotImplemented
+        raise NotImplementedError
 
     @staticmethod
     def should_queue_start_item(item: T) -> bool:
@@ -55,7 +55,7 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
         return True
 
 
-from zepben.ewb.services.network.tracing.traversal.context_value_computer import ContextValueComputer
+from zepben.ewb.services.network.tracing.traversal.context_value_computer import ContextValueComputer  # noqa: E402
 
 
 class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T], Generic[T, U]):
@@ -68,8 +68,8 @@ class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T],
 
     @abstractmethod
     def compute_initial_value(self, item: T):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def compute_next_value(self, next_item: T, current_item: T, current_value):
-        raise NotImplemented
+        raise NotImplementedError

@@ -140,9 +140,9 @@ class Traversal(Generic[T, D]):
         self._parent: D = parent
         self._debug_logger = DebugLoggingWrapper(self.name, debug_logger) if debug_logger else None
 
-        if type(queue_type) == Traversal.BasicQueueType:
+        if isinstance(queue_type, Traversal.BasicQueueType):
             self.queue_next = lambda current, context: self._queue_next_non_branching(current, context, self._queue_type.queue_next)
-        elif type(queue_type) == Traversal.BranchingQueueType:
+        elif isinstance(queue_type, Traversal.BranchingQueueType):
             self.queue_next = lambda current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
 
         self.queue: TraversalQueue[T] = queue_type.queue
@@ -216,7 +216,7 @@ class Traversal(Generic[T, D]):
             elif len(inspect.getfullargspec(condition).args) == 4:
                 return self.add_queue_condition(condition)
             else:
-                raise RuntimeError(f'Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
+                raise RuntimeError('Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
 
         else:
             raise RuntimeError(

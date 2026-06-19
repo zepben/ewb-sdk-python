@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from traceback import print_tb
-from typing import TypeVar, Type, Set, Any, cast, Callable
+from typing import Type, Set, Any, cast, Callable
 
 from hypothesis import given
 from hypothesis.strategies import SearchStrategy

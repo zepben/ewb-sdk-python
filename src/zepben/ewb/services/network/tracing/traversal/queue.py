@@ -9,7 +9,7 @@ __all__ = ["TraversalQueue"]
 
 from abc import abstractmethod, ABCMeta
 from collections import deque
-from typing import TypeVar, Iterable, Generic, Deque, TYPE_CHECKING, Union
+from typing import TypeVar, Iterable, Generic, Union
 
 T = TypeVar('T')
 U = TypeVar('U')

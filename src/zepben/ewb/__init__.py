@@ -243,8 +243,7 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import *
 
 from zepben.ewb.model.resistance_reactance import *
 
-from zepben.ewb.services.network.tracing.util import *
-
+from zepben.ewb.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.ewb.services.network.translator.network_proto2cim import *
 from zepben.ewb.services.network.translator.network_cim2proto import *
 from zepben.ewb.services.network.network_service import *
@@ -305,7 +304,7 @@ from zepben.ewb.services.network.tracing.traversal.traversal import *
 from zepben.ewb.services.network.tracing.traversal.traversal_condition import *
 from zepben.ewb.services.network.tracing.traversal.weighted_priority_queue import *
 
-from zepben.ewb.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
+from zepben.ewb.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper  # noqa: F401
 
 from zepben.ewb.services.network.tracing.find_swer_equipment import *
 
@@ -315,8 +314,8 @@ from zepben.ewb.services.common.meta.service_info import *
 from zepben.ewb.services.common.meta.metadata_translations import *
 from zepben.ewb.services.common.translator.base_proto2cim import *
 from zepben.ewb.services.common.base_service import *
-from zepben.ewb.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference
-from zepben.ewb.services.common import resolver
+from zepben.ewb.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference  # noqa: F401
+from zepben.ewb.services.common import resolver  # noqa: F401
 
 from zepben.ewb.services.diagram.translator.diagram_proto2cim import *
 from zepben.ewb.services.diagram.translator.diagram_cim2proto import *
@@ -356,10 +355,10 @@ from zepben.ewb.model.busbranch.bus_branch import *
 from zepben.ewb.services.common.difference import *
 from zepben.ewb.services.common.translator.service_differences import *
 
-from zepben.ewb.services.common.base_service_comparator import BaseServiceComparator
-from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparator
-from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
-from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
+from zepben.ewb.services.common.base_service_comparator import BaseServiceComparator  # noqa: F401
+from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparator  # noqa: F401
+from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator  # noqa: F401
+from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator  # noqa: F401
 
 from zepben.ewb.database.paths.database_type import *
 from zepben.ewb.database.paths.ewb_data_file_paths import *
@@ -602,7 +601,7 @@ from zepben.ewb.database.sqlite.network.network_cim_writer import *
 from zepben.ewb.database.sqlite.network.network_database_tables import *
 from zepben.ewb.database.sqlite.network.network_database_writer import *
 from zepben.ewb.database.sqlite.network.network_service_writer import *
-from zepben.ewb.database.sqlite.extensions.result_set import ResultSet
+from zepben.ewb.database.sqlite.extensions.result_set import ResultSet  # noqa: F401
 from zepben.ewb.database.sqlite.common.metadata_collection_reader import *
 from zepben.ewb.database.sqlite.common.metadata_entry_reader import *
 from zepben.ewb.database.sqlite.customer.customer_cim_reader import *

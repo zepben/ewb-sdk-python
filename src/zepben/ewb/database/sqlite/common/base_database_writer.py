@@ -76,7 +76,7 @@ class BaseDatabaseWriter(ABC):
         @return True if the database was successfully saved, otherwise False.
         """
         if self._has_been_used:
-            self._logger.error(f"You can only use the database writer once.")
+            self._logger.error("You can only use the database writer once.")
             return False
         self._has_been_used = True
 

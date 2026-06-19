@@ -223,7 +223,7 @@ class TestClearDirection:
         _check_expected_direction(_get_t(n, 'c3', 2), NONE)
 
     @pytest.mark.asyncio
-    async def test_clears_loops(self):
+    async def test_clears_loops_with_two_feeders(self):
         #
         #            1--c2--2
         # b0 11--c1--2      1--c3--21 b4

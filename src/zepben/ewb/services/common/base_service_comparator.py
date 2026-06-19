@@ -69,7 +69,7 @@ class BaseServiceComparator:
             t = target.get(s.mrid, default=None)
             if t:
                 source_type = type(s)
-                if source_type != type(t):
+                if source_type is not type(t):
                     differences.add_to_missing_from_source(s.mrid)
                     differences.add_to_missing_from_target(s.mrid)
                 else:
@@ -234,7 +234,7 @@ class BaseServiceComparator:
             s_val = getattr(diff.source, prop.__name__) if diff.source else None
             t_val = getattr(diff.target, prop.__name__) if diff.target else None
 
-        if (type(s_val) == float) or (type(t_val) == float):
+        if isinstance(s_val, float) or isinstance(t_val, float):
             raise TypeError(f"Using wrong comparator for {prop}, use _calculate_float_diff instead.")
 
         if to_comparable(s_val) == to_comparable(t_val):

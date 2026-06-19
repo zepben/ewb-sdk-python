@@ -85,7 +85,7 @@ def create_auth_provider_config(conf_address: str, verify: bool, auth_type_field
                         provider_details=fetch_provider_details(auth_config_json[issuer_field])
                     )
                 else:
-                    raise AuthException(1, f"authMethod 'NONE' is not supported for token fetching!")
+                    raise AuthException(1, "authMethod 'NONE' is not supported for token fetching!")
 
             except ValueError:
                 raise AuthException(response.status_code, f"Expected JSON response from {conf_address}, but got: {response.text}.")
