@@ -12,17 +12,18 @@ async def test_find_lv_feeders_works_for_sites_and_substations_with_lv_substatio
     #
     # tx0 21 b1(lvf5) 21--c2--2
     #     21 b3(lvf6) 21--c4--2
-    lvSub = LvSubstation(mrid=generate_id())
+    lv_sub = LvSubstation(mrid=generate_id())
     site = Site(mrid=generate_id())
-    network = (TestNetworkBuilder()
-        .from_power_transformer(action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lvSub))
-        .to_breaker(is_normally_open=True, is_open=True, action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lvSub))
-        .to_acls() # c2
+    network = (
+        TestNetworkBuilder()
+        .from_power_transformer(action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lv_sub))  # tx0
+        .to_breaker(is_normally_open=True, is_open=True, action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lv_sub))  # b1
+        .to_acls()  # c2
         .branch_from("tx0")
-        .to_breaker(is_normally_open=False, is_open=False, action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lvSub))
-        .to_acls() # c4
-        .add_lv_feeder("b1") # lvf5
-        .add_lv_feeder("b3") # lvf6
+        .to_breaker(is_normally_open=False, is_open=False, action=lambda it: _add_equipment_to_site(it, site) and _add_equipment_to_site(it, lv_sub))  # b3
+        .to_acls()  # c4
+        .add_lv_feeder("b1")  # lvf5
+        .add_lv_feeder("b3")  # lvf6
     ).network
     assign_to_lv_feeders = Tracing.assign_equipment_to_lv_feeders()
 

@@ -7,5 +7,5 @@ from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireIns
 from zepben.protobuf.cim.iec61968.assetinfo.WireInsulationKind_pb2 import WireInsulationKind as PBWireInsulationKind
 
 
-def test_wire_material_kind_enum():
+def test_wire_insulation_kind_enum():
     validate_enum(WireInsulationKind, PBWireInsulationKind)
