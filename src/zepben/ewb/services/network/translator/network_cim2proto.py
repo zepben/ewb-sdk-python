@@ -25,7 +25,7 @@ __all__ = [
     "ev_charging_unit", "transformer_end_rated_s_to_pb", "tap_changer_control_to_pb", "regulating_control_to_pb", "protection_relay_function_to_pb",
     "protection_relay_scheme_to_pb", "protection_relay_system_to_pb", "relay_setting_to_pb", "ground_to_pb", "ground_disconnector_to_pb",
     "series_compensator_to_pb", "pan_demand_response_function_to_pb", "battery_control_to_pb", "asset_function_to_pb", "end_device_function_to_pb",
-    "static_var_compensator_to_pb", "per_length_phase_impedance_to_pb", "phase_impedance_data_to_pb",
+    "static_var_compensator_to_pb", "per_length_phase_impedance_to_pb", "phase_impedance_data_to_pb", "breaker_configuration_to_pb", "busbar_configuration_to_pb", "bay_to_pb", "voltage_level_to_pb",
 ]
 
 from typing import Any, Optional
@@ -91,6 +91,9 @@ from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_p
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.Sensor_pb2 import Sensor as PBSensor
 from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal as PBAcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage as PBBaseVoltage
+from zepben.protobuf.cim.iec61970.base.core.Bay_pb2 import Bay as PBBay
+from zepben.protobuf.cim.iec61970.base.core.BreakerConfiguration_pb2 import BreakerConfiguration as PBBreakerConfiguration
+from zepben.protobuf.cim.iec61970.base.core.BusbarConfiguration_pb2 import BusbarConfiguration as PBBusbarConfiguration
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer as PBConnectivityNodeContainer
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode as PBConnectivityNode
@@ -104,6 +107,7 @@ from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import Power
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
+from zepben.protobuf.cim.iec61970.base.core.VoltageLevel_pb2 import VoltageLevel as PBVoltageLevel
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
@@ -234,6 +238,9 @@ from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import *
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import *
 from zepben.ewb.model.cim.iec61970.base.core.base_voltage import *
+from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
+from zepben.ewb.model.cim.iec61970.base.core.breaker_configuration import BreakerConfiguration
+from zepben.ewb.model.cim.iec61970.base.core.busbar_configuration import BusbarConfiguration
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import *
@@ -247,6 +254,7 @@ from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import *
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import *
 from zepben.ewb.model.cim.iec61970.base.core.substation import *
 from zepben.ewb.model.cim.iec61970.base.core.terminal import *
+from zepben.ewb.model.cim.iec61970.base.core.voltage_level import VoltageLevel
 from zepben.ewb.model.cim.iec61970.base.equivalents.equivalent_branch import *
 from zepben.ewb.model.cim.iec61970.base.equivalents.equivalent_equipment import *
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_unit import *
@@ -1141,13 +1149,15 @@ def sub_geographical_region_to_pb(cim: SubGeographicalRegion) -> PBSubGeographic
 @bind_to_pb
 def substation_to_pb(cim: Substation) -> PBSubstation:
     return PBSubstation(
-        ec=equipment_container_to_pb(cim),
-        subGeographicalRegionMRID=mrid_or_empty(cim.sub_geographical_region),
-        normalEnergizedFeederMRIDs=[str(io.mrid) for io in cim.feeders],
-        loopMRIDs=[str(io.mrid) for io in cim.loops],
-        normalEnergizedLoopMRIDs=[str(io.mrid) for io in cim.energized_loops],
-        circuitMRIDs=[str(io.mrid) for io in cim.circuits]
-    )
+         ec=equipment_container_to_pb(cim),
+         subGeographicalRegionMRID=mrid_or_empty(cim.sub_geographical_region),
+         normalEnergizedFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_feeders],
+         loopMRIDs=[str(io.mrid) for io in cim.loops],
+         normalEnergizedLoopMRIDs=[str(io.mrid) for io in cim.normal_energized_loops],
+         circuitMRIDs=[str(io.mrid) for io in cim.circuits],
+         bayMRIDs=[str(io.mrid) for io in cim.bays],
+         voltageLevelMRIDs=[str(io.mrid) for io in cim.voltage_levels],
+     )
 
 
 @bind_to_pb
@@ -1979,5 +1989,50 @@ def circuit_to_pb(cim: Circuit) -> PBCircuit:
         l=line_to_pb(cim),
         loopMRID=mrid_or_empty(cim.loop),
         endTerminalMRIDs=[str(io.mrid) for io in cim.end_terminals],
-        endSubstationMRIDs=[str(io.mrid) for io in cim.end_substations]
+        endSubstationMRIDs=[str(io.mrid) for io in cim.end_substations],
+        endBayMRIDs=[str(io.mrid) for io in cim.end_bays],
+    )
+
+
+##############################
+# IEC61970 Base Core Enums   #
+##############################
+
+@bind_to_pb
+def breaker_configuration_to_pb(cim: BreakerConfiguration) -> PBBreakerConfiguration:
+    return PBBreakerConfiguration(value=cim.value)
+
+
+@bind_to_pb
+def busbar_configuration_to_pb(cim: BusbarConfiguration) -> PBBusbarConfiguration:
+    return PBBusbarConfiguration(value=cim.value)
+
+
+################################
+# IEC61970 Base Core Bays    #
+################################
+
+@bind_to_pb
+def bay_to_pb(cim: Bay) -> PBBay:
+    return PBBay(
+        ec=equipment_container_to_pb(cim),
+        substationMRID=mrid_or_empty(cim.substation),
+        voltageLevelMRID=mrid_or_empty(cim.voltage_level),
+        circuitMRID=mrid_or_empty(cim.circuit),
+        bayEnergyMeasFlagSet=cim.bay_energy_meas_flag,
+        bayPowerMeasFlagSet=cim.bay_power_meas_flag,
+        breakerConfigurationMRID=mrid_or_empty(cim.breaker_configuration),
+        busBarConfigurationMRID=mrid_or_empty(cim.bus_bar_configuration),
+    )
+
+
+@bind_to_pb
+def voltage_level_to_pb(cim: VoltageLevel) -> PBVoltageLevel:
+    return PBVoltageLevel(
+        ec=equipment_container_to_pb(cim),
+        substationMRID=mrid_or_empty(cim.substation),
+        baseVoltageMRID=mrid_or_empty(cim.base_voltage),
+        highVoltageLimit=cim.high_voltage_limit,
+        lowVoltageLimit=cim.low_voltage_limit,
+        bayMRIDs=[str(io.mrid) for io in cim.bays],
     )

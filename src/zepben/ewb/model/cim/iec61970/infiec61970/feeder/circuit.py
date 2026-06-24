@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
 
 
 class Circuit(Line):
@@ -24,8 +25,9 @@ class Circuit(Line):
     loop: Optional[Loop] = None
     _end_terminals: Optional[List[Terminal]] = None
     _end_substations: Optional[List[Substation]] = None
+    _end_bays: Optional[List[Bay]] = None
 
-    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
+    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, end_bays: List[Bay] = None, **kwargs):
         super(Circuit, self).__init__(**kwargs)
         if end_terminals:
             for term in end_terminals:
@@ -34,6 +36,10 @@ class Circuit(Line):
         if end_substations:
             for sub in end_substations:
                 self.add_end_substation(sub)
+
+        if end_bays:
+            for bay in end_bays:
+                self.add_end_bay(bay)
 
     @property
     def end_terminals(self) -> Generator[Terminal, None, None]:
@@ -141,4 +147,58 @@ class Circuit(Line):
         Returns A reference to this `Circuit` to allow fluent use.
         """
         self._end_substations = None
+        return self
+
+    @property
+    def end_bays(self) -> Generator[Bay, None, None]:
+        """
+        The `Bay`s at the ends of this `Circuit`.
+        """
+        return ngen(self._end_bays)
+
+    def num_end_bays(self):
+        """Return the number of end `Bay`s associated with this `Circuit`"""
+        return nlen(self._end_bays)
+
+    def get_end_bay(self, mrid: str) -> Bay:
+        """
+        Get the `Bay` for this `Circuit` identified by `mrid`
+
+        `mrid` the mRID of the required `Bay`
+        Returns The `Bay` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._end_bays, mrid)
+
+    def add_end_bay(self, bay: Bay) -> Circuit:
+        """
+        Associate an `Bay` with this `Circuit`
+
+        `bay` the `Bay` to associate with this `Circuit`.
+        Returns A reference to this `Circuit` to allow fluent use.
+        Raises `ValueError` if another `Bay` with the same `mrid` already exists for this `Circuit`.
+        """
+        if self._validate_reference(bay, self.get_end_bay, "An Bay"):
+            return self
+        self._end_bays = list() if self._end_bays is None else self._end_bays
+        self._end_bays.append(bay)
+        return self
+
+    def remove_end_bay(self, bay: Bay) -> Circuit:
+        """
+        Disassociate `bay` from this `Circuit`
+
+        `bay` the `Bay` to disassociate from this `Circuit`.
+        Returns A reference to this `Circuit` to allow fluent use.
+        Raises `ValueError` if `bay` was not associated with this `Circuit`.
+        """
+        self._end_bays = safe_remove(self._end_bays, bay)
+        return self
+
+    def clear_end_bays(self) -> Circuit:
+        """
+        Clear all end bays.
+        Returns A reference to this `Circuit` to allow fluent use.
+        """
+        self._end_bays = None
         return self

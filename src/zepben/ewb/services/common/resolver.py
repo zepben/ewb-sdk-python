@@ -21,7 +21,7 @@ __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_te
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
            "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info", "cut_ac_line_segment", "cuts",
-           "clamp_ac_line_segment", "clamps"]
+           "clamp_ac_line_segment", "clamps", "bay", "voltage_level", "sub_bays", "voltage_levels", "end_bays"]
 
 from zepben.ewb import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEquipment, PowerTransformer, Pole, Streetlight, ConnectivityNode, \
     Control, Customer, CustomerAgreement, Equipment, EquipmentContainer, EnergyConsumer, EnergySource, \
@@ -32,6 +32,8 @@ from zepben.ewb import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEquip
     TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, RegulatingControl, \
     ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse, BatteryUnit, \
     SynchronousMachine
+from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
+from zepben.ewb.model.cim.iec61970.base.core.voltage_level import VoltageLevel
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -54,7 +56,8 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import Transformer
 from zepben.ewb.services.common.reference_resolvers import *
 from zepben.ewb.services.common.reference_resolvers import acls_to_acls_phase_resolver, acls_phase_to_acls_resolver, acls_phase_to_wire_info_resolver, \
     shunt_compensator_to_terminal_resolver, feeder_to_nelvs_resolver, feeder_to_celvs_resolver, lvs_to_nef_resolver, lvs_to_cef_resolver, lvf_to_nelvs_resolver, \
-    lvs_to_nelvf_resolver
+    lvs_to_nelvf_resolver, bay_to_sub_resolver, sub_to_bay_resolver, bay_to_vl_resolver, vl_to_bay_resolver, bay_to_circuit_resolver, circuit_to_bay_resolver, \
+    vl_to_sub_resolver, sub_to_vl_resolver, circuit_to_end_bay_resolver, end_bay_to_circuit_resolver
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -105,6 +108,31 @@ def clamp_ac_line_segment(clamp: Clamp) -> BoundReferenceResolver:
 def clamps(acls: AcLineSegment) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(acls, acls_to_clamp_resolver, None)
+
+
+def bay(bay_obj: Bay) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(bay_obj, bay_to_sub_resolver, sub_to_bay_resolver)
+
+
+def voltage_level(vl: VoltageLevel) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(vl, vl_to_sub_resolver, sub_to_vl_resolver)
+
+
+def sub_bays(substation: Substation) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(substation, sub_to_bay_resolver, bay_to_sub_resolver)
+
+
+def voltage_levels(substation: Substation) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(substation, sub_to_vl_resolver, vl_to_sub_resolver)
+
+
+def end_bays(circuit: Circuit) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(circuit, circuit_to_end_bay_resolver, end_bay_to_circuit_resolver)
 
 def phases(acls: AcLineSegment) -> BoundReferenceResolver:
     # noinspection PyArgumentList

@@ -28,7 +28,9 @@ __all__ = [
     "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver", "acls_to_cut_resolver", "cut_to_acls_resolver", "acls_to_clamp_resolver",
     "clamp_to_acls_resolver", "asset_to_psr_resolver", "psr_to_asset_resolver", "acls_to_acls_phase_resolver", "acls_phase_to_acls_resolver",
     "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
-    "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
+    "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", "bay_to_sub_resolver", "sub_to_bay_resolver",
+    "bay_to_vl_resolver", "vl_to_bay_resolver", "bay_to_circuit_resolver", "circuit_to_bay_resolver", "vl_to_sub_resolver", "sub_to_vl_resolver",
+    "circuit_to_end_bay_resolver", "end_bay_to_circuit_resolver", ]
 
 from typing import Callable, Optional, Any
 
@@ -82,6 +84,8 @@ from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
+from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
+from zepben.ewb.model.cim.iec61970.base.core.voltage_level import VoltageLevel
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
@@ -399,3 +403,18 @@ ed_to_edf_resolver = ReferenceResolver(EndDevice, EndDeviceFunction, lambda t, r
 
 asset_to_psr_resolver = ReferenceResolver(Asset, PowerSystemResource, lambda t, r: t.add_power_system_resource(r))
 psr_to_asset_resolver = ReferenceResolver(PowerSystemResource, Asset, lambda t, r: t.add_asset(r))
+
+bay_to_sub_resolver = ReferenceResolver(Bay, Substation, lambda t, r: t.add_bay(r))
+sub_to_bay_resolver = ReferenceResolver(Substation, Bay, lambda t, r: setattr(t, 'substation', r))
+
+bay_to_vl_resolver = ReferenceResolver(Bay, VoltageLevel, lambda t, r: t.add_bay(r))
+vl_to_bay_resolver = ReferenceResolver(VoltageLevel, Bay, lambda t, r: setattr(t, 'voltage_level', r))
+
+bay_to_circuit_resolver = ReferenceResolver(Bay, Circuit, lambda t, r: t.add_end_bay(r))
+circuit_to_bay_resolver = ReferenceResolver(Circuit, Bay, lambda t, r: setattr(t, 'circuit', r))
+
+vl_to_sub_resolver = ReferenceResolver(VoltageLevel, Substation, lambda t, r: t.add_voltage_level(r))
+sub_to_vl_resolver = ReferenceResolver(Substation, VoltageLevel, lambda t, r: setattr(t, 'substation', r))
+
+circuit_to_end_bay_resolver = ReferenceResolver(Circuit, Bay, lambda t, r: t.add_end_bay(r))
+end_bay_to_circuit_resolver = ReferenceResolver(Bay, Circuit, lambda t, r: setattr(t, 'circuit', r))

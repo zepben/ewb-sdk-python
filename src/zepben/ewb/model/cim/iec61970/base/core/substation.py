@@ -17,6 +17,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
+    from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
+    from zepben.ewb.model.cim.iec61970.base.core.voltage_level import VoltageLevel
 
 
 class Substation(EquipmentContainer):
@@ -36,8 +38,12 @@ class Substation(EquipmentContainer):
 
     _circuits: Optional[List[Circuit]] = None
 
+    _bays: Optional[List[Bay]] = None
+
+    _voltage_levels: Optional[List[VoltageLevel]] = None
+
     def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
-                 circuits: List[Circuit] = None, **kwargs):
+                 circuits: List[Circuit] = None, bays: List[Bay] = None, voltage_levels: List[VoltageLevel] = None, **kwargs):
         super(Substation, self).__init__(**kwargs)
         if normal_energized_feeders:
             for feeder in normal_energized_feeders:
@@ -51,6 +57,12 @@ class Substation(EquipmentContainer):
         if circuits:
             for circuit in circuits:
                 self.add_circuit(circuit)
+        if bays:
+            for bay in bays:
+                self.add_bay(bay)
+        if voltage_levels:
+            for vl in voltage_levels:
+                self.add_voltage_level(vl)
 
     @property
     def circuits(self) -> Generator[Circuit, None, None]:
@@ -274,4 +286,116 @@ class Substation(EquipmentContainer):
         Returns A reference to this `Substation` to allow fluent use.
         """
         self._circuits = None
+        return self
+
+    @property
+    def bays(self) -> Generator[Bay, None, None]:
+        """
+        The `Bay`s contained in this substation.
+        """
+        return ngen(self._bays)
+
+    def num_bays(self):
+        """
+        Returns The number of `Bay`s associated with this `Substation`
+        """
+        return nlen(self._bays)
+
+    def get_bay(self, mrid: str) -> Bay:
+        """
+        Get the `Bay` for this `Substation` identified by `mrid`
+
+        `mrid` The mRID of the required `Bay`
+        Returns The `Bay` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._bays, mrid)
+
+    def add_bay(self, bay: Bay) -> Substation:
+        """
+        Associate a `Bay` with this `Substation`
+
+        `bay` The `Bay` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `Bay` with the same `mrid` already exists for this `Substation`.
+        """
+        if self._validate_reference(bay, self.get_bay, "A Bay"):
+            return self
+        self._bays = list() if self._bays is None else self._bays
+        self._bays.append(bay)
+        return self
+
+    def remove_bay(self, bay: Bay) -> Substation:
+        """
+        Disassociate `bay` from this `Substation`
+
+        `bay` The `Bay` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `bay` was not associated with this `Substation`.
+        """
+        self._bays = safe_remove(self._bays, bay)
+        return self
+
+    def clear_bays(self) -> Substation:
+        """
+        Clear all current `Bay`s.
+        Returns A reference to this `Substation` to allow fluent use.
+        """
+        self._bays = None
+        return self
+
+    @property
+    def voltage_levels(self) -> Generator[VoltageLevel, None, None]:
+        """
+        The `VoltageLevel`s within this substation.
+        """
+        return ngen(self._voltage_levels)
+
+    def num_voltage_levels(self):
+        """
+        Returns The number of `VoltageLevel`s associated with this `Substation`
+        """
+        return nlen(self._voltage_levels)
+
+    def get_voltage_level(self, mrid: str) -> VoltageLevel:
+        """
+        Get the `VoltageLevel` for this `Substation` identified by `mrid`
+
+        `mrid` The mRID of the required `VoltageLevel`
+        Returns The `VoltageLevel` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._voltage_levels, mrid)
+
+    def add_voltage_level(self, voltage_level: VoltageLevel) -> Substation:
+        """
+        Associate a `VoltageLevel` with this `Substation`
+
+        `voltage_level` The `VoltageLevel` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `VoltageLevel` with the same `mrid` already exists for this `Substation`.
+        """
+        if self._validate_reference(voltage_level, self.get_voltage_level, "A VoltageLevel"):
+            return self
+        self._voltage_levels = list() if self._voltage_levels is None else self._voltage_levels
+        self._voltage_levels.append(voltage_level)
+        return self
+
+    def remove_voltage_level(self, voltage_level: VoltageLevel) -> Substation:
+        """
+        Disassociate `voltage_level` from this `Substation`
+
+        `voltage_level` The `VoltageLevel` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `voltage_level` was not associated with this `Substation`.
+        """
+        self._voltage_levels = safe_remove(self._voltage_levels, voltage_level)
+        return self
+
+    def clear_voltage_levels(self) -> Substation:
+        """
+        Clear all current `VoltageLevel`s.
+        Returns A reference to this `Substation` to allow fluent use.
+        """
+        self._voltage_levels = None
         return self

@@ -5,6 +5,8 @@
 
 __all__ = []
 
+from zepben.protobuf.cim.iec61970.base.core.BreakerConfiguration_pb2 import BreakerConfiguration as PBBreakerConfiguration
+from zepben.protobuf.cim.iec61970.base.core.BusbarConfiguration_pb2 import BusbarConfiguration as PBBusbarConfiguration
 from zepben.protobuf.cim.extensions.iec61968.common.ContactMethodType_pb2 import ContactMethodType as PBContactMethodType
 from zepben.protobuf.cim.extensions.iec61970.base.protection.PolarizingQuantityType_pb2 import PolarizingQuantityType as PBPolarizingQuantityType
 from zepben.protobuf.cim.extensions.iec61970.base.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
@@ -31,6 +33,8 @@ from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import Windin
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
+from zepben.ewb.model.cim.iec61970.base.core.breaker_configuration import BreakerConfiguration
+from zepben.ewb.model.cim.iec61970.base.core.busbar_configuration import BusbarConfiguration
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.polarizing_quantity_type import PolarizingQuantityType
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
@@ -85,3 +89,5 @@ _map_vector_group = EnumMapper(VectorGroup, PBVectorGroup)
 _map_winding_connection = EnumMapper(WindingConnection, PBWindingConnection)
 _map_wire_material_kind = EnumMapper(WireMaterialKind, PBWireMaterialKind)
 _map_wire_insulation_kind = EnumMapper(WireInsulationKind, PBWireInsulationKind)
+_map_breaker_configuration = EnumMapper(BreakerConfiguration, PBBreakerConfiguration)
+_map_busbar_configuration = EnumMapper(BusbarConfiguration, PBBusbarConfiguration)

@@ -28,8 +28,8 @@ __all__ = [
     "transformer_end_rated_s_to_cim", "tap_changer_control_to_cim", "regulating_control_to_cim", "distance_relay_to_cim", "protection_relay_scheme_to_cim",
     "protection_relay_system_to_cim", "relay_setting_to_cim", "voltage_relay_to_cim", "ground_to_cim", "ground_disconnector_to_cim",
     "series_compensator_to_cim", "pan_demand_response_function_to_cim", 'battery_control_to_cim', "asset_function_to_cim", "end_device_function_to_cim",
-    "static_var_compensator_to_cim", "clamp_to_cim", "cut_to_cim"
-]
+    "static_var_compensator_to_cim", "clamp_to_cim", "cut_to_cim", "breaker_configuration_to_cim", "busbar_configuration_to_cim", "bay_to_cim", "voltage_level_to_cim"
+ ]
 
 from typing import Optional
 
@@ -94,6 +94,9 @@ from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_p
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.Sensor_pb2 import Sensor as PBSensor
 from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal as PBAcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage as PBBaseVoltage
+from zepben.protobuf.cim.iec61970.base.core.Bay_pb2 import Bay as PBBay
+from zepben.protobuf.cim.iec61970.base.core.BreakerConfiguration_pb2 import BreakerConfiguration as PBBreakerConfiguration
+from zepben.protobuf.cim.iec61970.base.core.BusbarConfiguration_pb2 import BusbarConfiguration as PBBusbarConfiguration
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer as PBConnectivityNodeContainer
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode as PBConnectivityNode
@@ -107,6 +110,7 @@ from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import Power
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
+from zepben.protobuf.cim.iec61970.base.core.VoltageLevel_pb2 import VoltageLevel as PBVoltageLevel
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
@@ -251,6 +255,9 @@ from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import *
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.base_voltage import *
+from zepben.ewb.model.cim.iec61970.base.core.bay import Bay
+from zepben.ewb.model.cim.iec61970.base.core.breaker_configuration import BreakerConfiguration
+from zepben.ewb.model.cim.iec61970.base.core.busbar_configuration import BusbarConfiguration
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import *
@@ -265,6 +272,7 @@ from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import *
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.substation import *
 from zepben.ewb.model.cim.iec61970.base.core.terminal import *
+from zepben.ewb.model.cim.iec61970.base.core.voltage_level import VoltageLevel
 from zepben.ewb.model.cim.iec61970.base.domain.unit_symbol import *
 from zepben.ewb.model.cim.iec61970.base.equivalents.equivalent_branch import *
 from zepben.ewb.model.cim.iec61970.base.equivalents.equivalent_equipment import *
@@ -1336,6 +1344,10 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Opti
         network_service.resolve_or_defer_reference(resolver.normal_energized_loops(cim), mrid)
     for mrid in pb.circuitMRIDs:
         network_service.resolve_or_defer_reference(resolver.circuits(cim), mrid)
+    for mrid in pb.bayMRIDs:
+        network_service.resolve_or_defer_reference(resolver.bays(cim), mrid)
+    for mrid in pb.voltageLevelMRIDs:
+        network_service.resolve_or_defer_reference(resolver.voltage_levels(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim
@@ -2334,6 +2346,69 @@ def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[C
         network_service.resolve_or_defer_reference(resolver.end_terminal(cim), mrid)
     for mrid in pb.endSubstationMRIDs:
         network_service.resolve_or_defer_reference(resolver.end_substation(cim), mrid)
+    for mrid in pb.endBayMRIDs:
+        network_service.resolve_or_defer_reference(resolver.end_bay(cim), mrid)
 
     line_to_cim(pb.l, cim, network_service)
+    return cim
+
+
+##############################
+# IEC61970 Base Core Enums   #
+##############################
+
+@bind_to_cim
+@add_to_service_or_none
+def breaker_configuration_to_cim(pb: PBBreakerConfiguration, network_service: NetworkService) -> Optional[BreakerConfiguration]:
+    # noinspection PyUnresolvedReferences
+    return BreakerConfiguration(pb.value)
+
+
+@bind_to_cim
+@add_to_service_or_none
+def busbar_configuration_to_cim(pb: PBBusbarConfiguration, network_service: NetworkService) -> Optional[BusbarConfiguration]:
+    # noinspection PyUnresolvedReferences
+    return BusbarConfiguration(pb.value)
+
+
+################################
+# IEC61970 Base Core Bays    #
+################################
+
+@bind_to_cim
+@add_to_service_or_none
+def bay_to_cim(pb: PBBay, network_service: NetworkService) -> Optional[Bay]:
+    # noinspection PyUnresolvedReferences
+    cim = Bay(
+        mrid=pb.mrid(),
+        bay_energy_meas_flag=get_nullable(pb, 'bayEnergyMeasFlagSet'),
+        bay_power_meas_flag=get_nullable(pb, 'bayPowerMeasFlagSet'),
+    )
+
+    network_service.resolve_or_defer_reference(resolver.bay_substation(cim), pb.substationMRID)
+    network_service.resolve_or_defer_reference(resolver.bay_voltage_level(cim), pb.voltageLevelMRID)
+    network_service.resolve_or_defer_reference(resolver.bay_circuit(cim), pb.circuitMRID)
+    network_service.resolve_or_defer_reference(resolver.bay_breaker_configuration(cim), pb.breakerConfigurationMRID)
+    network_service.resolve_or_defer_reference(resolver.bay_busbar_configuration(cim), pb.busBarConfigurationMRID)
+
+    equipment_container_to_cim(pb.ec, cim, network_service)
+    return cim
+
+
+@bind_to_cim
+@add_to_service_or_none
+def voltage_level_to_cim(pb: PBVoltageLevel, network_service: NetworkService) -> Optional[VoltageLevel]:
+    # noinspection PyUnresolvedReferences
+    cim = VoltageLevel(
+        mrid=pb.mrid(),
+        high_voltage_limit=pb.highVoltageLimit,
+        low_voltage_limit=pb.lowVoltageLimit,
+    )
+
+    network_service.resolve_or_defer_reference(resolver.voltage_level_substation(cim), pb.substationMRID)
+    network_service.resolve_or_defer_reference(resolver.voltage_level_base_voltage(cim), pb.baseVoltageMRID)
+    for mrid in pb.bayMRIDs:
+        network_service.resolve_or_defer_reference(resolver.voltage_level_bays(cim), mrid)
+
+    equipment_container_to_cim(pb.ec, cim, network_service)
     return cim

@@ -4,7 +4,23 @@
 * None.
 
 ### New Features
-* None.
+* Added the following new CIM classes:
+  * `Bay` - A collection of power system resources within a given substation. A bay typically represents a physical grouping related to modularization of equipment.
+  * `VoltageLevel` - A collection of equipment at one common system voltage forming a switchgear.
+  * `BreakerConfiguration` - Enum for switching arrangement types: `SINGLE_BREAKER`, `BREAKER_AND_A_HALF`, `DOUBLE_BREAKER`, `NO_BREAKER`.
+  * `BusbarConfiguration` - Enum for busbar layout types: `SINGLE_BUS`, `DOUBLE_BUS`, `MAIN_WITH_TRANSFER_BUS`, `RING_BUS`.
+* Added the following new properties to existing model classes:
+  * `Substation.bays` - The `Bay`s contained in this substation.
+  * `Substation.voltage_levels` - The `VoltageLevel`s within this substation.
+  * `Circuit.end_bays` - The `Bay`s at the ends of this `Circuit`.
+* Added bidirectional reference resolvers for the new relationships:
+  * `bay()` - Resolves `Bay` to `Substation`.
+  * `voltage_level()` - Resolves `VoltageLevel` to `Substation`.
+  * `sub_bays()` - Resolves `Substation` to its `Bay`s.
+  * `voltage_levels()` - Resolves `Substation` to its `VoltageLevel`s.
+  * `end_bays()` - Resolves `Circuit` to its end `Bay`s.
+* Added proto2cim and cim2proto translators for `Bay`, `VoltageLevel`, `BreakerConfiguration`, and `BusbarConfiguration`.
+* Updated `Substation`, `Circuit`, and `BaseVoltage` translators to handle the new fields.
 
 ### Enhancements
 * None.
