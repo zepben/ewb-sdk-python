@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from math import isnan
 from dataclasses import dataclass, field
 from typing import Optional, Any, List, Dict, TypeVar, Generic
 
@@ -19,6 +20,16 @@ class Difference:
 class ValueDifference(Difference):
     source_value: Optional[Any]
     target_value: Optional[Any]
+
+    def __eq__(self, other):
+        if (isinstance(self.source_value, float)
+            and isinstance(self.target_value, float)
+            and isnan(self.source_value)
+            and isnan(self.target_value)
+        ):
+            return True
+        else:
+            return super().__eq__(other)
 
 
 @dataclass()
