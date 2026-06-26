@@ -6,8 +6,10 @@
 __all__ = ["PowerElectronicsWindUnit"]
 
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class PowerElectronicsWindUnit(PowerElectronicsUnit):
     """A wind generating unit that connects to the AC network with power electronics rather than rotating machines or an aggregation of such units."""
     pass

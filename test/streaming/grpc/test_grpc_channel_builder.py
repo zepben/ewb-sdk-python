@@ -5,12 +5,12 @@
 
 from unittest import mock
 from unittest.mock import call
+from dataclasses import dataclass
 
 import pytest
 from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 
 from test.util import all_subclasses
-from zepben.ewb.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType

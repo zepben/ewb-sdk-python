@@ -8,8 +8,10 @@ __all__ = ["ShortCircuitTest"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class ShortCircuitTest(TransformerTest):
     """
     Short-circuit test results determine mesh impedance parameters. They include load losses and leakage impedances. For three-phase windings, the excitation

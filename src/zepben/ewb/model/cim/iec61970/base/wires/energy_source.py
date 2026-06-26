@@ -11,11 +11,13 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 
 
+@zb_dataclass
 class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
@@ -111,8 +113,8 @@ class EnergySource(EnergyConnection):
     x0_max: Optional[float] = None
     """Maximum zero sequence Thevenin reactance."""
 
-    def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
-        super(EnergySource, self).__init__(**kwargs)
+    def __init__(self, *args, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
+        super(EnergySource, self).__init__(*args, **kwargs)
         if energy_source_phases:
             for phase in energy_source_phases:
                 self.add_phase(phase)

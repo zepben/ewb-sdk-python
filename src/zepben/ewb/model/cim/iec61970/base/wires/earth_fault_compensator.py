@@ -6,11 +6,14 @@
 __all__ = ["EarthFaultCompensator"]
 
 from typing import Optional
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class EarthFaultCompensator(ConductingEquipment):
+@zb_dataclass
+class EarthFaultCompensator(ConductingEquipment, metaclass=ABCMeta):
     """
     A conducting equipment used to represent a connection to ground which is typically used to compensate earth faults. An earth fault compensator device
     modelled with a single terminal implies a second terminal solidly connected to ground. If two terminals are modelled, the ground is not assumed and

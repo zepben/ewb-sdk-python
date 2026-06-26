@@ -12,12 +12,15 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import safe_remove, ngen, nlen, get_by_mrid
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
+
+@zb_dataclass
 @zbex
 class Loop(IdentifiedObject):
     """
@@ -30,8 +33,8 @@ class Loop(IdentifiedObject):
     _substations: Optional[List[Substation]] = None
     _energizing_substations: Optional[List[Substation]] = None
 
-    def __init__(self, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None, **kwargs):
-        super(Loop, self).__init__(**kwargs)
+    def __init__(self, *args, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None, **kwargs):
+        super(Loop, self).__init__(*args, **kwargs)
         if circuits:
             for term in circuits:
                 self.add_circuit(term)

@@ -6,8 +6,10 @@
 __all__ = ["PhotoVoltaicUnit"]
 
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class PhotoVoltaicUnit(PowerElectronicsUnit):
     """A photovoltaic device or an aggregation of such devices."""
     pass

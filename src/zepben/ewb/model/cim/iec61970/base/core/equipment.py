@@ -9,6 +9,7 @@ __all__ = ['Equipment']
 
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
@@ -17,6 +18,7 @@ from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerS
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -26,7 +28,8 @@ if TYPE_CHECKING:
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 
-class Equipment(PowerSystemResource):
+@zb_dataclass
+class Equipment(PowerSystemResource, metaclass=ABCMeta):
     """
     Abstract class, should only be used through subclasses.
     Any part of a power system that is a physical device, electronic or mechanical.
@@ -44,9 +47,8 @@ class Equipment(PowerSystemResource):
     _operational_restrictions: Optional[List[OperationalRestriction]] = None
     _current_containers: Optional[List[EquipmentContainer]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
-        super(Equipment, self).__init__(**kwargs)
+    def __init__(self, *args, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
+        super(Equipment, self).__init__(*args, **kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)

@@ -6,8 +6,10 @@
 __all__ = ["Organisation"]
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Organisation(IdentifiedObject):
     """
     Organisation that might have roles as utility, contractor, supplier, manufacturer, customer, etc.

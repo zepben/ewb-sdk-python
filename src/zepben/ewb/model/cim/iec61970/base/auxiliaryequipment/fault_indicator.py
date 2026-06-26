@@ -6,8 +6,10 @@
 __all__ = ["FaultIndicator"]
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class FaultIndicator(AuxiliaryEquipment):
     """
     A FaultIndicator is typically only an indicator (which may or may not be remotely monitored), and not a piece of

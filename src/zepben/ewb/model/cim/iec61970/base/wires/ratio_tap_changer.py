@@ -10,11 +10,13 @@ __all__ = ["RatioTapChanger"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 
+@zb_dataclass
 class RatioTapChanger(TapChanger):
     """
     A tap changer that changes the voltage ratio impacting the voltage magnitude but not the phase angle across the transformer.

@@ -8,8 +8,10 @@ __all__ = ["OpenCircuitTest"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class OpenCircuitTest(TransformerTest):
     """
     Open-circuit test results verify winding turn ratios and phase shifts. They include induced voltage and phase shift measurements on open-circuit windings,

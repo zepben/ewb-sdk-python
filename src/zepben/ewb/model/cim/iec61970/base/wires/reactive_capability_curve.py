@@ -6,8 +6,10 @@
 __all__ = ["ReactiveCapabilityCurve"]
 
 from zepben.ewb.model.cim.iec61970.base.core.curve import Curve
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class ReactiveCapabilityCurve(Curve):
     """
     Reactive power rating envelope versus the synchronous machine's active power, in both the generating and motoring modes. For each active power value there

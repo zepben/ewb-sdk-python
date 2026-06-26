@@ -8,26 +8,30 @@ from __future__ import annotations
 __all__ = ["ConnectivityNode"]
 
 from typing import Generator, List, TYPE_CHECKING
+from dataclasses import field
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, ngen
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-@dataclass(slots=False)
-class ConnectivityNode(IdentifiedObject):
+# TODO: Python 3.11+ has @dataclass(weakref_slot=True) that replaces this hack
+class WeakrefSlot:
+    __slots__ = ("__weakref__",)
+
+
+@zb_dataclass
+class ConnectivityNode(IdentifiedObject, WeakrefSlot):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
-    # noinspection PyDunderSlots
-    __slots__ = ["_terminals", "__weakref__"]
-    _terminals: List[Terminal] = []
+    _terminals: List[Terminal] = field(default_factory=list)
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConnectivityNode, self).__init__(**kwargs)
+    def __init__(self, *args, terminals: List[Terminal] = None, **kwargs):
+        super(ConnectivityNode, self).__init__(*args, **kwargs)
         if terminals:
             for term in terminals:
                 self.add_terminal(term)

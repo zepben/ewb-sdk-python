@@ -5,9 +5,13 @@
 
 __all__ = ["PerLengthImpedance"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class PerLengthImpedance(PerLengthLineParameter):
+@zb_dataclass
+class PerLengthImpedance(PerLengthLineParameter, metaclass=ABCMeta):
     """Common type for per-length impedance electrical catalogues."""
     pass

@@ -6,15 +6,18 @@
 __all__ = ["TapChanger"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.util import require
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 
 
-class TapChanger(PowerSystemResource):
+@zb_dataclass
+class TapChanger(PowerSystemResource, metaclass=ABCMeta):
     """
     Mechanism for changing transformer winding tap positions.
     """
@@ -34,8 +37,8 @@ class TapChanger(PowerSystemResource):
     _normal_step: Optional[int] = None
     _step: Optional[float] = None
 
-    def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
-        super(TapChanger, self).__init__(**kwargs)
+    def __init__(self, *args, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
+        super(TapChanger, self).__init__(*args, **kwargs)
         if high_step is not None:
             self._high_step = high_step
         if low_step is not None:

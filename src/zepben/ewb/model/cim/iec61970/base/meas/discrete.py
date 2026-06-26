@@ -6,8 +6,10 @@
 __all__ = ["Discrete"]
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Discrete(Measurement):
     """Discrete represents a discrete Measurement, i.e. a Measurement representing discrete values, e.g. a Breaker position."""
     pass

@@ -5,10 +5,14 @@
 
 __all__ = ["EndDeviceFunction"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class EndDeviceFunction(AssetFunction):
+@zb_dataclass
+class EndDeviceFunction(AssetFunction, metaclass=ABCMeta):
     """
     Function performed by an end device such as a meter, communication equipment, controllers, etc.
     """

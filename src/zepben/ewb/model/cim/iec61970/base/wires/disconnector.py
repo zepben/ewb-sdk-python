@@ -6,8 +6,10 @@
 __all__ = ["Disconnector"]
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Disconnector(Switch):
     """
     A manually operated or motor operated mechanical switching device used for changing the connections in a circuit,

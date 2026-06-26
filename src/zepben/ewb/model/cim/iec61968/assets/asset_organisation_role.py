@@ -5,9 +5,13 @@
 
 __all__ = ["AssetOrganisationRole"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class AssetOrganisationRole(OrganisationRole):
+@zb_dataclass
+class AssetOrganisationRole(OrganisationRole, metaclass=ABCMeta):
     """ Role an organisation plays with respect to asset. """
     pass

@@ -6,8 +6,10 @@
 __all__ = ["Junction"]
 
 from zepben.ewb.model.cim.iec61970.base.wires.connector import Connector
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Junction(Connector):
     """
     A point where one or more conducting equipments are connected with zero resistance.

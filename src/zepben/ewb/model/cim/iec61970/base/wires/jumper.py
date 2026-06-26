@@ -6,8 +6,10 @@
 __all__ = ["Jumper"]
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Jumper(Switch):
     """
     A short section of conductor with negligible impedance which can be manually removed and replaced if the circuit is de-energized.

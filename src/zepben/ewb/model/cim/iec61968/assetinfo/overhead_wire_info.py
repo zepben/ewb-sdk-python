@@ -6,8 +6,10 @@
 __all__ = ["OverheadWireInfo"]
 
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class OverheadWireInfo(WireInfo):
     """
     Overhead wire data. A "wire" is an above ground conductor.

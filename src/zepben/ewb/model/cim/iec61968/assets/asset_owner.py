@@ -6,8 +6,10 @@
 __all__ = ["AssetOwner"]
 
 from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class AssetOwner(AssetOrganisationRole):
     """ Owner of the Asset """
     pass

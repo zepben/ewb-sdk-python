@@ -6,9 +6,11 @@
 __all__ = ["TransformerEnd"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
@@ -17,7 +19,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
-class TransformerEnd(IdentifiedObject):
+
+@zb_dataclass
+class TransformerEnd(IdentifiedObject, metaclass=ABCMeta):
     """
     A conducting connection point of a power transformer. It corresponds to a physical transformer winding terminal.
     In earlier CIM versions, the TransformerWinding class served a similar purpose, but this class is more flexible
@@ -50,8 +54,8 @@ class TransformerEnd(IdentifiedObject):
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
-    def __init__(self, terminal: Optional['Terminal'] = None, **kwargs):
-        super(TransformerEnd, self).__init__(**kwargs)
+    def __init__(self, *args, terminal: Optional['Terminal'] = None, **kwargs):
+        super(TransformerEnd, self).__init__(*args, **kwargs)
         if terminal is not None:
             self.terminal = terminal
 

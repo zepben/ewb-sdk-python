@@ -6,10 +6,12 @@
 __all__ = ["AccumulatorValue"]
 
 from typing import Optional
+from dataclasses import dataclass
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 
+@dataclass
 class AccumulatorValue(MeasurementValue):
     """AccumulatorValue represents an accumulated (counted) MeasurementValue."""
 

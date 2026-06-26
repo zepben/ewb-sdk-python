@@ -27,13 +27,18 @@ def test_only_exports_equipment_for_expected_equipment_containers():
 
     _ = import_submodules('zepben.ewb.model.cim')
     all_equipment_container_classes = all_subclasses(EquipmentContainer, 'zepben.ewb.model.cim')
+    all_equipment_container_classes = {it.__name__ for it in all_equipment_container_classes}
 
     should_export = [Site(mrid="site"), Substation(mrid="substation"), Circuit(mrid="circuit"), HvCustomer(mrid="hv_customer"), LvSubstation(mrid="lv_substation")]
     should_ignore = [Feeder(mrid="feeder"), LvFeeder(mrid="lv_feeder")]
 
-    assert {it.__class__ for it in (should_export + should_ignore)} == all_equipment_container_classes, "Should be checking all EquipmentContainer subclasses"
+    expected = {it.__class__.__name__ for it in (should_export + should_ignore)}
 
-    junction = Junction(mrid=generate_id())
+
+    # We are using class names instead of identities because dataclasses create their own class instances
+    assert expected == all_equipment_container_classes, "Should be checking all EquipmentContainer subclasses"
+
+    junction = Junction('j1')
     for it in should_export:
         junction.add_container(it)
     for it in should_ignore:

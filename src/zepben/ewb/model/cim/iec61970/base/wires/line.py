@@ -5,9 +5,13 @@
 
 __all__ = ["Line"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class Line(EquipmentContainer):
+@zb_dataclass
+class Line(EquipmentContainer, metaclass=ABCMeta):
     """Contains equipment beyond a substation belonging to a power transmission line."""
     pass

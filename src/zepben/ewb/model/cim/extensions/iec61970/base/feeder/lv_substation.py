@@ -11,10 +11,13 @@ from zepben.ewb import ngen, nlen, safe_remove_by_id, get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
+
+@zb_dataclass
 @zbex
 class LvSubstation(EquipmentContainer):
     """
@@ -31,12 +34,13 @@ class LvSubstation(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_energizing_feeders: list['Feeder'] | None = None,
         current_energizing_feeders: list['Feeder'] | None = None,
         normal_energized_lv_feeders: list[LvFeeder] | None = None,
         **kwargs
     ):
-        super(LvSubstation, self).__init__(**kwargs)
+        super(LvSubstation, self).__init__(*args, **kwargs)
         if normal_energizing_feeders:
             for lv_feeder in normal_energizing_feeders:
                 self.add_normal_energizing_feeder(lv_feeder)

@@ -12,12 +12,14 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 
 
+@zb_dataclass
 class CurrentTransformer(Sensor):
     """
     Instrument transformer used to measure electrical qualities of the circuit that is being protected and/or monitored.

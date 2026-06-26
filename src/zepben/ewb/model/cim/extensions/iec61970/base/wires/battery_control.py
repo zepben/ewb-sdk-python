@@ -10,8 +10,10 @@ from typing import Optional
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 @zbex
 class BatteryControl(RegulatingControl):
     """
