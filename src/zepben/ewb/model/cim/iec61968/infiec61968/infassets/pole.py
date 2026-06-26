@@ -11,11 +11,13 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61968.assets.structure import Structure
 from zepben.ewb.util import get_by_mrid, ngen, nlen, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.streetlight import Streetlight
 
 
+@zb_dataclass
 class Pole(Structure):
     """A Pole Asset"""
 
@@ -24,8 +26,8 @@ class Pole(Structure):
 
     _streetlights: Optional[List[Streetlight]] = None
 
-    def __init__(self, streetlights: List[Streetlight] = None, **kwargs):
-        super(Pole, self).__init__(**kwargs)
+    def __init__(self, *args, streetlights: List[Streetlight] = None, **kwargs):
+        super(Pole, self).__init__(*args, **kwargs)
         if streetlights:
             for light in streetlights:
                 self.add_streetlight(light)

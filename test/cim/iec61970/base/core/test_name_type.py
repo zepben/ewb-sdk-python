@@ -12,8 +12,6 @@ from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 # noinspection PyArgumentList
-name_type_args = ["1", "2"]
-
 
 def test_name_type_constructor_default():
     # noinspection PyArgumentList

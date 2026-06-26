@@ -5,9 +5,9 @@
 import os
 import uuid
 from typing import Union, List
+from dataclasses import dataclass
 
 import pytest
-from zepben.ewb.dataclassy import dataclass
 from hypothesis import settings, Verbosity, Phase
 from pytest import fixture
 
@@ -32,6 +32,8 @@ from .network_fixtures import *
 #       single example of where the test failed, with a call stack that tells you where this was, and a massive speed
 #       improvement in all failing tests...
 #
+
+
 no_shrink_phases = [p for p in Phase if p != Phase.shrink]
 
 settings.register_profile("ci", max_examples=1000, phases=no_shrink_phases)
@@ -77,7 +79,7 @@ def gen_tap_changer(**kwargs):
     return RatioTapChanger(**kwargs)
 
 
-@dataclass()
+@dataclass
 class AddResult:
     io: IdentifiedObject
     node: Union[ConnectivityNode, List[ConnectivityNode]] = None

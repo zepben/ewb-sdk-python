@@ -9,11 +9,13 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61968.assets.asset import Asset
 from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassets.pole import Pole
 
 
+@zb_dataclass
 class Streetlight(Asset):
     """
     A Streetlight asset.

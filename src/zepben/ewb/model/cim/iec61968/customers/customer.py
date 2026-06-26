@@ -12,11 +12,13 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 
 
+@zb_dataclass
 class Customer(OrganisationRole):
     """
     Organisation receiving services from service supplier.
@@ -30,8 +32,8 @@ class Customer(OrganisationRole):
 
     _customer_agreements: Optional[List[CustomerAgreement]] = None
 
-    def __init__(self, customer_agreements: List[CustomerAgreement] = None, **kwargs):
-        super(Customer, self).__init__(**kwargs)
+    def __init__(self, *args, customer_agreements: List[CustomerAgreement] = None, **kwargs):
+        super(Customer, self).__init__(*args, **kwargs)
         if customer_agreements:
             for agreement in customer_agreements:
                 self.add_agreement(agreement)

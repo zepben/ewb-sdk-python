@@ -6,16 +6,19 @@
 __all__ = ["Measurement"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.scada.remote_source import RemoteSource
 
 
-class Measurement(IdentifiedObject):
+@zb_dataclass
+class Measurement(IdentifiedObject, metaclass=ABCMeta):
     """
     A Measurement represents any measured, calculated or non-measured non-calculated quantity. Any piece of equipment
     may contain Measurements, e.g. a substation may have temperature measurements and door open indications,

@@ -6,11 +6,14 @@
 __all__ = ["RotatingMachine"]
 
 from typing import Optional
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class RotatingMachine(RegulatingCondEq):
+@zb_dataclass
+class RotatingMachine(RegulatingCondEq, metaclass=ABCMeta):
     """
     A rotating machine which may be used as a generator or motor.
     """

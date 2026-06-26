@@ -6,8 +6,10 @@
 __all__ = ["Recloser"]
 
 from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Recloser(ProtectedSwitch):
     """
     Pole-mounted fault interrupter with built-in phase and ground relays, current transformer (CT), and supplemental controls.

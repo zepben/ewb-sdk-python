@@ -5,10 +5,14 @@
 
 __all__ = ["EquivalentEquipment"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class EquivalentEquipment(ConductingEquipment):
+@zb_dataclass
+class EquivalentEquipment(ConductingEquipment, metaclass=ABCMeta):
     """
     The class represents equivalent objects that are the result of a network reduction. The class is the base for equivalent objects of different types.
     """

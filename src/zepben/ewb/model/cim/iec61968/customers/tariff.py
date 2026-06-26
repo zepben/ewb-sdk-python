@@ -6,8 +6,10 @@
 __all__ = ["Tariff"]
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class Tariff(Document):
     """
     Document, approved by the responsible regulatory agency, listing the terms and conditions,

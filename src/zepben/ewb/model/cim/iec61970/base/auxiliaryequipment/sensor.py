@@ -8,15 +8,18 @@ from __future__ import annotations
 __all__ = ["Sensor"]
 
 from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
-class Sensor(AuxiliaryEquipment):
+@zb_dataclass
+class Sensor(AuxiliaryEquipment, metaclass=ABCMeta):
     """
     This class describes devices that transform a measured quantity into signals that can be presented at displays,
     used in control or be recorded.
@@ -25,8 +28,8 @@ class Sensor(AuxiliaryEquipment):
     _relay_functions: Optional[List[ProtectionRelayFunction]] = None
     """The relay functions influenced by this [Sensor]."""
 
-    def __init__(self, relay_functions: Iterable[ProtectionRelayFunction] = None, **kwargs):
-        super(Sensor, self).__init__(**kwargs)
+    def __init__(self, *args, relay_functions: Iterable[ProtectionRelayFunction] = None, **kwargs):
+        super(Sensor, self).__init__(*args, **kwargs)
         if relay_functions is not None:
             for relay_function in relay_functions:
                 self.add_relay_function(relay_function)

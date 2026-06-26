@@ -8,11 +8,13 @@ __all__ = ["RemoteSource"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.scada.remote_point import RemotePoint
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
 
 
+@zb_dataclass
 class RemoteSource(RemotePoint):
     """
     Remote sources are state variables that are telemetered or calculated within the remote unit.

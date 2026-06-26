@@ -8,8 +8,10 @@ __all__ = ["ShuntCompensatorInfo"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class ShuntCompensatorInfo(AssetInfo):
     """Properties of shunt capacitor, shunt reactor or switchable bank of shunt capacitor or reactor assets."""
 

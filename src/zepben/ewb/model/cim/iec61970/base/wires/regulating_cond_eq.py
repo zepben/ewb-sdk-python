@@ -8,14 +8,17 @@ from __future__ import annotations
 __all__ = ["RegulatingCondEq"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
 
-class RegulatingCondEq(EnergyConnection):
+@zb_dataclass
+class RegulatingCondEq(EnergyConnection, metaclass=ABCMeta):
     """
     A short section of conductor with negligible impedance which can be manually removed and replaced if the circuit is
     de-energized. Note that zero-impedance branches can potentially be modeled by other equipment types.
@@ -26,8 +29,8 @@ class RegulatingCondEq(EnergyConnection):
 
     _regulating_control: Optional[RegulatingControl] = None
 
-    def __init__(self, regulating_control: Optional[RegulatingControl] = None, **kwargs):
-        super(RegulatingCondEq, self).__init__(**kwargs)
+    def __init__(self, *args, regulating_control: Optional[RegulatingControl] = None, **kwargs):
+        super(RegulatingCondEq, self).__init__(*args, **kwargs)
         if regulating_control:
             self.regulating_control = regulating_control
 

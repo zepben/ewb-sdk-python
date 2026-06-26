@@ -6,10 +6,12 @@
 __all__ = ["DiscreteValue"]
 
 from typing import Optional
+from dataclasses import dataclass
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 
+@dataclass(slots=True)
 class DiscreteValue(MeasurementValue):
     """`DiscreteValue` represents a discrete `MeasurementValue`."""
 

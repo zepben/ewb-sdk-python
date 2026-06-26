@@ -9,11 +9,13 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 
+@zb_dataclass
 class TransformerStarImpedance(IdentifiedObject):
     """
     Transformer star impedance (Pi-model) that accurately reflects impedance for transformers with 2 or 3 windings. For transformers with 4 or more windings,

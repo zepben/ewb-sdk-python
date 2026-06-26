@@ -8,8 +8,10 @@ __all__ = ["NoLoadTest"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class NoLoadTest(TransformerTest):
     """
     No-load test results determine core admittance parameters. They include exciting current and core loss measurements from applying voltage to one

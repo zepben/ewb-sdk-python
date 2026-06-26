@@ -12,11 +12,13 @@ from typing import TYPE_CHECKING
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@zb_dataclass
 class AcLineSegmentPhase(PowerSystemResource):
     """
     Represents a single wire of an alternating current line segment.
@@ -33,8 +35,8 @@ class AcLineSegmentPhase(PowerSystemResource):
     sequence_number: int | None = None
     _ac_line_segment: AcLineSegment | None = None
 
-    def __init__(self, ac_line_segment: AcLineSegment = None, **kwargs):
-        super(AcLineSegmentPhase, self).__init__(**kwargs)
+    def __init__(self, *args, ac_line_segment: AcLineSegment = None, **kwargs):
+        super(AcLineSegmentPhase, self).__init__(*args, **kwargs)
         if ac_line_segment is not None:
             self.ac_line_segment = ac_line_segment
 

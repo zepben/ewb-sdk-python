@@ -5,10 +5,14 @@
 
 __all__ = ["EnergyConnection"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class EnergyConnection(ConductingEquipment):
+@zb_dataclass
+class EnergyConnection(ConductingEquipment, metaclass=ABCMeta):
     """
     A connection of energy generation or consumption on the power system phases.
     """

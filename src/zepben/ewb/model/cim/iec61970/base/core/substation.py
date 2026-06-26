@@ -11,6 +11,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
+@zb_dataclass
 class Substation(EquipmentContainer):
     """
     A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk
@@ -36,9 +38,8 @@ class Substation(EquipmentContainer):
 
     _circuits: Optional[List[Circuit]] = None
 
-    def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
-                 circuits: List[Circuit] = None, **kwargs):
-        super(Substation, self).__init__(**kwargs)
+    def __init__(self, *args, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None, circuits: List[Circuit] = None, **kwargs):
+        super(Substation, self).__init__(*args, **kwargs)
         if normal_energized_feeders:
             for feeder in normal_energized_feeders:
                 self.add_feeder(feeder)

@@ -12,6 +12,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 
 
+@zb_dataclass
 class PotentialTransformer(Sensor):
     """
     Instrument transformer (also known as Voltage Transformer) used to measure electrical qualities of the circuit that

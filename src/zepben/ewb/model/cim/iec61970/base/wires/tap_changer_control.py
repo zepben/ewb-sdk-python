@@ -8,8 +8,10 @@ __all__ = ["TapChangerControl"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
+@zb_dataclass
 class TapChangerControl(RegulatingControl):
     """
     Describes behaviour specific to tap changers, e.g. how the voltage at the end of a line varies with the load level and compensation of the voltage drop by

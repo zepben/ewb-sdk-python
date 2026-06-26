@@ -5,10 +5,14 @@
 
 __all__ = ["ConnectivityNodeContainer"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class ConnectivityNodeContainer(PowerSystemResource):
+@zb_dataclass
+class ConnectivityNodeContainer(PowerSystemResource, metaclass=ABCMeta):
     """
     A base class for all objects that may contain connectivity nodes or topological nodes.
     """

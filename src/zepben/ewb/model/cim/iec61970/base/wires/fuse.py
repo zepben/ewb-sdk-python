@@ -8,11 +8,13 @@ __all__ = ["Fuse"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
+@zb_dataclass
 class Fuse(Switch):
     """
     An overcurrent protective device with a circuit opening fusible part that is heated and severed by the passage of

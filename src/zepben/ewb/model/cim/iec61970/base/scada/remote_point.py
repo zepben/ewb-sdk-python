@@ -5,10 +5,14 @@
 
 __all__ = ["RemotePoint"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 
-class RemotePoint(IdentifiedObject):
+@zb_dataclass
+class RemotePoint(IdentifiedObject, metaclass=ABCMeta):
     """
     For a RTU remote points correspond to telemetered values or control outputs. Other units (e.g. control centers)
     usually also contain calculated values.

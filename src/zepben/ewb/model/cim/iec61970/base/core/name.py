@@ -10,27 +10,24 @@ __all__ = ["Name"]
 from typing import TYPE_CHECKING, Optional
 
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
+from zepben.ewb.dataclass_descriptors import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
     from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 
 
+@zb_dataclass
 class Name(Identifiable):
     """
     The Name class provides the means to define any number of human-readable names for an object. A name is **not** to be used for defining inter-object
     relationships. For inter-object relationships instead use the object identification 'mRID'.
     """
 
-    @property
-    def mrid(self) -> str:
+    # This is required because python dataclasses don't support overwriting a field with a @property.
+    # We need to force-attach it after the class is created.
+    def _get_mrid(self):
         return f"{self.name}-{self.type.name}-{self.identified_object.mrid}"
-
-    def __getattribute__(self, item):
-        # This is a workaround for self.mrid being a property, when we're expecting a string.
-        if item == "mrid":
-            return object.__getattribute__(self, 'mrid').fget(self)
-        return object.__getattribute__(self, item)
 
     name: str
     """Any free text that name the object."""
@@ -41,8 +38,11 @@ class Name(Identifiable):
     identified_object: Optional[IdentifiedObject] = None
     """Identified object that this name designates."""
 
-    def __str__(self) -> str:
-        class_name = f'{self.__class__.__name__}'
-        if self.name:
-            return f'{class_name}{{{self.mrid}|{self.name}}}'
-        return f'{class_name}{{{self.mrid}}}'
+
+# Can't error on mrid being set - dataclass init auto-assigns it
+def _ignore_set(*_):
+    pass
+
+# Force dataclass to reckon with our property overwrite - otherwise it get ignored
+# noinspection PyProtectedMember,PyTypeChecker
+Name.mrid = property(Name._get_mrid, _ignore_set)
