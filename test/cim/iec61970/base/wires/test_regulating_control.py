@@ -3,27 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args
+from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
+    verify_power_system_resource_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq, generate_id
-
-regulating_control_args = [
-    *power_system_resource_args,
-    False,
-    RegulatingControlModeKind.voltage,
-    PhaseCode.ABC,
-    1.1,
-    2.2,
-    True,
-    3.3,
-    4.4,
-    5.5,
-    Terminal(mrid=generate_id()),
-    6.6,
-    7.7,
-    [PowerElectronicsConnection(mrid=generate_id())]
-]
+from zepben.ewb import RegulatingControlModeKind, PhaseCode, RegulatingControl, RegulatingCondEq
 
 
 def verify_regulating_control_constructor_default(rc: RegulatingControl):
@@ -58,7 +41,7 @@ def verify_regulating_control_constructor_kwargs(
     ct_primary,
     min_target_deadband,
     regulating_conducting_equipment,
-    **kwargs
+    **kwargs,
 ):
     verify_power_system_resource_constructor_kwargs(rc, **kwargs)
     assert rc.discrete == discrete
@@ -76,25 +59,6 @@ def verify_regulating_control_constructor_kwargs(
     assert list(rc.regulating_conducting_equipment) == regulating_conducting_equipment
 
 
-def verify_regulating_control_constructor_args(rc):
-    verify_power_system_resource_constructor_args(rc)
-    assert regulating_control_args[-13:] == [
-        rc.discrete,
-        rc.mode,
-        rc.monitored_phase,
-        rc.target_deadband,
-        rc.target_value,
-        rc.enabled,
-        rc.max_allowed_target_value,
-        rc.min_allowed_target_value,
-        rc.rated_current,
-        rc.terminal,
-        rc.ct_primary,
-        rc.min_target_deadband,
-        list(rc.regulating_conducting_equipment)
-    ]
-
-
 def test_regulating_control_regulating_conducting_equipment():
     # noinspection PyArgumentList
     validate_unordered(
@@ -105,5 +69,5 @@ def test_regulating_control_regulating_conducting_equipment():
         RegulatingControl.get_regulating_cond_eq,
         RegulatingControl.add_regulating_cond_eq,
         RegulatingControl.remove_regulating_cond_eq,
-        RegulatingControl.clear_regulating_cond_eq
+        RegulatingControl.clear_regulating_cond_eq,
     )

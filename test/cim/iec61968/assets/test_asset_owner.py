@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import asset_owner_kwargs
 from cim.iec61968.assets.test_asset_organisation_role import verify_asset_organisation_role_constructor_default, \
-    verify_asset_organisation_role_constructor_kwargs, verify_asset_organisation_role_constructor_args, asset_organisation_role_args
+    verify_asset_organisation_role_constructor_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
-
-asset_owner_args = asset_organisation_role_args
 
 
 def test_asset_owner_constructor_default():
@@ -20,7 +18,3 @@ def test_asset_owner_constructor_default():
 @given(**asset_owner_kwargs())
 def test_asset_owner_constructor_kwargs(**kwargs):
     verify_asset_organisation_role_constructor_kwargs(AssetOwner(**kwargs), **kwargs)
-
-
-def test_asset_owner_constructor_args():
-    verify_asset_organisation_role_constructor_args(AssetOwner(*asset_owner_args))

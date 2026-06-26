@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import pole_kwargs
 from cim.iec61968.assets.test_structure import verify_structure_constructor_default, \
-    verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
+    verify_structure_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import Pole, Streetlight, generate_id
-
-pole_args = [*structure_args, "a", [Streetlight(mrid=generate_id())]]
 
 
 def test_pole_constructor_default():
@@ -23,23 +21,15 @@ def test_pole_constructor_default():
 
 @given(**pole_kwargs())
 def test_pole_constructor_kwargs(classification, streetlights, **kwargs):
-    p = Pole(classification=classification,
-             streetlights=streetlights,
-             **kwargs)
+    p = Pole(
+        classification=classification,
+        streetlights=streetlights,
+        **kwargs,
+    )
 
     verify_structure_constructor_kwargs(p, **kwargs)
     assert p.classification == classification
     assert list(p.streetlights) == streetlights
-
-
-def test_pole_constructor_args():
-    p = Pole(*pole_args)
-
-    verify_structure_constructor_args(p)
-    assert pole_args[-2:] == [
-        p.classification,
-        list(p.streetlights)
-    ]
 
 
 def test_streetlights_collection():
@@ -51,5 +41,5 @@ def test_streetlights_collection():
         Pole.get_streetlight,
         Pole.add_streetlight,
         Pole.remove_streetlight,
-        Pole.clear_streetlights
+        Pole.clear_streetlights,
     )

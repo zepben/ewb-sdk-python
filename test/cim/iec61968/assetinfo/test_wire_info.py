@@ -4,11 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from zepben.ewb import WireInfo, WireMaterialKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
-
-wire_info_args = [*identified_object_args, 1, WireMaterialKind.acsr, "6.7", "8", "4", True, WireInsulationKind.doubleWireArmour, 1.2]
 
 
 def verify_wire_info_constructor_default(wi: WireInfo):
@@ -33,7 +31,7 @@ def verify_wire_info_constructor_kwargs(
     insulated,
     insulation_material,
     insulation_thickness,
-    **kwargs
+    **kwargs,
 ):
     verify_identified_object_constructor_kwargs(wi, **kwargs)
     assert wi.rated_current == rated_current
@@ -44,17 +42,3 @@ def verify_wire_info_constructor_kwargs(
     assert wi.insulated == insulated
     assert wi.insulation_material == insulation_material
     assert wi.insulation_thickness == insulation_thickness
-
-
-def verify_wire_info_constructor_args(wi: WireInfo):
-    verify_identified_object_constructor_args(wi)
-    assert wire_info_args[-8:] == [
-        wi.rated_current,
-        wi.material,
-        wi.size_description,
-        wi.strand_count,
-        wi.core_strand_count,
-        wi.insulated,
-        wi.insulation_material,
-        wi.insulation_thickness,
-    ]

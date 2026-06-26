@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.ewb import OrganisationRole, Organisation, generate_id
-
-organisation_role_args = [*identified_object_args, Organisation(mrid=generate_id())]
+    verify_identified_object_constructor_kwargs
+from zepben.ewb import OrganisationRole
 
 
 def verify_organisation_role_constructor_default(or_: OrganisationRole):
@@ -18,10 +16,3 @@ def verify_organisation_role_constructor_default(or_: OrganisationRole):
 def verify_organisation_role_constructor_kwargs(or_: OrganisationRole, organisation, **kwargs):
     verify_identified_object_constructor_kwargs(or_, **kwargs)
     assert or_.organisation == organisation
-
-
-def verify_organisation_role_constructor_args(or_: OrganisationRole):
-    verify_identified_object_constructor_args(or_)
-    assert organisation_role_args[-1:] == [
-        or_.organisation
-    ]

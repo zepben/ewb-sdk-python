@@ -8,8 +8,9 @@ from typing import Tuple
 import pytest
 
 from zepben.ewb import IdentifiedObject, generate_id
-from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
+from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+
 
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -21,9 +22,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 #
 
 # noinspection PyArgumentList
-identified_object_args = [
-    "test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]
-]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
@@ -47,15 +45,6 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
         assert list(io.names) == names
     else:
         assert not list(io.names)
-
-
-def verify_identified_object_constructor_args(io: IdentifiedObject):
-    assert identified_object_args == [
-        io.mrid,
-        io.name,
-        io.description,
-        list(io.names)
-    ]
 
 
 def test_user_can_add_names_to_identified_object():

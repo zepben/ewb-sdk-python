@@ -5,11 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import shunt_compensator_info_kwargs
-from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, \
-    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
+    verify_asset_info_constructor_kwargs
 from zepben.ewb import ShuntCompensatorInfo, generate_id
-
-shunt_compensator_info_args = [*asset_info_args, 1, 2, 3, 4]
 
 
 def test_shunt_compensator_info_constructor_default():
@@ -24,26 +22,16 @@ def test_shunt_compensator_info_constructor_default():
 
 @given(**shunt_compensator_info_kwargs())
 def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
-    sci = ShuntCompensatorInfo(max_power_loss=max_power_loss,
-                               rated_current=rated_current,
-                               rated_reactive_power=rated_reactive_power,
-                               rated_voltage=rated_voltage,
-                               **kwargs)
+    sci = ShuntCompensatorInfo(
+        max_power_loss=max_power_loss,
+        rated_current=rated_current,
+        rated_reactive_power=rated_reactive_power,
+        rated_voltage=rated_voltage,
+        **kwargs,
+    )
 
     verify_asset_info_constructor_kwargs(sci, **kwargs)
     assert sci.max_power_loss == max_power_loss
     assert sci.rated_current == rated_current
     assert sci.rated_reactive_power == rated_reactive_power
     assert sci.rated_voltage == rated_voltage
-
-
-def test_shunt_compensator_info_constructor_args():
-    sci = ShuntCompensatorInfo(*shunt_compensator_info_args)
-
-    verify_asset_info_constructor_args(sci)
-    assert shunt_compensator_info_args[-4:] == [
-        sci.max_power_loss,
-        sci.rated_current,
-        sci.rated_reactive_power,
-        sci.rated_voltage
-    ]

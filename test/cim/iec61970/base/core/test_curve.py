@@ -6,12 +6,10 @@ from typing import Callable
 
 from pytest import raises
 
-from cim.iec61970.base.core.test_identified_object import identified_object_args, verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
+from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered_other
 from zepben.ewb import Curve, CurveData, generate_id
-
-curve_args = identified_object_args
 
 
 def verify_curve_constructor_default(curve: Curve):
@@ -20,10 +18,6 @@ def verify_curve_constructor_default(curve: Curve):
 
 def verify_curve_constructor_kwargs(curve: Curve, **kwargs):
     verify_identified_object_constructor_kwargs(curve, **kwargs)
-
-
-def verify_curve_constructor_args(curve: Curve):
-    verify_identified_object_constructor_args(curve)
 
 
 def test_curve_data_collection():
@@ -36,7 +30,7 @@ def test_curve_data_collection():
         Curve.add_curve_data,
         Curve.remove_data,
         Curve.clear_data,
-        lambda rs: rs.x_value
+        lambda rs: rs.x_value,
     )
 
 

@@ -6,14 +6,11 @@ from hypothesis import given
 
 from cim.fill_fields import diagram_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import DiagramStyle, OrientationKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-
-# noinspection PyArgumentList
-diagram_args = [*identified_object_args, DiagramStyle.GEOGRAPHIC, OrientationKind.NEGATIVE, {"do": DiagramObject(mrid=generate_id())}]
 
 
 def test_diagram_constructor_default():
@@ -27,27 +24,17 @@ def test_diagram_constructor_default():
 
 @given(**diagram_kwargs())
 def test_diagram_constructor_kwargs(diagram_style, orientation_kind, diagram_objects, **kwargs):
-    d = Diagram(diagram_style=diagram_style,
-                orientation_kind=orientation_kind,
-                diagram_objects=diagram_objects,
-                **kwargs)
+    d = Diagram(
+        diagram_style=diagram_style,
+        orientation_kind=orientation_kind,
+        diagram_objects=diagram_objects,
+        **kwargs,
+    )
 
     verify_identified_object_constructor_kwargs(d, **kwargs)
     assert d.diagram_style == diagram_style
     assert d.orientation_kind == orientation_kind
     assert list(d.diagram_objects) == diagram_objects
-
-
-def test_diagram_constructor_args():
-    d = Diagram(*diagram_args)
-
-    verify_identified_object_constructor_args(d)
-    assert diagram_args[-3:-1] == [
-        d.diagram_style,
-        d.orientation_kind
-    ]
-    # We use a different style of matching here as the passed in arg for diagram_objects is a map and the stored collection is a list.
-    assert list(d.diagram_objects) == list(diagram_args[-1].values())
 
 
 def test_diagram_objects_collection():
@@ -59,5 +46,5 @@ def test_diagram_objects_collection():
         Diagram.get_diagram_object,
         Diagram.add_diagram_object,
         Diagram.remove_diagram_object,
-        Diagram.clear_diagram_objects
+        Diagram.clear_diagram_objects,
     )

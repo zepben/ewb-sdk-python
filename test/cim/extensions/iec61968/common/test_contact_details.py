@@ -3,25 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text, sampled_from, booleans
 
-from cim.fill_fields import ALPHANUM, contact_details_kwargs
+from cim.fill_fields import contact_details_kwargs
 from cim.private_collection_validator import validate_unordered_other, DuplicateBehaviour
 from util import assert_or_empty
 from zepben.ewb import ContactMethodType, TelephoneNumber, ElectronicAddress, ContactDetails
-
-contact_details_args = [
-    text(alphabet=ALPHANUM),
-    text(alphabet=ALPHANUM),
-    text(alphabet=ALPHANUM),
-    text(alphabet=ALPHANUM),
-    text(alphabet=ALPHANUM),
-    sampled_from(ContactMethodType),
-    booleans(),
-    text(alphabet=ALPHANUM),
-    [TelephoneNumber()],
-    [ElectronicAddress()],
-]
 
 
 def test_contact_details_constructor_default():
@@ -49,7 +35,7 @@ def test_contact_details_constructor_kwargs(
     is_primary,
     business_name,
     phone_numbers,
-    electronic_addresses
+    electronic_addresses,
 ):
     c = ContactDetails(
         id=id,
@@ -61,7 +47,7 @@ def test_contact_details_constructor_kwargs(
         is_primary=is_primary,
         business_name=business_name,
         phone_numbers=phone_numbers,
-        electronic_addresses=electronic_addresses
+        electronic_addresses=electronic_addresses,
     )
 
     assert c.contact_address == contact_address
@@ -73,21 +59,6 @@ def test_contact_details_constructor_kwargs(
     assert c.business_name == business_name
     assert_or_empty(c.phone_numbers, phone_numbers)
     assert_or_empty(c.electronic_addresses, electronic_addresses)
-
-
-def test_contact_details_constructor_args():
-    c = ContactDetails(*contact_details_args)
-
-    assert c.id == contact_details_args[-10]
-    assert c.contact_address == contact_details_args[-9]
-    assert c.contact_type == contact_details_args[-8]
-    assert c.first_name == contact_details_args[-7]
-    assert c.last_name == contact_details_args[-6]
-    assert c.preferred_contact_method == contact_details_args[-5]
-    assert c.is_primary == contact_details_args[-4]
-    assert c.business_name == contact_details_args[-3]
-    assert list(c.phone_numbers) == contact_details_args[-2]
-    assert list(c.electronic_addresses) == contact_details_args[-1]
 
 
 def test_phone_number_collection():
@@ -109,7 +80,7 @@ def test_phone_number_collection():
         ContactDetails.remove_phone_number,
         ContactDetails.clear_phone_numbers,
         lambda it: it.local_number,
-        duplicate_behaviour=DuplicateBehaviour.SUPPORTED
+        duplicate_behaviour=DuplicateBehaviour.SUPPORTED,
     )
 
 
@@ -132,5 +103,5 @@ def test_electronic_address_collection():
         ContactDetails.remove_electronic_address,
         ContactDetails.clear_electronic_addresses,
         lambda it: it.email1,
-        duplicate_behaviour=DuplicateBehaviour.SUPPORTED
+        duplicate_behaviour=DuplicateBehaviour.SUPPORTED,
     )

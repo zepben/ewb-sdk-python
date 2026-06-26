@@ -9,47 +9,10 @@ from pytest import raises
 
 from cim.fill_fields import power_electronics_connection_kwargs
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+    verify_regulating_cond_eq_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection, generate_id
+from zepben.ewb import PowerElectronicsUnit, PowerElectronicsConnection, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-
-power_electronics_connection_args = [
-    *regulating_cond_eq_args,
-    1,
-    2.2,
-    3.3,
-    4.4,
-    5.5,
-    6,
-    7,
-    "1",
-    208,
-    51.9,
-    47.10,
-    False,
-    211,
-    228,
-    248,
-    258,
-    0.15,
-    0.16,
-    0.17,
-    0.18,
-    True,
-    219,
-    220,
-    221,
-    222,
-    0.23,
-    0.24,
-    0.25,
-    0.26,
-    False,
-    0.27,
-    [BatteryUnit(mrid=generate_id()), BatteryUnit(mrid=generate_id())],
-    [PowerElectronicsConnectionPhase(mrid=generate_id()), PowerElectronicsConnectionPhase(mrid=generate_id())]
-]
 
 
 def test_power_electronics_connection_constructor_default():
@@ -126,7 +89,7 @@ def test_power_electronics_connection_constructor_kwargs(
     inv_fix_reactive_power,
     power_electronics_units,
     power_electronics_connection_phases,
-    **kwargs
+    **kwargs,
 ):
     pec = PowerElectronicsConnection(
         max_i_fault=max_i_fault,
@@ -162,7 +125,7 @@ def test_power_electronics_connection_constructor_kwargs(
         inv_fix_reactive_power=inv_fix_reactive_power,
         power_electronics_units=power_electronics_units,
         power_electronics_connection_phases=power_electronics_connection_phases,
-        **kwargs
+        **kwargs,
     )
 
     verify_regulating_cond_eq_constructor_kwargs(pec, **kwargs)
@@ -201,47 +164,6 @@ def test_power_electronics_connection_constructor_kwargs(
     assert list(pec.phases) == power_electronics_connection_phases
 
 
-def test_power_electronics_connection_constructor_args():
-    pec = PowerElectronicsConnection(*power_electronics_connection_args)
-
-    verify_regulating_cond_eq_constructor_args(pec)
-    assert power_electronics_connection_args[-33:] == [
-        pec.max_i_fault,
-        pec.p,
-        pec.q,
-        pec.max_q,
-        pec.min_q,
-        pec.rated_s,
-        pec.rated_u,
-        pec.inverter_standard,
-        pec.sustain_op_overvolt_limit,
-        pec.stop_at_over_freq,
-        pec.stop_at_under_freq,
-        pec.inv_volt_watt_resp_mode,
-        pec.inv_watt_resp_v1,
-        pec.inv_watt_resp_v2,
-        pec.inv_watt_resp_v3,
-        pec.inv_watt_resp_v4,
-        pec.inv_watt_resp_p_at_v1,
-        pec.inv_watt_resp_p_at_v2,
-        pec.inv_watt_resp_p_at_v3,
-        pec.inv_watt_resp_p_at_v4,
-        pec.inv_volt_var_resp_mode,
-        pec.inv_var_resp_v1,
-        pec.inv_var_resp_v2,
-        pec.inv_var_resp_v3,
-        pec.inv_var_resp_v4,
-        pec.inv_var_resp_q_at_v1,
-        pec.inv_var_resp_q_at_v2,
-        pec.inv_var_resp_q_at_v3,
-        pec.inv_var_resp_q_at_v4,
-        pec.inv_reactive_power_mode,
-        pec.inv_fix_reactive_power,
-        list(pec.units),
-        list(pec.phases)
-    ]
-
-
 def test_power_electronics_units_collection():
     validate_unordered(
         PowerElectronicsConnection,
@@ -251,7 +173,7 @@ def test_power_electronics_units_collection():
         PowerElectronicsConnection.get_unit,
         PowerElectronicsConnection.add_unit,
         PowerElectronicsConnection.remove_unit,
-        PowerElectronicsConnection.clear_units
+        PowerElectronicsConnection.clear_units,
     )
 
 
@@ -264,75 +186,75 @@ def test_power_electronics_connection_phases_collection():
         PowerElectronicsConnection.get_phase,
         PowerElectronicsConnection.add_phase,
         PowerElectronicsConnection.remove_phase,
-        PowerElectronicsConnection.clear_phases
+        PowerElectronicsConnection.clear_phases,
     )
 
 
 def test_power_electronics_connection_property_bounds():
     with raises(ValueError, match=re.escape("inv_watt_resp_v1 [199] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v1=199)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v1=199)
     with raises(ValueError, match=re.escape("inv_watt_resp_v1 [301] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v1=301)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v1=301)
     with raises(ValueError, match=re.escape("inv_watt_resp_v2 [215] must be between 216 and 230.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v2=215)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v2=215)
     with raises(ValueError, match=re.escape("inv_watt_resp_v2 [231] must be between 216 and 230.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v2=231)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v2=231)
     with raises(ValueError, match=re.escape("inv_watt_resp_v3 [234] must be between 235 and 255.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v3=234)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v3=234)
     with raises(ValueError, match=re.escape("inv_watt_resp_v3 [256] must be between 235 and 255.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v3=256)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v3=256)
     with raises(ValueError, match=re.escape("inv_watt_resp_v4 [243] must be between 244 and 265.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v4=243)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v4=243)
     with raises(ValueError, match=re.escape("inv_watt_resp_v4 [266] must be between 244 and 265.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v4=266)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_v4=266)
 
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v1 [-0.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v1=-0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v1=-0.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v1 [1.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v1=1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v1=1.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v2 [-0.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v2=-0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v2=-0.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v2 [1.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v2=1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v2=1.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v3 [-0.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v3=-0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v3=-0.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v3 [1.01] must be between 0.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v3=1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v3=1.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v4 [-0.01] must be between 0.0 and 0.2.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v4=-0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v4=-0.01)
     with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v4 [0.21] must be between 0.0 and 0.2.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v4=0.21)
+        PowerElectronicsConnection(mrid="mrid", inv_watt_resp_p_at_v4=0.21)
 
     with raises(ValueError, match=re.escape("inv_var_resp_v1 [199] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v1=199)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v1=199)
     with raises(ValueError, match=re.escape("inv_var_resp_v1 [301] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v1=301)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v1=301)
     with raises(ValueError, match=re.escape("inv_var_resp_v2 [199] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v2=199)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v2=199)
     with raises(ValueError, match=re.escape("inv_var_resp_v2 [301] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v2=301)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v2=301)
     with raises(ValueError, match=re.escape("inv_var_resp_v3 [199] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v3=199)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v3=199)
     with raises(ValueError, match=re.escape("inv_var_resp_v3 [301] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v3=301)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v3=301)
     with raises(ValueError, match=re.escape("inv_var_resp_v4 [199] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v4=199)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v4=199)
     with raises(ValueError, match=re.escape("inv_var_resp_v4 [301] must be between 200 and 300.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v4=301)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_v4=301)
 
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v1 [-0.01] must be between 0.0 and 0.6.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v1=-0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v1=-0.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v1 [0.61] must be between 0.0 and 0.6.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v1=0.61)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v1=0.61)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v2 [-1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v2=-1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v2=-1.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v2 [1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v2=1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v2=1.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v3 [-1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=-1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v3=-1.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v3 [1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=1.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v3=1.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [-0.61] must be between -0.6 and 0.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=-0.61)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v4=-0.61)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [0.01] must be between -0.6 and 0.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=0.01)
+        PowerElectronicsConnection(mrid="mrid", inv_var_resp_q_at_v4=0.01)

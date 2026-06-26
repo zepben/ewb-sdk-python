@@ -7,14 +7,12 @@ from hypothesis import given
 
 from cim.fill_fields import ac_line_segment_kwargs
 from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
-    verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_args
+    verify_conductor_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import AcLineSegment, generate_id, SinglePhaseKind, OverheadWireInfo
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-
-ac_line_segment_args = [*conductor_args, PerLengthSequenceImpedance(mrid=generate_id())]
 
 
 def test_ac_line_segment_constructor_default():
@@ -34,15 +32,6 @@ def test_ac_line_segment_constructor_kwargs(per_length_impedance, **kwargs):
     assert als.per_length_impedance == per_length_impedance
     assert als.per_length_sequence_impedance == per_length_impedance
     assert als.per_length_phase_impedance != per_length_impedance
-
-
-def test_ac_line_segment_constructor_args():
-    als = AcLineSegment(*ac_line_segment_args)
-
-    verify_conductor_constructor_args(als)
-    assert ac_line_segment_args[-1:] == [
-        als.per_length_impedance
-    ]
 
 
 def test_properties():
@@ -112,7 +101,7 @@ def test_ac_line_segment_phases():
         AcLineSegment.get_phase,
         AcLineSegment.add_phase,
         AcLineSegment.remove_phase,
-        AcLineSegment.clear_phases
+        AcLineSegment.clear_phases,
     )
 
 

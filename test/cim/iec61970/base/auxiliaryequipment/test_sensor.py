@@ -4,11 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import verify_auxiliary_equipment_constructor_default, \
-    verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
+    verify_auxiliary_equipment_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import Sensor, ProtectionRelayFunction, generate_id
-
-sensor_args = [*auxiliary_equipment_args, [ProtectionRelayFunction(mrid=generate_id())]]
+from zepben.ewb import Sensor, ProtectionRelayFunction
 
 
 def verify_sensor_constructor_default(sn: Sensor):
@@ -22,13 +20,6 @@ def verify_sensor_constructor_kwargs(sn: Sensor, relay_functions, **kwargs):
     assert list(sn.relay_functions) == relay_functions
 
 
-def verify_sensor_constructor_args(sn: Sensor):
-    verify_auxiliary_equipment_constructor_args(sn)
-    assert sensor_args[-1:] == [
-        list(sn.relay_functions)
-    ]
-
-
 def test_relay_functions_collection():
     validate_unordered(
         Sensor,
@@ -38,5 +29,5 @@ def test_relay_functions_collection():
         Sensor.get_relay_function,
         Sensor.add_relay_function,
         Sensor.remove_relay_function,
-        Sensor.clear_relay_function
+        Sensor.clear_relay_function,
     )

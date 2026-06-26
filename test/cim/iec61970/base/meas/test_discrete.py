@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import discrete_kwargs
 from cim.iec61970.base.meas.test_measurement import verify_measurement_constructor_default, \
-    verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
+    verify_measurement_constructor_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
-
-discrete_args = measurement_args
 
 
 def test_discrete_constructor_default():
@@ -20,7 +18,3 @@ def test_discrete_constructor_default():
 @given(**discrete_kwargs())
 def test_discrete_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Discrete(**kwargs), **kwargs)
-
-
-def test_discrete_constructor_args():
-    verify_measurement_constructor_args(Discrete(*discrete_args))

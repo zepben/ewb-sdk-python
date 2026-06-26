@@ -2,25 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import datetime
 
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
+    verify_power_system_resource_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import Equipment, OperationalRestriction, EquipmentContainer, generate_id, Site, LvFeeder, Substation, LvSubstation
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-equipment_args = [
-    *power_system_resource_args,
-    False,
-    False,
-    datetime.datetime(2023, 1, 2),
-    [UsagePoint(mrid=generate_id()), UsagePoint(mrid=generate_id())],
-    [EquipmentContainer(mrid=generate_id()), EquipmentContainer(mrid=generate_id())],
-    [OperationalRestriction(mrid=generate_id()), OperationalRestriction(mrid=generate_id())],
-    [Feeder(mrid=generate_id()), Feeder(mrid=generate_id())]
-]
 
 
 def verify_equipment_constructor_default(eq: Equipment):
@@ -34,9 +22,11 @@ def verify_equipment_constructor_default(eq: Equipment):
     assert not list(eq.current_containers)
 
 
-def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_service, commissioned_date, usage_points, equipment_containers,
-                                        operational_restrictions,
-                                        current_containers, **kwargs):
+def verify_equipment_constructor_kwargs(
+    eq: Equipment, in_service, normally_in_service, commissioned_date, usage_points, equipment_containers,
+    operational_restrictions,
+    current_containers, **kwargs,
+):
     verify_power_system_resource_constructor_kwargs(eq, **kwargs)
     assert eq.in_service == in_service
     assert eq.normally_in_service == normally_in_service
@@ -45,19 +35,6 @@ def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_s
     assert list(eq.containers) == equipment_containers
     assert list(eq.operational_restrictions) == operational_restrictions
     assert list(eq.current_containers) == current_containers
-
-
-def verify_equipment_constructor_args(eq: Equipment):
-    verify_power_system_resource_constructor_args(eq)
-    assert equipment_args[-7:] == [
-        eq.in_service,
-        eq.normally_in_service,
-        eq.commissioned_date,
-        list(eq.usage_points),
-        list(eq.containers),
-        list(eq.operational_restrictions),
-        list(eq.current_containers)
-    ]
 
 
 def test_usage_points_collection():
@@ -69,7 +46,7 @@ def test_usage_points_collection():
         Equipment.get_usage_point,
         Equipment.add_usage_point,
         Equipment.remove_usage_point,
-        Equipment.clear_usage_points
+        Equipment.clear_usage_points,
     )
 
 
@@ -82,7 +59,7 @@ def test_equipment_containers_collection():
         Equipment.get_container,
         Equipment.add_container,
         Equipment.remove_container,
-        Equipment.clear_containers
+        Equipment.clear_containers,
     )
 
 
@@ -95,7 +72,7 @@ def test_operational_restrictions_collection():
         Equipment.get_operational_restriction,
         Equipment.add_operational_restriction,
         Equipment.remove_operational_restriction,
-        Equipment.clear_operational_restrictions
+        Equipment.clear_operational_restrictions,
     )
 
 
@@ -108,7 +85,7 @@ def test_current_containers_collection():
         Equipment.get_current_container,
         Equipment.add_current_container,
         Equipment.remove_current_container,
-        Equipment.clear_current_containers
+        Equipment.clear_current_containers,
     )
 
 

@@ -7,11 +7,9 @@ import sys
 import pytest
 
 from cim.iec61970.base.core.test_equipment import verify_equipment_constructor_default, \
-    verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
+    verify_equipment_constructor_kwargs
 from cim.private_collection_validator import validate_ordered
-from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal, generate_id
-
-conducting_equipment_args = [*equipment_args, BaseVoltage(mrid=generate_id()), [Terminal(mrid=generate_id()), Terminal(mrid=generate_id())]]
+from zepben.ewb import ConductingEquipment, Terminal, generate_id
 
 
 def verify_conducting_equipment_constructor_default(ce: ConductingEquipment):
@@ -26,14 +24,6 @@ def verify_conducting_equipment_constructor_kwargs(ce: ConductingEquipment, base
     assert list(ce.terminals) == terminals
 
 
-def verify_conducting_equipment_constructor_args(ce: ConductingEquipment):
-    verify_equipment_constructor_args(ce)
-    assert conducting_equipment_args[-2:] == [
-        ce.base_voltage,
-        list(ce.terminals)
-    ]
-
-
 def test_terminals_collection():
     validate_ordered(
         ConductingEquipment,
@@ -45,7 +35,7 @@ def test_terminals_collection():
         ConductingEquipment.add_terminal,
         ConductingEquipment.remove_terminal,
         ConductingEquipment.clear_terminals,
-        lambda t: t.sequence_number
+        lambda t: t.sequence_number,
     )
 
 

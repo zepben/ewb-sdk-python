@@ -6,11 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import photo_voltaic_unit_kwargs
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import \
-    verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
-    power_electronics_unit_args
+    verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs
 from zepben.ewb import PhotoVoltaicUnit, generate_id
-
-photo_voltaic_unit_args = power_electronics_unit_args
 
 
 def test_photo_voltaic_unit_constructor_default():
@@ -20,7 +17,3 @@ def test_photo_voltaic_unit_constructor_default():
 @given(**photo_voltaic_unit_kwargs())
 def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PhotoVoltaicUnit(**kwargs), **kwargs)
-
-
-def test_photo_voltaic_unit_constructor_args():
-    verify_power_electronics_unit_constructor_args(PhotoVoltaicUnit(*photo_voltaic_unit_args))

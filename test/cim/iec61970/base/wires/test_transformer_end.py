@@ -5,22 +5,9 @@
 from pytest import raises
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.ewb import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse, generate_id
-from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+    verify_identified_object_constructor_kwargs
+from zepben.ewb import Terminal, PowerTransformer, Fuse, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-
-transformer_end_args = [
-    *identified_object_args,
-    True,
-    1.1,
-    2.2,
-    RatioTapChanger(mrid=generate_id()),
-    Terminal(mrid=generate_id()),
-    BaseVoltage(mrid=generate_id()),
-    3,
-    TransformerStarImpedance(mrid=generate_id())
-]
 
 
 def verify_transformer_end_constructor_default(te: TransformerEnd):
@@ -35,8 +22,10 @@ def verify_transformer_end_constructor_default(te: TransformerEnd):
     assert not te.star_impedance
 
 
-def verify_transformer_end_constructor_kwargs(te: TransformerEnd, grounded, r_ground, x_ground, ratio_tap_changer, terminal, base_voltage, end_number,
-                                              star_impedance, **kwargs):
+def verify_transformer_end_constructor_kwargs(
+    te: TransformerEnd, grounded, r_ground, x_ground, ratio_tap_changer, terminal, base_voltage, end_number,
+    star_impedance, **kwargs,
+):
     verify_identified_object_constructor_kwargs(te, **kwargs)
     assert te.grounded == grounded
     assert te.r_ground == r_ground
@@ -46,20 +35,6 @@ def verify_transformer_end_constructor_kwargs(te: TransformerEnd, grounded, r_gr
     assert te.base_voltage == base_voltage
     assert te.end_number == end_number
     assert te.star_impedance == star_impedance
-
-
-def verify_transformer_end_constructor_args(te: TransformerEnd):
-    verify_identified_object_constructor_args(te)
-    assert transformer_end_args[-8:] == [
-        te.grounded,
-        te.r_ground,
-        te.x_ground,
-        te.ratio_tap_changer,
-        te.terminal,
-        te.base_voltage,
-        te.end_number,
-        te.star_impedance
-    ]
 
 
 def test_allow_terminal_with_no_conducting_equipment():
@@ -76,8 +51,10 @@ def test_terminal_must_belong_to_power_transformer():
     t1 = Terminal(mrid="terminal_mrid")
     t1.conducting_equipment = Fuse(mrid="fuse_mrid")
 
-    with raises(ValueError, match=r"Cannot assign TransformerEnd\[transformer_end_mrid\] to Terminal\[terminal_mrid\], which is connected to a "
-                                  r"Fuse\[fuse_mrid\] rather than a PowerTransformer."):
+    with raises(
+        ValueError, match=r"Cannot assign TransformerEnd\[transformer_end_mrid\] to Terminal\[terminal_mrid\], which is connected to a "
+                          r"Fuse\[fuse_mrid\] rather than a PowerTransformer.",
+    ):
         te.terminal = t1
 
     t2 = Terminal(mrid=generate_id())

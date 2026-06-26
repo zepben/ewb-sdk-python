@@ -7,14 +7,12 @@ from hypothesis import given
 
 from cim.fill_fields import per_length_phase_impedance_kwargs
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
-    verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_args
+    verify_per_length_impedance_constructor_kwargs
 from cim.private_collection_validator import validate_unordered_other
 from util import assert_or_empty
 from zepben.ewb import SinglePhaseKind, single_phase_kind_by_id, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
-
-per_length_phase_impedance_args = [*per_length_impedance_args, [PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.A)]]
 
 
 def test_per_length_phase_impedance_constructor_default():
@@ -33,16 +31,6 @@ def test_per_length_phase_impedance_constructor_kwargs(data, **kwargs):
     assert_or_empty(plpi.data, data)
 
 
-def test_per_length_phase_impedance_constructor_args():
-    # noinspection PyArgumentList
-    plpi = PerLengthPhaseImpedance(*per_length_phase_impedance_args)
-
-    verify_per_length_impedance_constructor_args(plpi)
-    assert per_length_phase_impedance_args[-1:] == [
-        list(plpi.data),
-    ]
-
-
 @pytest.mark.timeout(10000)
 def test_phase_impedance_data():
     validate_unordered_other(
@@ -55,7 +43,7 @@ def test_phase_impedance_data():
         PerLengthPhaseImpedance.remove_data,
         PerLengthPhaseImpedance.clear_data,
         lambda it: (it.from_phase, it.to_phase),
-        lambda rs: f"from_phase {rs[0]} and to_phase {rs[1]}"
+        lambda rs: f"from_phase {rs[0]} and to_phase {rs[1]}",
     )
 
 
