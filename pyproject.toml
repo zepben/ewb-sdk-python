@@ -68,9 +68,12 @@ ignore = [
     "E741",  # ambiguous-variable-name
     "E722",  # bare-except
 ]
+extend-select = [
+    "I", # Import order
+]
 
 [tool.ruff.lint.per-file-ignores]
-"src/zepben/ewb/__init__.py" = ["F403"]  # star-imports are intentional here
+"src/zepben/ewb/__init__.py" = ["F403", "I"]  # star-imports are intentional here
 "src/zepben/ewb/auth/__init__.py" = ["F403"]
 "src/zepben/ewb/database/sqlite/common/base_database_tables.py" = ["F403"]
 "src/zepben/ewb/database/sqlite/customer/customer_database_tables.py" = ["F403"]
