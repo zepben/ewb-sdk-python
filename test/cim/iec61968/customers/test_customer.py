@@ -7,12 +7,9 @@ from hypothesis import given
 
 from cim.fill_fields import customer_kwargs
 from cim.iec61968.common.test_organisation_role import verify_organisation_role_constructor_default, \
-    verify_organisation_role_constructor_kwargs, \
-    verify_organisation_role_constructor_args, organisation_role_args
+    verify_organisation_role_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import Customer, CustomerKind, CustomerAgreement, generate_id
-
-customer_args = [*organisation_role_args, CustomerKind.residential, "special", [CustomerAgreement(mrid=generate_id())]]
 
 
 def test_customer_constructor_default():
@@ -30,24 +27,13 @@ def test_customer_constructor_kwargs(kind, special_need, customer_agreements, **
         kind=kind,
         special_need=special_need,
         customer_agreements=customer_agreements,
-        **kwargs
+        **kwargs,
     )
 
     verify_organisation_role_constructor_kwargs(c, **kwargs)
     assert c.kind == kind
     assert c.special_need == special_need
     assert list(c.agreements) == customer_agreements
-
-
-def test_customer_constructor_args():
-    c = Customer(*customer_args)
-
-    verify_organisation_role_constructor_args(c)
-    assert customer_args[-3:] == [
-        c.kind,
-        c.special_need,
-        list(c.agreements)
-    ]
 
 
 def test_customer_agreements_collection():
@@ -59,5 +45,5 @@ def test_customer_agreements_collection():
         Customer.get_agreement,
         Customer.add_agreement,
         Customer.remove_agreement,
-        Customer.clear_agreements
+        Customer.clear_agreements,
     )

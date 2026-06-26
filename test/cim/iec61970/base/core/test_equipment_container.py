@@ -7,13 +7,10 @@ from typing import Generator, Type
 import pytest
 
 from cim.iec61970.base.core.test_connectivity_node_container import \
-    verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs, \
-    verify_connectivity_node_container_constructor_args, connectivity_node_container_args
+    verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import EquipmentContainer, Equipment, LvFeeder, Substation, generate_id, TestNetworkBuilder, NetworkStateOperators
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-equipment_container_args = [*connectivity_node_container_args, {"e": Equipment(mrid=generate_id())}]
 
 
 def verify_equipment_container_constructor_default(ec: EquipmentContainer):
@@ -26,13 +23,6 @@ def verify_equipment_container_constructor_kwargs(ec: EquipmentContainer, equipm
     assert list(ec.equipment) == equipment
 
 
-def verify_equipment_container_constructor_args(ec: EquipmentContainer):
-    verify_connectivity_node_container_constructor_args(ec)
-
-    # We use a different style of matching here as the passed in arg for equipment is a map and the stored collection is a list.
-    assert list(ec.equipment) == list(equipment_container_args[-1].values())
-
-
 def test_equipment_collection():
     validate_unordered(
         EquipmentContainer,
@@ -42,7 +32,7 @@ def test_equipment_collection():
         EquipmentContainer.get_equipment,
         EquipmentContainer.add_equipment,
         EquipmentContainer.remove_equipment,
-        EquipmentContainer.clear_equipment
+        EquipmentContainer.clear_equipment,
     )
 
 

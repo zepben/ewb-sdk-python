@@ -6,16 +6,10 @@
 from hypothesis import given
 
 from cim.fill_fields import protection_relay_system_kwargs
-from cim.iec61970.base.core.test_equipment import equipment_args, verify_equipment_constructor_default, \
-    verify_equipment_constructor_kwargs, verify_equipment_constructor_args
+from cim.iec61970.base.core.test_equipment import verify_equipment_constructor_default, \
+    verify_equipment_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme, generate_id
-
-protection_relay_system_args = [
-    *equipment_args,
-    ProtectionKind.JDIFF,
-    [ProtectionRelayScheme(mrid=generate_id()), ProtectionRelayScheme(mrid=generate_id()), ProtectionRelayScheme(mrid=generate_id())]
-]
 
 
 def test_protection_relay_system_constructor_default():
@@ -31,22 +25,12 @@ def test_protection_relay_system_constructor_kwargs(protection_kind, schemes, **
     prs = ProtectionRelaySystem(
         protection_kind=protection_kind,
         schemes=schemes,
-        **kwargs
+        **kwargs,
     )
 
     verify_equipment_constructor_kwargs(prs, **kwargs)
     assert prs.protection_kind == protection_kind
     assert list(prs.schemes) == schemes
-
-
-def test_protection_relay_system_constructor_args():
-    prs = ProtectionRelaySystem(*protection_relay_system_args)
-
-    verify_equipment_constructor_args(prs)
-    assert protection_relay_system_args[-2:] == [
-        prs.protection_kind,
-        list(prs.schemes)
-    ]
 
 
 def test_schemes_collection():
@@ -58,5 +42,5 @@ def test_schemes_collection():
         ProtectionRelaySystem.get_scheme,
         ProtectionRelaySystem.add_scheme,
         ProtectionRelaySystem.remove_scheme,
-        ProtectionRelaySystem.clear_scheme
+        ProtectionRelaySystem.clear_scheme,
     )

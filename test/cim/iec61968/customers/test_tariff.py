@@ -6,11 +6,8 @@
 from hypothesis import given
 
 from cim.fill_fields import tariff_kwargs
-from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
-    verify_document_constructor_args, document_args
+from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs
 from zepben.ewb import Tariff, generate_id
-
-tariff_args = document_args
 
 
 def test_tariff_constructor_default():
@@ -20,7 +17,3 @@ def test_tariff_constructor_default():
 @given(**tariff_kwargs())
 def test_tariff_constructor_kwargs(**kwargs):
     verify_document_constructor_kwargs(Tariff(**kwargs), **kwargs)
-
-
-def test_tariff_constructor_args():
-    verify_document_constructor_args(Tariff(*tariff_args))

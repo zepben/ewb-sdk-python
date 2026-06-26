@@ -6,39 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import energy_source_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
+    verify_energy_connection_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
-
-energy_source_args = [
-    *energy_connection_args,
-    [EnergySourcePhase(mrid=generate_id())],
-    1.1,
-    2.2,
-    3.3,
-    4.4,
-    5.5,
-    6.6,
-    7.7,
-    8.8,
-    9.9,
-    10.01,
-    11.11,
-    12.21,
-    True,
-    13.31,
-    14.41,
-    15.51,
-    16.61,
-    17.71,
-    18.81,
-    19.91,
-    20.02,
-    21.12,
-    22.22,
-    23.32,
-    24.42
-]
 
 
 def test_energy_source_constructor_default():
@@ -74,9 +44,11 @@ def test_energy_source_constructor_default():
 
 
 @given(**energy_source_kwargs())
-def test_energy_source_constructor_kwargs(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
-                                          r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min,
-                                          r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
+def test_energy_source_constructor_kwargs(
+    energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
+    r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min,
+    r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs,
+):
     es = EnergySource(
         energy_source_phases=energy_source_phases,
         active_power=active_power,
@@ -104,7 +76,7 @@ def test_energy_source_constructor_kwargs(energy_source_phases, active_power, re
         x_max=x_max,
         xn_max=xn_max,
         x0_max=x0_max,
-        **kwargs
+        **kwargs,
     )
 
     verify_energy_connection_constructor_kwargs(es, **kwargs)
@@ -136,40 +108,6 @@ def test_energy_source_constructor_kwargs(energy_source_phases, active_power, re
     assert es.x0_max == x0_max
 
 
-def test_energy_source_constructor_args():
-    es = EnergySource(*energy_source_args)
-
-    verify_energy_connection_constructor_args(es)
-    assert energy_source_args[-26:] == [
-        list(es.phases),
-        es.active_power,
-        es.reactive_power,
-        es.voltage_angle,
-        es.voltage_magnitude,
-        es.p_max,
-        es.p_min,
-        es.r,
-        es.r0,
-        es.rn,
-        es.x,
-        es.x0,
-        es.xn,
-        es.is_external_grid,
-        es.r_min,
-        es.rn_min,
-        es.r0_min,
-        es.x_min,
-        es.xn_min,
-        es.x0_min,
-        es.r_max,
-        es.rn_max,
-        es.r0_max,
-        es.x_max,
-        es.xn_max,
-        es.x0_max
-    ]
-
-
 def test_phases_collection():
     validate_unordered(
         EnergySource,
@@ -179,5 +117,5 @@ def test_phases_collection():
         EnergySource.get_phase,
         EnergySource.add_phase,
         EnergySource.remove_phase,
-        EnergySource.clear_phases
+        EnergySource.clear_phases,
     )

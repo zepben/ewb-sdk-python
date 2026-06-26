@@ -8,11 +8,9 @@ from hypothesis import assume
 from pytest import raises
 
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
+    verify_power_system_resource_constructor_kwargs
 from zepben.ewb import TapChangerControl, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
-
-tap_changer_args = [*power_system_resource_args, False, 1, TapChangerControl(mrid=generate_id()), 10, 2, 3, 4, 5.5]
 
 
 def verify_tap_changer_constructor_default(tc: TapChanger):
@@ -34,8 +32,10 @@ def assume_step_values(high_step, low_step, neutral_step, normal_step, step):
     assume(high_step >= step >= low_step)
 
 
-def verify_tap_changer_constructor_kwargs(tc: TapChanger, control_enabled, neutral_u, high_step, low_step, neutral_step, normal_step, step, tap_changer_control,
-                                          **kwargs):
+def verify_tap_changer_constructor_kwargs(
+    tc: TapChanger, control_enabled, neutral_u, high_step, low_step, neutral_step, normal_step, step, tap_changer_control,
+    **kwargs,
+):
     assume_step_values(high_step, low_step, neutral_step, normal_step, step)
 
     verify_power_system_resource_constructor_kwargs(tc, **kwargs)
@@ -49,32 +49,16 @@ def verify_tap_changer_constructor_kwargs(tc: TapChanger, control_enabled, neutr
     assert tc.tap_changer_control == tap_changer_control
 
 
-def verify_tap_changer_constructor_args(tc: TapChanger):
-    verify_power_system_resource_constructor_args(tc)
-    assert tap_changer_args[-8:] == [
-        tc.control_enabled,
-        tc.neutral_u,
-        tc.tap_changer_control,
-        tc.high_step,
-        tc.low_step,
-        tc.neutral_step,
-        tc.normal_step,
-        tc.step
-    ]
-
-
 # noinspection PyArgumentList
 def test_detected_invalid_steps_via_constructor_args():
-    # args order: control_enabled, neutral_u, _high_step, _low_step, _neutral_step, _normal_step, _step
-
     with raises(ValueError, match=re.escape("High step [0] must be greater than low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 0, 0, 0, 0, 0.0)
+        TapChanger(mrid="mrid", high_step=0, low_step=0, neutral_step=0, normal_step=0, step=0.0)
     with raises(ValueError, match=re.escape("Neutral step [2] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 2, 0, 0.0)
+        TapChanger(mrid="mrid", high_step=1, low_step=0, neutral_step=2, normal_step=0, step=0.0)
     with raises(ValueError, match=re.escape("Normal step [2] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 0, 2, 0.0)
+        TapChanger(mrid="mrid", high_step=1, low_step=0, neutral_step=0, normal_step=2, step=0.0)
     with raises(ValueError, match=re.escape("Step [1.1] must be between high step [1] and low step [0]")):
-        TapChanger(*power_system_resource_args, True, 100, TapChangerControl(mrid=generate_id()), 1, 0, 0, 0, 1.1)
+        TapChanger(mrid="mrid", high_step=1, low_step=0, neutral_step=0, normal_step=0, step=1.1)
 
 
 def test_validates_step_changes():

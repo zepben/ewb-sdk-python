@@ -6,12 +6,8 @@
 from hypothesis import given
 
 from cim.fill_fields import ground_kwargs
-from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs, \
-    verify_conducting_equipment_constructor_args, \
-    conducting_equipment_args
+from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import Ground, generate_id
-
-ground_args = conducting_equipment_args
 
 
 def test_ground_constructor_default():
@@ -21,7 +17,3 @@ def test_ground_constructor_default():
 @given(**ground_kwargs())
 def test_ground_constructor_kwargs(**kwargs):
     verify_conducting_equipment_constructor_kwargs(Ground(**kwargs), **kwargs)
-
-
-def test_ground_constructor_args():
-    verify_conducting_equipment_constructor_args(Ground(*ground_args))

@@ -6,13 +6,11 @@ from hypothesis import given
 
 from cim.fill_fields import geographical_region_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-
-geographical_region_args = [*identified_object_args, [SubGeographicalRegion(mrid=generate_id())]]
 
 
 def test_geographical_region_constructor_default():
@@ -30,15 +28,6 @@ def test_geographical_region_constructor_kwargs(sub_geographical_regions, **kwar
     assert list(gr.sub_geographical_regions) == sub_geographical_regions
 
 
-def test_geographical_region_constructor_args():
-    gr = GeographicalRegion(*geographical_region_args)
-
-    verify_identified_object_constructor_args(gr)
-    assert geographical_region_args[-1:] == [
-        list(gr.sub_geographical_regions)
-    ]
-
-
 def test_sub_geographical_regions_collection():
     validate_unordered(
         GeographicalRegion,
@@ -48,5 +37,5 @@ def test_sub_geographical_regions_collection():
         GeographicalRegion.get_sub_geographical_region,
         GeographicalRegion.add_sub_geographical_region,
         GeographicalRegion.remove_sub_geographical_region,
-        GeographicalRegion.clear_sub_geographical_regions
+        GeographicalRegion.clear_sub_geographical_regions,
     )

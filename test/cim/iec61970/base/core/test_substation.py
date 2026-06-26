@@ -6,18 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import substation_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
-    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+    verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import Substation, Feeder, Loop, Circuit, generate_id
-
-substation_args = [
-    *equipment_container_args,
-    Substation(mrid=generate_id()),
-    [Feeder(mrid=generate_id())],
-    [Loop(mrid=generate_id())],
-    [Loop(mrid=generate_id())],
-    [Circuit(mrid=generate_id())]
-]
 
 
 def test_substation_constructor_default():
@@ -33,12 +24,14 @@ def test_substation_constructor_default():
 
 @given(**substation_kwargs())
 def test_substation_constructor_kwargs(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
-    cn = Substation(sub_geographical_region=sub_geographical_region,
-                    normal_energized_feeders=normal_energized_feeders,
-                    loops=loops,
-                    energized_loops=energized_loops,
-                    circuits=circuits,
-                    **kwargs)
+    cn = Substation(
+        sub_geographical_region=sub_geographical_region,
+        normal_energized_feeders=normal_energized_feeders,
+        loops=loops,
+        energized_loops=energized_loops,
+        circuits=circuits,
+        **kwargs,
+    )
 
     verify_equipment_container_constructor_kwargs(cn, **kwargs)
     assert cn.sub_geographical_region == sub_geographical_region
@@ -46,19 +39,6 @@ def test_substation_constructor_kwargs(sub_geographical_region, normal_energized
     assert list(cn.loops) == loops
     assert list(cn.energized_loops) == energized_loops
     assert list(cn.circuits) == circuits
-
-
-def test_substation_constructor_args():
-    cn = Substation(*substation_args)
-
-    verify_equipment_container_constructor_args(cn)
-    assert substation_args[-5:] == [
-        cn.sub_geographical_region,
-        list(cn.feeders),
-        list(cn.loops),
-        list(cn.energized_loops),
-        list(cn.circuits)
-    ]
 
 
 def test_normal_energized_feeders_collection():
@@ -70,7 +50,7 @@ def test_normal_energized_feeders_collection():
         Substation.get_feeder,
         Substation.add_feeder,
         Substation.remove_feeder,
-        Substation.clear_feeders
+        Substation.clear_feeders,
     )
 
 
@@ -83,7 +63,7 @@ def test_loops_collection():
         Substation.get_loop,
         Substation.add_loop,
         Substation.remove_loop,
-        Substation.clear_loops
+        Substation.clear_loops,
     )
 
 
@@ -96,7 +76,7 @@ def test_energized_loops_collection():
         Substation.get_energized_loop,
         Substation.add_energized_loop,
         Substation.remove_energized_loop,
-        Substation.clear_energized_loops
+        Substation.clear_energized_loops,
     )
 
 
@@ -109,5 +89,5 @@ def test_circuits_collection():
         Substation.get_circuit,
         Substation.add_circuit,
         Substation.remove_circuit,
-        Substation.clear_circuits
+        Substation.clear_circuits,
     )

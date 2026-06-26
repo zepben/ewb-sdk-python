@@ -6,20 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import terminal_kwargs
 from cim.iec61970.base.core.test_ac_dc_terminal import verify_ac_dc_terminal_constructor_default, \
-    verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
-from zepben.ewb import Terminal, ConnectivityNode, ConductingEquipment, PhaseCode, generate_id, NetworkService, Junction
+    verify_ac_dc_terminal_constructor_kwargs
+from zepben.ewb import Terminal, ConnectivityNode, PhaseCode, generate_id, NetworkService, Junction
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
-
-# noinspection PyArgumentList
-terminal_args = [
-    *ac_dc_terminal_args,
-    ConductingEquipment(mrid=generate_id()),
-    PhaseCode.XYN,
-    1,
-    FeederDirection.UPSTREAM,
-    FeederDirection.DOWNSTREAM,
-    ConnectivityNode(mrid=generate_id())
-]
 
 
 def test_terminal_constructor_default():
@@ -44,15 +33,17 @@ def test_terminal_constructor_kwargs(
     normal_feeder_direction,
     current_feeder_direction,
     connectivity_node,
-    **kwargs
+    **kwargs,
 ):
-    t = Terminal(conducting_equipment=conducting_equipment,
-                 phases=phases,
-                 sequence_number=sequence_number,
-                 normal_feeder_direction=normal_feeder_direction,
-                 current_feeder_direction=current_feeder_direction,
-                 connectivity_node=connectivity_node,
-                 **kwargs)
+    t = Terminal(
+        conducting_equipment=conducting_equipment,
+        phases=phases,
+        sequence_number=sequence_number,
+        normal_feeder_direction=normal_feeder_direction,
+        current_feeder_direction=current_feeder_direction,
+        connectivity_node=connectivity_node,
+        **kwargs,
+    )
 
     verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
     assert t.conducting_equipment == conducting_equipment
@@ -61,21 +52,6 @@ def test_terminal_constructor_kwargs(
     assert t.normal_feeder_direction == normal_feeder_direction
     assert t.current_feeder_direction == current_feeder_direction
     assert t.connectivity_node == connectivity_node
-
-
-def test_terminal_constructor_args():
-    t = Terminal(*terminal_args)
-
-    verify_ac_dc_terminal_constructor_args(t)
-    expected_args = [
-        t.conducting_equipment,
-        t.phases,
-        t.sequence_number,
-        t.normal_feeder_direction,
-        t.current_feeder_direction,
-        t.connectivity_node
-    ]
-    assert (terminal_args[-len(expected_args):] == expected_args)
 
 
 def test_connectivity():

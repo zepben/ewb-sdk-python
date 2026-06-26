@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import transformer_star_impedance_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.ewb import TransformerStarImpedance, TransformerEndInfo, generate_id
-
-transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, TransformerEndInfo(mrid=generate_id())]
+    verify_identified_object_constructor_kwargs
+from zepben.ewb import TransformerStarImpedance, generate_id
 
 
 def test_transformer_star_impedance_constructor_default():
@@ -31,7 +29,7 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
         x=x,
         x0=x0,
         transformer_end_info=transformer_end_info,
-        **kwargs
+        **kwargs,
     )
 
     verify_identified_object_constructor_kwargs(tsi, **kwargs)
@@ -40,16 +38,3 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
     assert tsi.x == x
     assert tsi.x0 == x0
     assert tsi.transformer_end_info == transformer_end_info
-
-
-def test_transformer_star_impedance_constructor_args():
-    tsi = TransformerStarImpedance(*transformer_star_impedance_args)
-
-    verify_identified_object_constructor_args(tsi)
-    assert transformer_star_impedance_args[-5:] == [
-        tsi.r,
-        tsi.r0,
-        tsi.x,
-        tsi.x0,
-        tsi.transformer_end_info
-    ]

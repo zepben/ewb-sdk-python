@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+    verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import Connector, Conductor, CableInfo, generate_id
-
-connector_args = conducting_equipment_args
 
 
 def verify_connector_constructor_default(c: Connector):
@@ -16,10 +14,6 @@ def verify_connector_constructor_default(c: Connector):
 
 def verify_connector_constructor_kwargs(c: Connector, **kwargs):
     verify_conducting_equipment_constructor_kwargs(c, **kwargs)
-
-
-def verify_connector_constructor_args(c: Connector):
-    verify_conducting_equipment_constructor_args(c)
 
 
 def test_is_underground():

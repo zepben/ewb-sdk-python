@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import no_load_test_kwargs
 from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
-    verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
+    verify_transformer_test_constructor_kwargs
 from zepben.ewb import NoLoadTest, generate_id
-
-no_load_test_args = [*transformer_test_args, 1, 2.2, 3.3, 4, 5]
 
 
 def test_no_load_test_constructor_default():
@@ -25,12 +23,14 @@ def test_no_load_test_constructor_default():
 
 @given(**no_load_test_kwargs())
 def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
-    nlt = NoLoadTest(energised_end_voltage=energised_end_voltage,
-                     exciting_current=exciting_current,
-                     exciting_current_zero=exciting_current_zero,
-                     loss=loss,
-                     loss_zero=loss_zero,
-                     **kwargs)
+    nlt = NoLoadTest(
+        energised_end_voltage=energised_end_voltage,
+        exciting_current=exciting_current,
+        exciting_current_zero=exciting_current_zero,
+        loss=loss,
+        loss_zero=loss_zero,
+        **kwargs,
+    )
 
     verify_transformer_test_constructor_kwargs(nlt, **kwargs)
     assert nlt.energised_end_voltage == energised_end_voltage
@@ -38,16 +38,3 @@ def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current
     assert nlt.exciting_current_zero == exciting_current_zero
     assert nlt.loss == loss
     assert nlt.loss_zero == loss_zero
-
-
-def test_no_load_test_constructor_args():
-    nlt = NoLoadTest(*no_load_test_args)
-
-    verify_transformer_test_constructor_args(nlt)
-    assert no_load_test_args[-5:] == [
-        nlt.energised_end_voltage,
-        nlt.exciting_current,
-        nlt.exciting_current_zero,
-        nlt.loss,
-        nlt.loss_zero
-    ]

@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import analog_kwargs
 from cim.iec61970.base.meas.test_measurement import verify_measurement_constructor_default, \
-    verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
+    verify_measurement_constructor_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
-
-analog_args = measurement_args
 
 
 def test_analog_constructor_default():
@@ -24,12 +22,8 @@ def test_analog_constructor_default():
 def test_analog_constructor_kwargs(positive_flow_in, **kwargs):
     ana = Analog(
         positive_flow_in=positive_flow_in,
-        **kwargs
+        **kwargs,
     )
 
     verify_measurement_constructor_kwargs(ana, **kwargs)
     assert ana.positive_flow_in == positive_flow_in
-
-
-def test_analog_constructor_args():
-    verify_measurement_constructor_args(Analog(*analog_args))

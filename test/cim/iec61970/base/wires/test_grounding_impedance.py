@@ -5,11 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import grounding_impedance_kwargs
-from cim.iec61970.base.wires.test_earth_fault_compensator import earth_fault_compensator_args, \
-    verify_earth_fault_compensator_constructor_default, verify_earth_fault_compensator_constructor_kwargs, verify_earth_fault_compensator_constructor_args
+from cim.iec61970.base.wires.test_earth_fault_compensator import verify_earth_fault_compensator_constructor_default, \
+    verify_earth_fault_compensator_constructor_kwargs
 from zepben.ewb import GroundingImpedance
-
-grounding_impedance_args = [*earth_fault_compensator_args, 1.0]
 
 
 def verify_grounding_impedance_constructor_default():
@@ -25,12 +23,3 @@ def verify_grounding_impedance_constructor_kwargs(x, **kwargs):
 
     verify_earth_fault_compensator_constructor_kwargs(gi, **kwargs)
     assert gi.x == x
-
-
-def verify_grounding_impedance_constructor_args():
-    gi = GroundingImpedance(*grounding_impedance_args)
-
-    verify_earth_fault_compensator_constructor_args(gi)
-    assert grounding_impedance_args[-1:] == [
-        gi.x
-    ]

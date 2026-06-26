@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import remote_control_kwargs
 from cim.iec61970.base.scada.test_remote_point import verify_remote_point_constructor_default, \
-    verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args
-from zepben.ewb import RemoteControl, Control, generate_id
-
-remote_control_args = [*remote_point_args, Control(mrid=generate_id())]
+    verify_remote_point_constructor_kwargs
+from zepben.ewb import RemoteControl, generate_id
 
 
 def test_remote_control_constructor_default():
@@ -26,13 +24,3 @@ def test_remote_control_constructor_kwargs(control, **kwargs):
 
     verify_remote_point_constructor_kwargs(rc, **kwargs)
     assert rc.control == control
-
-
-def test_remote_control_constructor_args():
-    # noinspection PyArgumentList
-    c = RemoteControl(*remote_control_args)
-
-    verify_remote_point_constructor_args(c)
-    assert remote_control_args[-1:] == [
-        c.control
-    ]

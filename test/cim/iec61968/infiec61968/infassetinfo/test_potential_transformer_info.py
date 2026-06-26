@@ -7,11 +7,8 @@ from hypothesis import given
 
 from cim.fill_fields import potential_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
-    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from zepben.ewb import PotentialTransformerInfo, Ratio, generate_id
-
-# noinspection PyArgumentList
-potential_transformer_info_args = [*asset_info_args, "a", Ratio(1.1, 2.2), 3.3, "b", 4, 5.5]
+    verify_asset_info_constructor_kwargs
+from zepben.ewb import PotentialTransformerInfo, generate_id
 
 
 def test_potential_transformer_info_constructor_default():
@@ -35,7 +32,7 @@ def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_r
         pt_class=pt_class,
         rated_voltage=rated_voltage,
         secondary_ratio=secondary_ratio,
-        **kwargs
+        **kwargs,
     )
 
     verify_asset_info_constructor_kwargs(vti, **kwargs)
@@ -45,17 +42,3 @@ def test_potential_transformer_info_constructor_kwargs(accuracy_class, nominal_r
     assert vti.pt_class == pt_class
     assert vti.rated_voltage == rated_voltage
     assert vti.secondary_ratio == secondary_ratio
-
-
-def test_potential_transformer_info_constructor_args():
-    vti = PotentialTransformerInfo(*potential_transformer_info_args)
-
-    verify_asset_info_constructor_args(vti)
-    assert potential_transformer_info_args[-6:] == [
-        vti.accuracy_class,
-        vti.nominal_ratio,
-        vti.primary_ratio,
-        vti.pt_class,
-        vti.rated_voltage,
-        vti.secondary_ratio
-    ]

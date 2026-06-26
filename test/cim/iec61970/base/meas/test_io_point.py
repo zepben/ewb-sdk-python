@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from zepben.ewb import IoPoint
-
-io_point_args = identified_object_args
 
 
 def verify_io_point_constructor_default(ip: IoPoint):
@@ -16,7 +14,3 @@ def verify_io_point_constructor_default(ip: IoPoint):
 
 def verify_io_point_constructor_kwargs(ip: IoPoint, **kwargs):
     verify_identified_object_constructor_kwargs(ip, **kwargs)
-
-
-def verify_io_point_constructor_args(ip: IoPoint):
-    verify_identified_object_constructor_args(ip)

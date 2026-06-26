@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+    verify_regulating_cond_eq_constructor_kwargs
 from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, Terminal, generate_id
-
-shunt_compensator_args = [*regulating_cond_eq_args, True, 1, PhaseShuntConnectionKind.G, Terminal(mrid=generate_id()), 2.2]
 
 
 def verify_shunt_compensator_constructor_default(sc: ShuntCompensator):
@@ -26,14 +24,3 @@ def verify_shunt_compensator_constructor_kwargs(sc: ShuntCompensator, grounded, 
     assert sc.phase_connection == phase_connection
     assert sc.sections == sections
     assert sc.grounding_terminal == grounding_terminal
-
-
-def verify_shunt_compensator_constructor_args(sc: ShuntCompensator):
-    verify_regulating_cond_eq_constructor_args(sc)
-    assert shunt_compensator_args[-5:] == [
-        sc.grounded,
-        sc.nom_u,
-        sc.phase_connection,
-        sc.grounding_terminal,
-        sc.sections,
-    ]

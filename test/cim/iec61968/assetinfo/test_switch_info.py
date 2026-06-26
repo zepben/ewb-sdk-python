@@ -5,11 +5,8 @@
 from hypothesis import given
 
 from cim.fill_fields import switch_info_kwargs
-from cim.iec61968.assets.test_asset_info import asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
-    verify_asset_info_constructor_args
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs
 from zepben.ewb import SwitchInfo, generate_id
-
-switch_info_args = [*asset_info_args, 1.1]
 
 
 def test_switch_info_constructor_default():
@@ -23,17 +20,8 @@ def test_switch_info_constructor_default():
 def test_switch_info_constructor_kwargs(rated_interrupting_time, **kwargs):
     si = SwitchInfo(
         rated_interrupting_time=rated_interrupting_time,
-        **kwargs
+        **kwargs,
     )
 
     verify_asset_info_constructor_kwargs(si, **kwargs)
     assert si.rated_interrupting_time == rated_interrupting_time
-
-
-def test_switch_info_constructor_args():
-    si = SwitchInfo(*switch_info_args)
-
-    verify_asset_info_constructor_args(si)
-    assert switch_info_args[-1:] == [
-        si.rated_interrupting_time
-    ]

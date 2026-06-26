@@ -5,14 +5,11 @@
 from hypothesis import given
 
 from cim.fill_fields import lv_substation_kwargs
-from cim.iec61970.base.core.test_equipment_container import equipment_container_args, \
-    verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args
+from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from util import assert_or_empty
 from zepben.ewb import generate_id, LvFeeder, Feeder, Terminal, PowerTransformer, Fuse
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
-
-lv_substation_args = equipment_container_args
 
 
 def test_lv_substation_constructor_default():
@@ -24,13 +21,13 @@ def test_lv_substation_constructor_kwargs(
     normal_energizing_feeders,
     current_energizing_feeders,
     normal_energized_lv_feeders,
-    **kwargs
+    **kwargs,
 ):
     lv_sub = LvSubstation(
         normal_energizing_feeders=normal_energizing_feeders,
         current_energizing_feeders=current_energizing_feeders,
         normal_energized_lv_feeders=normal_energized_lv_feeders,
-        **kwargs
+        **kwargs,
     )
 
     verify_equipment_container_constructor_kwargs(lv_sub, **kwargs)
@@ -38,10 +35,6 @@ def test_lv_substation_constructor_kwargs(
     assert_or_empty(lv_sub.normal_energizing_feeders, normal_energizing_feeders)
     assert_or_empty(lv_sub.current_energizing_feeders, current_energizing_feeders)
     assert_or_empty(lv_sub.normal_energized_lv_feeders, normal_energized_lv_feeders)
-
-
-def test_lv_substation_constructor_args():
-    verify_equipment_container_constructor_args(LvSubstation(*lv_substation_args))
 
 
 def test_normal_energized_lv_feeder_collection():
@@ -53,7 +46,7 @@ def test_normal_energized_lv_feeder_collection():
         LvSubstation.get_normal_energized_lv_feeder,
         LvSubstation.add_normal_energized_lv_feeder,
         LvSubstation.remove_normal_energized_lv_feeder,
-        LvSubstation.clear_normal_energized_lv_feeders
+        LvSubstation.clear_normal_energized_lv_feeders,
     )
 
 
@@ -66,7 +59,7 @@ def test_normal_energizing_feeder_collection():
         LvSubstation.get_normal_energizing_feeder,
         LvSubstation.add_normal_energizing_feeder,
         LvSubstation.remove_normal_energizing_feeder,
-        LvSubstation.clear_normal_energizing_feeders
+        LvSubstation.clear_normal_energizing_feeders,
     )
 
 
@@ -79,7 +72,7 @@ def test_current_energizing_feeder_collection():
         LvSubstation.get_current_energizing_feeder,
         LvSubstation.add_current_energizing_feeder,
         LvSubstation.remove_current_energizing_feeder,
-        LvSubstation.clear_current_energizing_feeders
+        LvSubstation.clear_current_energizing_feeders,
     )
 
 

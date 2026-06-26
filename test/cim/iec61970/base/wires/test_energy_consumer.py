@@ -6,12 +6,10 @@ from hypothesis import given
 
 from cim.fill_fields import energy_consumer_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
+    verify_energy_connection_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import EnergyConsumer, PhaseShuntConnectionKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-
-energy_consumer_args = [*energy_connection_args, [EnergyConsumerPhase(mrid=generate_id())], 1, True, PhaseShuntConnectionKind.Y, 2.2, 3.3, 4.4, 5.5]
 
 
 def test_energy_consumer_constructor_default():
@@ -39,7 +37,7 @@ def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_cou
         p_fixed=p_fixed,
         q=q,
         q_fixed=q_fixed,
-        **kwargs
+        **kwargs,
     )
 
     verify_energy_connection_constructor_kwargs(ec, **kwargs)
@@ -53,22 +51,6 @@ def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_cou
     assert ec.q_fixed == q_fixed
 
 
-def test_energy_consumer_constructor_args():
-    ec = EnergyConsumer(*energy_consumer_args)
-
-    verify_energy_connection_constructor_args(ec)
-    assert energy_consumer_args[-8:] == [
-        list(ec.phases),
-        ec.customer_count,
-        ec.grounded,
-        ec.phase_connection,
-        ec.p,
-        ec.p_fixed,
-        ec.q,
-        ec.q_fixed
-    ]
-
-
 def test_phases_collection():
     validate_unordered(
         EnergyConsumer,
@@ -78,5 +60,5 @@ def test_phases_collection():
         EnergyConsumer.get_phase,
         EnergyConsumer.add_phase,
         EnergyConsumer.remove_phase,
-        EnergyConsumer.clear_phases
+        EnergyConsumer.clear_phases,
     )

@@ -7,10 +7,6 @@ from hypothesis import given
 
 from cim.fill_fields import street_address_kwargs
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
-from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
-
-street_address_args = ["a", TownDetail(), "b", StreetDetail()]
 
 
 def test_street_address_constructor_default():
@@ -30,14 +26,3 @@ def test_street_address_constructor_kwargs(postal_code, town_detail, po_box, str
     assert sa.town_detail == town_detail
     assert sa.po_box == po_box
     assert sa.street_detail == street_detail
-
-
-def test_street_address_constructor_args():
-    sa = StreetAddress(*street_address_args)
-
-    assert street_address_args[-4:] == [
-        sa.postal_code,
-        sa.town_detail,
-        sa.po_box,
-        sa.street_detail
-    ]

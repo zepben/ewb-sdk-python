@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import accumulator_value_kwargs
 from cim.iec61970.base.meas.test_measurement_value import verify_measurement_value_constructor_default, \
-    verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
+    verify_measurement_value_constructor_kwargs
 from zepben.ewb.model.cim.iec61970.base.meas.accumulator_value import AccumulatorValue
-
-accumulator_value_args = [*measurement_value_args, 1, "a"]
 
 
 def test_accumulator_value_constructor_default():
@@ -26,20 +24,9 @@ def test_accumulator_value_constructor_kwargs(value, accumulator_mrid, **kwargs)
     av = AccumulatorValue(
         value=value,
         accumulator_mrid=accumulator_mrid,
-        **kwargs
+        **kwargs,
     )
 
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
     assert av.accumulator_mrid == accumulator_mrid
-
-
-def test_accumulator_value_constructor_args():
-    # noinspection PyArgumentList
-    av = AccumulatorValue(*accumulator_value_args)
-
-    verify_measurement_value_constructor_args(av)
-    assert accumulator_value_args[-2:] == [
-        av.value,
-        av.accumulator_mrid
-    ]
