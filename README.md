@@ -7,7 +7,7 @@ The Python EWB SDK contains everything necessary to communicate with a Zepben En
 
 ## Requirements
 
-- Python 3.10 or later
+- Python 3.10 - 3.13 inclusive
 
 ## Installation
 
