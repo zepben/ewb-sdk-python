@@ -35,7 +35,6 @@ class Name(Identifiable):
     identified_object: Optional[IdentifiedObject] = None
     """Identified object that this name designates."""
 
-
     def __init__(self,
                  name: str,
                  *_,
@@ -47,3 +46,11 @@ class Name(Identifiable):
         io_mrid = "" if identified_object is None else identified_object.mrid
         mrid = f"{name}-{type.name}-{io_mrid}"
         super(Name, self).__init__(mrid=mrid, name=name, type=type, identified_object=identified_object, **kwargs)
+
+    def __eq__(self, other):
+        # Names are recreated when added to an IdObj, so we cannot check equality on identity
+        return isinstance(other, Name) and other.mrid == self.mrid
+
+    def __hash__(self):
+        # Objects implementing __eq__ require a __hash__ because Python
+        return object.__hash__(self)

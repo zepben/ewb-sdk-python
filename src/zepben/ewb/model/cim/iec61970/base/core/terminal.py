@@ -122,6 +122,9 @@ class Terminal(AcDcTerminal):
     def connectivity_node_id(self):
         return self.connectivity_node.mrid if self.connectivity_node is not None else None
 
+    def __repr__(self):
+        return f"Terminal{{{self.mrid}}}"
+
     def get_switch(self):
         """
         Get any associated switch for this Terminal
