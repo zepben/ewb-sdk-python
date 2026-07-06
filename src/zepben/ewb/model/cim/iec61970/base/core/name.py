@@ -52,5 +52,6 @@ class Name(Identifiable):
         return isinstance(other, Name) and other.mrid == self.mrid
 
     def __hash__(self):
-        # Objects implementing __eq__ require a __hash__ because Python
-        return object.__hash__(self)
+        # Objects implementing __eq__ require a __hash__ because Python;
+        # Have to hash on mrid because a == b implies hash(a) == hash(b)
+        return object.__hash__(self.mrid)
