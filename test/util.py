@@ -5,6 +5,7 @@
 
 import importlib
 import pkgutil
+import sys
 from concurrent import futures
 from typing import Generator, TypeVar, Callable, Any, Optional
 
@@ -13,29 +14,58 @@ from hypothesis.strategies import uuids
 
 T = TypeVar("T")
 
+def _is_stale_class(cls: type) -> bool:
+    """
+    Dataclasses create stale class objects that mess with the inheritance tree.
+    We check that the class has not been re-assigned in its own containing module
 
-def all_subclasses(cls, package):
+    Example::
+
+        @dataclass(slots=True)
+        class Dummy:
+            ...
+
+    This creates two classes ``Dummy`` - with and without slots. This function
+    will return False for the one with slots, since that is the one that
+    the module now recognises as the true Dummy.
+    """
+    module = sys.modules.get(cls.__module__)
+    if module is None:
+        return True
+    current = getattr(module, cls.__name__, None)
+    return cls is not current
+
+
+def all_subclasses(cls, package) -> set[type]:
     """
     Get all concrete subclasses of a given class that are defined under `package`
+    Account for stale classes created with ``@dataclass`` decorator
+
+    NOTE: This method does not recognise nested classes as subclasses
     :param cls: The class to check
     :param package: The package to find classes under
     :return: A set of all concrete implementations of `cls` under `package`
     """
-    y = set()
+    leaves = set()
 
     def find_subclasses(recurse_cls):
-        for c in recurse_cls.__subclasses__():
-            # The abstract check doesn't work the same in python, so we add all items and remove the ones that are parent classes below.
-            # Checking for ABC in bases works if all classes are marked with ABC, but this is not compatible with using dataclassy.
-            if c.__module__.startswith(package):
-                y.add(c)
+        children = list(recurse_cls.__subclasses__())
+        # Filter out subclasses that are outside the target package
+        children = [c for c in children if c.__module__.startswith(package)]
+        # Filter out subclasses that are stale references
+        children = [c for c in children if not _is_stale_class(c)]
+
+        # If no children exist, this is a leaf node
+        if not children:
+            leaves.add(recurse_cls)
+
+        # Recursively look for leaves in children
+        for c in children:
             find_subclasses(c)
 
     find_subclasses(cls)
 
-    # The abstract check doesn't work the same in python, so remove all parent classes we added above.
-    supers = {it.__mro__[1] for it in y}
-    return {it for it in y if it not in supers}
+    return leaves
 
 
 def import_submodules(package: str, recursive=True):

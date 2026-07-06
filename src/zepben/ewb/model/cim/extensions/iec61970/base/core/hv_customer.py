@@ -7,8 +7,10 @@ __all__ = ['HvCustomer']
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.extensions.zbex import zbex
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 @zbex
 class HvCustomer(EquipmentContainer):
     """

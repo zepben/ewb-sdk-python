@@ -5,19 +5,19 @@
 
 __all__ = ["Identifiable", "TIdentifiable"]
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from typing import TypeVar, overload, Callable, Any
 
 from zepben.ewb import require
-from zepben.ewb.dataclassy import dataclass
+from zepben.ewb.dataclass_descriptors.dataclass_base import DataclassBase, zb_dataclass
 
 TIdentifiable = TypeVar('TIdentifiable')
 
 T = TypeVar('T')
 
 
-@dataclass(slots=True)
-class Identifiable(metaclass=ABCMeta):
+@zb_dataclass
+class Identifiable(DataclassBase, metaclass=ABCMeta):
     """
     An interface that marks an object as identifiable.
 
@@ -25,15 +25,28 @@ class Identifiable(metaclass=ABCMeta):
     """
     mrid: str
 
-    def __init__(self, **kwargs):
-        if kwargs:
-            raise TypeError("unexpected keyword arguments in Identified constructor: {}".format(kwargs))
+    def __init__(self, mrid: str, *args, **kwargs):
+        self.mrid = mrid
+        # TODO: check for mRID in kwargs
+        if args:
+            raise TypeError(None, "All fields except MRId can only be instantiated as keyword arguments")
+        super(Identifiable, self).__init__(**kwargs)
 
-    @abstractmethod
     def __str__(self) -> str:
         """
         Printable version of the object including its name, mrid, and optionally, type
         """
+        class_name = f'{self.__class__.__name__}'
+        return f'{class_name}{{{self.mrid}}}'
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash(self.mrid)
+
+    def __eq__(self, other):
+        return type(other) is type(self) and self.mrid == other.mrid
 
     @overload
     def _validate_reference(self, other: 'Identifiable', getter: Callable[[str], 'Identifiable | None'], type_description: str) -> bool: ...

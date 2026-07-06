@@ -13,16 +13,16 @@ from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLin
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
     from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
-    from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
-    from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
+@zb_dataclass
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,

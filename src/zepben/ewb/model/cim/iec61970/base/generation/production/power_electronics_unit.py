@@ -6,14 +6,17 @@
 __all__ = ["PowerElectronicsUnit"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 
 
-class PowerElectronicsUnit(Equipment):
+@zb_dataclass
+class PowerElectronicsUnit(Equipment, metaclass=ABCMeta):
     """
     A generating unit or battery or aggregation that connects to the AC network using power electronics rather than rotating machines.
     """

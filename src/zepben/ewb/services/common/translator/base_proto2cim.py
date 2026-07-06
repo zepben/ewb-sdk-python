@@ -12,6 +12,7 @@ import functools
 import inspect
 from abc import ABCMeta
 from typing import Optional, Callable, TypeVar
+from dataclasses import dataclass
 
 from google.protobuf.message import Message
 from typing_extensions import ParamSpec
@@ -22,7 +23,6 @@ from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import Identifi
 from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNameType
 from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.common.organisation import Organisation

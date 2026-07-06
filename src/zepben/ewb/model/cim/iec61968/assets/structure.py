@@ -5,10 +5,14 @@
 
 __all__ = ["Structure"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class Structure(AssetContainer):
+@zb_dataclass
+class Structure(AssetContainer, metaclass=ABCMeta):
     """
     Construction holding assets such as conductors, transformers, switchgear, etc. Where applicable, number of conductors
     can be derived from the number of associated wire spacing instances.

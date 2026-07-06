@@ -13,6 +13,7 @@ from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import Cont
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 
+@zb_dataclass
 class UsagePoint(IdentifiedObject):
     """
     Logical or physical point in the network to which readings or events may be attributed.
@@ -58,8 +60,8 @@ class UsagePoint(IdentifiedObject):
     _end_devices: list[EndDevice] | None = None
     _contacts: list[ContactDetails] | None = None
 
-    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
-        super(UsagePoint, self).__init__(**kwargs)
+    def __init__(self, *args, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
+        super(UsagePoint, self).__init__(*args, **kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)

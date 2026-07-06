@@ -11,6 +11,7 @@ from typing import Optional, TYPE_CHECKING, Tuple
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
+@zb_dataclass
 class TransformerEndInfo(AssetInfo):
     """Transformer end data."""
 

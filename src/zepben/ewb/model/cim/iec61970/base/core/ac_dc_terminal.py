@@ -5,10 +5,14 @@
 
 __all__ = ["AcDcTerminal"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class AcDcTerminal(IdentifiedObject):
+@zb_dataclass
+class AcDcTerminal(IdentifiedObject, metaclass=ABCMeta):
     """
     An electrical connection point (AC or DC) to a piece of conducting equipment. Terminals are connected at physical
     connection points called connectivity nodes.

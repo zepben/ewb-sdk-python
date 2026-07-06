@@ -11,8 +11,10 @@ from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLen
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import require, ngen, nlen, safe_remove, none
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class PerLengthPhaseImpedance(PerLengthImpedance):
     """
     Impedance and admittance parameters per unit length for n-wire unbalanced lines, in matrix form.
@@ -20,11 +22,11 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
     _data: Optional[List[PhaseImpedanceData]] = None
 
-    def __init__(self, data: List[PhaseImpedanceData] = None, **kwargs):
+    def __init__(self, *args, data: List[PhaseImpedanceData] = None, **kwargs):
         """
         `data` A list of `PhaseImpedanceData`s to associate with this `PerLengthPhaseImpedance`.
         """
-        super(PerLengthPhaseImpedance, self).__init__(**kwargs)
+        super(PerLengthPhaseImpedance, self).__init__(*args, **kwargs)
         if data:
             for phase_data in data:
                 self.add_data(phase_data)

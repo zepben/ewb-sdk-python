@@ -6,14 +6,17 @@
 __all__ = ["OrganisationRole"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.organisation import Organisation
 
 
-class OrganisationRole(IdentifiedObject):
+@zb_dataclass
+class OrganisationRole(IdentifiedObject, metaclass=ABCMeta):
     """
     Identifies a way in which an organisation may participate in the utility enterprise (e.g., customer, manufacturer, etc).
     """

@@ -13,6 +13,7 @@ from zepben.ewb import get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import ngen, nlen, safe_remove_by_id
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@zb_dataclass
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.
@@ -48,6 +50,7 @@ class Feeder(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_head_terminal: Terminal = None,
         normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
@@ -55,9 +58,9 @@ class Feeder(EquipmentContainer):
         current_energized_lv_feeders: List[LvFeeder] = None,
         normal_energized_lv_substations: List[LvSubstation] = None,
         current_energized_lv_substations: List[LvSubstation] = None,
-        **kwargs
+        **kwargs,
     ):
-        super(Feeder, self).__init__(**kwargs)
+        super(Feeder, self).__init__(*args, **kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
         if normal_energizing_substation:

@@ -8,8 +8,10 @@ __all__ = ["PetersenCoil"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class PetersenCoil(EarthFaultCompensator):
     """
     A variable impedance device normally used to offset line charging during single line faults in an ungrounded section of network.

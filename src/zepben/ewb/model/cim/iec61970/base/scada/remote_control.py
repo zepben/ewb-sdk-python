@@ -8,11 +8,13 @@ __all__ = ["RemoteControl"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.scada.remote_point import RemotePoint
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.meas.control import Control
 
 
+@zb_dataclass
 class RemoteControl(RemotePoint):
     """
     Remote controls are outputs that are sent by the remote unit to actuators in the process.

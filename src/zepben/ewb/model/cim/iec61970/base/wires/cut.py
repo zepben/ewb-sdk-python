@@ -8,11 +8,13 @@ __all__ = ["Cut"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@zb_dataclass
 class Cut(Switch):
     """
     A cut separates a line segment into two parts. The cut appears as a switch inserted between these two parts and connects them together. As the cut is

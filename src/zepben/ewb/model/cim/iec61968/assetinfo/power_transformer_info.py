@@ -12,19 +12,21 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 
 
+@zb_dataclass
 class PowerTransformerInfo(AssetInfo):
     """Set of power transformer data, from an equipment library."""
 
     _transformer_tank_infos: Optional[List[TransformerTankInfo]] = None
     """Data for all the tanks described by this power transformer data."""
 
-    def __init__(self, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
-        super(PowerTransformerInfo, self).__init__(**kwargs)
+    def __init__(self, *args, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
+        super(PowerTransformerInfo, self).__init__(*args, **kwargs)
         if transformer_tank_infos:
             for ti in transformer_tank_infos:
                 self.add_transformer_tank_info(ti)

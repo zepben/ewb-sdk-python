@@ -12,11 +12,13 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 
+@zb_dataclass
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 
@@ -47,8 +49,8 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: Optional[float] = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
-        super(EnergyConsumer, self).__init__(**kwargs)
+    def __init__(self, *args, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
+        super(EnergyConsumer, self).__init__(*args, **kwargs)
         if energy_consumer_phases:
             for phase in energy_consumer_phases:
                 self.add_phase(phase)

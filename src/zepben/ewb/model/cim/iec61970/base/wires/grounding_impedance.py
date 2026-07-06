@@ -8,8 +8,10 @@ __all__ = ["GroundingImpedance"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class GroundingImpedance(EarthFaultCompensator):
     """
     A fixed impedance device used for grounding.

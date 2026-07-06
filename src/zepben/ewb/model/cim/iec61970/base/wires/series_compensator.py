@@ -8,8 +8,10 @@ __all__ = ["SeriesCompensator"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class SeriesCompensator(ConductingEquipment):
     """
     A Series Compensator is a series capacitor or reactor or an AC transmission line without charging susceptance. It is a two terminal device.

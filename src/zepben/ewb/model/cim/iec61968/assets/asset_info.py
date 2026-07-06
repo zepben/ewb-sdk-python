@@ -5,10 +5,14 @@
 
 __all__ = ["AssetInfo"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class AssetInfo(IdentifiedObject):
+@zb_dataclass
+class AssetInfo(IdentifiedObject, metaclass=ABCMeta):
     """
     Set of attributes of an asset, representing typical datasheet information of a physical device that can be
     instantiated and shared in different data exchange contexts:

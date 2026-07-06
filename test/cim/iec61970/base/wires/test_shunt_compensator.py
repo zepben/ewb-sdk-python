@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs
-from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind
+from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, Terminal, generate_id
 
 
 def verify_shunt_compensator_constructor_default(sc: ShuntCompensator):

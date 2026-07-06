@@ -53,7 +53,7 @@ class StreamUnaryGrpc(GrpcInteration):
     request_validators: List[Callable[[GrpcRequest], Any]]
     """
     Stream of requests.
-    
+
     Requires one per request sent via the same stream. For multiple requests on different streams use multiple StreamUnaryGrpc instances.
     """
     response: GrpcResponse

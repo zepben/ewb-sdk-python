@@ -13,11 +13,13 @@ from zepben.ewb.model.cim.iec61970.base.core.identified_object import Identified
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 from zepben.ewb.util import nlen, ngen, require, safe_remove_by_id
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
+@zb_dataclass
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation
@@ -32,8 +34,8 @@ class Diagram(IdentifiedObject):
 
     _diagram_objects: Optional[Dict[str, DiagramObject]] = None
 
-    def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
-        super(Diagram, self).__init__(**kwargs)
+    def __init__(self, *args, diagram_objects: List[DiagramObject] = None, **kwargs):
+        super(Diagram, self).__init__(*args, **kwargs)
         if diagram_objects:
             for obj in diagram_objects:
                 self.add_diagram_object(obj)

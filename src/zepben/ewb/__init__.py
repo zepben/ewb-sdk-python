@@ -13,6 +13,8 @@ from __future__ import annotations
 from zepben.ewb.auth.client.zepben_token_fetcher import *
 from zepben.ewb.auth.common.auth_exception import *
 from zepben.ewb.auth.common.auth_method import *
+from zepben.ewb.dataclass_descriptors.dataclass_base import *
+from zepben.ewb.dataclass_descriptors.descriptor_fix import *
 from zepben.ewb.util import *
 
 #############

@@ -8,8 +8,10 @@ __all__ = ["LinearShuntCompensator"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class LinearShuntCompensator(ShuntCompensator):
     """A linear shunt compensator has banks or sections with equal admittance values."""
 

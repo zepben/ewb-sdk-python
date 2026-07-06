@@ -9,7 +9,7 @@ from pytest import raises
 
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs
-from zepben.ewb import generate_id
+from zepben.ewb import TapChangerControl, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 
 

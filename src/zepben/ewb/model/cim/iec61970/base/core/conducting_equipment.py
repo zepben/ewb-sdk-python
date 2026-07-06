@@ -9,16 +9,20 @@ __all__ = ['ConductingEquipment']
 
 import sys
 from typing import List, Optional, Generator, TYPE_CHECKING, Union
+from abc import ABCMeta
+from dataclasses import field
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import get_by_mrid, require, ngen
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.base_voltage import BaseVoltage
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-class ConductingEquipment(Equipment):
+@zb_dataclass
+class ConductingEquipment(Equipment, metaclass=ABCMeta):
     """
     Abstract class, should only be used through subclasses.
     The parts of the AC power system that are designed to carry current or that are conductively connected through
@@ -35,11 +39,11 @@ class ConductingEquipment(Equipment):
     used for transformers.
     """
 
-    _terminals: List[Terminal] = []
+    _terminals: List[Terminal] = field(default_factory=list)
     max_terminals = int(sys.maxsize)
 
-    def __init__(self, terminals: List[Terminal] = None, **kwargs):
-        super(ConductingEquipment, self).__init__(**kwargs)
+    def __init__(self, *args, terminals: List[Terminal] = None, **kwargs):
+        super(ConductingEquipment, self).__init__(*args, **kwargs)
         if terminals:
             for term in terminals:
                 if term.conducting_equipment is None:
@@ -194,5 +198,5 @@ class ConductingEquipment(Equipment):
             terminal.conducting_equipment = self
 
         require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
+                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.",)
         return False

@@ -21,8 +21,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 # constructors.
 #
 
-# noinspection PyArgumentList
-
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
     assert io.mrid
@@ -37,9 +35,11 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
     assert io.mrid == mrid
     assert io.name == name
     assert io.description == description
-    # Recreate expected names with the object linked, which matches IdentifiedObject constructor behaviour
+    # Assign identified object to the names we are checking against due to no identified object requirement on Name creation
+    # Note: this is due to automatic two-way association introduced in the name rejig rework
     if names is not None:
-        names = [Name(name=name.name, type=name.type, identified_object=io) for name in names]
+        for name in names:
+            name.identified_object = io
         assert list(io.names) == names
     else:
         assert not list(io.names)

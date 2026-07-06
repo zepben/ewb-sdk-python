@@ -12,7 +12,10 @@ from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePha
 from zepben.ewb.services.network.network_service import NetworkService
 from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
+
+@zb_dataclass
 class PathTerminal(Terminal):
     def __add__(self, other: Terminal) -> NetworkTraceStep.Path:
         """

@@ -11,10 +11,6 @@ from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
-# noinspection PyArgumentList
-name_args = ["1", NameType(name="nt1"), Junction(mrid=generate_id())]
-
-
 #
 # NOTE: There is no default constructor so no need to test it.
 #

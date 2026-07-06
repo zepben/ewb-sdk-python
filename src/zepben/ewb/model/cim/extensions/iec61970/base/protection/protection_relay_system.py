@@ -13,11 +13,13 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind im
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import ngen, get_by_mrid, nlen, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 
 
+@zb_dataclass
 @zbex
 class ProtectionRelaySystem(Equipment):
     """
@@ -30,8 +32,8 @@ class ProtectionRelaySystem(Equipment):
 
     _schemes: Optional[List[ProtectionRelayScheme]] = None
 
-    def __init__(self, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
-        super(ProtectionRelaySystem, self).__init__(**kwargs)
+    def __init__(self, *args, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
+        super(ProtectionRelaySystem, self).__init__(*args, **kwargs)
         if schemes is not None:
             for scheme in schemes:
                 self.add_scheme(scheme)

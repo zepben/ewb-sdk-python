@@ -8,8 +8,10 @@ __all__ = ["PerLengthSequenceImpedance"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class PerLengthSequenceImpedance(PerLengthImpedance):
     """
     Sequence impedance and admittance parameters per unit length, for transposed lines of 1, 2, or 3 phases.

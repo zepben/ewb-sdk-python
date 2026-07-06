@@ -6,8 +6,10 @@
 __all__ = ["LoadBreakSwitch"]
 
 from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class LoadBreakSwitch(ProtectedSwitch):
     """A mechanical switching device capable of making, carrying, and breaking currents under normal operating
     conditions. """

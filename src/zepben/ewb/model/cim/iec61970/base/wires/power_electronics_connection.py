@@ -11,12 +11,14 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 
+@zb_dataclass
 class PowerElectronicsConnection(RegulatingCondEq):
     """
     A connection to the AC network for energy production or consumption that uses power electronics rather than rotating machines.
@@ -140,7 +142,9 @@ class PowerElectronicsConnection(RegulatingCondEq):
     _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
     """The individual units models for the power electronics connection."""
 
-    def __init__(self, power_electronics_units: List[PowerElectronicsUnit] = None,
+    def __init__(self,
+                 *args,
+                 power_electronics_units: List[PowerElectronicsUnit] = None,
                  power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
                  inv_watt_resp_v1=None,
                  inv_watt_resp_v2=None,
@@ -159,7 +163,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
                  inv_var_resp_q_at_v3=None,
                  inv_var_resp_q_at_v4=None,
                  **kwargs):
-        super(PowerElectronicsConnection, self).__init__(**kwargs)
+        super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
         if power_electronics_units:
             for unit in power_electronics_units:
                 self.add_unit(unit)

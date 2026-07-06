@@ -5,10 +5,14 @@
 
 __all__ = ["AssetContainer"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61968.assets.asset import Asset
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class AssetContainer(Asset):
+@zb_dataclass
+class AssetContainer(Asset, metaclass=ABCMeta):
     """
     Asset that is aggregation of other assets such as conductors, transformers, switchgear, land, fences, buildings,
     equipment, vehicles, etc.
