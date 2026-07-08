@@ -8,11 +8,15 @@ from __future__ import annotations
 __all__ = ["Customer"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations, Alias
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
@@ -30,66 +34,41 @@ class Customer(OrganisationRole):
     special_need: Optional[str] = None
     """A special service need such as life support, hospitals, etc."""
 
-    _customer_agreements: Optional[List[CustomerAgreement]] = None
+    _customer_agreements: Optional[List[CustomerAgreement]] = field(default=None)
 
-    def __init__(self, *args, customer_agreements: List[CustomerAgreement] = None, **kwargs):
-        super(Customer, self).__init__(*args, **kwargs)
-        if customer_agreements:
-            for agreement in customer_agreements:
-                self.add_agreement(agreement)
+    agreements: MridCollection[CustomerAgreement] = LazyMridList(
+        _customer_agreements,
+        "A CustomerAgreement",
+    )
+    customer_agreements = Alias(agreements)
 
-    @property
-    def agreements(self) -> Generator[CustomerAgreement, None, None]:
-        """
-        The `CustomerAgreement`s for this `Customer`.
-        """
-        return ngen(self._customer_agreements)
 
+    # region deprecated list boilerplate
+    # region agreements boilerplate
+
+    @deprecated("Use len(obj.agreements) instead.")
     def num_agreements(self) -> int:
-        """
-        Get the number of `CustomerAgreement`s associated with this `Customer`.
-        """
-        return nlen(self._customer_agreements)
+        return len(self.agreements)
 
+    @deprecated("Use obj.agreements.get_by_mrid(mrid) instead.")
     def get_agreement(self, mrid: str) -> CustomerAgreement:
-        """
-        Get the `CustomerAgreement` for this `Customer` identified by `mrid`.
+        return self.agreements.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `customer_agreement.CustomerAgreement`
-        Returns the `CustomerAgreement` with the specified `mrid`.
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._customer_agreements, mrid)
-
+    @deprecated("Use obj.agreements.append(customer_agreement) instead.")
     def add_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        """
-        Associate a `CustomerAgreement` with this `Customer`.
-        `customer_agreement` The `customer_agreement.CustomerAgreement` to associate with this `Customer`.
-        Returns A reference to this `Customer` to allow fluent use.
-        Raises `ValueError` if another `CustomerAgreement` with the same `mrid` already exists for this `Customer`
-        """
-        if self._validate_reference(customer_agreement, self.get_agreement, "A CustomerAgreement"):
-            return self
-
-        self._customer_agreements = list() if self._customer_agreements is None else self._customer_agreements
-        self._customer_agreements.append(customer_agreement)
+        self.agreements.append(customer_agreement)
         return self
 
+    @deprecated("Use obj.agreements.remove(customer_agreement) instead.")
     def remove_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
-        """
-        Disassociate `customer_agreement` from this `Customer`.
-
-        `customer_agreement` the `customer_agreement.CustomerAgreement` to disassociate with this `Customer`.
-        Returns A reference to this `Customer` to allow fluent use.
-        Raises `ValueError` if `customer_agreement` was not associated with this `Customer`.
-        """
-        self._customer_agreements = safe_remove(self._customer_agreements, customer_agreement)
+        self.agreements.remove(customer_agreement)
         return self
 
+    @deprecated("Use obj.agreements.clear() instead.")
     def clear_agreements(self) -> Customer:
-        """
-        Clear all customer agreements.
-        Returns self
-        """
-        self._customer_agreements = None
+        self.agreements.clear()
         return self
+
+    # endregion agreements boilerplate
+
+    # endregion deprecated list boilerplate

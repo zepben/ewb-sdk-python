@@ -6,11 +6,15 @@
 __all__ = ["SynchronousMachine"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
@@ -23,7 +27,7 @@ class SynchronousMachine(RotatingMachine):
     synchronous condenser or pump.
     """
 
-    _reactive_capability_curves: Optional[List['ReactiveCapabilityCurve']] = None
+    _reactive_capability_curves: Optional[List['ReactiveCapabilityCurve']] = field(default=None)
 
     base_q: Optional[float] = None
     """Default base reactive power value in VAr. This value represents the initial reactive power that can be used by any application function."""
@@ -106,65 +110,42 @@ class SynchronousMachine(RotatingMachine):
     operating_mode: SynchronousMachineKind = SynchronousMachineKind.UNKNOWN
     """Current mode of operation."""
 
-    def __init__(self, *args, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
-        """
-        `reactive_capability_curves` A list of `ReactiveCapabilityCurve`s to associate with this `SynchronousMachine`.
-        """
-        super(SynchronousMachine, self).__init__(*args, **kwargs)
-        if curves:
-            for rcc in curves:
-                self.add_curve(rcc)
+    curves: MridCollection['ReactiveCapabilityCurve'] = LazyMridList(
+        _reactive_capability_curves,
+        "A ReactiveCapabilityCurve",
+    )
 
-    @property
-    def curves(self) -> Generator['ReactiveCapabilityCurve', None, None]:
-        """
-        The available reactive capability curves for this synchronous machine. The first shall be the default for this :class:`SynchronousMachine`.
-        """
-        return ngen(self._reactive_capability_curves)
 
+
+
+
+
+    # region deprecated list boilerplate
+    # region curves boilerplate
+
+    @deprecated("Use len(obj.curves) instead.")
     def num_curves(self):
-        """Return the number of :class:`ReactiveCapabilityCurve`s associated with this :class:`SynchronousMachine`."""
-        return nlen(self._reactive_capability_curves)
+        return len(self.curves)
 
+    @deprecated("Use obj.curves.get_by_mrid(mrid) instead.")
     def get_curve(self, mrid: str) -> 'ReactiveCapabilityCurve':
-        """
-        Get the :class:`ReactiveCapabilityCurve` for this :class:`SynchronousMachine` identified by `mrid`
+        return self.curves.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the required :class:`ReactiveCapabilityCurve`.
-        :returns: The :class:`ReactiveCapabilityCurve` with the specified `mrid` if it exists.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._reactive_capability_curves, mrid)
-
+    @deprecated("Use obj.curves.append(curve) instead.")
     def add_curve(self, curve: 'ReactiveCapabilityCurve') -> 'SynchronousMachine':
-        """
-        Associate a :class:`ReactiveCapabilityCurve` with this :class:`SynchronousMachine`.
-
-        :param curve: The :class:`ReactiveCapabilityCurve` to associate with this :class:`SynchronousMachine`.
-        :returns: A reference to this :class:`SynchronousMachine` to allow fluent use.
-        :raises ValueError: If another :class:`ReactiveCapabilityCurve` with the same `mrid` already exists for this :class:`SynchronousMachine`.
-        """
-        if self._validate_reference(curve, self.get_curve, "A ReactiveCapabilityCurve"):
-            return self
-        self._reactive_capability_curves = self._reactive_capability_curves or []
-        self._reactive_capability_curves.append(curve)
+        self.curves.append(curve)
         return self
 
+    @deprecated("Use obj.curves.remove(curve) instead.")
     def remove_curve(self, curve: 'ReactiveCapabilityCurve') -> 'SynchronousMachine':
-        """
-        Disassociate a :class:`ReactiveCapabilityCurve` from this :class:`SynchronousMachine`.
-
-        :param curve: The :class:`ReactiveCapabilityCurve` to disassociate from this :class:`SynchronousMachine`.
-        :returns: A reference to this :class:`SynchronousMachine` to allow fluent use.
-        :raises ValueError: If `curve` was not associated with this :class:`SynchronousMachine`.
-        """
-        self._reactive_capability_curves = safe_remove(self._reactive_capability_curves, curve)
+        self.curves.remove(curve)
         return self
 
+    @deprecated("Use obj.curves.clear() instead.")
     def clear_curves(self) -> 'SynchronousMachine':
-        """
-        Clear all :class:`ReactiveCapabilityCurve` associated with this :class:`SynchronousMachine`.
-        :returns: A reference to this :class:`SynchronousMachine` to allow fluent use.
-        """
-        self._reactive_capability_curves = None
+        self.curves.clear()
         return self
+
+    # endregion curves boilerplate
+
+    # endregion deprecated list boilerplate

@@ -4,14 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import field
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass, DataclassBase
-from zepben.ewb.dataclass_descriptors.descriptor_fix import remove_descriptor_annotations, BackedDescriptor
+from zepben.ewb.dataclass_descriptors.dataclass_base import DataclassBase
+from zepben.ewb import zb_dataclass, remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.descriptor_fix import BackedDescriptor
 
 
 @zb_dataclass
-@remove_descriptor_annotations
 class DescriptorTest(DataclassBase):
-    _x: int = field()
+    _x: int = field(default=0)
     x: int = BackedDescriptor(_x)
 
 

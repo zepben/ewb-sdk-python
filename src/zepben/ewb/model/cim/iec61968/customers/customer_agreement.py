@@ -8,10 +8,14 @@ from __future__ import annotations
 __all__ = ["CustomerAgreement"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer import Customer
@@ -29,15 +33,7 @@ class CustomerAgreement(Agreement):
     _customer: Optional[Customer] = None
     """The `zepben.ewb.model.cim.iec61968.customers.customer.Customer` that has this `CustomerAgreement`."""
 
-    _pricing_structures: Optional[List[PricingStructure]] = None
-
-    def __init__(self, *args, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
-        super(CustomerAgreement, self).__init__(*args, **kwargs)
-        if customer:
-            self.customer = customer
-        if pricing_structures:
-            for ps in pricing_structures:
-                self.add_pricing_structure(ps)
+    _pricing_structures: Optional[List[PricingStructure]] = field(default=None)
 
     @property
     def customer(self):
@@ -51,59 +47,39 @@ class CustomerAgreement(Agreement):
         else:
             raise ValueError(f"customer for {str(self)} has already been set to {self._customer}, cannot reset this field to {cust}")
 
-    @property
-    def pricing_structures(self) -> Generator[PricingStructure, None, None]:
-        """
-        The `PricingStructure`s of this `CustomerAgreement`.
-        """
-        return ngen(self._pricing_structures)
 
+    pricing_structures: MridCollection[PricingStructure] = LazyMridList(
+        _pricing_structures,
+        "A PricingStructure",
+    )
+
+
+    # region deprecated list boilerplate
+    # region pricing_structures boilerplate
+
+    @deprecated("Use len(obj.pricing_structures) instead.")
     def num_pricing_structures(self):
-        """
-        The number of `PricingStructure`s associated with this `CustomerAgreement`
-        """
-        return nlen(self._pricing_structures)
+        return len(self.pricing_structures)
 
+    @deprecated("Use obj.pricing_structures.get_by_mrid(mrid) instead.")
     def get_pricing_structure(self, mrid: str) -> PricingStructure:
-        """
-        Get the `PricingStructure` for this `CustomerAgreement` identified by `mrid`
+        return self.pricing_structures.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `PricingStructure`
-        Returns the `PricingStructure` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._pricing_structures, mrid)
-
+    @deprecated("Use obj.pricing_structures.append(ps) instead.")
     def add_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:
-        """
-        Associate `ps` with this `CustomerAgreement`
-
-        `ps` the `PricingStructure` to associate with this `CustomerAgreement`.
-        Returns A reference to this `CustomerAgreement` to allow fluent use.
-        Raises `ValueError` if another `PricingStructure` with the same `mrid` already exists for this `CustomerAgreement`
-        """
-        if self._validate_reference(ps, self.get_pricing_structure, "A PricingStructure"):
-            return self
-
-        self._pricing_structures = list() if self._pricing_structures is None else self._pricing_structures
-        self._pricing_structures.append(ps)
+        self.pricing_structures.append(ps)
         return self
 
+    @deprecated("Use obj.pricing_structures.remove(ps) instead.")
     def remove_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:
-        """
-        Disassociate `ps` from this `CustomerAgreement`
-
-        `ps` the `PricingStructure` to disassociate from this `CustomerAgreement`.
-        Returns A reference to this `CustomerAgreement` to allow fluent use.
-        Raises `ValueError` if `ps` was not associated with this `CustomerAgreement`.
-        """
-        self._pricing_structures = safe_remove(self._pricing_structures, ps)
+        self.pricing_structures.remove(ps)
         return self
 
+    @deprecated("Use obj.pricing_structures.clear() instead.")
     def clear_pricing_structures(self) -> CustomerAgreement:
-        """
-        Clear all pricing structures.
-        Returns a reference to this `CustomerAgreement` to allow fluent use.
-        """
-        self._pricing_structures = None
+        self.pricing_structures.clear()
         return self
+
+    # endregion pricing_structures boilerplate
+
+    # endregion deprecated list boilerplate

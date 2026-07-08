@@ -9,12 +9,16 @@ __all__ = ["RegulatingControl"]
 
 from typing import Optional, List, Generator, Iterable, TYPE_CHECKING
 from abc import ABCMeta
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_control_mode_kind import RegulatingControlModeKind
 from zepben.ewb.util import nlen, get_by_mrid, safe_remove, ngen
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
@@ -107,70 +111,41 @@ class RegulatingControl(PowerSystemResource, metaclass=ABCMeta):
     regulators, shunt compensators, or battery units.
     """
 
-    _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
+    _regulating_cond_eq: Optional[List[RegulatingCondEq]] = field(default=None)
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
-    def __init__(self, *args, regulating_conducting_equipment: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
-        super(RegulatingControl, self).__init__(*args, **kwargs)
-        if regulating_conducting_equipment is not None:
-            for eq in regulating_conducting_equipment:
-                self.add_regulating_cond_eq(eq)
+    regulating_conducting_equipment: MridCollection[RegulatingCondEq] = LazyMridList(
+        _regulating_cond_eq,
+        "A RegulatingCondEq",
+    )
 
-    @property
-    def regulating_conducting_equipment(self) -> Generator[RegulatingCondEq, None, None]:
-        """
-        Yields all the :class:`RegulatingCondEq` that are controlled by this :class:`RegulatingControl`.
 
-        :return: A generator that iterates over all RegulatingCondEq controlled by this RegulatingControl.
-        """
-        return ngen(self._regulating_cond_eq)
+    # region deprecated list boilerplate
+    # region regulating_conducting_equipment boilerplate
 
+    @deprecated("Use len(obj.regulating_conducting_equipment) instead.")
     def num_regulating_cond_eq(self) -> int:
-        """
-        Get the number of :class:`RegulatingCondEq` that are controlled by this :class:`RegulatingControl`.
+        return len(self.regulating_conducting_equipment)
 
-        :return: The number of RegulatingCondEq that are controlled by this RegulatingControl.
-        """
-        return nlen(self._regulating_cond_eq)
-
+    @deprecated("Use obj.regulating_conducting_equipment.get_by_mrid(mrid) instead.")
     def get_regulating_cond_eq(self, mrid: str) -> RegulatingCondEq:
-        """
-        Get a :class:`RegulatingCondEq` controlled by this :class:`RegulatingControl`.
+        return self.regulating_conducting_equipment.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the desired RegulatingCondEq
-        :return: The RegulatingCondEq with the specified mRID if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._regulating_cond_eq, mrid)
-
+    @deprecated("Use obj.regulating_conducting_equipment.append(regulating_cond_eq) instead.")
     def add_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq) -> RegulatingControl:
-        """
-        Associate this :class:`RegulatingControl` with a :class:`RegulatingCondEq` it is controlling.
-
-        :param regulating_cond_eq: The RegulatingCondEq to associate with this RegulatingControl.
-        :return: A reference to this RegulatingControl for fluent use.
-        """
-        if self._validate_reference(regulating_cond_eq, self.get_regulating_cond_eq, "A RegulatingCondEq"):
-            return self
-
-        self._regulating_cond_eq = list() if self._regulating_cond_eq is None else self._regulating_cond_eq
-        self._regulating_cond_eq.append(regulating_cond_eq)
+        self.regulating_conducting_equipment.append(regulating_cond_eq)
         return self
 
+    @deprecated("Use obj.regulating_conducting_equipment.remove(regulating_cond_eq) instead.")
     def remove_regulating_cond_eq(self, regulating_cond_eq: Optional[RegulatingCondEq]) -> RegulatingControl:
-        """
-        Disassociate this :class:`RegulatingControl` from a :class:`RegulatingCondEq`.
-
-        :param regulating_cond_eq: The RegulatingCondEq to disassociate from this RegulatingControl.
-        :return: A reference to this RegulatingControl for fluent use.
-        """
-        self._regulating_cond_eq = safe_remove(self._regulating_cond_eq, regulating_cond_eq)
+        self.regulating_conducting_equipment.remove(regulating_cond_eq)
         return self
 
+    @deprecated("Use obj.regulating_conducting_equipment.clear() instead.")
     def clear_regulating_cond_eq(self) -> RegulatingControl:
-        """
-        Disassociate all :class:`RegulatingCondEq` from this :class:`RegulatingControl`.
-        :return: A reference to this RegulatingControl for fluent use.
-        """
-        self._regulating_cond_eq = None
+        self.regulating_conducting_equipment.clear()
         return self
+
+    # endregion regulating_conducting_equipment boilerplate
+
+    # endregion deprecated list boilerplate

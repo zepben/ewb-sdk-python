@@ -7,8 +7,14 @@ from __future__ import annotations
 
 __all__ = ["EnergyConsumer"]
 
-from typing import Optional, Generator, List, TYPE_CHECKING
+from dataclasses import field
+from typing import Optional, List, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
+from zepben.ewb import remove_descriptor_annotations, Alias
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
@@ -22,7 +28,7 @@ if TYPE_CHECKING:
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 
-    _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = None
+    _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = field(default=None)
     """The individual phase models for this energy consumer."""
 
     customer_count: Optional[int] = None
@@ -49,30 +55,25 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: Optional[float] = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, *args, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
-        super(EnergyConsumer, self).__init__(*args, **kwargs)
-        if energy_consumer_phases:
-            for phase in energy_consumer_phases:
-                self.add_phase(phase)
+    phases: MridCollection[EnergyConsumerPhase] = LazyMridList(
+        _energy_consumer_phases,
+        "An EnergyConsumerPhase",
+    )
+    # TODO: Remove hack
+    # Old inits used the wrong name. This allows backwards compatibility
+    energy_consumer_phases: None = Alias(phases)
 
-    @property
-    def phases(self) -> Generator[EnergyConsumerPhase, None, None]:
-        """The individual phase models for this energy consumer."""
-        return ngen(self._energy_consumer_phases)
 
+    # region deprecated list boilerplate
+    # region phases boilerplate
+
+    @deprecated("Use len(obj.phases) instead.")
     def num_phases(self):
-        """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
-        return nlen(self._energy_consumer_phases)
+        return len(self.phases)
 
+    @deprecated("Use obj.phases.get_by_mrid(mrid) instead.")
     def get_phase(self, mrid: str) -> EnergyConsumerPhase:
-        """
-        Get the `EnergyConsumerPhase` for this `EnergyConsumer` identified by `mrid`
-
-        `mrid` The mRID of the required `EnergyConsumerPhase`
-        Returns The `EnergyConsumerPhase` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._energy_consumer_phases, mrid)
+        return self.phases.get_by_mrid(mrid)
 
     def add_phase(self, phase: EnergyConsumerPhase) -> EnergyConsumer:
         """
@@ -95,22 +96,16 @@ class EnergyConsumer(EnergyConnection):
         self._energy_consumer_phases.append(phase)
         return self
 
+    @deprecated("Use obj.phases.remove(phase) instead.")
     def remove_phase(self, phase: EnergyConsumerPhase) -> EnergyConsumer:
-        """
-        Disassociate `phase` from this `OperationalRestriction`.
-
-        `phase` the `EnergyConsumerPhase` to disassociate with this `EnergyConsumer`.
-        Raises `KeyError` if `phase` was not associated with this `EnergyConsumer`.
-        Returns A reference to this `EnergyConsumer` to allow fluent use.
-        Raises `ValueError` if `phase` was not associated with this `EnergyConsumer`.
-        """
-        self._energy_consumer_phases = safe_remove(self._energy_consumer_phases, phase)
+        self.phases.remove(phase)
         return self
 
+    @deprecated("Use obj.phases.clear() instead.")
     def clear_phases(self) -> EnergyConsumer:
-        """
-        Clear all phases.
-        Returns A reference to this `EnergyConsumer` to allow fluent use.
-        """
-        self._energy_consumer_phases = None
+        self.phases.clear()
         return self
+
+    # endregion phases boilerplate
+
+    # endregion deprecated list boilerplate

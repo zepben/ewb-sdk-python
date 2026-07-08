@@ -7,9 +7,15 @@ from __future__ import annotations
 
 __all__ = ['EquipmentContainer']
 
+from dataclasses import field
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
 from abc import ABCMeta
 
+from typing_extensions import deprecated
+
+from zepben.ewb import remove_descriptor_annotations, Alias
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
+from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -32,28 +38,17 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
     Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
     """
 
-    _equipment: Optional[Dict[str, Equipment]] = None
+    _equipment_by_id: Dict[str, Equipment] | None = field(default=None)
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __init__(self, *args, equipment: List[Equipment] = None, **kwargs):
-        super(EquipmentContainer, self).__init__(*args, **kwargs)
-        if equipment:
-            for eq in equipment:
-                self.add_equipment(eq)
+    equipment: MridCollection[Equipment] = LazyMridMap(
+        _equipment_by_id,
+        "An Equipment",
+    )
+    """The `Equipment` contained in this `EquipmentContainer`"""
 
-    @property
-    def equipment(self) -> Generator[Equipment, None, None]:
-        """
-        The `Equipment` contained in this `EquipmentContainer`
-        """
-        return ngen(self._equipment)
-
-    @property
-    def current_equipment(self) -> Generator[Equipment, None, None]:
-        """
-        Contained `Equipment` using the current state of the network.
-        """
-        return self.equipment
+    current_equipment = Alias(equipment)
+    """Contained `Equipment` using the current state of the network."""
 
     def current_feeders(self) -> Generator[Feeder, None, None]:
         """
@@ -61,7 +56,7 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
         Returns the current feeders for all associated feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self._equipment_by_id.values():
             for f in equip.current_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -73,7 +68,7 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
         Returns the normal feeders for all associated feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self._equipment_by_id.values():
             for f in equip.normal_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -85,7 +80,7 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
         Returns the normal LV feeders for all associated LV feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self._equipment_by_id.values():
             for f in equip.current_lv_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -97,7 +92,7 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
         Returns the normal LV feeders for all associated LV feeders
         """
         seen = set()
-        for equip in self._equipment.values():
+        for equip in self._equipment_by_id.values():
             for f in equip.normal_lv_feeders:
                 if f not in seen:
                     seen.add(f.mrid)
@@ -146,103 +141,59 @@ class EquipmentContainer(ConnectivityNodeContainer, metaclass=ABCMeta):
                                     seen.add(ct.from_terminal)
                                     yield ct.from_terminal
 
+
+
+    # region deprecated list boilerplate
+    # region equipment boilerplate
+
+    @deprecated("Use len(self.equipment) instead")
     def num_equipment(self):
-        """
-        Returns The number of `Equipment` associated with this `EquipmentContainer`
-        """
-        return nlen(self._equipment)
+        return len(self.equipment)
 
+    @deprecated("Use self.equipment.get_by_mrid(mrid) instead")
     def get_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `EquipmentContainer` identified by `mrid`
+        return self.equipment.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        if not self._equipment:
-            raise KeyError(mrid)
-        try:
-            return self._equipment[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
-
+    @deprecated("Use equipment.append(equipment) instead")
     def add_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Associate `equipment` with this `EquipmentContainer`.
-
-        `equipment` The `Equipment` to associate with this `EquipmentContainer`.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
-        """
-        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
-            return self
-        if self._equipment is None:
-            self._equipment = dict()
-        self._equipment[equipment.mrid] = equipment
+        self.equipment.append(equipment)
         return self
 
+    @deprecated("Use equipment.remove(equipment) instead")
     def remove_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Disassociate `equipment` from this `EquipmentContainer`
-
-        `equipment` The `Equipment` to disassociate with this `EquipmentContainer`.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
-        """
-        self._equipment = safe_remove_by_id(self._equipment, equipment)
+        self.equipment.remove(equipment)
         return self
 
+    @deprecated("Use equipment.clear() instead")
     def clear_equipment(self) -> EquipmentContainer:
-        """
-        Clear all equipment.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        """
-        self._equipment = None
+        self.equipment.clear()
         return self
 
-    def num_current_equipment(self) -> int:
-        """
-        Returns The number of `Equipment` contained in this `EquipmentContainer` in the current state of the network.
-        """
-        return self.num_equipment()
+    # endregion
+    # region current_equipment boilerplate
 
+    @deprecated("Use len(current_equipment) instead")
+    def num_current_equipment(self):
+        return len(self.current_equipment)
+
+    @deprecated("Use current_equipment.get_by_mrid(mrid) instead")
     def get_current_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` contained in this `EquipmentContainer` in the current state of the network, identified by `mrid`
+        return self.current_equipment.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return self.get_equipment(mrid)
-
+    @deprecated("Use current_equipment.append(equipment) instead")
     def add_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Associate `equipment` with this `EquipmentContainer` in the current state of the network.
-
-        `equipment` the `Equipment` to associate with this `EquipmentContainer` in the current state of the network.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
-        """
-        self.add_equipment(equipment)
+        self.current_equipment.append(equipment)
         return self
 
+    @deprecated("Use current_equipment.remove(equipment) instead")
     def remove_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
-        """
-        Disassociate `equipment` from this `EquipmentContainer` in the current state of the network.
-
-        `equipment` The `Equipment` to disassociate from this `EquipmentContainer` in the current state of the network.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
-        """
-        self.remove_equipment(equipment)
+        self.current_equipment.remove(equipment)
         return self
 
+    @deprecated("Use current_equipment.clear() instead")
     def clear_current_equipment(self) -> EquipmentContainer:
-        """
-        Clear all `Equipment` from this `EquipmentContainer` in the current state of the network.
-        Returns A reference to this `EquipmentContainer` to allow fluent use.
-        """
-        self.clear_equipment()
+        self.current_equipment.clear()
         return self
+
+    # endregion
+    # endregion

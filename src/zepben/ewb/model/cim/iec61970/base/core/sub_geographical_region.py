@@ -8,12 +8,14 @@ from __future__ import annotations
 __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
-
+from dataclasses import field
 from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
@@ -26,9 +28,10 @@ class SubGeographicalRegion(IdentifiedObject):
     A subset of a geographical region of a power system network model.
     """
 
-    _geographical_region: Optional[GeographicalRegion] = None
+    geographical_region: Optional[GeographicalRegion] = None
+    """The geographical region to which this sub-geographical region is within."""
 
-    _substations: Optional[List[Substation]] = None
+    _substations: Optional[List[Substation]] = field(default=None)
 
     def __init__(self, *args, substations: List[Substation] = None, **kwargs):
         super(SubGeographicalRegion, self).__init__(*args, **kwargs)
@@ -47,28 +50,17 @@ class SubGeographicalRegion(IdentifiedObject):
     def geographical_region(self, value):
         self._geographical_region = value
 
-    @property
-    def substations(self) -> Generator[Substation, None, None]:
-        """
-        All substations belonging to this sub geographical region.
-        """
-        return ngen(self._substations)
-
     def num_substations(self) -> int:
         """
         Returns The number of `Substation`s associated with this `SubGeographicalRegion`
         """
         return nlen(self._substations)
 
-    def get_substation(self, mrid: str) -> Substation:
-        """
-        Get the `Substation` for this `SubGeographicalRegion` identified by `mrid`
+    substations: MridCollection[Substation] = LazyMridList(
+        _substations,
+        "A Substation",
+    )
 
-        `mrid` the mRID of the required `Substation`
-        Returns The `Substation` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._substations, mrid)
 
     def add_substation(self, substation: Substation) -> SubGeographicalRegion:
         """
@@ -93,21 +85,29 @@ class SubGeographicalRegion(IdentifiedObject):
         self._substations.append(substation)
         return self
 
+
+
+    # region deprecated list boilerplate
+    # region substations boilerplate
+
+    @deprecated("Use len(obj.substations) instead.")
+    def num_substations(self) -> int:
+        return len(self.substations)
+
+    @deprecated("Use obj.substations.get_by_mrid(mrid) instead.")
+    def get_substation(self, mrid: str) -> Substation:
+        return self.substations.get_by_mrid(mrid)
+
+    @deprecated("Use obj.substations.remove(substation) instead.")
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:
-        """
-        Disassociate `substation` from this `GeographicalRegion`
-
-        `substation` The `Substation` to disassociate from this `SubGeographicalRegion`.
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-        Raises `ValueError` if `substation` was not associated with this `SubGeographicalRegion`.
-        """
-        self._substations = safe_remove(self._substations, substation)
+        self.substations.remove(substation)
         return self
 
+    @deprecated("Use obj.substations.clear() instead.")
     def clear_substations(self) -> SubGeographicalRegion:
-        """
-        Clear all `Substations`.
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-        """
-        self._substations = None
+        self.substations.clear()
         return self
+
+    # endregion substations boilerplate
+
+    # endregion deprecated list boilerplate

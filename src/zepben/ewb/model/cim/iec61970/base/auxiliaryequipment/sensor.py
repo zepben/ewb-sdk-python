@@ -9,10 +9,14 @@ __all__ = ["Sensor"]
 
 from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
 from abc import ABCMeta
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
@@ -25,71 +29,41 @@ class Sensor(AuxiliaryEquipment, metaclass=ABCMeta):
     used in control or be recorded.
     """
 
-    _relay_functions: Optional[List[ProtectionRelayFunction]] = None
+    _relay_functions: Optional[List[ProtectionRelayFunction]] = field(default=None)
     """The relay functions influenced by this [Sensor]."""
 
-    def __init__(self, *args, relay_functions: Iterable[ProtectionRelayFunction] = None, **kwargs):
-        super(Sensor, self).__init__(*args, **kwargs)
-        if relay_functions is not None:
-            for relay_function in relay_functions:
-                self.add_relay_function(relay_function)
+    relay_functions: MridCollection[ProtectionRelayFunction] = LazyMridList(
+        _relay_functions,
+        "A ProtectionRelayFunction",
+    )
 
-    @property
-    def relay_functions(self) -> Generator[ProtectionRelayFunction, None, None]:
-        """
-        Yields all the :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
 
-        :return: A generator that iterates over all ProtectionRelayFunction influenced by this Sensor.
-        """
-        return ngen(self._relay_functions)
+    # region deprecated list boilerplate
+    # region relay_functions boilerplate
 
+    @deprecated("Use len(obj.relay_functions) instead.")
     def num_relay_functions(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
+        return len(self.relay_functions)
 
-        :return: The number of ProtectionRelayFunction influenced by this Sensor.
-        """
-        return nlen(self._relay_functions)
-
+    @deprecated("Use obj.relay_functions.get_by_mrid(mrid) instead.")
     def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
-        """
-        Get a :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
+        return self.relay_functions.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the desired ProtectionRelayFunction
-        :return: The ProtectionRelayFunction with the specified mRID if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._relay_functions, mrid)
-
+    @deprecated("Use obj.relay_functions.append(protection_relay_function) instead.")
     def add_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        """
-        Associate this :class:`Sensor` with a :class:`ProtectionRelayFunction` it is influencing.
-
-        :param protection_relay_function: The ProtectionRelayFunction to associate with this Sensor.
-        :return: A reference to this Sensor for fluent use.
-        """
-        if self._validate_reference(protection_relay_function, self.get_relay_function, "A ProtectionRelayFunction"):
-            return self
-
-        self._relay_functions = list() if self._relay_functions is None else self._relay_functions
-        self._relay_functions.append(protection_relay_function)
+        self.relay_functions.append(protection_relay_function)
         return self
 
+    @deprecated("Use obj.relay_functions.remove(protection_relay_function) instead.")
     def remove_relay_function(self, protection_relay_function: ProtectionRelayFunction) -> Sensor:
-        """
-        Disassociate this :class:`Sensor` from a :class:`ProtectionRelayFunction` it is influencing.
-
-        :param protection_relay_function: The ProtectionRelayFunction to disassociate from this Sensor.
-        :return: A reference to this Sensor for fluent use.
-        """
-        self._relay_functions = safe_remove(self._relay_functions, protection_relay_function)
+        self.relay_functions.remove(protection_relay_function)
         return self
 
+    @deprecated("Use obj.relay_functions.clear() instead.")
     def clear_relay_function(self) -> Sensor:
-        """
-        Disassociate all :class:`ProtectionRelayFunction` from this :class:`Sensor`.
-
-        :return: A reference to this Sensor for fluent use.
-        """
-        self._relay_functions = None
+        self.relay_functions.clear()
         return self
+
+    # endregion relay_functions boilerplate
+
+    # endregion deprecated list boilerplate
