@@ -37,11 +37,6 @@ class AcLineSegmentPhase(PowerSystemResource):
     sequence_number: int | None = None
     _ac_line_segment: AcLineSegment | None = None
 
-    def __init__(self, *args, ac_line_segment: AcLineSegment = None, **kwargs):
-        super(AcLineSegmentPhase, self).__init__(*args, **kwargs)
-        if ac_line_segment is not None:
-            self.ac_line_segment = ac_line_segment
-
     @property
     def ac_line_segment(self) -> 'AcLineSegment | None':
         return self._ac_line_segment

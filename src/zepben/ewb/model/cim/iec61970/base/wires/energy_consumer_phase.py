@@ -42,11 +42,6 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, *args, energy_consumer: 'EnergyConsumer' = None, **kwargs):
-        super(EnergyConsumerPhase, self).__init__(*args, **kwargs)
-        if energy_consumer:
-            self.energy_consumer = energy_consumer
-
     @property
     def energy_consumer(self):
         """The `EnergyConsumer` that has this phase."""

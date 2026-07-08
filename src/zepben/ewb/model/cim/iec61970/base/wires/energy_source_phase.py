@@ -31,11 +31,6 @@ class EnergySourcePhase(PowerSystemResource):
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
 
-    def __init__(self, *args, energy_source: 'EnergySource' = None, **kwargs):
-        super(EnergySourcePhase, self).__init__(*args, **kwargs)
-        if energy_source:
-            self.energy_source = energy_source
-
     @property
     def energy_source(self):
         """The `EnergySource` with this `EnergySourcePhase`"""

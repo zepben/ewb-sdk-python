@@ -15,6 +15,7 @@ if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
+from dataclasses import field
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
@@ -22,6 +23,8 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind im
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.util import require, nlen, ngen, safe_remove, get_by_mrid
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
@@ -59,11 +62,11 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN
     """[ZBEX] The flow of the power direction used by this ProtectionRelayFunction."""
 
-    _sensors: Optional[List[Sensor]] = None
+    _sensors: Optional[List[Sensor]] = field(default=None)
 
-    _protected_switches: Optional[List[ProtectedSwitch]] = None
+    _protected_switches: Optional[List[ProtectedSwitch]] = field(default=None)
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    _schemes: Optional[List[ProtectionRelayScheme]] = field(default=None)
 
     _time_limits: Optional[List[float]] = None
 
@@ -312,87 +315,23 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._time_limits = None
         return self
 
-    def num_sensors(self) -> int:
-        """
-        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
+    sensors: MridCollection[Sensor] = LazyMridList(
+        _sensors,
+        "A Sensor",
+    )
 
-        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._sensors)
 
-    def get_sensor(self, mrid: str) -> Sensor:
-        """
-        Get a sensor :class:`Sensor` for this :class:`ProtectionRelayFunction` by its mrid.
 
-        :param mrid: The mrid of the desired :class:`Sensor`.
-        :returns: The :class:`Sensor` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._sensors, mrid)
 
-    def add_sensor(self, sensor: Sensor) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`Sensor`.
 
-        :param sensor: The :class:`Sensor` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(sensor, self.get_sensor, "A Sensor"):
-            return self
-        self._sensors = list() if self._sensors is None else self._sensors
-        self._sensors.append(sensor)
-        return self
 
-    def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`Sensor`.
+    protected_switches: MridCollection[ProtectedSwitch] = LazyMridList(
+        _protected_switches,
+        "A ProtectedSwitch",
+    )
 
-        :param sensor: The :class:`Sensor` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If sensor was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = safe_remove(self._sensors, sensor)
-        return self
 
-    def clear_sensors(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`Sensors<Sensor>` from this :class:`ProtectionRelayFunction`.
 
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = None
-        return self
-
-    def num_protected_switches(self) -> int:
-        """
-        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-
-        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._protected_switches)
-
-    def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
-        """
-        Get a :class:`ProtectedSwitch` operated by this :class:`ProtectionRelayFunction` by its mrid.
-
-        :param mrid: The mrid of the desired :class:`ProtectedSwitch`.
-        :returns: The :class:`ProtectedSwitch` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._protected_switches, mrid)
-
-    def add_protected_switch(self, protected_switch: ProtectedSwitch) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectedSwitch` it operates.
-
-        :param protected_switch: The :class:`ProtectedSwitch` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(protected_switch, self.get_protected_switch, "A ProtectedSwitch"):
-            return self
-        self._protected_switches = list() if self._protected_switches is None else self._protected_switches
-        self._protected_switches.append(protected_switch)
-        return self
 
     def remove_protected_switch(self, protected_switch: Optional[ProtectedSwitch]) -> ProtectionRelayFunction:
         """
@@ -405,62 +344,92 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._sensors = safe_remove(self._protected_switches, protected_switch)
         return self
 
+
+    schemes: MridCollection[ProtectionRelayScheme] = LazyMridList(
+        _schemes,
+        "A ProtectionRelayScheme",
+    )
+
+
+
+
+
+
+    # region deprecated list boilerplate
+    # region sensors boilerplate
+
+    @deprecated("Use len(obj.sensors) instead.")
+    def num_sensors(self) -> int:
+        return len(self.sensors)
+
+    @deprecated("Use obj.sensors.get_by_mrid(mrid) instead.")
+    def get_sensor(self, mrid: str) -> Sensor:
+        return self.sensors.get_by_mrid(mrid)
+
+    @deprecated("Use obj.sensors.append(sensor) instead.")
+    def add_sensor(self, sensor: Sensor) -> ProtectionRelayFunction:
+        self.sensors.append(sensor)
+        return self
+
+    @deprecated("Use obj.sensors.remove(sensor) instead.")
+    def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
+        self.sensors.remove(sensor)
+        return self
+
+    @deprecated("Use obj.sensors.clear() instead.")
+    def clear_sensors(self) -> ProtectionRelayFunction:
+        self.sensors.clear()
+        return self
+
+    # endregion sensors boilerplate
+
+    # region protected_switches boilerplate
+
+    @deprecated("Use len(obj.protected_switches) instead.")
+    def num_protected_switches(self) -> int:
+        return len(self.protected_switches)
+
+    @deprecated("Use obj.protected_switches.get_by_mrid(mrid) instead.")
+    def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
+        return self.protected_switches.get_by_mrid(mrid)
+
+    @deprecated("Use obj.protected_switches.append(protected_switch) instead.")
+    def add_protected_switch(self, protected_switch: ProtectedSwitch) -> ProtectionRelayFunction:
+        self.protected_switches.append(protected_switch)
+        return self
+
+    @deprecated("Use obj.protected_switches.clear() instead.")
     def clear_protected_switches(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectedSwitches<ProtectedSwitch>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._protected_switches = None
+        self.protected_switches.clear()
         return self
 
+    # endregion protected_switches boilerplate
+
+    # region schemes boilerplate
+
+    @deprecated("Use len(obj.schemes) instead.")
     def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        return len(self.schemes)
 
-        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._schemes)
-
+    @deprecated("Use obj.schemes.get_by_mrid(mrid) instead.")
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
-        """
-        Get a :class:`ProtectionRelayScheme` this :class:`ProtectionRelayFunction` operates under by its mRID.
+        return self.schemes.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the desired :class:`ProtectionRelayScheme`.
-        :returns: The :class:`ProtectionRelayScheme` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._schemes, mrid)
-
+    @deprecated("Use obj.schemes.append(scheme) instead.")
     def add_scheme(self, scheme: ProtectionRelayScheme) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectionRelayScheme` it operates under.
-
-        :param scheme: The :class:`ProtectionRelayScheme` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(scheme, self.get_scheme, "A ProtectionRelayScheme"):
-            return self
-        self._schemes = list() if self._schemes is None else self._schemes
-        self._schemes.append(scheme)
+        self.schemes.append(scheme)
         return self
 
+    @deprecated("Use obj.schemes.remove(scheme) instead.")
     def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectionRelayScheme`.
-
-        :param scheme: The :class:`ProtectionRelayScheme` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If scheme was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = safe_remove(self._schemes, scheme)
+        self.schemes.remove(scheme)
         return self
 
+    @deprecated("Use obj.schemes.clear() instead.")
     def clear_schemes(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = None
+        self.schemes.clear()
         return self
+
+    # endregion schemes boilerplate
+
+    # endregion deprecated list boilerplate

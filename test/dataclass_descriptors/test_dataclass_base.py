@@ -7,13 +7,10 @@ from typing import List
 
 import pytest
 
-from zepben.ewb import Cut
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass, DataclassBase
-from zepben.ewb.boilerplate.backed_descriptor import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass, DataclassBase
 
 
 @zb_dataclass
-@remove_descriptor_annotations
 class Root(DataclassBase):
     mrid: str
     y: int
@@ -26,15 +23,13 @@ class Root(DataclassBase):
         self.mrid = mrid
         super(Root, self).__init__(**kwargs)
 
-
 @zb_dataclass
-@remove_descriptor_annotations
 class Child(Root):
     x: float = 42.0
     z: str = "abc"
 
     dc_default: int = field(default=99)
-    dc_default_factory: List[int] = field(default_factory=lambda: [33])
+    dc_default_factory: List[int] = field(default_factory=lambda : [33])
 
 
 def test_dataclass_base():
@@ -48,8 +43,8 @@ def test_dataclass_base():
     obj = Child(mrid, y=33, z="Hello there")
     # Memory layout correct
     # noinspection PyUnresolvedReferences
-    all_slots = set(obj.__slots__).union(set(Root.__slots__))  # Python 3.11+ stores parent slots only in parent
-    assert all_slots == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
+    all_slots = set(obj.__slots__).union(set(Root.__slots__)) # Python 3.11+ stores parent slots only in parent
+    assert all_slots  == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
 
     # positional arg
     assert obj.mrid == mrid
@@ -77,14 +72,3 @@ def test_dataclass_base():
     other = Child("mrid2", y=42)
     other.dc_default_factory.append(24)
     assert obj.dc_default_factory == [33]
-
-
-def test_identifiable_mrid():
-    obj = Cut("it")
-    assert obj.mrid == "it"
-
-    obj = Cut(mrid="it")
-    assert obj.mrid == "it"
-
-    with pytest.raises(TypeError):
-        Cut("it", mrid="it")

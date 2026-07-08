@@ -8,10 +8,14 @@ from __future__ import annotations
 __all__ = ["OperationalRestriction"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
@@ -29,66 +33,40 @@ class OperationalRestriction(Document):
     They then apply operational restrictions in the operational systems to warn operators of potential problems.
     After appropriate inspection and maintenance, the operational restrictions may be removed.
     """
-    _equipment: Optional[List[Equipment]] = None
+    _equipment: Optional[List[Equipment]] = field(default=None)
 
-    def __init__(self, *args, equipment: List[Equipment] = None, **kwargs):
-        super(OperationalRestriction, self).__init__(*args, **kwargs)
-        if equipment:
-            for eq in equipment:
-                self.add_equipment(eq)
+    equipment: MridCollection[Equipment] = LazyMridList(
+        _equipment,
+        "An Equipment",
+    )
 
-    @property
-    def equipment(self) -> Generator[Equipment, None, None]:
-        """
-        The `Equipment` to which this `OperationalRestriction` applies.
-        """
-        return ngen(self._equipment)
 
+    # region deprecated list boilerplate
+    # region equipment boilerplate
+
+    @deprecated("Use len(obj.equipment) instead.")
     def num_equipment(self):
-        """
-        Returns the number of `Equipment` associated with this `OperationalRestriction`
-        """
-        return nlen(self._equipment)
+        return len(self.equipment)
 
+    @deprecated("Use obj.equipment.get_by_mrid(mrid) instead.")
     def get_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `OperationalRestriction` identified by `mrid`
+        return self.equipment.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._equipment, mrid)
-
+    @deprecated("Use obj.equipment.append(equipment) instead.")
     def add_equipment(self, equipment: Equipment) -> OperationalRestriction:
-        """
-        Associate an `Equipment` with this `OperationalRestriction`
-
-        `equipment` The `Equipment` to associate with this `OperationalRestriction`.
-        Returns A reference to this `OperationalRestriction` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `OperationalRestriction`.
-        """
-        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
-            return self
-        self._equipment = list() if self._equipment is None else self._equipment
-        self._equipment.append(equipment)
+        self.equipment.append(equipment)
         return self
 
+    @deprecated("Use obj.equipment.remove(equipment) instead.")
     def remove_equipment(self, equipment: Equipment) -> OperationalRestriction:
-        """
-        Disassociate `equipment` from this `OperationalRestriction`.
-
-        `equipment` The `Equipment` to disassociate from this `OperationalRestriction`.
-        Returns A reference to this `OperationalRestriction` to allow fluent use.
-        Raises `ValueError` if `equipment` was not associated with this `OperationalRestriction`.
-        """
-        self._equipment = safe_remove(self._equipment, equipment)
+        self.equipment.remove(equipment)
         return self
 
+    @deprecated("Use obj.equipment.clear() instead.")
     def clear_equipment(self) -> OperationalRestriction:
-        """
-        Clear all equipment.
-        Returns A reference to this `OperationalRestriction` to allow fluent use.
-        """
-        self._equipment = None
+        self.equipment.clear()
         return self
+
+    # endregion equipment boilerplate
+
+    # endregion deprecated list boilerplate

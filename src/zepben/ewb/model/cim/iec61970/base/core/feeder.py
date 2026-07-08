@@ -7,11 +7,14 @@ from __future__ import annotations
 
 __all__ = ["Feeder"]
 
+from dataclasses import field
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb import get_by_mrid
+from zepben.ewb import get_by_mrid, remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
+from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import ngen, nlen, safe_remove_by_id
@@ -35,52 +38,21 @@ class Feeder(EquipmentContainer):
     _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    _normal_energizing_substation: Substation | None = None
+    normal_energizing_substation: Substation | None = None
+    """The substation that normally energizes the feeder. Also used for naming purposes."""
 
-    _current_equipment: Dict[str, Equipment] | None = None
+    _current_equipment_by_id: Dict[str, Equipment] | None = field(default=None)
     """The equipment contained in this feeder in the current state of the network."""
 
-    _normal_energized_lv_feeders: Dict[str, LvFeeder] | None = None
+    _normal_energized_lv_feeders_by_id: Dict[str, LvFeeder] | None = field(default=None)
     """The LV feeders that are energized by this feeder in the normal state of the network."""
 
-    _current_energized_lv_feeders: Dict[str, LvFeeder] | None = None
+    _current_energized_lv_feeders_by_id: Dict[str, LvFeeder] | None = field(default=None)
     """The LV feeders that are energized by this feeder in the current state of the network."""
 
-    _normal_energized_lv_substations: Dict[str, 'LvSubstation'] | None = None
-    _current_energized_lv_substations: Dict[str, 'LvSubstation'] | None = None
+    _normal_energized_lv_substations_by_id: Dict[str, 'LvSubstation'] | None = field(default=None)
+    _current_energized_lv_substations_by_id: Dict[str, 'LvSubstation'] | None = field(default=None)
 
-    def __init__(
-        self,
-        *args,
-        normal_head_terminal: Terminal = None,
-        normal_energizing_substation: Substation = None,
-        current_equipment: List[Equipment] = None,
-        normal_energized_lv_feeders: List[LvFeeder] = None,
-        current_energized_lv_feeders: List[LvFeeder] = None,
-        normal_energized_lv_substations: List[LvSubstation] = None,
-        current_energized_lv_substations: List[LvSubstation] = None,
-        **kwargs,
-    ):
-        super(Feeder, self).__init__(*args, **kwargs)
-        if normal_head_terminal:
-            self.normal_head_terminal = normal_head_terminal
-        if normal_energizing_substation:
-            self.normal_energizing_substation = normal_energizing_substation
-        if normal_energized_lv_feeders:
-            for lv_feeder in normal_energized_lv_feeders:
-                self.add_normal_energized_lv_feeder(lv_feeder)
-        if current_equipment:
-            for eq in current_equipment:
-                self.add_current_equipment(eq)
-        if current_energized_lv_feeders:
-            for lv_feeder in current_energized_lv_feeders:
-                self.add_current_energized_lv_feeder(lv_feeder)
-        if normal_energized_lv_substations:
-            for lv_substation in normal_energized_lv_substations:
-                self.add_normal_energized_lv_substation(lv_substation)
-        if current_energized_lv_substations:
-            for lv_substation in current_energized_lv_substations:
-                self.add_current_energized_lv_substation(lv_substation)
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
@@ -94,6 +66,35 @@ class Feeder(EquipmentContainer):
         else:
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
 
+    current_equipment: MridCollection[Equipment] = LazyMridMap(
+        _current_equipment_by_id,
+        "A current Equipment",
+    )
+    """Contained `Equipment` using the current state of the network."""
+
+    normal_energized_lv_feeders: MridCollection[LvFeeder] = LazyMridMap(
+        _normal_energized_lv_feeders_by_id,
+        "An LvFeeder",
+    )
+    """The LV feeders that are normally energized by this feeder."""
+
+    current_energized_lv_feeders: MridCollection[LvFeeder] = LazyMridMap(
+        _current_energized_lv_feeders_by_id,
+        "An LvFeeder",
+    )
+    """[ZBEX] The LV feeders that are currently energized by this feeder."""
+
+    normal_energized_lv_substations: MridCollection[LvSubstation] = LazyMridMap(
+        _normal_energized_lv_substations_by_id,
+        "An LvSubstation",
+    )
+    """[ZBEX]"""
+
+    current_energized_lv_substations: MridCollection[LvSubstation] = LazyMridMap(
+        _current_energized_lv_substations_by_id,
+        "An LvSubstation",
+    )
+    """[ZBEX]"""
     @property
     def normal_energizing_substation(self):
         """The substation that normally energizes the feeder. Also used for naming purposes."""
@@ -111,270 +112,137 @@ class Feeder(EquipmentContainer):
         """
         return ngen(self._current_equipment)
 
-    @property
-    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are normally energized by this feeder.
-        """
-        return ngen(self._normal_energized_lv_feeders)
 
-    @zbex
-    @property
-    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are currently energized by this feeder.
-        """
-        return ngen(self._current_energized_lv_feeders)
+    # region deprecated list boilerplate
+    # region current_equipment boilerplate
 
-    @zbex
-    @property
-    def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._normal_energized_lv_substations)
-
-    @zbex
-    @property
-    def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._current_energized_lv_substations)
-
+    @deprecated("Use len(current_equipment) instead")
     def num_current_equipment(self):
-        """
-        :returns: The number of `Equipment` associated with this `Feeder`
-        """
-        return nlen(self._current_equipment)
+        return len(self.current_equipment)
 
+    @deprecated("Use current_equipment.get_by_mrid(mrid) instead")
     def get_current_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `Feeder` identified by `mrid`
+        return self.current_equipment.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Equipment`
-        :returns: The `Equipment` with the specified `mrid` if it exists
-        :raises: `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._current_equipment, mrid)
-
-    def add_current_equipment(self, equipment: Equipment) -> Feeder:
-        """
-        Associate `equipment` with this `Feeder`.
-
-        `equipment` the `Equipment` to associate with this `Feeder`.
-        :returns: A reference to this `Feeder` to allow fluent use.
-        :raises: `ValueError` if another `Equipment` with the same `mrid` already exists for this `Feeder`.
-        """
-        if self._validate_reference(equipment, self.get_current_equipment, "An Equipment"):
-            return self
-        self._current_equipment = dict() if self._current_equipment is None else self._current_equipment
-        self._current_equipment[equipment.mrid] = equipment
+    @deprecated("Use current_equipment.append(equipment) instead")
+    def add_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
+        self.current_equipment.append(equipment)
         return self
 
-    def remove_current_equipment(self, equipment: Equipment) -> Feeder:
-        """
-        Disassociate `equipment` from this `Feeder`
-
-        `equipment` The `Equipment` to disassociate from this `Feeder`.
-        :returns: A reference to this `Feeder` to allow fluent use.
-        :raises: `KeyError` if `equipment` was not associated with this `Feeder`.
-        """
-        self._current_equipment = safe_remove_by_id(self._current_equipment, equipment)
+    @deprecated("Use current_equipment.remove(equipment) instead")
+    def remove_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
+        self.current_equipment.remove(equipment)
         return self
 
-    def clear_current_equipment(self) -> Feeder:
-        """
-        Clear all equipment.
-        :returns: A reference to this `Feeder` to allow fluent use.
-        """
-        self._current_equipment = None
+    @deprecated("Use current_equipment.clear() instead")
+    def clear_current_equipment(self) -> EquipmentContainer:
+        self.current_equipment.clear()
         return self
 
-    def num_normal_energized_lv_feeders(self) -> int:
-        """
-        Get the number of LV feeders that are normally energized by this feeder.
-        """
-        return nlen(self._normal_energized_lv_feeders)
+    # endregion
+    # region normal_energized_lv_feeders boilerplate
 
+    @deprecated("Use len(normal_energized_lv_feeders) instead")
+    def num_normal_energized_lv_feeders(self):
+        return len(self.normal_energized_lv_feeders)
+
+    @deprecated("Use normal_energized_lv_feeders.get_by_mrid(mrid) instead")
     def get_normal_energized_lv_feeder(self, mrid: str) -> LvFeeder:
-        """
-        Energized LvFeeder in the normal state of the network.
+        return self.normal_energized_lv_feeders.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the `LvFeeder`.
-        :returns: A matching `LvFeeder` that is energized by this `Feeder` in the normal state of the network.
-        :raise sA `KeyError` if no matching `LvFeeder` was found.
-        """
-        return get_by_mrid(self._normal_energized_lv_feeders, mrid)
-
+    @deprecated("Use normal_energized_lv_feeders.append(lv_feeder) instead")
     def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        """
-        Associate this `Feeder` with an `LvFeeder` in the normal state of the network.
-
-        :param lv_feeder: the LV feeder to associate with this feeder in the normal state of the network.
-        :return: This `Feeder` for fluent use.
-        """
-        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
-            return self
-        self._normal_energized_lv_feeders = dict() if self._normal_energized_lv_feeders is None else self._normal_energized_lv_feeders
-        self._normal_energized_lv_feeders[lv_feeder.mrid] = lv_feeder
+        self.normal_energized_lv_feeders.append(lv_feeder)
         return self
 
+    @deprecated("Use normal_energized_lv_feeders.remove(lv_feeder) instead")
     def remove_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        """
-        Disassociate this `Feeder` from an `LvFeeder` in the normal state of the network.
-
-        :param lv_feeder: the LV feeder to disassociate from this feeder in the normal state of the network.
-        :return: This `Feeder` for fluent use.
-        :raises: A `ValueError` if `lv_feeder` is not found in the normal energized lv feeders collection.
-        """
-        self._normal_energized_lv_feeders = safe_remove_by_id(self._normal_energized_lv_feeders, lv_feeder)
+        self.normal_energized_lv_feeders.remove(lv_feeder)
         return self
 
+    @deprecated("Use normal_energized_lv_feeders.clear() instead")
     def clear_normal_energized_lv_feeders(self) -> Feeder:
-        """
-        Clear all `LvFeeder`s associated with `Feeder` in the normal state of the network.
-
-        :return: This `Feeder` for fluent use.
-        """
-        self._normal_energized_lv_feeders = None
+        self.normal_energized_lv_feeders.clear()
         return self
 
-    def num_current_energized_lv_feeders(self) -> int:
-        """
-        Get the number of LV feeders that are currently energized by this feeder.
-        """
-        return nlen(self._current_energized_lv_feeders)
+    # endregion
+    # region current_energized_lv_feeders boilerplate
 
+    @deprecated("Use len(current_energized_lv_feeders) instead")
+    def num_current_energized_lv_feeders(self):
+        return len(self.current_energized_lv_feeders)
+
+    @deprecated("Use current_energized_lv_feeders.get_by_mrid(mrid) instead")
     def get_current_energized_lv_feeder(self, mrid: str) -> LvFeeder:
-        """
-        Energized LvFeeder in the current state of the network.
+        return self.current_energized_lv_feeders.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the `LvFeeder`.
-        :return: A matching `LvFeeder` that is energized by this `Feeder` in the current state of the network.
-        :raises: A `KeyError` if no matching `LvFeeder` was found.
-        """
-        return get_by_mrid(self._current_energized_lv_feeders, mrid)
-
+    @deprecated("Use current_energized_lv_feeders.append(lv_feeder) instead")
     def add_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        """
-        Associate this `Feeder` with an `LvFeeder` in the current state of the network.
-
-        :param lv_feeder: the LV feeder to associate with this feeder in the current state of the network.
-        :return: This `Feeder` for fluent use.
-        """
-        if self._validate_reference(lv_feeder, self.get_current_energized_lv_feeder, "An LvFeeder"):
-            return self
-        self._current_energized_lv_feeders = dict() if self._current_energized_lv_feeders is None else self._current_energized_lv_feeders
-        self._current_energized_lv_feeders[lv_feeder.mrid] = lv_feeder
+        self.current_energized_lv_feeders.append(lv_feeder)
         return self
 
+    @deprecated("Use current_energized_lv_feeders.remove(lv_feeder) instead")
     def remove_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
-        """
-        Disassociate this `Feeder` from an `LvFeeder` in the current state of the network.
-
-        :param lv_feeder: the LV feeder to disassociate from this feeder in the current state of the network.
-        :return: This `Feeder` for fluent use.
-        :raises: A `ValueError` if `lv_feeder` is not found in the current energized lv feeders collection.
-        """
-        self._current_energized_lv_feeders = safe_remove_by_id(self._current_energized_lv_feeders, lv_feeder)
+        self.current_energized_lv_feeders.remove(lv_feeder)
         return self
 
+    @deprecated("Use current_energized_lv_feeders.clear() instead")
     def clear_current_energized_lv_feeders(self) -> Feeder:
-        """
-        Clear all `LvFeeder`s associated with `Feeder` in the current state of the network.
-
-        :return: This `Feeder` for fluent use.
-        """
-        self._current_energized_lv_feeders = None
+        self.current_energized_lv_feeders.clear()
         return self
 
-    def num_normal_energized_lv_substations(self) -> int:
-        """
-        Get the number of entries in the normal [LvSubstation] collection.
-        """
-        return nlen(self._normal_energized_lv_substations)
+    # endregion
+    # region normal_energized_lv_substations boilerplate
 
-    def get_normal_energized_lv_substation(self, mrid: str) -> 'LvSubstation | None':
-        """
-        Retrieve an energized LvSubstation using the normal state of the network.
+    @deprecated("Use len(normal_energized_lv_substations) instead")
+    def num_normal_energized_lv_substations(self):
+        return len(self.normal_energized_lv_substations)
 
-        :param mrid: the mRID of the required normal [LvSubstation]
-        :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
-        """
-        return get_by_mrid(self._normal_energized_lv_substations, mrid)
+    @deprecated("Use normal_energized_lv_substations.get_by_mrid(mrid) instead")
+    def get_normal_energized_lv_substation(self, mrid: str) -> LvSubstation:
+        return self.normal_energized_lv_substations.get_by_mrid(mrid)
 
-    def add_normal_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
-        """
-        Associate this [Feeder] with a [LvSubstation] in the normal state of the network.
-
-        :param lv_substation: the [LvSubstation] to associate with this LV feeder in the normal state of the network.
-        :returns: This [Feeder] for fluent use.
-        """
-        if self._validate_reference(lv_substation, self.get_normal_energized_lv_substation, "An LvSubstation"):
-            return self
-        if self._normal_energized_lv_substations is None:
-            self._normal_energized_lv_substations = dict()
-        self._normal_energized_lv_substations[lv_substation.mrid] = lv_substation
+    @deprecated("Use normal_energized_lv_substations.append(lv_substation) instead")
+    def add_normal_energized_lv_substation(self, lv_substation: LvSubstation) -> Feeder:
+        self.normal_energized_lv_substations.append(lv_substation)
         return self
 
-    def remove_normal_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
-        """
-        Disassociate this [Feeder] from a [LvSubstation] in the normal state of the network.
-
-        :param lv_substation: the [LvSubstation] to disassociate from this LV feeder in the normal state of the network.
-        :returns: true if a matching [LvSubstation] is removed from the collection.
-        """
-        self._normal_energized_lv_substations = safe_remove_by_id(self._normal_energized_lv_substations, lv_substation)
+    @deprecated("Use normal_energized_lv_substations.remove(lv_substation) instead")
+    def remove_normal_energized_lv_substation(self, lv_substation: LvSubstation) -> Feeder:
+        self.normal_energized_lv_substations.remove(lv_substation)
         return self
 
-    def clear_normal_energized_lv_substations(self) -> "Feeder":
-        """
-        Clear all [LvSubstation]'s associated with this [Feeder] in the normal state of the network.
-
-        :returns: This [Feeder] for fluent use.
-        """
-        self._normal_energized_lv_substations = None
+    @deprecated("Use normal_energized_lv_substations.clear() instead")
+    def clear_normal_energized_lv_substations(self) -> Feeder:
+        self.normal_energized_lv_substations.clear()
         return self
 
-    def num_current_energized_lv_substations(self) -> int:
-        """
-        Get the number of entries in the current [LvSubstation] collection.
-        """
-        return nlen(self._current_energized_lv_substations)
+    # endregion
+    # region current_energized_lv_substations boilerplate
 
-    def get_current_energized_lv_substation(self, mrid: str) -> 'LvSubstation | None':
-        """
-        Retrieve an energized LvSubstation using the current state of the network.
+    @deprecated("Use len(current_energized_lv_substations) instead")
+    def num_current_energized_lv_substations(self):
+        return len(self.current_energized_lv_substations)
 
-        :param mrid: the mRID of the required current [LvSubstation]
-        :returns: The [LvSubstation] with the specified [mRID] if it exists, otherwise null
-        """
-        return get_by_mrid(self._current_energized_lv_substations, mrid)
+    @deprecated("Use current_energized_lv_substations.get_by_mrid(mrid) instead")
+    def get_current_energized_lv_substation(self, mrid: str) -> LvSubstation:
+        return self.current_energized_lv_substations.get_by_mrid(mrid)
 
-    def add_current_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
-        """
-        Associate this [Feeder] with a [LvSubstation] in the current state of the network.
-
-        :param lv_substation: the [LvSubstation] to associate with this LV feeder in the current state of the network.
-        :returns: This [Feeder] for fluent use.
-        """
-        if self._validate_reference(lv_substation, self.get_current_energized_lv_substation, "An LvSubstation"):
-            return self
-        if self._current_energized_lv_substations is None:
-            self._current_energized_lv_substations = dict()
-        self._current_energized_lv_substations[lv_substation.mrid] = lv_substation
+    @deprecated("Use current_energized_lv_substations.append(lv_substation) instead")
+    def add_current_energized_lv_substation(self, lv_substation: LvSubstation) -> Feeder:
+        self.current_energized_lv_substations.append(lv_substation)
         return self
 
-    def remove_current_energized_lv_substation(self, lv_substation: 'LvSubstation') -> "Feeder":
-        """
-        Disassociate this [Feeder] from a [LvSubstation] in the current state of the network.
-
-        :param lv_substation: the [LvSubstation] to disassociate from this LV feeder in the current state of the network.
-        :returns: true if a matching [LvSubstation] is removed from the collection.
-        """
-        self._current_energized_lv_substations = safe_remove_by_id(self._current_energized_lv_substations, lv_substation)
+    @deprecated("Use current_energized_lv_substations.remove(lv_substation) instead")
+    def remove_current_energized_lv_substation(self, lv_substation: LvSubstation) -> Feeder:
+        self.current_energized_lv_substations.remove(lv_substation)
         return self
 
-    def clear_current_energized_lv_substations(self) -> "Feeder":
-        """
-        Clear all [LvSubstation]'s associated with this [Feeder] in the current state of the network.
-
-        :returns: This [Feeder] for fluent use.
-        """
-        self._current_energized_lv_substations = None
+    @deprecated("Use current_energized_lv_substations.clear() instead")
+    def clear_current_energized_lv_substations(self) -> Feeder:
+        self.current_energized_lv_substations.clear()
         return self
+
+    # endregion
+    # endregion
+

@@ -8,10 +8,14 @@ from __future__ import annotations
 __all__ = ["PricingStructure"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
@@ -29,68 +33,42 @@ class PricingStructure(Document):
     :var code: Unique user-allocated key for this pricing structure, used by company representatives to identify the correct price structure for allocating to a
                customer. For rate schedules it is often prefixed by a state code.
     """
-    _tariffs: Optional[List[Tariff]] = None
+    _tariffs: Optional[List[Tariff]] = field(default=None)
 
     code: str | None = None
 
-    def __init__(self, *args, tariffs: List[Tariff] = None, **kwargs):
-        super(PricingStructure, self).__init__(*args, **kwargs)
-        if tariffs:
-            for tariff in tariffs:
-                self.add_tariff(tariff)
+    tariffs: MridCollection[Tariff] = LazyMridList(
+        _tariffs,
+        "A Tariff",
+    )
 
-    @property
-    def tariffs(self) -> Generator[Tariff, None, None]:
-        """
-        The `Tariff`s of this `PricingStructure`.
-        """
-        return ngen(self._tariffs)
 
+    # region deprecated list boilerplate
+    # region tariffs boilerplate
+
+    @deprecated("Use len(obj.tariffs) instead.")
     def num_tariffs(self):
-        """
-        Returns The number of `Tariff`s associated with this `PricingStructure`
-        """
-        return nlen(self._tariffs)
+        return len(self.tariffs)
 
+    @deprecated("Use obj.tariffs.get_by_mrid(mrid) instead.")
     def get_tariff(self, mrid: str) -> Tariff:
-        """
-        Get the `Tariff` for this `PricingStructure` identified by `mrid`
+        return self.tariffs.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Tariff`
-        Returns The `Tariff` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._tariffs, mrid)
-
+    @deprecated("Use obj.tariffs.append(tariff) instead.")
     def add_tariff(self, tariff: Tariff) -> PricingStructure:
-        """
-        Associate a `Tariff` with this `PricingStructure`.
-
-        `tariff` the `Tariff` to associate with this `PricingStructure`.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        Raises `ValueError` if another `Tariff` with the same `mrid` already exists for this `PricingStructure`.
-        """
-        if self._validate_reference(tariff, self.get_tariff, "A Tariff"):
-            return self
-        self._tariffs = list() if self._tariffs is None else self._tariffs
-        self._tariffs.append(tariff)
+        self.tariffs.append(tariff)
         return self
 
+    @deprecated("Use obj.tariffs.remove(tariff) instead.")
     def remove_tariff(self, tariff: Tariff) -> PricingStructure:
-        """
-        Disassociate `tariff` from this `PricingStructure`.
-
-        `tariff` the `Tariff` to disassociate from this `PricingStructure`.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        Raises `ValueError` if `tariff` was not associated with this `PricingStructure`.
-        """
-        self._tariffs = safe_remove(self._tariffs, tariff)
+        self.tariffs.remove(tariff)
         return self
 
+    @deprecated("Use obj.tariffs.clear() instead.")
     def clear_tariffs(self) -> PricingStructure:
-        """
-        Clear all tariffs.
-        Returns A reference to this `PricingStructure` to allow fluent use.
-        """
-        self._tariffs = None
+        self.tariffs.clear()
         return self
+
+    # endregion tariffs boilerplate
+
+    # endregion deprecated list boilerplate

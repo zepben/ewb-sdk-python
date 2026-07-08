@@ -8,12 +8,16 @@ from __future__ import annotations
 __all__ = ["UsagePoint"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
@@ -56,125 +60,27 @@ class UsagePoint(IdentifiedObject):
     four-wire, s12n (splitSecondary12N) is single-phase, three-wire, and s1n and s2n are single-phase, two-wire.
     """
 
-    _equipment: list[Equipment] | None = None
-    _end_devices: list[EndDevice] | None = None
+    _equipment: list[Equipment] | None = field(default=None)
+    _end_devices: list[EndDevice] | None = field(default=None)
     _contacts: list[ContactDetails] | None = None
 
-    def __init__(self, *args, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, contacts: List[ContactDetails] = None, **kwargs):
+    def __init__(self, *args, contacts: List[ContactDetails] = None, **kwargs):
         super(UsagePoint, self).__init__(*args, **kwargs)
-        if equipment:
-            for eq in equipment:
-                self.add_equipment(eq)
-        if end_devices:
-            for ed in end_devices:
-                self.add_end_device(ed)
         if contacts:
             for c in contacts:
                 self.add_contact(c)
 
-    @property
-    def end_devices(self) -> Generator[EndDevice, None, None]:
-        """
-        The `EndDevice`'s (Meter's) associated with this `UsagePoint`.
-        """
-        return ngen(self._end_devices)
 
-    @property
-    def equipment(self) -> Generator[Equipment, None, None]:
-        """
-        The `zepben.model.Equipment` associated with this `UsagePoint`.
-        """
-        return ngen(self._equipment)
+    end_devices: MridCollection[EndDevice] = LazyMridList(
+        _end_devices,
+        "An EndDevice",
+    )
 
-    def is_metered(self):
-        """
-        Check whether this `UsagePoint` is metered. A `UsagePoint` is metered if it's associated with at least one `EndDevice`.
-        Returns True if this `UsagePoint` has an `EndDevice`, False otherwise.
-        """
-        return nlen(self._end_devices) > 0
+    equipment: MridCollection[Equipment] = LazyMridList(
+        _equipment,
+        "An Equipment",
+    )
 
-    @property
-    def contacts(self) -> Generator[ContactDetails, None, None]:
-        """[ZBEX] All contact details for this `UsagePoint`"""
-        return ngen(self._contacts)
-
-    def num_contacts(self):
-        """Get the number of entries in the `ContactDetails` collection"""
-        return nlen(self._contacts)
-
-    def get_contact(self, _id: str) -> ContactDetails:
-        """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
-        try:
-            return next((it for it in self.contacts if it.id == _id))
-        except StopIteration:
-            raise KeyError(_id)
-
-    def add_contact(self, contact: ContactDetails) -> UsagePoint:
-        """Add a `ContactDetails` to this `UsagePoint`"""
-        if self._validate_reference(contact, self.get_contact, "A ContactDetails"):
-            return self
-
-        if self._contacts is None:
-            self._contacts = list()
-        self._contacts.append(contact)
-        return self
-
-    def remove_contact(self, contact: ContactDetails) -> UsagePoint:
-        self._contacts = safe_remove(self._contacts, contact)
-        return self
-
-    def clear_contacts(self) -> UsagePoint:
-        self._contacts = None
-        return self
-
-    def num_end_devices(self):
-        """
-        Returns The number of `EndDevice`s associated with this `UsagePoint`
-        """
-        return nlen(self._end_devices)
-
-    def get_end_device(self, mrid: str) -> EndDevice:
-        """
-        Get the `EndDevice` for this `UsagePoint` identified by `mrid`
-
-        `mrid` The mRID of the required `EndDevice`
-        Returns The `EndDevice` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._end_devices, mrid)
-
-    def add_end_device(self, end_device: EndDevice) -> UsagePoint:
-        """
-        Associate an `EndDevice` with this `UsagePoint`
-
-        `end_device` The `EndDevice` to associate with this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if another `EndDevice` with the same `mrid` already exists for this `UsagePoint`.
-        """
-        if self._validate_reference(end_device, self.get_end_device, "An EndDevice"):
-            return self
-        self._end_devices = list() if self._end_devices is None else self._end_devices
-        self._end_devices.append(end_device)
-        return self
-
-    def remove_end_device(self, end_device: EndDevice) -> UsagePoint:
-        """
-        Disassociate `end_device` from this `UsagePoint`.
-
-        `end_device` The `EndDevice` to disassociate from this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if `end_device` was not associated with this `UsagePoint`.
-        """
-        self._end_devices = safe_remove(self._end_devices, end_device)
-        return self
-
-    def clear_end_devices(self) -> UsagePoint:
-        """
-        Clear all end_devices.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        """
-        self._end_devices = None
-        return self
 
     def num_equipment(self):
         """
@@ -225,3 +131,60 @@ class UsagePoint(IdentifiedObject):
         """
         self._equipment = None
         return self
+
+    # region deprecated list boilerplate
+    # region end_devices boilerplate
+
+    @deprecated("Use len(obj.end_devices) instead.")
+    def num_end_devices(self):
+        return len(self.end_devices)
+
+    @deprecated("Use obj.end_devices.get_by_mrid(mrid) instead.")
+    def get_end_device(self, mrid: str) -> EndDevice:
+        return self.end_devices.get_by_mrid(mrid)
+
+    @deprecated("Use obj.end_devices.append(end_device) instead.")
+    def add_end_device(self, end_device: EndDevice) -> UsagePoint:
+        self.end_devices.append(end_device)
+        return self
+
+    @deprecated("Use obj.end_devices.remove(end_device) instead.")
+    def remove_end_device(self, end_device: EndDevice) -> UsagePoint:
+        self.end_devices.remove(end_device)
+        return self
+
+    @deprecated("Use obj.end_devices.clear() instead.")
+    def clear_end_devices(self) -> UsagePoint:
+        self.end_devices.clear()
+        return self
+
+    # endregion end_devices boilerplate
+
+    # region equipment boilerplate
+
+    @deprecated("Use len(obj.equipment) instead.")
+    def num_equipment(self):
+        return len(self.equipment)
+
+    @deprecated("Use obj.equipment.get_by_mrid(mrid) instead.")
+    def get_equipment(self, mrid: str) -> Equipment:
+        return self.equipment.get_by_mrid(mrid)
+
+    @deprecated("Use obj.equipment.append(equipment) instead.")
+    def add_equipment(self, equipment: Equipment) -> UsagePoint:
+        self.equipment.append(equipment)
+        return self
+
+    @deprecated("Use obj.equipment.remove(equipment) instead.")
+    def remove_equipment(self, equipment: Equipment) -> UsagePoint:
+        self.equipment.remove(equipment)
+        return self
+
+    @deprecated("Use obj.equipment.clear() instead.")
+    def clear_equipment(self) -> UsagePoint:
+        self.equipment.clear()
+        return self
+
+    # endregion equipment boilerplate
+
+    # endregion deprecated list boilerplate
