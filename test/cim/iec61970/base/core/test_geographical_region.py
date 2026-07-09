@@ -8,6 +8,8 @@ from cim.fill_fields import geographical_region_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
@@ -38,4 +40,15 @@ def test_sub_geographical_regions_collection():
         GeographicalRegion.add_sub_geographical_region,
         GeographicalRegion.remove_sub_geographical_region,
         GeographicalRegion.clear_sub_geographical_regions,
+    )
+
+
+def test_sub_geographical_regions_backfill():
+    validate_backfill(
+        GeographicalRegion,
+        lambda mrid: SubGeographicalRegion(mrid),
+        lambda mrid, geo: SubGeographicalRegion(mrid, geographical_region=geo),
+        lambda other: other.geographical_region,
+        GeographicalRegion.num_sub_geographical_regions,
+        GeographicalRegion.add_sub_geographical_region,
     )

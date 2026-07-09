@@ -11,6 +11,8 @@ from cim.fill_fields import power_electronics_connection_kwargs
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import PowerElectronicsUnit, PowerElectronicsConnection, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
@@ -187,6 +189,17 @@ def test_power_electronics_connection_phases_collection():
         PowerElectronicsConnection.add_phase,
         PowerElectronicsConnection.remove_phase,
         PowerElectronicsConnection.clear_phases,
+    )
+
+
+def test_power_electronics_connection_phases_backfill():
+    validate_backfill(
+        PowerElectronicsConnection,
+        lambda mrid: PowerElectronicsConnectionPhase(mrid),
+        lambda mrid, pec: PowerElectronicsConnectionPhase(mrid, power_electronics_connection=pec),
+        lambda other: other.power_electronics_connection,
+        PowerElectronicsConnection.num_phases,
+        PowerElectronicsConnection.add_phase,
     )
 
 

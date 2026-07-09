@@ -423,6 +423,50 @@ def _validate_ordered_other(
     )
 
 
+
+def validate_backfill(
+    create_it: Type[Identifiable] | Callable[[str], TIdentifiable],
+    create_other: Type[UIdentifiable] | Callable[[str], UIdentifiable],
+    create_other_with_it: Callable[[str, TIdentifiable], UIdentifiable],
+    get_backref_from_other: Callable[[UIdentifiable], TIdentifiable],
+    num: Callable[[TIdentifiable], int] | Callable[[], int],
+    add: Callable[[TIdentifiable, UIdentifiable], TIdentifiable] | Callable[[UIdentifiable], TIdentifiable],
+):
+    """
+    Check that list-related auto-linked relationships function as expected
+
+    :param create_it lambda creating containing object by mRID
+    :param create_other lambda creating object that's added to the list (also by mRID)
+    :param create_other_with_it creating object that's added to the list, assigning a dummy backref
+    :param get_backref_from_other retrieve the backref from the contained object (for verification)
+    :param num retrieve size of collection
+    :param add attempt to add to the collection
+    """
+    it = create_it("it")
+    wrong_it = create_it("wrong_it")
+    other1 = create_other("1")
+
+    # Check that container is assigned to an object with no backref gets
+    add(it, other1)
+    assert num(it) == 1
+    assert get_backref_from_other(other1) is it
+
+    # Check that an object already backref'd to container is accepted cleanly
+    other2 = create_other_with_it("2", it)
+    assert get_backref_from_other(other2) is it
+    add(it, other2)
+    assert num(it) == 2
+    assert get_backref_from_other(other2) is it
+
+    # Check that an object already backref'd to another container is rejected correctly
+    other_wrong = create_other_with_it("3", wrong_it)
+    assert get_backref_from_other(other_wrong) is wrong_it
+    with pytest.raises(ValueError):
+        add(it, other_wrong)
+    assert num(it) == 2
+    assert get_backref_from_other(other_wrong) is wrong_it
+
+
 def _validate(
     it: TIdentifiable,
     others: List[_U],
