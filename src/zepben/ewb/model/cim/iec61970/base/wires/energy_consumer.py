@@ -11,7 +11,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
@@ -80,10 +80,17 @@ class EnergyConsumer(EnergyConnection):
 
         `phase` the `EnergyConsumerPhase` to associate with this `EnergyConsumer`.
         Returns A reference to this `EnergyConsumer` to allow fluent use.
-        Raises `ValueError` if another `EnergyConsumerPhase` with the same `mrid` already exists for this `EnergyConsumer`.
+        Raises `ValueError` if another `EnergyConsumerPhase` with the same `mrid` already exists for this `EnergyConsumer`, or if `phase.energy_consumer` is not
+        this `EnergyConsumer`.
         """
         if self._validate_reference(phase, self.get_phase, "An EnergyConsumerPhase"):
             return self
+
+        if phase.energy_consumer is None:
+            phase.energy_consumer = self
+
+        require(phase.energy_consumer is self, lambda: f"${phase} `energy_consumer` property references ${phase.energy_consumer}, expected ${self}.")
+
         self._energy_consumer_phases = list() if self._energy_consumer_phases is None else self._energy_consumer_phases
         self._energy_consumer_phases.append(phase)
         return self

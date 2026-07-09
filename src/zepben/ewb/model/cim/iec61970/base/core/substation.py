@@ -10,7 +10,7 @@ __all__ = ["Substation"]
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
@@ -103,10 +103,17 @@ class Substation(EquipmentContainer):
 
         `feeder` The `Feeder` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`.
+        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`, or if
+        `feeder.normal_energizing_substation` is not this `Substation`.
         """
         if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
             return self
+
+        if feeder.normal_energizing_substation is None:
+            feeder.normal_energizing_substation = self
+
+        require(feeder.normal_energizing_substation is self, lambda: f"${feeder} `normal_energizing_substation` property references ${feeder.normal_energizing_substation}, expected ${self}.")
+
         self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
         self._normal_energized_feeders.append(feeder)
         return self
