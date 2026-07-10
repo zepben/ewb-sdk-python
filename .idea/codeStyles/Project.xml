@@ -17,6 +17,7 @@
       <option name="MIN_LINES_AROUND_BLOCK_ELEMENTS" value="2" />
     </Markdown>
     <Python>
+      <option name="BLANK_LINES_BEFORE_FIRST_METHOD" value="1" />
       <option name="DICT_NEW_LINE_AFTER_LEFT_BRACE" value="true" />
       <option name="DICT_NEW_LINE_BEFORE_RIGHT_BRACE" value="true" />
       <option name="LIST_NEW_LINE_AFTER_LEFT_BRACKET" value="true" />

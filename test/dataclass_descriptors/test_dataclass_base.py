@@ -26,6 +26,7 @@ class Root(DataclassBase):
         self.mrid = mrid
         super(Root, self).__init__(**kwargs)
 
+
 @zb_dataclass
 @remove_descriptor_annotations
 class Child(Root):
@@ -33,7 +34,7 @@ class Child(Root):
     z: str = "abc"
 
     dc_default: int = field(default=99)
-    dc_default_factory: List[int] = field(default_factory=lambda : [33])
+    dc_default_factory: List[int] = field(default_factory=lambda: [33])
 
 
 def test_dataclass_base():
@@ -47,8 +48,8 @@ def test_dataclass_base():
     obj = Child(mrid, y=33, z="Hello there")
     # Memory layout correct
     # noinspection PyUnresolvedReferences
-    all_slots = set(obj.__slots__).union(set(Root.__slots__)) # Python 3.11+ stores parent slots only in parent
-    assert all_slots  == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
+    all_slots = set(obj.__slots__).union(set(Root.__slots__))  # Python 3.11+ stores parent slots only in parent
+    assert all_slots == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
 
     # positional arg
     assert obj.mrid == mrid

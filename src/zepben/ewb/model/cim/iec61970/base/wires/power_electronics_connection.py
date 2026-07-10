@@ -9,9 +9,9 @@ __all__ = ["PowerElectronicsConnection"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
@@ -142,27 +142,29 @@ class PowerElectronicsConnection(RegulatingCondEq):
     _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
     """The individual units models for the power electronics connection."""
 
-    def __init__(self,
-                 *args,
-                 power_electronics_units: List[PowerElectronicsUnit] = None,
-                 power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
-                 inv_watt_resp_v1=None,
-                 inv_watt_resp_v2=None,
-                 inv_watt_resp_v3=None,
-                 inv_watt_resp_v4=None,
-                 inv_watt_resp_p_at_v1=None,
-                 inv_watt_resp_p_at_v2=None,
-                 inv_watt_resp_p_at_v3=None,
-                 inv_watt_resp_p_at_v4=None,
-                 inv_var_resp_v1=None,
-                 inv_var_resp_v2=None,
-                 inv_var_resp_v3=None,
-                 inv_var_resp_v4=None,
-                 inv_var_resp_q_at_v1=None,
-                 inv_var_resp_q_at_v2=None,
-                 inv_var_resp_q_at_v3=None,
-                 inv_var_resp_q_at_v4=None,
-                 **kwargs):
+    def __init__(
+        self,
+        *args,
+        power_electronics_units: List[PowerElectronicsUnit] = None,
+        power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
+        inv_watt_resp_v1=None,
+        inv_watt_resp_v2=None,
+        inv_watt_resp_v3=None,
+        inv_watt_resp_v4=None,
+        inv_watt_resp_p_at_v1=None,
+        inv_watt_resp_p_at_v2=None,
+        inv_watt_resp_p_at_v3=None,
+        inv_watt_resp_p_at_v4=None,
+        inv_var_resp_v1=None,
+        inv_var_resp_v2=None,
+        inv_var_resp_v3=None,
+        inv_var_resp_v4=None,
+        inv_var_resp_q_at_v1=None,
+        inv_var_resp_q_at_v2=None,
+        inv_var_resp_q_at_v3=None,
+        inv_var_resp_q_at_v4=None,
+        **kwargs,
+    ):
         super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
         if power_electronics_units:
             for unit in power_electronics_units:

@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
-
 @zb_dataclass
 @zbex
 class Loop(IdentifiedObject):

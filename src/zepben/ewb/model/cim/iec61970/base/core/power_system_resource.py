@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
 
 
-
 @zb_dataclass
 class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
     """

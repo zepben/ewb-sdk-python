@@ -15,8 +15,10 @@ from streaming.get.catching_thread import CatchingThread
 GrpcRequest = TypeVar('GrpcRequest')
 GrpcResponse = TypeVar('GrpcResponse')
 
+
 class GrpcInteration:
     pass
+
 
 @dataclass
 class StreamGrpc(GrpcInteration):

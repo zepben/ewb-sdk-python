@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
-
 @zb_dataclass
 class TransformerEnd(IdentifiedObject, metaclass=ABCMeta):
     """

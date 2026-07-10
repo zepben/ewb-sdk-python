@@ -14,6 +14,7 @@ from hypothesis.strategies import uuids
 
 T = TypeVar("T")
 
+
 def _is_stale_class(cls: type) -> bool:
     """
     Dataclasses create stale class objects that mess with the inheritance tree.
@@ -105,5 +106,6 @@ def assert_or_empty(
         expected.sort(key=sorted_by, reverse=sort_reversed)
 
     assert actual == expected
+
 
 mrid_strategy = uuids(version=4).map(lambda x: str(x))

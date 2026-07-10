@@ -6,10 +6,8 @@
 from hypothesis import given
 
 from cim.fill_fields import name_kwargs
-from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
-from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+
 
 #
 # NOTE: There is no default constructor so no need to test it.

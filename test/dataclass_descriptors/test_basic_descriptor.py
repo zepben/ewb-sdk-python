@@ -14,6 +14,7 @@ class DescriptorTest(DataclassBase):
     _x: int = field()
     x: int = BackedDescriptor(_x)
 
+
 def test_backed_descriptor():
     # Check the descriptor gets set
     obj = DescriptorTest(x=42)

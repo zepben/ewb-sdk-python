@@ -34,7 +34,6 @@ def test_name_type_constructor_kwargs(name, description, **kwargs):
     assert nt.mrid == nt.name
 
 
-
 #
 # NOTE: The names collection is non-standard and can't be tested with the verify_container methods.
 #

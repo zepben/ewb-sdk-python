@@ -5,8 +5,8 @@
 
 __all__ = ["DiscreteValue"]
 
-from typing import Optional
 from dataclasses import dataclass
+from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 

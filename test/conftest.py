@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import os
 import uuid
-from typing import Union, List
 from dataclasses import dataclass
+from typing import Union, List
 
 import pytest
 from hypothesis import settings, Verbosity, Phase
