@@ -13,8 +13,10 @@ from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require, nlen, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class Location(IdentifiedObject):
     """
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.
@@ -25,11 +27,11 @@ class Location(IdentifiedObject):
 
     _position_points: Optional[List[PositionPoint]] = None
 
-    def __init__(self, position_points: List[PositionPoint] = None, **kwargs):
+    def __init__(self, *args, position_points: List[PositionPoint] = None, **kwargs):
         """
         `position_points` A list of `PositionPoint`s to associate with this `Location`.
         """
-        super(Location, self).__init__(**kwargs)
+        super(Location, self).__init__(*args, **kwargs)
         if position_points:
             for point in position_points:
                 self.add_point(point)

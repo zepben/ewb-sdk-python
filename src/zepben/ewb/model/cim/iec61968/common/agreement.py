@@ -5,11 +5,15 @@
 
 __all__ = ["Agreement"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class Agreement(Document):
+@zb_dataclass
+class Agreement(Document, metaclass=ABCMeta):
     """
     Formal agreement between two parties defining the terms and conditions for a set of services. The specifics of
     the services are, in turn, defined via one or more service agreements.

@@ -9,11 +9,13 @@ __all__ = ["ShuntCompensator"]
 
 import sys
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
@@ -24,7 +26,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-class ShuntCompensator(RegulatingCondEq):
+@zb_dataclass
+class ShuntCompensator(RegulatingCondEq, metaclass=ABCMeta):
     """
     A shunt capacitor or reactor or switchable bank of shunt capacitors or reactors. A section of a shunt compensator
     is an individual capacitor or reactor.  A negative value for reactivePerSection indicates that the compensator is
@@ -54,8 +57,8 @@ class ShuntCompensator(RegulatingCondEq):
     _grounding_terminal: 'Terminal | None' = None
     sections: Optional[float] = None
 
-    def __init__(self, grounding_terminal=None, **kwargs):
-        super(ShuntCompensator, self).__init__(**kwargs)
+    def __init__(self, *args, grounding_terminal = None, **kwargs):
+        super(ShuntCompensator, self).__init__(*args, **kwargs)
         if grounding_terminal is not None:
             self.grounding_terminal = grounding_terminal
 

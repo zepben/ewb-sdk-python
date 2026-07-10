@@ -11,12 +11,14 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
+@zb_dataclass
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.
@@ -27,8 +29,8 @@ class SubGeographicalRegion(IdentifiedObject):
 
     _substations: Optional[List[Substation]] = None
 
-    def __init__(self, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(**kwargs)
+    def __init__(self, *args, substations: List[Substation] = None, **kwargs):
+        super(SubGeographicalRegion, self).__init__(*args, **kwargs)
         if substations:
             for sub in substations:
                 self.add_substation(sub)

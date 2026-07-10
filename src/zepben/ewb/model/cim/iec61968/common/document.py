@@ -7,11 +7,14 @@ __all__ = ["Document"]
 
 from datetime import datetime
 from typing import Optional
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class Document(IdentifiedObject):
+@zb_dataclass
+class Document(IdentifiedObject, metaclass=ABCMeta):
     """
     Parent class for different groupings of information collected and managed as a part of a business process.
     It will frequently contain references to other objects, such as assets, people and power system resources.

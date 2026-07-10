@@ -12,8 +12,10 @@ from zepben.ewb.model.cim.iec61968.metering.controlled_appliance import Controll
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.ewb.util import require
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 @zbex
 class PanDemandResponseFunction(EndDeviceFunction):
     """
@@ -25,8 +27,8 @@ class PanDemandResponseFunction(EndDeviceFunction):
 
     _appliance_bitmask: Optional[int] = None
 
-    def __init__(self, appliance: Union[int, ControlledAppliance] = None, **kwargs):
-        super(PanDemandResponseFunction, self).__init__(**kwargs)
+    def __init__(self, *args, appliance: Union[int, ControlledAppliance] = None, **kwargs):
+        super(PanDemandResponseFunction, self).__init__(*args, **kwargs)
         if appliance is not None:
             self.appliance = appliance
 

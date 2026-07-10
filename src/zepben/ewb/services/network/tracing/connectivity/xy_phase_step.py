@@ -5,12 +5,12 @@
 
 __all__ = ["XyPhaseStep"]
 
-from zepben.ewb.dataclassy import dataclass
+from dataclasses import dataclass
 
 from zepben.ewb import Terminal, PhaseCode
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, unsafe_hash=True)
 class XyPhaseStep(object):
 
     terminal: Terminal

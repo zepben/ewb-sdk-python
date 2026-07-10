@@ -2,16 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.ewb.dataclassy import dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Type, List, Optional
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
-
 from zepben.ewb import IdentifiedObject, Document, OrganisationRole, Organisation, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
-from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 
 @dataclass
@@ -65,7 +64,7 @@ class TestBaseServiceComparator:
             OrganisationRole.organisation,
             create_organisation_role,
             lambda it: Organisation(mrid="org1"),
-            lambda it: Organisation(mrid="org2")
+            lambda it: Organisation(mrid="org2"),
         )
 
     def test_compare_organisation(self, ):
@@ -84,31 +83,44 @@ class TestBaseServiceComparator:
         self.validator.validate_name_types(
             subject,
             diff_description,
-            expect_modification=ObjectDifference(subject, diff_description, {
-                "description": ValueDifference(subject.description, diff_description.description)
-            })
+            expect_modification=ObjectDifference(
+                subject,
+                diff_description,
+                {
+                    "description": ValueDifference(subject.description, diff_description.description)
+                },
+            ),
         )
         # noinspection PyArgumentList
         self.validator.validate_name_types(
             subject,
             diff_name_name,
-            expect_modification=ObjectDifference(subject, diff_name_name, {
-                "names": CollectionDifference(missing_from_target=list(subject.names), missing_from_source=list(diff_name_name.names))
-            })
+            expect_modification=ObjectDifference(
+                subject,
+                diff_name_name,
+                {
+                    "names": CollectionDifference(missing_from_target=list(subject.names), missing_from_source=list(diff_name_name.names))
+                },
+            ),
         )
         # noinspection PyArgumentList
         self.validator.validate_name_types(
             subject,
             diff_name_identified_object,
-            expect_modification=ObjectDifference(subject, diff_name_identified_object, {
-                "names": CollectionDifference(missing_from_target=list(subject.names), missing_from_source=list(diff_name_identified_object.names))
-            })
+            expect_modification=ObjectDifference(
+                subject,
+                diff_name_identified_object,
+                {
+                    "names": CollectionDifference(missing_from_target=list(subject.names), missing_from_source=list(diff_name_identified_object.names))
+                },
+            ),
         )
 
         source_type = _create_name_type("type", "desc", "name", "id")
         target_type = _create_name_type("type", "desc", "name", "id")
 
         self.validator.validate_name_types(source_type, target_type)
+
 
 def test_unordered_list_comparison():
     source = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
@@ -130,6 +142,7 @@ def test_unordered_list_comparison():
 
     diff = ObjectDifference(source, target_diff_values)
     assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
 
 def test_unordered_list_comparison_with_objects():
     source = UnorderedProperties([1, 1, 2])

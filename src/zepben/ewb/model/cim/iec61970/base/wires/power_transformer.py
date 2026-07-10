@@ -14,6 +14,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
+@zb_dataclass
 class PowerTransformer(ConductingEquipment):
     """
     An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing
@@ -50,7 +52,7 @@ class PowerTransformer(ConductingEquipment):
     """
     Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
     determined from the constituent winding connections and phase angle displacements.
-                                                                                                                            
+
     The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid
     voltage winding connection(for three winding transformers), phase displacement clock number from 0 to 11,  low voltage
     winding connection phase displacement clock number from 0 to 11.   The winding connections are D(delta), Y(wye),
@@ -59,7 +61,7 @@ class PowerTransformer(ConductingEquipment):
     string.  Some examples: YNy0(two winding wye to wye with no phase displacement), YNd11(two winding wye to delta with
     330 degrees phase displacement), YNyn0d5(three winding transformer wye with neutral high voltage, wye with neutral mid
     voltage and no phase displacement, delta low voltage with 150 degrees displacement).
-                                                                                                                            
+
     Phase displacement is defined as the angular difference between the phasors representing the voltages between the
     neutral point(real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system
     being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in
@@ -84,8 +86,8 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
-    def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
-        super(PowerTransformer, self).__init__(**kwargs)
+    def __init__(self, *args, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
+        super(PowerTransformer, self).__init__(*args, **kwargs)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 if end.power_transformer is None:

@@ -8,9 +8,11 @@ from __future__ import annotations
 __all__ = ["Asset"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
@@ -18,7 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 
 
-class Asset(IdentifiedObject):
+@zb_dataclass
+class Asset(IdentifiedObject, metaclass=ABCMeta):
     """
     Tangible resource of the utility, including power system equipment, various end devices, cabinets, buildings,
     etc. For electrical network equipment, the role of the asset is defined through PowerSystemResource and its
@@ -33,8 +36,8 @@ class Asset(IdentifiedObject):
 
     _power_system_resources: Optional[List[PowerSystemResource]] = None
 
-    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, power_system_resources: List[PowerSystemResource] = None, **kwargs):
-        super(Asset, self).__init__(**kwargs)
+    def __init__(self, *args, organisation_roles: List[AssetOrganisationRole] = None, power_system_resources: List[PowerSystemResource] = None, **kwargs):
+        super(Asset, self).__init__(*args, **kwargs)
         if organisation_roles:
             for role in organisation_roles:
                 self.add_organisation_role(role)

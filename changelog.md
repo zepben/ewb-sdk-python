@@ -1,7 +1,9 @@
 # Zepben Python SDK
 ## [1.4.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* CIM classes now have to be instantiated with keyword arguments. The only accepted positional argument is mrid (or equivalent identifier)
+* `__hash__` and `__eq__` are now based on object identity (parity with JVM); Name equality is based on its compound mRID.
+* All internal magic `dataclassy` functionality (eg `__tuple__`) has been removed - treat all CIM classes as slotted `dataclass`
 
 ### New Features
 * Added a `lint` tox environment that runs `ruff check .` to enforce code quality standards. The test environments now depend on lint passing first, so CI will fail if any new lint violations are introduced.
@@ -12,6 +14,7 @@
 * Added `per-file-ignores` for intentional star-imports in `__init__.py` files and resolver modules.
 * Added `skip_install = true` to the lint environment to avoid installing package dependencies that aren't needed for linting.
 * Added E402 noqa comments for intentional mid-file imports used to avoid circular dependency issues in `dataclassy/dataclass.py`, `context_value_computer.py`, `queue_condition.py`, `direction_logger.py`, and `test_network_trace.py`.
+* Switched from using `dataclassy` to native dataclasses
 
 ### Fixes
 * Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.

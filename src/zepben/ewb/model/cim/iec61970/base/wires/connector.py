@@ -5,10 +5,14 @@
 
 __all__ = ["Connector"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class Connector(ConductingEquipment):
+@zb_dataclass
+class Connector(ConductingEquipment, metaclass=ABCMeta):
     """
     A conductor, or group of conductors, with negligible impedance, that serve to connect other conducting equipment
     within a single substation and are modelled with a single logical terminal.

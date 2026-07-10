@@ -5,10 +5,14 @@
 
 __all__ = ["AssetFunction"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class AssetFunction(IdentifiedObject):
+@zb_dataclass
+class AssetFunction(IdentifiedObject, metaclass=ABCMeta):
     """
     Function performed by an asset.
     """

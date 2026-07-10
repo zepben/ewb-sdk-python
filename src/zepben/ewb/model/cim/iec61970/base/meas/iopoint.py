@@ -5,10 +5,14 @@
 
 __all__ = ["IoPoint"]
 
+from abc import ABCMeta
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class IoPoint(IdentifiedObject):
+@zb_dataclass
+class IoPoint(IdentifiedObject, metaclass=ABCMeta):
     """
     This class describes a measurement or control value.
     The purpose is to enable having attributes and associations common for measurement and control.

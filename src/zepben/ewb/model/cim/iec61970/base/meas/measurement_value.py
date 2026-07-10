@@ -5,10 +5,9 @@
 
 __all__ = ["MeasurementValue"]
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-
-from zepben.ewb.dataclassy import dataclass
 
 
 @dataclass(slots=True)

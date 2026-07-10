@@ -9,8 +9,10 @@ from typing import Optional
 
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.ewb.model.cim.extensions.zbex import zbex
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 @zbex
 class DistanceRelay(ProtectionRelayFunction):
     """

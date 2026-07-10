@@ -12,16 +12,18 @@ from typing import Optional, List, Generator
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
     _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
 
-    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
-        super(GeographicalRegion, self).__init__(**kwargs)
+    def __init__(self, *args, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
+        super(GeographicalRegion, self).__init__(*args, **kwargs)
         if sub_geographical_regions:
             for sgr in sub_geographical_regions:
                 self.add_sub_geographical_region(sgr)

@@ -11,6 +11,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.line import Line
 from zepben.ewb.util import ngen, get_by_mrid, safe_remove, nlen
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@zb_dataclass
 class Circuit(Line):
     """Missing description"""
 
@@ -25,8 +27,8 @@ class Circuit(Line):
     _end_terminals: Optional[List[Terminal]] = None
     _end_substations: Optional[List[Substation]] = None
 
-    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
-        super(Circuit, self).__init__(**kwargs)
+    def __init__(self, *args, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
+        super(Circuit, self).__init__(*args, **kwargs)
         if end_terminals:
             for term in end_terminals:
                 self.add_end_terminal(term)

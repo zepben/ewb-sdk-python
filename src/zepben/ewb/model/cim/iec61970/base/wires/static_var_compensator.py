@@ -9,8 +9,10 @@ from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class StaticVarCompensator(RegulatingCondEq):
     """
     A facility for providing variable and controllable shunt reactive power.The SVC typically consists of a step-down transformer, filter, thyristor-controlled reactor,

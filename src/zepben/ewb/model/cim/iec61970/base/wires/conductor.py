@@ -7,6 +7,9 @@ __all__ = ["Conductor"]
 
 import sys
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
+
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
@@ -19,7 +22,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
 
 
-class Conductor(ConductingEquipment):
+@zb_dataclass
+class Conductor(ConductingEquipment, metaclass=ABCMeta):
     """
     Combination of conducting material with consistent electrical characteristics, building a single electrical
     system, used to carry current between points in the power system.

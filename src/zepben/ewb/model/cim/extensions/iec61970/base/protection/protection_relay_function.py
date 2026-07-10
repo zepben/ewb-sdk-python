@@ -10,11 +10,13 @@ __all__ = ["ProtectionRelayFunction"]
 import sys
 import warnings
 from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING, Any
+from abc import ABCMeta
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
@@ -29,8 +31,9 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 
 
+@zb_dataclass
 @zbex
-class ProtectionRelayFunction(PowerSystemResource):
+class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     """
     [ZBEX]
     A function that a relay implements to protect equipment.
@@ -68,6 +71,7 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def __init__(
         self,
+        *args,
         sensors: Iterable[Sensor] = None,
         protected_switches: Iterable[ProtectedSwitch] = None,
         schemes: Iterable[ProtectionRelayScheme] = None,
@@ -76,7 +80,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         relay_info: RelayInfo | None = None,
         **kwargs
     ):
-        super(ProtectionRelayFunction, self).__init__(**kwargs)
+        super(ProtectionRelayFunction, self).__init__(*args, **kwargs)
 
         if sensors is not None:
             for sensor in sensors:

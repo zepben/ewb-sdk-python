@@ -7,12 +7,15 @@ from typing import Generator, Iterable
 import pytest
 
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
+from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.services.network.network_service import NetworkService
-from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
+
+@zb_dataclass
 class PathTerminal(Terminal):
     def __add__(self, other: Terminal) -> NetworkTraceStep.Path:
         """
@@ -24,6 +27,7 @@ class PathTerminal(Terminal):
         """
         allows shorthand notation to create a NetworkTraceStep.Path that traversed an AcLineSegment betweenm 2 terminals. Eg: c1[1]-clamp1[1]
         """
+
         def traversed_ce(ce):
             if isinstance(ce, AcLineSegment):
                 return ce
@@ -31,6 +35,7 @@ class PathTerminal(Terminal):
                 return ce.ac_line_segment
             else:
                 raise TypeError('Did not traverse')
+
         return NetworkTraceStep.Path(self, other, traversed_ce(self.conducting_equipment))
 
 
@@ -47,6 +52,7 @@ def setup_class():
 
 
 SPK = SinglePhaseKind
+
 
 class TestNetworkTraceStepPathProvider:
 
@@ -116,7 +122,7 @@ class TestNetworkTraceStepPathProvider:
         current_path = j0[1] + j0[2]
         next_paths = self.path_provider.next_paths(current_path)
 
-        _verify_paths(next_paths, (j0[2] + c1[1], ) )
+        _verify_paths(next_paths, (j0[2] + c1[1],))
 
     def test_only_includes_followed_phases(self):
         #
@@ -136,9 +142,13 @@ class TestNetworkTraceStepPathProvider:
         next_paths = self.path_provider.next_paths(current_path)
 
         # Should not contain tx1-t4 because its not in the phase paths
-        _verify_paths(next_paths, [
-            NetworkTraceStep.Path(tx1[1], tx1[2], None, {NominalPhasePath(SPK.A, SPK.A)}),
-            NetworkTraceStep.Path(tx1[1], tx1[3], None, {NominalPhasePath(SPK.B, SPK.B)})])
+        _verify_paths(
+            next_paths,
+            [
+                NetworkTraceStep.Path(tx1[1], tx1[2], None, {NominalPhasePath(SPK.A, SPK.A)}),
+                NetworkTraceStep.Path(tx1[1], tx1[3], None, {NominalPhasePath(SPK.B, SPK.B)})
+            ],
+        )
 
     def test_stepping_externally_to_connectivity_node_with_busbars_only_goes_to_busbars(self):
         network = self._busbar_network()
@@ -156,7 +166,7 @@ class TestNetworkTraceStepPathProvider:
         network = self._busbar_network()
 
         bbs1 = network['bbs1']
-        b0= network['b0']
+        b0 = network['b0']
         b3 = network['b3']
         b4 = network['b4']
         b5 = network['b5']
@@ -292,7 +302,7 @@ class TestNetworkTraceStepPathProvider:
         current_path = segment[1] - clamp1[1]
         next_paths = self.path_provider.next_paths(current_path)
 
-        _verify_paths(next_paths, (clamp1[1] + c3[1], ))
+        _verify_paths(next_paths, (clamp1[1] + c3[1],))
 
     def test_non_traverse_step_to_clamp_between_cuts_traverses_segment_both_ways_stopping_at_cuts(self):
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
@@ -371,7 +381,7 @@ class TestNetworkTraceStepPathProvider:
         clamp1 = network['c1-clamp1']
 
         next_paths = self.path_provider.next_paths(clamp1[1] - clamp1[1])
-        _verify_paths(next_paths, (clamp1[1] + c3[1], ))
+        _verify_paths(next_paths, (clamp1[1] + c3[1],))
 
     def test_starting_on_clamp_terminal_that_flagged_as_not_traversed_segment_steps_externally_and_traverses(self):
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
@@ -408,7 +418,7 @@ class TestNetworkTraceStepPathProvider:
         with subtests.test('Traverse from T1 towards T2'):
             current_path = b0[2] + c1[1]
             next_paths = self.path_provider.next_paths(current_path)
-            _verify_paths(next_paths, (c1[1] - cut[1], ))
+            _verify_paths(next_paths, (c1[1] - cut[1],))
 
         with subtests.test('Traverse from T2 towards T1'):
             current_path = b2[1] + c1[2]
@@ -482,15 +492,15 @@ class TestNetworkTraceStepPathProvider:
         with subtests.test('Traverse from T2 towards T1'):
             current_path = b2[1] + c1[2]
             next_paths = self.path_provider.next_paths(current_path)
-            _verify_paths(next_paths, (c1[2] - cut[2], ))
+            _verify_paths(next_paths, (c1[2] - cut[2],))
 
         with subtests.test('Internally stepped on cut T1 to T2, traverse towards c1.t2'):
             current_path = cut[1] + cut[2]
             next_paths = self.path_provider.next_paths(current_path)
-            _verify_paths(next_paths, (cut[2] - c1[2], ))
+            _verify_paths(next_paths, (cut[2] - c1[2],))
 
         with subtests.test('Internally stepped on cut T2 to T2, traverse towards c1.t1'):
-            current_path =cut[2] + cut[1]
+            current_path = cut[2] + cut[1]
             next_paths = self.path_provider.next_paths(current_path)
             _verify_paths(next_paths, (cut[1] - c1[1], cut[1] - clamp[1]))
 
@@ -522,15 +532,15 @@ class TestNetworkTraceStepPathProvider:
         with subtests.test('Traverse from T2 towards T1'):
             current_path = b2[1] + c1[2]
             next_paths = self.path_provider.next_paths(current_path)
-            _verify_paths(next_paths, (c1[2] - cut[2], ))
+            _verify_paths(next_paths, (c1[2] - cut[2],))
 
         with subtests.test('Internally stepped on cut T1 to T2, traverse towards c1.t2'):
             current_path = cut[1] + cut[2]
             next_paths = self.path_provider.next_paths(current_path)
-            _verify_paths(next_paths, (cut[2] - c1[2], ))
+            _verify_paths(next_paths, (cut[2] - c1[2],))
 
         with subtests.test('Internally stepped on cut T2 to T2, traverse towards c1.t1'):
-            current_path =cut[2] + cut[1]
+            current_path = cut[2] + cut[1]
             next_paths = self.path_provider.next_paths(current_path)
             _verify_paths(next_paths, (cut[1] - c1[1], cut[1] - clamp[1]))
 
@@ -586,7 +596,7 @@ class TestNetworkTraceStepPathProvider:
         cClamp5 = network['c-clamp5']
         cCut5t1 = network['c-cut5t1']
         cCut5t2 = network['c-cut5t2']
-        
+
         with subtests.test("traverse from c1.t1 should get clamps at start and stop at both cuts at start"):
             next_paths = self.path_provider.next_paths(b0[2] + c1[1])
             _verify_paths(next_paths, (c1[1] - clamp1[1], c1[1] - clamp2[1], c1[1] - cut1[1], c1[1] - cut2[1]))
@@ -667,8 +677,10 @@ class TestNetworkTraceStepPathProvider:
         clamp1 = n['c0-clamp1']
         c0 = n['c0']
 
-        _verify_paths(self.path_provider.next_paths(source[1] + clamp1[1]),
-                      ((clamp1[1] - c0[1]), (clamp1[1] - c0[2])))
+        _verify_paths(
+            self.path_provider.next_paths(source[1] + clamp1[1]),
+            ((clamp1[1] - c0[1]), (clamp1[1] - c0[2])),
+        )
 
     def test_traverses_from_both_sides_of_a_single_cut(self, subtests):
         n = (TestNetworkBuilder()
@@ -686,12 +698,16 @@ class TestNetworkTraceStepPathProvider:
         c0 = n['c0']
 
         with subtests.test("goes from t1 side of cut and finds t1 side of segment"):
-            _verify_paths(self.path_provider.next_paths(source1[1] + cut1[1]),
-                          ((cut1[1] - c0[1]), (cut1[1] + cut1[2])))
+            _verify_paths(
+                self.path_provider.next_paths(source1[1] + cut1[1]),
+                ((cut1[1] - c0[1]), (cut1[1] + cut1[2])),
+            )
 
         with subtests.test("goes from t2 side of cut and finds t2 side of segment"):
-            _verify_paths(self.path_provider.next_paths(source2[1] + cut1[2]),
-                          ((cut1[2] - c0[2]), cut1[2] + cut1[1]))
+            _verify_paths(
+                self.path_provider.next_paths(source2[1] + cut1[2]),
+                ((cut1[2] - c0[2]), cut1[2] + cut1[1]),
+            )
 
     def _busbar_network(self) -> NetworkService:
         #        1

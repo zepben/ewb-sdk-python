@@ -6,14 +6,17 @@
 __all__ = ["AuxiliaryEquipment"]
 
 from typing import Optional, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
-class AuxiliaryEquipment(Equipment):
+@zb_dataclass
+class AuxiliaryEquipment(Equipment, metaclass=ABCMeta):
     """
     `AuxiliaryEquipment` describe equipment that is not performing any primary functions but support for the
     equipment performing the primary function.

@@ -10,11 +10,13 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.ewb.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 
 
+@zb_dataclass
 class SynchronousMachine(RotatingMachine):
     """
     An electromechanical device that operates with shaft rotating synchronously with the network. It is a single machine operating either as a generator or
@@ -104,11 +106,11 @@ class SynchronousMachine(RotatingMachine):
     operating_mode: SynchronousMachineKind = SynchronousMachineKind.UNKNOWN
     """Current mode of operation."""
 
-    def __init__(self, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
+    def __init__(self, *args, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
         """
         `reactive_capability_curves` A list of `ReactiveCapabilityCurve`s to associate with this `SynchronousMachine`.
         """
-        super(SynchronousMachine, self).__init__(**kwargs)
+        super(SynchronousMachine, self).__init__(*args, **kwargs)
         if curves:
             for rcc in curves:
                 self.add_curve(rcc)

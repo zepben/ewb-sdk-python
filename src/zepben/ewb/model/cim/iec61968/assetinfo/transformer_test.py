@@ -6,11 +6,14 @@
 __all__ = ["TransformerTest"]
 
 from typing import Optional
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
-class TransformerTest(IdentifiedObject):
+@zb_dataclass
+class TransformerTest(IdentifiedObject, metaclass=ABCMeta):
     """
     Test result for transformer ends, such as short-circuit, open-circuit (excitation) or no-load test.
     """

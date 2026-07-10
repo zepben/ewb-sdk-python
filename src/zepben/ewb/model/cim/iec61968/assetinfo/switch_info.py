@@ -8,8 +8,10 @@ __all__ = ["SwitchInfo"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class SwitchInfo(AssetInfo):
     """Switch datasheet information."""
 

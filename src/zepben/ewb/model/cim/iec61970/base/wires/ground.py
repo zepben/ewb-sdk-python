@@ -6,8 +6,10 @@
 __all__ = ["Ground"]
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class Ground(ConductingEquipment):
     """
     A point where the system is grounded used for connecting conducting equipment to ground. The power system model can have any number of grounds.

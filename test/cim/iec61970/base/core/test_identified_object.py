@@ -21,8 +21,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 # constructors.
 #
 
-# noinspection PyArgumentList
-
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
     assert io.mrid
