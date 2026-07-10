@@ -7,6 +7,7 @@ from typing import List
 
 import pytest
 
+from zepben.ewb import Cut
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass, DataclassBase
 from zepben.ewb.dataclass_descriptors.descriptor_fix import remove_descriptor_annotations
 
@@ -75,3 +76,14 @@ def test_dataclass_base():
     other = Child("mrid2", y=42)
     other.dc_default_factory.append(24)
     assert obj.dc_default_factory == [33]
+
+
+def test_identifiable_mrid():
+    obj = Cut("it")
+    assert obj.mrid == "it"
+
+    obj = Cut(mrid="it")
+    assert obj.mrid == "it"
+
+    with pytest.raises(TypeError):
+        Cut("it", mrid="it")

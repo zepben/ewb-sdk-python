@@ -27,7 +27,8 @@ class Identifiable(DataclassBase, metaclass=ABCMeta):
 
     def __init__(self, mrid: str, *args, **kwargs):
         self.mrid = mrid
-        # TODO: check for mRID in kwargs
+        if mrid in kwargs:
+            raise TypeError(f"{self.__class__} got multiple values for argument 'mrid'")
         if args:
             raise TypeError(None, "All fields except MRId can only be instantiated as keyword arguments")
         super(Identifiable, self).__init__(**kwargs)
