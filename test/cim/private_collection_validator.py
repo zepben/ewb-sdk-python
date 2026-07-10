@@ -5,7 +5,8 @@
 import re
 from collections import Counter
 from enum import Enum
-from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any
+from types import MemberDescriptorType
+from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any, Protocol
 
 import pytest
 
@@ -423,48 +424,71 @@ def _validate_ordered_other(
     )
 
 
+T = TypeVar("T")
+
+class _DescriptorType(Protocol[T]):
+    """
+    Describes any type with a __get__ and a __set__ function - this includes both properties and dataclass fields.
+    """
+    def __get__(self, instance: object | None, owner: type[object]) -> Any:
+        ...
+
+    def __set__(self, instance: object, value: T) -> None:
+        ...
 
 def validate_backfill(
     create_it: Type[Identifiable] | Callable[[str], TIdentifiable],
     create_other: Type[UIdentifiable] | Callable[[str], UIdentifiable],
-    create_other_with_it: Callable[[str, TIdentifiable], UIdentifiable],
-    get_backref_from_other: Callable[[UIdentifiable], TIdentifiable],
+    backfill_prop: _DescriptorType | Any,   # At type checking time, dataclass still hasn't created the properties - this suppresses the warning
     num: Callable[[TIdentifiable], int] | Callable[[], int],
     add: Callable[[TIdentifiable, UIdentifiable], TIdentifiable] | Callable[[UIdentifiable], TIdentifiable],
 ):
     """
     Check that list-related auto-linked relationships function as expected
 
-    :param create_it lambda creating containing object by mRID
-    :param create_other lambda creating object that's added to the list (also by mRID)
-    :param create_other_with_it creating object that's added to the list, assigning a dummy backref
-    :param get_backref_from_other retrieve the backref from the contained object (for verification)
-    :param num retrieve size of collection
-    :param add attempt to add to the collection
+    :param create_it: lambda creating containing object by mRID
+    :param create_other: lambda creating object that's added to the list (also by mRID)
+    :param backfill_prop: reference to the backfill property (or dataclass field)
+    :param num: retrieve size of collection
+    :param add: attempt to add to the collection
     """
+    # Since we suppressed the type check warning for this, we must tell the user explicitly if they are passing the wrong thing
+    if not (hasattr(backfill_prop, "__get__") and hasattr(backfill_prop, "__set__")):
+        raise AttributeError(f"Backfill Property {backfill_prop} must define a __get__ and a __set__ function! "+
+                             "Ensure you pass a dataclass field to this test.")
+
+    # Properties' names are stored on their fget instead of main object, hence this workaround:
+    try:
+        backfill_prop_name = backfill_prop.__name__
+    except AttributeError:
+        backfill_prop_name = backfill_prop.fget.__name__
+
     it = create_it("it")
     wrong_it = create_it("wrong_it")
     other1 = create_other("1")
+    other2 = create_other("2")
+    other_wrong = create_other("3")
 
     # Check that container is assigned to an object with no backref gets
     add(it, other1)
     assert num(it) == 1
-    assert get_backref_from_other(other1) is it
+    assert backfill_prop.__get__(other1, type(other1)) is it
 
     # Check that an object already backref'd to container is accepted cleanly
-    other2 = create_other_with_it("2", it)
-    assert get_backref_from_other(other2) is it
+    backfill_prop.__set__(other2, it)
+    assert backfill_prop.__get__(other2, type(other2)) is it
     add(it, other2)
     assert num(it) == 2
-    assert get_backref_from_other(other2) is it
+    assert backfill_prop.__get__(other2, type(other2)) is it
 
     # Check that an object already backref'd to another container is rejected correctly
-    other_wrong = create_other_with_it("3", wrong_it)
-    assert get_backref_from_other(other_wrong) is wrong_it
-    with pytest.raises(ValueError):
+    backfill_prop.__set__(other_wrong, wrong_it)
+    assert backfill_prop.__get__(other_wrong, type(other_wrong)) is wrong_it
+    with pytest.raises(ValueError, match=re.escape(f"{other_wrong} `{backfill_prop_name}` property references " +
+                                                   f"{wrong_it}, expected {it}.")):
         add(it, other_wrong)
     assert num(it) == 2
-    assert get_backref_from_other(other_wrong) is wrong_it
+    assert backfill_prop.__get__(other_wrong, type(other_wrong)) is wrong_it
 
 
 def _validate(

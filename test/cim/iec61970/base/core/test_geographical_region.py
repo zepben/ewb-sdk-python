@@ -47,8 +47,7 @@ def test_sub_geographical_regions_backfill():
     validate_backfill(
         GeographicalRegion,
         lambda mrid: SubGeographicalRegion(mrid),
-        lambda mrid, geo: SubGeographicalRegion(mrid, geographical_region=geo),
-        lambda other: other.geographical_region,
+        SubGeographicalRegion.geographical_region,
         GeographicalRegion.num_sub_geographical_regions,
         GeographicalRegion.add_sub_geographical_region,
     )

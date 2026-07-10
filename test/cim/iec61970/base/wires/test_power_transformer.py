@@ -93,8 +93,7 @@ def test_power_transformer_ends_backfill():
     validate_backfill(
         PowerTransformer,
         lambda mrid: PowerTransformerEnd(mrid),
-        lambda mrid, pt: PowerTransformerEnd(mrid, power_transformer=pt),
-        lambda other: other.power_transformer,
+        PowerTransformerEnd.power_transformer,
         PowerTransformer.num_ends,
         PowerTransformer.add_end,
     )

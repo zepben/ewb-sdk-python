@@ -89,7 +89,7 @@ class EnergyConsumer(EnergyConnection):
         if phase.energy_consumer is None:
             phase.energy_consumer = self
 
-        require(phase.energy_consumer is self, lambda: f"${phase} `energy_consumer` property references ${phase.energy_consumer}, expected ${self}.")
+        require(phase.energy_consumer is self, lambda: f"{phase} `energy_consumer` property references {phase.energy_consumer}, expected {self}.")
 
         self._energy_consumer_phases = list() if self._energy_consumer_phases is None else self._energy_consumer_phases
         self._energy_consumer_phases.append(phase)

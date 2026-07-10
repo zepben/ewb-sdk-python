@@ -156,7 +156,7 @@ class EnergySource(EnergyConnection):
         if phase.energy_source is None:
             phase.energy_source = self
 
-        require(phase.energy_source is self, lambda: f"${phase} `energy_source` property references ${phase.energy_source}, expected ${self}.")
+        require(phase.energy_source is self, lambda: f"{phase} `energy_source` property references {phase.energy_source}, expected {self}.")
 
         self._energy_source_phases = list() if self._energy_source_phases is None else self._energy_source_phases
         self._energy_source_phases.append(phase)

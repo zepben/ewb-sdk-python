@@ -80,7 +80,7 @@ class Diagram(IdentifiedObject):
         """
         if not diagram_object.diagram:
             diagram_object.diagram = self
-        require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} references another Diagram "
+        require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} `diagram` property references "
                                                         f"{str(diagram_object.diagram)}, expected {str(self)}.")
 
         if self._validate_reference(diagram_object, self.get_diagram_object, "A DiagramObject"):

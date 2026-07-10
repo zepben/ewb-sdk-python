@@ -511,7 +511,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
         if phase.power_electronics_connection is None:
             phase.power_electronics_connection = self
 
-        require(phase.power_electronics_connection is self, lambda: f"${phase} `power_electronics_connection` property references ${phase.power_electronics_connection}, expected ${self}.")
+        require(phase.power_electronics_connection is self, lambda: f"{phase} `power_electronics_connection` property references {phase.power_electronics_connection}, expected {self}.")
 
         self._power_electronics_connection_phases = list() if self._power_electronics_connection_phases is None else self._power_electronics_connection_phases
         self._power_electronics_connection_phases.append(phase)

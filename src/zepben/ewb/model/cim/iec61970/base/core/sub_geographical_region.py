@@ -75,7 +75,7 @@ class SubGeographicalRegion(IdentifiedObject):
         if substation.sub_geographical_region is None:
             substation.sub_geographical_region = self
 
-        require(substation.sub_geographical_region is self, lambda: f"${substation} `sub_geographical_region` property references ${substation.sub_geographical_region}, expected ${self}.")
+        require(substation.sub_geographical_region is self, lambda: f"{substation} `sub_geographical_region` property references {substation.sub_geographical_region}, expected {self}.")
 
         self._substations = list() if self._substations is None else self._substations
         self._substations.append(substation)

@@ -56,8 +56,7 @@ def test_diagram_objects_backfill():
     validate_backfill(
         Diagram,
         lambda mrid: DiagramObject(mrid),
-        lambda mrid, diagram: DiagramObject(mrid, diagram=diagram),
-        lambda other: other.diagram,
+        DiagramObject.diagram,
         Diagram.num_diagram_objects,
         Diagram.add_diagram_object,
     )

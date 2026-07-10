@@ -51,8 +51,7 @@ def test_substations_backfill():
     validate_backfill(
         SubGeographicalRegion,
         lambda mrid: Substation(mrid),
-        lambda mrid, geo: Substation(mrid, sub_geographical_region=geo),
-        lambda other: other.sub_geographical_region,
+        Substation.sub_geographical_region,
         SubGeographicalRegion.num_substations,
         SubGeographicalRegion.add_substation,
     )

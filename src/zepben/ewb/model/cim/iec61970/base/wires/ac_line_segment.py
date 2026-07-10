@@ -199,7 +199,7 @@ class AcLineSegment(Conductor):
 
         require(
             cut.ac_line_segment is self,
-            lambda: f"Cut {cut} references another AcLineSegment {cut.ac_line_segment}, expected {str(self)}.",
+            lambda: f"{cut} `ac_line_segment` property references {cut.ac_line_segment}, expected {str(self)}.",
         )
         return False
 
@@ -219,7 +219,7 @@ class AcLineSegment(Conductor):
 
         require(
             clamp.ac_line_segment is self,
-            lambda: f"Clamp {clamp} references another AcLineSegment {clamp.ac_line_segment}, expected {str(self)}.",
+            lambda: f"{clamp} `ac_line_segment` property references {clamp.ac_line_segment}, expected {str(self)}.",
         )
         return False
 
@@ -267,7 +267,7 @@ class AcLineSegment(Conductor):
         if phase.ac_line_segment is None:
             phase.ac_line_segment = self
 
-        require(phase.ac_line_segment is self, lambda: f"${phase} `ac_line_segment` property references ${phase.ac_line_segment}, expected ${self}.")
+        require(phase.ac_line_segment is self, lambda: f"{phase} `ac_line_segment` property references {phase.ac_line_segment}, expected {self}.")
 
         if self._phases is None:
             self._phases = list()

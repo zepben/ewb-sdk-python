@@ -127,8 +127,7 @@ def test_phases_backfill():
     validate_backfill(
         EnergySource,
         lambda mrid: EnergySourcePhase(mrid),
-        lambda mrid, es: EnergySourcePhase(mrid, energy_source=es),
-        lambda other: other.energy_source,
+        EnergySourcePhase.energy_source,
         EnergySource.num_phases,
         EnergySource.add_phase,
     )

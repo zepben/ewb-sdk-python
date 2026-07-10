@@ -66,7 +66,8 @@ class GeographicalRegion(IdentifiedObject):
         if sub_geographical_region.geographical_region is None:
             sub_geographical_region.geographical_region = self
 
-        require(sub_geographical_region.geographical_region is self, lambda: f"${sub_geographical_region} `geographical_region` property references ${sub_geographical_region.geographical_region}, expected ${self}.")
+        require(sub_geographical_region.geographical_region is self, lambda: f"{sub_geographical_region} `geographical_region` property references " +
+                                                                             f"{sub_geographical_region.geographical_region}, expected {self}.")
 
         self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
         self._sub_geographical_regions.append(sub_geographical_region)

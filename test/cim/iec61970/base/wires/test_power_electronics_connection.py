@@ -196,8 +196,7 @@ def test_power_electronics_connection_phases_backfill():
     validate_backfill(
         PowerElectronicsConnection,
         lambda mrid: PowerElectronicsConnectionPhase(mrid),
-        lambda mrid, pec: PowerElectronicsConnectionPhase(mrid, power_electronics_connection=pec),
-        lambda other: other.power_electronics_connection,
+        PowerElectronicsConnectionPhase.power_electronics_connection,
         PowerElectronicsConnection.num_phases,
         PowerElectronicsConnection.add_phase,
     )

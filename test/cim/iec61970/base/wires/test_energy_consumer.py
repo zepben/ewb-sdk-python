@@ -70,8 +70,7 @@ def test_phases_backfill():
     validate_backfill(
         EnergyConsumer,
         lambda mrid: EnergyConsumerPhase(mrid),
-        lambda mrid, ec: EnergyConsumerPhase(mrid, energy_consumer=ec),
-        lambda other: other.energy_consumer,
+        EnergyConsumerPhase.energy_consumer,
         EnergyConsumer.num_phases,
         EnergyConsumer.add_phase,
     )

@@ -60,8 +60,7 @@ def test_normal_energized_feeders_backfill():
     validate_backfill(
         Substation,
         lambda mrid: Feeder(mrid),
-        lambda mrid, sub: Feeder(mrid, normal_energizing_substation=sub),
-        lambda other: other.normal_energizing_substation,
+        Feeder.normal_energizing_substation,
         Substation.num_feeders,
         Substation.add_feeder,
     )

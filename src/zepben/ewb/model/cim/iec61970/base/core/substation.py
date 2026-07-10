@@ -112,7 +112,7 @@ class Substation(EquipmentContainer):
         if feeder.normal_energizing_substation is None:
             feeder.normal_energizing_substation = self
 
-        require(feeder.normal_energizing_substation is self, lambda: f"${feeder} `normal_energizing_substation` property references ${feeder.normal_energizing_substation}, expected ${self}.")
+        require(feeder.normal_energizing_substation is self, lambda: f"{feeder} `normal_energizing_substation` property references {feeder.normal_energizing_substation}, expected {self}.")
 
         self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
         self._normal_energized_feeders.append(feeder)

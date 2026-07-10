@@ -111,8 +111,7 @@ def test_ac_line_segment_phases_backfill():
     validate_backfill(
         AcLineSegment,
         lambda mrid: AcLineSegmentPhase(mrid),
-        lambda mrid, acls: AcLineSegmentPhase(mrid, ac_line_segment=acls),
-        lambda other: other.ac_line_segment,
+        AcLineSegmentPhase.ac_line_segment,
         AcLineSegment.num_phases,
         AcLineSegment.add_phase,
     )
@@ -135,8 +134,7 @@ def test_ac_line_segment_cuts_backfill():
     validate_backfill(
         AcLineSegment,
         lambda mrid: Cut(mrid),
-        lambda mrid, acls: Cut(mrid, ac_line_segment=acls),
-        lambda other: other.ac_line_segment,
+        Cut.ac_line_segment,
         AcLineSegment.num_cuts,
         AcLineSegment.add_cut,
     )
@@ -159,8 +157,7 @@ def test_ac_line_segment_clamps_backfill():
     validate_backfill(
         AcLineSegment,
         lambda mrid: Clamp(mrid),
-        lambda mrid, acls: Clamp(mrid, ac_line_segment=acls),
-        lambda other: other.ac_line_segment,
+        Clamp.ac_line_segment,
         AcLineSegment.num_clamps,
         AcLineSegment.add_clamp,
     )

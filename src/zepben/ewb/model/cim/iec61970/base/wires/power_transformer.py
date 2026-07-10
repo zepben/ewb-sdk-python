@@ -224,6 +224,6 @@ class PowerTransformer(ConductingEquipment):
 
         require(
             end.power_transformer is self,
-            lambda: f"PowerTransformerEnd {end} references another PowerTransformer {end.power_transformer}, expected {str(self)}.",
+            lambda: f"{end} `power_transformer` property references {end.power_transformer}, expected {str(self)}.",
         )
         return False
