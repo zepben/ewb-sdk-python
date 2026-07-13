@@ -71,7 +71,9 @@ class ContactDetails(Identifiable):
         if id is not None:
             if "mrid" in kwargs:
                 raise TypeError("ContactDetails.id is an alias for mrid. Do not pass both to the constructor!")
-            super(ContactDetails, self).__init__(mrid=id, **kwargs)
+            kwargs["mrid"] = id
+        super(ContactDetails, self).__init__(**kwargs)
+
         for number in phone_numbers or []:
             self.add_phone_number(number)
 

@@ -11,7 +11,7 @@ from zepben.ewb import ContactMethodType, TelephoneNumber, ElectronicAddress, Co
 
 
 def test_contact_details_constructor_default():
-    c = ContactDetails(id="test")
+    c = ContactDetails(mrid="test")
 
     assert c.contact_address is None
     assert c.contact_type is None
@@ -26,7 +26,7 @@ def test_contact_details_constructor_default():
 
 @given(**contact_details_kwargs())
 def test_contact_details_constructor_kwargs(
-    id,
+    mrid,
     contact_address,
     contact_type,
     first_name,
@@ -38,7 +38,7 @@ def test_contact_details_constructor_kwargs(
     electronic_addresses,
 ):
     c = ContactDetails(
-        id=id,
+        mrid=mrid,
         contact_address=contact_address,
         contact_type=contact_type,
         first_name=first_name,
