@@ -137,7 +137,7 @@ def create_contact_details():
 
 def contact_details_kwargs():
     return {
-        "id": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE, min_size=1),
+        "mrid": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE, min_size=1),
         "contact_address": create_street_address(),
         "contact_type": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
         "first_name": one_of(none(), text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),

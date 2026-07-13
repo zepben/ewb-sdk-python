@@ -94,14 +94,13 @@ def test_end_devices_collection():
 
 
 def test_contacts_collection():
-    validate_unordered_other(
+    validate_unordered(
         UsagePoint,
-        lambda _id: ContactDetails(id=str(_id)),
+        ContactDetails,
         UsagePoint.contacts,
         UsagePoint.num_contacts,
         UsagePoint.get_contact,
         UsagePoint.add_contact,
         UsagePoint.remove_contact,
         UsagePoint.clear_contacts,
-        lambda it: it.id,
     )
