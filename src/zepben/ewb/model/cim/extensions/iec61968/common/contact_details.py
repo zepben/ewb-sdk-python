@@ -67,12 +67,12 @@ class ContactDetails(Identifiable):
 
     _electronic_addresses: list[ElectronicAddress] | None = None
 
-    def __init__(self, id: str|None=None, phone_numbers: list[TelephoneNumber] = None, electronic_addresses: list[ElectronicAddress] = None, **kwargs):
+    def __init__(self, id: str|None=None, *args, phone_numbers: list[TelephoneNumber] = None, electronic_addresses: list[ElectronicAddress] = None, **kwargs):
         if id is not None:
             if "mrid" in kwargs:
                 raise TypeError("ContactDetails.id is an alias for mrid. Do not pass both to the constructor!")
             kwargs["mrid"] = id
-        super(ContactDetails, self).__init__(**kwargs)
+        super(ContactDetails, self).__init__(*args, **kwargs)
 
         for number in phone_numbers or []:
             self.add_phone_number(number)
