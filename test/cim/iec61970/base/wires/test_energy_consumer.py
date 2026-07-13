@@ -8,6 +8,8 @@ from cim.fill_fields import energy_consumer_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import EnergyConsumer, PhaseShuntConnectionKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
@@ -61,4 +63,14 @@ def test_phases_collection():
         EnergyConsumer.add_phase,
         EnergyConsumer.remove_phase,
         EnergyConsumer.clear_phases,
+    )
+
+
+def test_phases_backfill():
+    validate_backfill(
+        EnergyConsumer,
+        lambda mrid: EnergyConsumerPhase(mrid),
+        EnergyConsumerPhase.energy_consumer,
+        EnergyConsumer.num_phases,
+        EnergyConsumer.add_phase,
     )

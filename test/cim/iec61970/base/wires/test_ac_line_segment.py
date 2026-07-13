@@ -9,7 +9,9 @@ from cim.fill_fields import ac_line_segment_kwargs
 from cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
     verify_conductor_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import AcLineSegment, generate_id, SinglePhaseKind, OverheadWireInfo
+
+from test.cim.private_collection_validator import validate_backfill
+from zepben.ewb import AcLineSegment, generate_id, SinglePhaseKind, OverheadWireInfo, Cut, Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
@@ -102,6 +104,62 @@ def test_ac_line_segment_phases():
         AcLineSegment.add_phase,
         AcLineSegment.remove_phase,
         AcLineSegment.clear_phases,
+    )
+
+
+def test_ac_line_segment_phases_backfill():
+    validate_backfill(
+        AcLineSegment,
+        lambda mrid: AcLineSegmentPhase(mrid),
+        AcLineSegmentPhase.ac_line_segment,
+        AcLineSegment.num_phases,
+        AcLineSegment.add_phase,
+    )
+
+
+def test_ac_line_segment_cuts():
+    validate_unordered(
+        AcLineSegment,
+        lambda mrid: Cut(mrid),
+        AcLineSegment.cuts,
+        AcLineSegment.num_cuts,
+        AcLineSegment.get_cut,
+        AcLineSegment.add_cut,
+        AcLineSegment.remove_cut,
+        AcLineSegment.clear_cuts,
+    )
+
+
+def test_ac_line_segment_cuts_backfill():
+    validate_backfill(
+        AcLineSegment,
+        lambda mrid: Cut(mrid),
+        Cut.ac_line_segment,
+        AcLineSegment.num_cuts,
+        AcLineSegment.add_cut,
+    )
+
+
+def test_ac_line_segment_clamps():
+    validate_unordered(
+        AcLineSegment,
+        lambda mrid: Clamp(mrid),
+        AcLineSegment.clamps,
+        AcLineSegment.num_clamps,
+        AcLineSegment.get_clamp,
+        AcLineSegment.add_clamp,
+        AcLineSegment.remove_clamp,
+        AcLineSegment.clear_clamps,
+    )
+
+
+def test_ac_line_segment_clamps_backfill():
+    validate_backfill(
+        AcLineSegment,
+        lambda mrid: Clamp(mrid),
+        Clamp.ac_line_segment,
+        AcLineSegment.num_clamps,
+        AcLineSegment.add_clamp,
     )
 
 

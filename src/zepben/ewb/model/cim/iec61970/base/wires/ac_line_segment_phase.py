@@ -49,7 +49,7 @@ class AcLineSegmentPhase(PowerSystemResource):
         if self._ac_line_segment is None or self._ac_line_segment is ac_line_segment:
             self._ac_line_segment = ac_line_segment
         else:
-            raise ValueError(f"ac_line_segment has already been set to ${self._ac_line_segment}. Cannot set this field again")
+            raise ValueError(f"ac_line_segment has already been set to {self._ac_line_segment}. Cannot set this field again")
 
 
     asset_info: WireInfo | None = None

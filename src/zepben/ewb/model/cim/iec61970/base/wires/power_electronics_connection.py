@@ -502,10 +502,17 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
         `phase` the `PowerElectronicsConnectionPhase` to associate with this `PowerElectronicsConnection`.
         Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`.
+        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`, or if
+        `phase.power_electronics_connection` is not this `PowerElectronicsConnection`.
         """
         if self._validate_reference(phase, self.get_phase, "A PowerElectronicsConnectionPhase"):
             return self
+
+        if phase.power_electronics_connection is None:
+            phase.power_electronics_connection = self
+
+        require(phase.power_electronics_connection is self, lambda: f"{phase} `power_electronics_connection` property references {phase.power_electronics_connection}, expected {self}.")
+
         self._power_electronics_connection_phases = list() if self._power_electronics_connection_phases is None else self._power_electronics_connection_phases
         self._power_electronics_connection_phases.append(phase)
         return self

@@ -8,6 +8,8 @@ from cim.fill_fields import sub_geographical_region_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import Substation, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 
@@ -42,4 +44,14 @@ def test_substations_collection():
         SubGeographicalRegion.add_substation,
         SubGeographicalRegion.remove_substation,
         SubGeographicalRegion.clear_substations,
+    )
+
+
+def test_substations_backfill():
+    validate_backfill(
+        SubGeographicalRegion,
+        lambda mrid: Substation(mrid),
+        Substation.sub_geographical_region,
+        SubGeographicalRegion.num_substations,
+        SubGeographicalRegion.add_substation,
     )

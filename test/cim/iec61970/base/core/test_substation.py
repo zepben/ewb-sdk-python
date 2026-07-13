@@ -8,6 +8,8 @@ from cim.fill_fields import substation_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import Substation, Feeder, Loop, Circuit, generate_id
 
 
@@ -51,6 +53,16 @@ def test_normal_energized_feeders_collection():
         Substation.add_feeder,
         Substation.remove_feeder,
         Substation.clear_feeders,
+    )
+
+
+def test_normal_energized_feeders_backfill():
+    validate_backfill(
+        Substation,
+        lambda mrid: Feeder(mrid),
+        Feeder.normal_energizing_substation,
+        Substation.num_feeders,
+        Substation.add_feeder,
     )
 
 

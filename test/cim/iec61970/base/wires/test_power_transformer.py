@@ -8,6 +8,8 @@ from pytest import raises
 from cim.fill_fields import power_transformer_kwargs
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs
+
+from test.cim.private_collection_validator import validate_unordered, validate_backfill
 from zepben.ewb import PowerTransformer, VectorGroup, PowerTransformerEnd, TransformerConstructionKind, TransformerFunctionKind, \
     Terminal, generate_id
 
@@ -72,3 +74,26 @@ def test_get_end_by_terminal():
 
     with raises(IndexError, match="No TransformerEnd with terminal Terminal{t2} was found in PowerTransformer PowerTransformer{pt}"):
         pt.get_end_by_terminal(t2)
+
+
+def test_power_transformer_ends_collection():
+    validate_unordered(
+        PowerTransformer,
+        PowerTransformerEnd,
+        PowerTransformer.ends,
+        PowerTransformer.num_ends,
+        PowerTransformer.get_end_by_mrid,
+        PowerTransformer.add_end,
+        PowerTransformer.remove_end,
+        PowerTransformer.clear_ends,
+    )
+
+
+def test_power_transformer_ends_backfill():
+    validate_backfill(
+        PowerTransformer,
+        lambda mrid: PowerTransformerEnd(mrid),
+        PowerTransformerEnd.power_transformer,
+        PowerTransformer.num_ends,
+        PowerTransformer.add_end,
+    )

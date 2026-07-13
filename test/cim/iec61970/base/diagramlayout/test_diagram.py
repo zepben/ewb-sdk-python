@@ -8,6 +8,8 @@ from cim.fill_fields import diagram_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import DiagramStyle, OrientationKind, generate_id
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
@@ -47,4 +49,14 @@ def test_diagram_objects_collection():
         Diagram.add_diagram_object,
         Diagram.remove_diagram_object,
         Diagram.clear_diagram_objects,
+    )
+
+
+def test_diagram_objects_backfill():
+    validate_backfill(
+        Diagram,
+        lambda mrid: DiagramObject(mrid),
+        DiagramObject.diagram,
+        Diagram.num_diagram_objects,
+        Diagram.add_diagram_object,
     )

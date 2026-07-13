@@ -4,6 +4,13 @@
 * CIM classes now have to be instantiated with keyword arguments. The only accepted positional argument is mrid (or equivalent identifier)
 * `__hash__` and `__eq__` are now based on object identity (parity with JVM); Name equality is based on its compound mRID.
 * All internal magic `dataclassy` functionality (eg `__tuple__`) has been removed - treat all CIM classes as slotted `dataclass`
+* Added backref enforcement when adding items to the following lists (will throw if backref is set to something else):
+  * `GeographicalRegion.sub_geographical_regions`
+  * `SubGeographicalRegion.substations`
+  * `Substation.feeders`
+  * `EnergyConsumer.phases`
+  * `EnergySource.phases`
+  * `PowerElectronicsConnection.phases`
 * ContactDetails are now Identifiable and no longer have default id generation. The constructor now requires a string. The `id` field is deprecated, to be replaced with mrid.
 
 ### New Features

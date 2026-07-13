@@ -11,7 +11,7 @@ from typing import Optional, List, Generator
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
@@ -57,10 +57,18 @@ class GeographicalRegion(IdentifiedObject):
 
         `sub_geographical_region` The `SubGeographicalRegion` to associate with this `GeographicalRegion`.
         Returns A reference to this `GeographicalRegion` to allow fluent use.
-        Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`.
+        Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`, or if
+        `sub_geographical_region.geographical_region` is not this `GeographicalRegion`.
         """
         if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubGeographicalRegion"):
             return self
+
+        if sub_geographical_region.geographical_region is None:
+            sub_geographical_region.geographical_region = self
+
+        require(sub_geographical_region.geographical_region is self, lambda: f"{sub_geographical_region} `geographical_region` property references " +
+                                                                             f"{sub_geographical_region.geographical_region}, expected {self}.")
+
         self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
         self._sub_geographical_regions.append(sub_geographical_region)
         return self

@@ -8,6 +8,8 @@ from cim.fill_fields import energy_source_kwargs
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
+
+from test.cim.private_collection_validator import validate_backfill
 from zepben.ewb import EnergySource, EnergySourcePhase, generate_id
 
 
@@ -118,4 +120,14 @@ def test_phases_collection():
         EnergySource.add_phase,
         EnergySource.remove_phase,
         EnergySource.clear_phases,
+    )
+
+
+def test_phases_backfill():
+    validate_backfill(
+        EnergySource,
+        lambda mrid: EnergySourcePhase(mrid),
+        EnergySourcePhase.energy_source,
+        EnergySource.num_phases,
+        EnergySource.add_phase,
     )

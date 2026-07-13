@@ -10,7 +10,7 @@ __all__ = ["SubGeographicalRegion"]
 from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
@@ -66,11 +66,17 @@ class SubGeographicalRegion(IdentifiedObject):
 
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
 
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this
-        `GeographicalRegion`.
+        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `SubGeographicalRegion`, or if
+        `substation.sub_geographical_region` is not this `SubGeographicalRegion`.
         """
         if self._validate_reference(substation, self.get_substation, "A Substation"):
             return self
+
+        if substation.sub_geographical_region is None:
+            substation.sub_geographical_region = self
+
+        require(substation.sub_geographical_region is self, lambda: f"{substation} `sub_geographical_region` property references {substation.sub_geographical_region}, expected {self}.")
+
         self._substations = list() if self._substations is None else self._substations
         self._substations.append(substation)
         return self
