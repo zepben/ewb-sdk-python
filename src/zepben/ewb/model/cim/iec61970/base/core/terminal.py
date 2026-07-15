@@ -18,7 +18,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSectio
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import IdentifiedObject
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment

@@ -5,7 +5,6 @@
 import re
 from collections import Counter
 from enum import Enum
-from types import MemberDescriptorType
 from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple, Any, Protocol
 
 import pytest

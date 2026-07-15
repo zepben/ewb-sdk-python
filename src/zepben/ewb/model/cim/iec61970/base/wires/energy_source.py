@@ -11,7 +11,6 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
