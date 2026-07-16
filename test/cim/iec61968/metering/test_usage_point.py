@@ -8,7 +8,7 @@ from hypothesis import given
 from cim.fill_fields import usage_point_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs
-from cim.private_collection_validator import validate_unordered, validate_unordered_other
+from cim.private_collection_validator import validate_unordered
 from util import assert_or_empty
 from zepben.ewb import Equipment, generate_id
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_details import ContactDetails
