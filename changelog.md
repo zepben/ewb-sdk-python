@@ -25,6 +25,7 @@
 * Switched from using `dataclassy` to native dataclasses
 
 ### Fixes
+* added python3.14 to compatibility list.
 * Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.
 * **E721**: Replaced `is`/`is not` type checks with `isinstance()` in `base_service_comparator.py` and `traversal.py`.
 * **F821**: Deleted dead `services/network/tracing/util.py` file. Fixed undefined names by importing `EnergySource` directly, importing `Generic` where needed, and importing customer types in `test_customer_consumer.py`.
