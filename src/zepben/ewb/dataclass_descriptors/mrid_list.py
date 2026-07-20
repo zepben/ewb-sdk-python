@@ -4,12 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field, Field
+from types import MemberDescriptorType
 from typing import Any, TypeVar, Protocol
 
 import pytest
 from typing_extensions import Self
 
-from zepben.ewb import remove_descriptor_annotations, BackedDescriptor
+from zepben.ewb import remove_descriptor_annotations, BackedDescriptor, require
 from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList, MutableCollection, IndexedMutableCollection, _IterableWrapper
 
 
@@ -47,14 +48,36 @@ class MridCollection(MutableCollection[S], ABC):
         return False
 
 
+class Backfill:
+    def __init__(self, backfill_prop: Any):
+        if not any(isinstance(backfill_prop, cls) for cls in (Field, MemberDescriptorType, BackedDescriptor, property)):
+            raise TypeError(f"backfill_prop parameter of the Descriptor constructor has to be an instance of dataclass Field, instead is {backfill_prop}")
+        self.backfill_prop = backfill_prop
+
+    def apply(self, element: S, owner: Any):
+        if isinstance(self.backfill_prop, property):
+            name = self.backfill_prop.fget.__name__
+        else:
+            name = self.backfill_prop.__name__
+            
+        if getattr(element, name) is None:
+            setattr(element, name, owner)
+
+        ref = getattr(element, name)
+        if ref is not owner:
+            raise ValueError(f"{element} `{name}` property references {ref}, expected {owner}.")
+
+
 class LazyMridList(LazyValidatedList, MridCollection[S]):
     def __init__(self,
                  private_field,
                  element_description: str,
+                 backfill: Backfill = None,
                  validate=None,
                  sort_by=None):
         super().__init__(private_field, validate, sort_by)
         self.element_description = element_description
+        self.backfill = backfill
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
         existing = self._get()
@@ -66,6 +89,9 @@ class LazyMridList(LazyValidatedList, MridCollection[S]):
     def append(self, item: T):
         if not self._can_add_by_mrid(item):
             return
+
+        if self.backfill is not None:
+            self.backfill.apply(item, self.instance)
 
         super().append(item)
 
@@ -132,16 +158,6 @@ class MridList(_IterableWrapper, IndexedMutableCollection[S], MridCollection[S])
     def __getitem__(self, item):
         return self.backing_list[item]
 
-
-#
-# class Backfill(Protocol[S]):
-#     def __init__(self, backref_field: Any):
-#         if not isinstance(backref_field, Field) and not isinstance(backref_field, BackedDescriptor):
-#             raise TypeError(f"backref_field parameter of the Descriptor constructor has to be an instance of dataclass Field, instead is {backref_field}")
-#         self.backref_field = backref_field
-#
-#     def apply(self, element: S, owner: Any):
-#         setattr(element, self.backref_field.__name__, )
 
 
 

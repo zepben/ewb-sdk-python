@@ -11,8 +11,7 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList
+from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -24,12 +23,11 @@ from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import Vec
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.ewb.util import require
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
-    from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
 class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
@@ -132,13 +130,16 @@ class PowerTransformer(ConductingEquipment):
     ends: PowerTransformerEndList = PowerTransformerEndList(
         _power_transformer_ends,
         "A PowerTransformerEnd",
+        backfill=Backfill(PowerTransformerEnd.power_transformer),
         validate=lambda self, it: self._validate_end(it),
         sort_by=lambda it: it.end_number
     )
 
-    @deprecated("...")
-    def num_ends(self):
-        return len(self.ends)
+    def _validate_end(self, end: PowerTransformerEnd):
+        self._validate_reference_by_field(end, end.end_number, self.ends.get_by_num, "end_number")
+
+        if end.end_number == 0:
+            end.end_number = self.num_ends() + 1
 
 
     @property
@@ -165,59 +166,47 @@ class PowerTransformer(ConductingEquipment):
         else:
             return None
 
-    @deprecated("...")
+
+    # region deprecated list boilerplate
+    #
+    # ("region/endregion" is an IntelliJ feature letting you hide the entire thing)
+    # This boilerplate exists solely to enable backwards compatibility.
+    # It will be removed eventually.
+    # Every single method simply forwards the call to the corresponding list.
+
+    # ends boilerplate
+
+    @deprecated("Use `len(power_transformer.ends)` instead.")
+    def num_ends(self):
+        return len(self.ends)
+
+    @deprecated("Use `power_transformer.ends.get_by_mrid(mrid)` instead.")
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
         return self.ends.get_by_mrid(mrid)
 
-    @deprecated("...")
+    @deprecated("Use `power_transformer.ends.get_by_num(end_number)` instead.")
     def get_end_by_num(self, end_number: int) -> PowerTransformerEnd:
         return self.ends.get_by_num(end_number)
 
-    @deprecated("...")
+    @deprecated("Use `power_transformer.ends.get_by_terminal(terminal)` instead.")
     def get_end_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
         return self.ends.get_by_terminal(terminal)
 
-    @deprecated("...")
+    @deprecated("Use `power_transformer.ends.append(end)` instead.")
     def add_end(self, end: PowerTransformerEnd) -> PowerTransformer:
-        """
-        Associate a `PowerTransformerEnd` with this `PowerTransformer`. If `end.end_number` == 0, the end will be assigned an end_number of
-        `self.num_ends() + 1`.
-
-        `end` the `PowerTransformerEnd` to associate with this `PowerTransformer`.
-        Returns A reference to this `PowerTransformer` to allow fluent use.
-        Raises `ValueError` if another `PowerTransformerEnd` with the same `mrid` already exists for this `PowerTransformer`.
-        """
         self.ends.append(end)
         return self
 
-    @deprecated("...")
+    @deprecated("Use `power_transformer.ends.remove(end)` instead.")
     def remove_end(self, end: PowerTransformerEnd) -> PowerTransformer:
         self.ends.remove(end)
         return self
 
-    @deprecated("...")
+    @deprecated("Use `power_transformer.ends.clear()` instead.")
     def clear_ends(self) -> PowerTransformer:
         self.ends.clear()
         return self
 
-    def _validate_end(self, end: PowerTransformerEnd):
-        """
-        Validate an end against this `PowerTransformer`'s `PowerTransformerEnd`s.
+    # endregion
 
-        `end` The `PowerTransformerEnd` to validate.
-        Returns True if `end` is already associated with this `PowerTransformer`, otherwise False.
-        Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
-        with the same mRID.
-        """
-        self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number")
-
-        if not end.power_transformer:
-            end.power_transformer = self
-
-        require(
-            end.power_transformer is self,
-            lambda: f"{end} `power_transformer` property references {end.power_transformer}, expected {str(self)}.",
-        )
-
-        if end.end_number == 0:
-            end.end_number = self.num_ends() + 1
+    # endregion

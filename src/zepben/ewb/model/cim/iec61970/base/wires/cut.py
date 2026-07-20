@@ -5,9 +5,8 @@
 
 __all__ = ["Cut"]
 
+from dataclasses import field
 from typing import Optional, TYPE_CHECKING
-
-from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -32,6 +31,8 @@ class Cut(Switch):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the cut is located starting from side one of the cut line segment, i.e. the line segment Terminal with sequenceNumber equal to 1."""
 
+    ac_line_segment: Optional['AcLineSegment'] = field(default=None)
+    """The line segment to which the cut is applied."""
     _ac_line_segment: Optional['AcLineSegment'] = None
 
     @property

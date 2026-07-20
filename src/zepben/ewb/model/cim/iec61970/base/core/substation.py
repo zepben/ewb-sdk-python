@@ -15,11 +15,11 @@ from zepben.ewb.model.cim.iec61970.base.core.equipment_container import Equipmen
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
 
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
-    from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
@@ -31,7 +31,8 @@ class Substation(EquipmentContainer):
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    _sub_geographical_region: Optional[SubGeographicalRegion] = None
+    sub_geographical_region: Optional[SubGeographicalRegion] = field(default=None)
+    """The SubGeographicalRegion containing the substation."""
 
     _normal_energized_feeders: Optional[List[Feeder]] = field(default=None)
 
@@ -76,25 +77,9 @@ class Substation(EquipmentContainer):
     feeders: MridCollection[Feeder] = LazyMridList(
         _normal_energized_feeders,
         "A Feeder",
+        backfill=Backfill(Feeder.normal_energizing_substation)
     )
     normal_energized_feeders = Alias(feeders)
-
-
-
-    def add_circuit(self, circuit: Circuit) -> Substation:
-        """
-        Associate a `Circuit` with this `Substation`
-
-        `circuit` The `Circuit` to associate with this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
-        """
-        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
-            return self
-        self._circuits = list() if self._circuits is None else self._circuits
-        self._circuits.append(circuit)
-        return self
-
 
 
     # region deprecated list boilerplate
@@ -188,6 +173,11 @@ class Substation(EquipmentContainer):
     @deprecated("Use obj.feeders.get_by_mrid(mrid) instead.")
     def get_feeder(self, mrid: str) -> Feeder:
         return self.feeders.get_by_mrid(mrid)
+
+    @deprecated("Use obj.feeders.append(feeder) instead.")
+    def add_feeder(self, feeder: Feeder) -> Substation:
+        self.feeders.append(feeder)
+        return self
 
     @deprecated("Use obj.feeders.remove(feeder) instead.")
     def remove_feeder(self, feeder: Feeder) -> Substation:

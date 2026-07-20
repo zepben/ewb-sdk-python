@@ -15,11 +15,11 @@ from zepben.ewb.model.cim.iec61970.base.core.identified_object import Identified
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
+from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-    from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
 @zb_dataclass
@@ -28,7 +28,7 @@ class SubGeographicalRegion(IdentifiedObject):
     A subset of a geographical region of a power system network model.
     """
 
-    geographical_region: Optional[GeographicalRegion] = None
+    geographical_region: Optional[GeographicalRegion] = field(default=None)
     """The geographical region to which this sub-geographical region is within."""
 
     _substations: Optional[List[Substation]] = field(default=None)
@@ -59,32 +59,8 @@ class SubGeographicalRegion(IdentifiedObject):
     substations: MridCollection[Substation] = LazyMridList(
         _substations,
         "A Substation",
+        backfill=Backfill(Substation.sub_geographical_region)
     )
-
-
-    def add_substation(self, substation: Substation) -> SubGeographicalRegion:
-        """
-        Associate a `Substation` with this `GeographicalRegion`
-
-        `substation` the `Substation` to associate with this `SubGeographicalRegion`.
-
-        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `SubGeographicalRegion`, or if
-        `substation.sub_geographical_region` is not this `SubGeographicalRegion`.
-        """
-        if self._validate_reference(substation, self.get_substation, "A Substation"):
-            return self
-
-        if substation.sub_geographical_region is None:
-            substation.sub_geographical_region = self
-
-        require(substation.sub_geographical_region is self, lambda: f"{substation} `sub_geographical_region` property references {substation.sub_geographical_region}, expected {self}.")
-
-        self._substations = list() if self._substations is None else self._substations
-        self._substations.append(substation)
-        return self
-
 
 
     # region deprecated list boilerplate
@@ -97,6 +73,11 @@ class SubGeographicalRegion(IdentifiedObject):
     @deprecated("Use obj.substations.get_by_mrid(mrid) instead.")
     def get_substation(self, mrid: str) -> Substation:
         return self.substations.get_by_mrid(mrid)
+
+    @deprecated("Use obj.substations.append(substation) instead.")
+    def add_substation(self, substation: Substation) -> SubGeographicalRegion:
+        self.substations.append(substation)
+        return self
 
     @deprecated("Use obj.substations.remove(substation) instead.")
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:

@@ -7,18 +7,19 @@ from __future__ import annotations
 
 __all__ = ["PowerElectronicsConnection"]
 
-from typing import Optional, List, Generator, TYPE_CHECKING
 from dataclasses import field
+from typing import Optional, List, TYPE_CHECKING
+
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
-from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
-from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
-    from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 
 @zb_dataclass
@@ -426,35 +427,10 @@ class PowerElectronicsConnection(RegulatingCondEq):
     phases: MridCollection[PowerElectronicsConnectionPhase] = LazyMridList(
         _power_electronics_connection_phases,
         "A PowerElectronicsConnectionPhase",
+        backfill=Backfill(PowerElectronicsConnectionPhase.power_electronics_connection)
     )
 
 
-
-
-
-
-
-
-    def add_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
-        """
-        Associate a `PowerElectronicsConnectionPhase` with this `PowerElectronicsConnection`
-
-        `phase` the `PowerElectronicsConnectionPhase` to associate with this `PowerElectronicsConnection`.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`, or if
-        `phase.power_electronics_connection` is not this `PowerElectronicsConnection`.
-        """
-        if self._validate_reference(phase, self.get_phase, "A PowerElectronicsConnectionPhase"):
-            return self
-
-        if phase.power_electronics_connection is None:
-            phase.power_electronics_connection = self
-
-        require(phase.power_electronics_connection is self, lambda: f"{phase} `power_electronics_connection` property references {phase.power_electronics_connection}, expected {self}.")
-
-        self._power_electronics_connection_phases = list() if self._power_electronics_connection_phases is None else self._power_electronics_connection_phases
-        self._power_electronics_connection_phases.append(phase)
-        return self
 
 
 
@@ -495,6 +471,11 @@ class PowerElectronicsConnection(RegulatingCondEq):
     @deprecated("Use obj.phases.get_by_mrid(mrid) instead.")
     def get_phase(self, mrid: str) -> PowerElectronicsConnectionPhase:
         return self.phases.get_by_mrid(mrid)
+
+    @deprecated("Use obj.phases.append(phase) instead.")
+    def add_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
+        self.phases.append(phase)
+        return self
 
     @deprecated("Use obj.phases.remove(phase) instead.")
     def remove_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:

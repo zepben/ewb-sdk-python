@@ -5,9 +5,8 @@
 
 __all__ = ["Clamp"]
 
+from dataclasses import field
 from typing import Optional, TYPE_CHECKING
-
-from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -26,7 +25,8 @@ class Clamp(ConductingEquipment):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
-    _ac_line_segment: Optional['AcLineSegment'] = None
+    ac_line_segment: Optional['AcLineSegment'] = field(default=None)
+    """The line segment to which the clamp is connected."""
 
     max_terminals = 1
 
