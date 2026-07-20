@@ -38,7 +38,7 @@ class Feeder(EquipmentContainer):
     _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Substation | None = None
+    normal_energizing_substation: Substation | None = field(default=None)
     """The substation that normally energizes the feeder. Also used for naming purposes."""
 
     _current_equipment_by_id: Dict[str, Equipment] | None = field(default=None)

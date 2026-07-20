@@ -8,20 +8,16 @@ from __future__ import annotations
 __all__ = ["EnergyConsumer"]
 
 from dataclasses import field
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List
 
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations, Alias
+from zepben.ewb import Alias
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
+from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-
-if TYPE_CHECKING:
-    from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 
 @zb_dataclass
@@ -58,6 +54,7 @@ class EnergyConsumer(EnergyConnection):
     phases: MridCollection[EnergyConsumerPhase] = LazyMridList(
         _energy_consumer_phases,
         "An EnergyConsumerPhase",
+        backfill=Backfill(EnergyConsumerPhase.energy_consumer)
     )
     # TODO: Remove hack
     # Old inits used the wrong name. This allows backwards compatibility
@@ -75,25 +72,9 @@ class EnergyConsumer(EnergyConnection):
     def get_phase(self, mrid: str) -> EnergyConsumerPhase:
         return self.phases.get_by_mrid(mrid)
 
+    @deprecated("Use obj.phases.append(phase) instead.")
     def add_phase(self, phase: EnergyConsumerPhase) -> EnergyConsumer:
-        """
-        Associate an `EnergyConsumerPhase` with this `EnergyConsumer`
-
-        `phase` the `EnergyConsumerPhase` to associate with this `EnergyConsumer`.
-        Returns A reference to this `EnergyConsumer` to allow fluent use.
-        Raises `ValueError` if another `EnergyConsumerPhase` with the same `mrid` already exists for this `EnergyConsumer`, or if `phase.energy_consumer` is not
-        this `EnergyConsumer`.
-        """
-        if self._validate_reference(phase, self.get_phase, "An EnergyConsumerPhase"):
-            return self
-
-        if phase.energy_consumer is None:
-            phase.energy_consumer = self
-
-        require(phase.energy_consumer is self, lambda: f"{phase} `energy_consumer` property references {phase.energy_consumer}, expected {self}.")
-
-        self._energy_consumer_phases = list() if self._energy_consumer_phases is None else self._energy_consumer_phases
-        self._energy_consumer_phases.append(phase)
+        self.phases.append(phase)
         return self
 
     @deprecated("Use obj.phases.remove(phase) instead.")

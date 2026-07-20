@@ -9,7 +9,7 @@ import pytest
 
 from zepben.ewb import remove_descriptor_annotations
 from zepben.ewb.dataclass_descriptors.lazy_list import _IterableWrapper
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, Backfill
 
 
 class HasMrid(Protocol):
@@ -24,10 +24,12 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         self,
         private_field,
         element_description: str,
+        backfill: Backfill = None,
         validate=None):
         super().__init__(private_field)
-        self.validate = validate
         self.element_description = element_description
+        self.backfill = backfill
+        self.validate = validate
 
     def _get(self):
         return getattr(self.instance, self.backing_name)
@@ -58,6 +60,9 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     def append(self, element: S):
         if not self._can_add_by_mrid(element):
             return
+
+        if self.backfill is not None:
+            self.backfill.apply(element, self.instance)
 
         if self.validate is not None:
             self.validate(self.instance, element)

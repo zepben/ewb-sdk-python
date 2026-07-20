@@ -62,7 +62,7 @@ class IdentifiedObject(Identifiable, metaclass=ABCMeta):
 
     def __str__(self):
         class_name = f'{self.__class__.__name__}'
-        if self.name:
+        if getattr(self, "name", None):
             return f'{class_name}{{{self.mrid}|{self.name}}}'
         return f'{class_name}{{{self.mrid}}}'
 

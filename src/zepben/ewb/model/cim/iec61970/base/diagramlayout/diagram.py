@@ -8,21 +8,17 @@ from __future__ import annotations
 __all__ = ["Diagram"]
 
 from dataclasses import field
-from typing import Optional, Dict, List, TYPE_CHECKING
+from typing import Dict
 
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, Backfill
 from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
-from zepben.ewb.util import require
-
-if TYPE_CHECKING:
-    from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
 @zb_dataclass
@@ -43,18 +39,9 @@ class Diagram(IdentifiedObject):
     diagram_objects: MridCollection[DiagramObject] = LazyMridMap(
         _diagram_objects,
         "A DiagramObject",
-        validate=lambda self, it: self._validate_diagram_object(it)
+        backfill=Backfill(DiagramObject.diagram)
     )
     """The diagram objects belonging to this diagram."""
-
-    def _validate_diagram_object(self, diagram_object: DiagramObject) -> None:
-        """
-        Fill and validate the `diagram` backref for the `diagram_object`
-        """
-        if not diagram_object.diagram:
-            diagram_object.diagram = self
-        require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} `diagram` property references "
-                                                        f"{str(diagram_object.diagram)}, expected {str(self)}.")
 
 
     # region deprecated list boilerplate

@@ -7,23 +7,20 @@ from __future__ import annotations
 
 __all__ = ["AcLineSegment"]
 
-from typing import Optional, Generator, TYPE_CHECKING
 from dataclasses import field
+from typing import Optional, TYPE_CHECKING
+
 from typing_extensions import deprecated
 
-from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
-from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
-from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
+from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
+from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
+from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 if TYPE_CHECKING:
-    from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
-    from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
-    from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
-    from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
@@ -59,9 +56,9 @@ class AcLineSegment(Conductor):
     per_length_impedance: 'PerLengthImpedance | None' = None
     """A `zepben.ewb.model.cim.iec61970.base.wires.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: list['Cut'] | None = field(default=None)
-    _clamps: list['Clamp'] | None = field(default=None)
-    _phases: list['AcLineSegmentPhase'] | None = field(default=None)
+    _cuts: list[Cut] | None = field(default=None)
+    _clamps: list[Clamp] | None = field(default=None)
+    _phases: list[AcLineSegmentPhase] | None = field(default=None)
 
     @property
     def per_length_sequence_impedance(self) -> Optional['PerLengthSequenceImpedance']:
@@ -96,68 +93,25 @@ class AcLineSegment(Conductor):
         self.per_length_impedance = value
 
 
-    cuts: MridCollection['Cut'] = LazyMridList(
+    cuts: MridCollection[Cut] = LazyMridList(
         _cuts,
         "A Cut",
-        validate=lambda self, it: self._validate_cut(it)
+        backfill=Backfill(Cut.ac_line_segment)
     )
 
-    def _validate_cut(self, cut: 'Cut') -> None:
-        """
-        Validate a cut against this `AcLineSegment`'s `Cut`s.
 
-        :param cut: The `Cut` to validate.
-        :raise ValueError: If `cut.ac_line_segment` is not this `AcLineSegment`
-        """
-        if not cut.ac_line_segment:
-            cut.ac_line_segment = self
-
-        require(
-            cut.ac_line_segment is self,
-            lambda: f"{cut} `ac_line_segment` property references {cut.ac_line_segment}, expected {str(self)}.",
-        )
-
-
-    clamps: MridCollection['Clamp'] = LazyMridList(
+    clamps: MridCollection[Clamp] = LazyMridList(
         _clamps,
         "A Clamp",
-        validate=lambda self, it: self._validate_clamp(it)
+        backfill=Backfill(Clamp.ac_line_segment)
     )
-
-    def _validate_clamp(self, clamp: 'Clamp') -> None:
-        """
-        Validate a clamp against this `AcLineSegment`'s `Clamp`s.
-
-        :param clamp: The `Clamp` to validate.
-        :raise ValueError: If `clamp.ac_line_segment` is not this `AcLineSegment`
-        """
-        if not clamp.ac_line_segment:
-            clamp.ac_line_segment = self
-
-        require(
-            clamp.ac_line_segment is self,
-            lambda: f"{clamp} `ac_line_segment` property references {clamp.ac_line_segment}, expected {str(self)}.",
-        )
-
 
     phases: AcLineSegmentPhaseList = AcLineSegmentPhaseList(
         _phases,
         "An AcLineSegmentPhase",
-        validate=lambda self, it: self._validate_phase(it),
+        backfill=Backfill(AcLineSegmentPhase.ac_line_segment),
         sort_by=lambda it: it.sequence_number or 0
     )
-
-    def _validate_phase(self, phase: AcLineSegmentPhase) -> None:
-        """
-        Validate a phase against this `AcLineSegment`'s `Phase`s.
-
-        :param phase: The `Phase` to validate.
-        :raise ValueError: If `phase.ac_line_segment` is not this `AcLineSegment`
-        """
-        if phase.ac_line_segment is None:
-            phase.ac_line_segment = self
-
-        require(phase.ac_line_segment is self, lambda: f"{phase} `ac_line_segment` property references {phase.ac_line_segment}, expected {self}.")
 
 
     def wire_info_for_phase(self, phase: SinglePhaseKind) -> 'WireInfo | None':
@@ -182,16 +136,16 @@ class AcLineSegment(Conductor):
         return len(self.cuts)
 
     @deprecated("Use obj.cuts.get_by_mrid(mrid) instead.")
-    def get_cut(self, mrid: str) -> 'Cut':
+    def get_cut(self, mrid: str) -> Cut:
         return self.cuts.get_by_mrid(mrid)
 
     @deprecated("Use obj.cuts.append(cut) instead.")
-    def add_cut(self, cut: 'Cut') -> 'AcLineSegment':
+    def add_cut(self, cut: Cut) -> 'AcLineSegment':
         self.cuts.append(cut)
         return self
 
     @deprecated("Use obj.cuts.remove(cut) instead.")
-    def remove_cut(self, cut: 'Cut') -> 'AcLineSegment':
+    def remove_cut(self, cut: Cut) -> 'AcLineSegment':
         self.cuts.remove(cut)
         return self
 
@@ -209,16 +163,16 @@ class AcLineSegment(Conductor):
         return len(self.clamps)
 
     @deprecated("Use obj.clamps.get_by_mrid(mrid) instead.")
-    def get_clamp(self, mrid: str) -> 'Clamp':
+    def get_clamp(self, mrid: str) -> Clamp:
         return self.clamps.get_by_mrid(mrid)
 
     @deprecated("Use obj.clamps.append(clamp) instead.")
-    def add_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
+    def add_clamp(self, clamp: Clamp) -> 'AcLineSegment':
         self.clamps.append(clamp)
         return self
 
     @deprecated("Use obj.clamps.remove(clamp) instead.")
-    def remove_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
+    def remove_clamp(self, clamp: Clamp) -> 'AcLineSegment':
         self.clamps.remove(clamp)
         return self
 
