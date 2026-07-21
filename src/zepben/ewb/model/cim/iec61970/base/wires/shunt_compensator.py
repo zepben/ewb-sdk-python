@@ -57,11 +57,6 @@ class ShuntCompensator(RegulatingCondEq, metaclass=ABCMeta):
     _grounding_terminal: 'Terminal | None' = None
     sections: Optional[float] = None
 
-    def __init__(self, *args, grounding_terminal = None, **kwargs):
-        super(ShuntCompensator, self).__init__(*args, **kwargs)
-        if grounding_terminal is not None:
-            self.grounding_terminal = grounding_terminal
-
     @property
     @deprecated("use asset_info instead.")
     def shunt_compensator_info(self) -> Optional['ShuntCompensatorInfo']:

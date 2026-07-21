@@ -31,11 +31,6 @@ class SubGeographicalRegion(IdentifiedObject):
 
     _substations: Optional[List[Substation]] = field(default=None)
 
-    def __init__(self, *args, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(*args, **kwargs)
-        if substations:
-            for sub in substations:
-                self.add_substation(sub)
 
     @property
     @targets(_geographical_region)

@@ -53,15 +53,6 @@ class Curve(IdentifiedObject, metaclass=ABCMeta):
 
     _data: list[CurveData] | None = field(default=None)
 
-    def __init__(self, *args, data: List[CurveData] = None, **kwargs):
-        """
-        `data` A list of `CurveData`s to associate with this `Curve`.
-        """
-        super(Curve, self).__init__(*args, **kwargs)
-        if data:
-            for curve_data in data:
-                self.add_curve_data(curve_data)
-
     data: CurveDataList[CurveData] = CurveDataList(
         _data,
         validate=lambda self, it: self._validate_data(it),
