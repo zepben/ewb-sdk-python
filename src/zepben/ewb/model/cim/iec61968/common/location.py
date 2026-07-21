@@ -7,13 +7,17 @@ from __future__ import annotations
 
 __all__ = ["Location"]
 
-from typing import List, Optional, Generator, Callable, Any
+from dataclasses import field
+from typing import List, Optional, Callable, Any
 
+from typing_extensions import deprecated
+
+from zepben.ewb import Alias
+from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import require, nlen, ngen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 
 @zb_dataclass
@@ -25,107 +29,84 @@ class Location(IdentifiedObject):
     main_address: Optional[StreetAddress] = None
     """Main address of the location."""
 
-    _position_points: Optional[List[PositionPoint]] = None
+    _position_points: Optional[List[PositionPoint]] = field(default=None)
 
-    def __init__(self, *args, position_points: List[PositionPoint] = None, **kwargs):
-        """
-        `position_points` A list of `PositionPoint`s to associate with this `Location`.
-        """
-        super(Location, self).__init__(*args, **kwargs)
-        if position_points:
-            for point in position_points:
-                self.add_point(point)
+    points: LazyIndexedList[PositionPoint] = LazyIndexedList(
+        _position_points,
+        "PositionPoint",
+    )
+    position_points = Alias(points)
 
-    @property
-    def points(self) -> Generator[PositionPoint, None, None]:
-        """
-        Returns Generator over the `PositionPoint`s of this `Location`.
-        """
-        for point in ngen(self._position_points):
-            yield point
 
-    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
-        """
-        Call the `action` on each :class:`PositionPoint` in the `points` collection
+    # region deprecated list boilerplate
+    #
+    # ("region/endregion" is an IntelliJ feature letting you hide the entire thing)
+    # This boilerplate exists solely to enable backwards compatibility.
+    # It will be removed eventually.
+    # Every single method simply forwards the call to the corresponding list.
 
-        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
-        """
-        for index, point in enumerate(self.points):
-            action(index, point)
+    # region points boilerplate
 
+    @deprecated("Use points.for_each_indexed(action) instead.")
+    def for_each_point(
+        self,
+        action: Callable[[int, PositionPoint], Any],
+    ):
+        self.points.for_each_indexed(action)
+
+    @deprecated("Use len(points) instead.")
     def num_points(self):
-        """
-        Returns The number of `PositionPoint`s in this `Location`
-        """
-        return nlen(self._position_points)
+        return len(self.points)
 
+    @deprecated("Use points[sequence_number] instead.")
     def get_point(self, sequence_number: int) -> PositionPoint:
-        """
-        Get the `sequence_number` `PositionPoint` for this `Location`.
+        return self.points[sequence_number]
 
-        `sequence_number` The sequence number of the `PositionPoint` to get.
-        Returns The `PositionPoint` identified by `sequence_number`
-        Raises IndexError if this `Location` didn't contain `sequence_number` points.
-        """
-        return self._position_points[sequence_number]
+    @deprecated("Use points[item] instead.")
+    def __getitem__(self, item: int) -> PositionPoint:
+        return self.points[item]
 
-    def __getitem__(self, item):
-        return self.get_point(item)
-
+    @deprecated("Use points.append(point) instead.")
     def add_point(self, point: PositionPoint) -> Location:
-        """
-        Associate a `PositionPoint` with this `Location`, assigning it a sequence_number of `num_points`.
-        `point` The `PositionPoint` to associate with this `Location`.
-        Returns A reference to this `Location` to allow fluent use.
-        """
-        return self.insert_point(point)
-
-    def insert_point(self, point: PositionPoint, sequence_number: int = None) -> Location:
-        """
-        Associate a `PositionPoint` with this `Location`
-
-        `point` The `PositionPoint` to associate with this `Location`.
-        `sequence_number` The sequence number of the `PositionPoint`.
-        Returns A reference to this `Location` to allow fluent use.
-        Raises `ValueError` if `sequence_number` < 0 or > `num_points()`.
-        """
-        if sequence_number is None:
-            sequence_number = self.num_points()
-        require(0 <= sequence_number <= self.num_points(),
-                lambda: f"Unable to add PositionPoint to {str(self)}. Sequence number {sequence_number} "
-                        f"is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
-                        f"adding the items in order and there are no gaps in the numbering.")
-        self._position_points = list() if self._position_points is None else self._position_points
-        self._position_points.insert(sequence_number, point)
+        self.points.append(point)
         return self
 
-    def __setitem__(self, key, value):
-        return self.insert_point(value, key)
+    @deprecated("Use points.insert(sequence_number, point)")
+    def insert_point(
+        self,
+        point: PositionPoint,
+        sequence_number: int | None = None,
+    ) -> Location:
+        if sequence_number is None: sequence_number = len(self.points)
+        self.points.insert(sequence_number, point)
 
+        return self
+
+    @deprecated("Use points.insert(key, value) instead.")
+    def __setitem__(
+        self,
+        key: int,
+        value: PositionPoint,
+    ) -> None:
+        self.points.insert(key, value)
+
+    @deprecated("Use points.remove(point) instead.")
     def remove_point(self, point: PositionPoint) -> Location:
-        """
-        Remove a `PositionPoint` from this `Location`
-        `point` The `PositionPoint` to remove.
-        Raises `ValueError` if `point` was not part of this `Location`
-        Returns A reference to this `Location` to allow fluent use.
-        """
-        self._position_points = safe_remove(self._position_points, point)
+        self.points.remove(point)
         return self
 
-    def remove_point_by_sequence_number(self, sequence_number: int) -> PositionPoint:
-        """
-        Remove a :class:`PositionPoint` from this :class:`Location` by its sequence number.
+    @deprecated("Use points.pop(sequence_number) instead.")
+    def remove_point_by_sequence_number(
+        self,
+        sequence_number: int,
+    ) -> PositionPoint:
+        return self.points.pop(sequence_number)
 
-        NOTE: This will update the sequence numbers of all items located after the removed sequence number.
-
-        :param sequence_number: The sequence number of the `PositionPoint` to remove.
-        :return: The :class:`PositionPoint` that was removed, or null if there was no :class:`PositionPoint` for the given `sequenceNumber`.
-        :raises IndexError: If no :class:`PositionPoint` with the specified `sequence_number` was not associated with this :class:`Location`.
-        """
-        point = self.get_point(sequence_number)
-        self._position_points = safe_remove(self._position_points, point)
-        return point
-
+    @deprecated("Use points.clear() instead.")
     def clear_points(self) -> Location:
-        self._position_points = None
+        self.points.clear()
         return self
+
+    # endregion
+
+    # endregion
