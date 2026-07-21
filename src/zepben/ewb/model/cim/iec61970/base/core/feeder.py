@@ -9,6 +9,8 @@ __all__ = ["Feeder"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb import get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
@@ -33,8 +35,7 @@ class Feeder(EquipmentContainer):
     _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Substation | None = None
-    """The substation that normally energizes the feeder. Also used for naming purposes."""
+    _normal_energizing_substation: Substation | None = None
 
     _current_equipment: Dict[str, Equipment] | None = None
     """The equipment contained in this feeder in the current state of the network."""
@@ -92,6 +93,16 @@ class Feeder(EquipmentContainer):
             self._normal_head_terminal = term
         else:
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
+
+    @property
+    def normal_energizing_substation(self):
+        """The substation that normally energizes the feeder. Also used for naming purposes."""
+        return self._normal_energizing_substation
+
+    @normal_energizing_substation.setter
+    @deprecated("normal_energizing_substation should never be set directly - it is automatically set when adding it to the `feeders` list")
+    def normal_energizing_substation(self, value):
+        self._normal_energizing_substation = value
 
     @property
     def current_equipment(self) -> Generator[Equipment, None, None]:

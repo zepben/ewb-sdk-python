@@ -9,6 +9,8 @@ __all__ = ["DiagramObject"]
 
 from typing import Optional, List, Generator, Callable, TYPE_CHECKING, Any
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.ewb.util import nlen, ngen, require, safe_remove
@@ -26,7 +28,6 @@ class DiagramObject(IdentifiedObject):
     """
 
     _diagram: Optional[Diagram] = None
-    """A diagram object is part of a diagram."""
 
     identified_object_mrid: Optional[str] = None
     """The domain object to which this diagram object is associated."""
@@ -49,9 +50,11 @@ class DiagramObject(IdentifiedObject):
 
     @property
     def diagram(self):
+        """A diagram object is part of a diagram."""
         return self._diagram
 
     @diagram.setter
+    @deprecated("diagram should never be set directly - it is automatically set when adding it to the `diagram_objects` list")
     def diagram(self, diag):
         if self._diagram is None or self._diagram is diag:
             self._diagram = diag

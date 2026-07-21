@@ -9,6 +9,8 @@ __all__ = ["Substation"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -27,8 +29,7 @@ class Substation(EquipmentContainer):
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    sub_geographical_region: Optional[SubGeographicalRegion] = None
-    """The SubGeographicalRegion containing the substation."""
+    _sub_geographical_region: Optional[SubGeographicalRegion] = None
 
     _normal_energized_feeders: Optional[List[Feeder]] = None
 
@@ -52,6 +53,17 @@ class Substation(EquipmentContainer):
         if circuits:
             for circuit in circuits:
                 self.add_circuit(circuit)
+
+
+    @property
+    def sub_geographical_region(self):
+        """The SubGeographicalRegion containing the substation."""
+        return self._sub_geographical_region
+
+    @sub_geographical_region.setter
+    @deprecated("sub_geographical_region should never be set directly - it is automatically set when adding it to the `substations` list")
+    def sub_geographical_region(self, value):
+        self._sub_geographical_region = value
 
     @property
     def circuits(self) -> Generator[Circuit, None, None]:

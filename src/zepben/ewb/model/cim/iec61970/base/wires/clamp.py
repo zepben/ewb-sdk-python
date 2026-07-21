@@ -7,6 +7,8 @@ __all__ = ["Clamp"]
 
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
@@ -24,10 +26,19 @@ class Clamp(ConductingEquipment):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
-    ac_line_segment: Optional['AcLineSegment'] = None
-    """The line segment to which the clamp is connected."""
+    _ac_line_segment: Optional['AcLineSegment'] = None
 
     max_terminals = 1
+
+    @property
+    def ac_line_segment(self) -> Optional['AcLineSegment']:
+        """The line segment to which the clamp is connected."""
+        return self._ac_line_segment
+
+    @ac_line_segment.setter
+    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `clamps` list")
+    def ac_line_segment(self, value):
+        self._ac_line_segment = value
 
     @property
     def length_from_t1_or_0(self) -> float:

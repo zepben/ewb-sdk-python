@@ -7,6 +7,8 @@ __all__ = ["EnergySourcePhase"]
 
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -40,6 +42,7 @@ class EnergySourcePhase(PowerSystemResource):
         return self._energy_source
 
     @energy_source.setter
+    @deprecated("energy_sounrce should never be set directly - it is automatically set when adding it to the `phases` list")
     def energy_source(self, es):
         if self._energy_source is None or self._energy_source is es:
             self._energy_source = es
