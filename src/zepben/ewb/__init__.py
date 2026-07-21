@@ -127,6 +127,7 @@ from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import *
 
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import *
 from zepben.ewb.model.cim.iec61970.base.core.base_voltage import *
+from zepben.ewb.model.cim.iec61970.base.core.terminal import *
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import *
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import *
@@ -144,7 +145,6 @@ from zepben.ewb.model.cim.iec61970.base.core.phase_code import *
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import *
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import *
 from zepben.ewb.model.cim.iec61970.base.core.substation import *
-from zepben.ewb.model.cim.iec61970.base.core.terminal import *
 
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import *
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import *

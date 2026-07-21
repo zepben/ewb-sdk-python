@@ -16,7 +16,6 @@ from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -32,7 +31,7 @@ class Terminal(AcDcTerminal):
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    _conducting_equipment: Optional[ConductingEquipment] = None
+    _conducting_equipment: Optional['ConductingEquipment'] = None
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
@@ -58,21 +57,12 @@ class Terminal(AcDcTerminal):
     _normal_phases: PhaseStatus = None
     _current_phases: PhaseStatus = None
 
-    def __init__(self, *args, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(Terminal, self).__init__(*args, **kwargs)
 
         self._normal_phases = PhaseStatus(self)
-
         self._current_phases = PhaseStatus(self)
 
-        if conducting_equipment:
-            self.conducting_equipment = conducting_equipment
-
-        # We set the connectivity node to itself if the name parameter is not used to make sure the positional argument is wrapped in a reference.
-        if connectivity_node:
-            self.connectivity_node = connectivity_node
-        else:
-            self.connectivity_node = self._cn
 
     @property
     def normal_phases(self) -> PhaseStatus:
@@ -174,6 +164,7 @@ class Terminal(AcDcTerminal):
                 return True
 
     def has_connected_busbars(self):
+        from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
         try:
             return any(it != self and isinstance(it.conducting_equipment, BusbarSection) for it in self.connectivity_node.terminals)
         except AttributeError:

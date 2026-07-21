@@ -8,8 +8,12 @@ from __future__ import annotations
 __all__ = ["PowerTransformerEnd"]
 
 import warnings
+from dataclasses import field
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
+from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
@@ -20,6 +24,24 @@ from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
+
+
+class TransformerEndRatedSList(LazyValidatedList[TransformerEndRatedS]):
+
+    def get_by_cooling_type(
+        self,
+        cooling_type: TransformerCoolingType,
+    ) -> TransformerEndRatedS | None:
+        return next((rating for rating in self if rating.cooling_type == cooling_type), None)
+
+    def remove_by_cooling_type(
+        self,
+        cooling_type: TransformerCoolingType,
+    ) -> TransformerEndRatedS | None:
+        rating = self.get_by_cooling_type(cooling_type)
+        if rating is not None:
+            self.remove(rating)
+        return rating
 
 
 @zb_dataclass
@@ -80,16 +102,14 @@ class PowerTransformerEnd(TransformerEnd):
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-    _s_ratings: Optional[List[TransformerEndRatedS]] = None
+    _s_ratings: Optional[List[TransformerEndRatedS]] = field(default=None)
     """
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
     Should not be used directly, instead use add_rating and get_rating functions. 
     """
 
-    def __init__(self, *args, power_transformer: PowerTransformer = None, rated_s: int = None, ratings: list[TransformerEndRatedS] = None, **kwargs):
+    def __init__(self, *args, rated_s: int = None, **kwargs):
         super(PowerTransformerEnd, self).__init__(*args, **kwargs)
-        if power_transformer:
-            self.power_transformer = power_transformer
         if self._s_ratings:
             raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
         if rated_s and self._rated_s:
@@ -104,9 +124,6 @@ class PowerTransformerEnd(TransformerEnd):
         if self._rated_s is not None:
             self.rated_s = self._rated_s
             self._rated_s = None
-        if ratings:
-            for rating in ratings:
-                self.add_rating(rating.rated_s, rating.cooling_type)
 
     @property
     def power_transformer(self):
@@ -145,9 +162,15 @@ class PowerTransformerEnd(TransformerEnd):
         if rated_s is not None:
             self.add_transformer_end_rated_s(TransformerEndRatedS(TransformerCoolingType.UNKNOWN, rated_s))
 
-    @property
-    def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
-        return ngen(self._s_ratings)
+    s_ratings: TransformerEndRatedSList = TransformerEndRatedSList(
+        _s_ratings,
+        validate=lambda self, it: self._validate_rating(it),
+        sort_by=lambda it: -it.rated_s
+    )
+
+    def _validate_rating(self, rating: TransformerEndRatedS):
+        if any(it.cooling_type == rating.cooling_type for it in self.s_ratings):
+            raise ValueError(f"A rating for coolingType {rating.cooling_type.name} already exists, please remove it first.")
 
     def resistance_reactance(self):
         """
@@ -166,48 +189,68 @@ class PowerTransformerEnd(TransformerEnd):
             else None
         )
 
+    # region deprecated list methods
+
+    # region s_ratings boilerplate
+
+    @deprecated("Use len(s_ratings) instead.")
     def num_ratings(self) -> int:
-        return nlen(self._s_ratings)
+        return len(self.s_ratings)
 
-    def get_rating(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
-        if self._s_ratings:
-            for s_rating in self._s_ratings:
-                if s_rating.cooling_type == cooling_type:
-                    return s_rating
-        raise KeyError(cooling_type)
+    @deprecated("Use s_ratings.get_by_cooling_type(cooling_type) instead.")
+    def get_rating(
+        self,
+        cooling_type: TransformerCoolingType,
+    ) -> TransformerEndRatedS:
+        rating = self.s_ratings.get_by_cooling_type(cooling_type)
 
-    def add_rating(self, rated_s: int, cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN) -> PowerTransformerEnd:
-        self._s_ratings = self._s_ratings if self._s_ratings else list()
+        if rating is None:
+            raise KeyError(cooling_type)
 
-        for s_rating in self._s_ratings:
-            if s_rating.cooling_type == cooling_type:
-                raise ValueError(f"A rating for coolingType {cooling_type.name} already exists, please remove it first.")
+        return rating
 
-        self._s_ratings.append(TransformerEndRatedS(cooling_type, rated_s))
-
-        def sort_by_rated_s(t: TransformerEndRatedS) -> int:
-            return t.rated_s
-
-        self._s_ratings.sort(key=sort_by_rated_s, reverse=True)
-
+    @deprecated("Use s_ratings.append(TransformerEndRatedS(cooling_type, rated_s)) instead.")
+    def add_rating(
+        self,
+        rated_s: int,
+        cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN,
+    ) -> PowerTransformerEnd:
+        self.s_ratings.append(TransformerEndRatedS(cooling_type, rated_s))
         return self
 
-    def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
-        return self.add_rating(transformer_end_rated_s.rated_s, transformer_end_rated_s.cooling_type)
-
-    def remove_rating(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
-        self._s_ratings = safe_remove(self._s_ratings, transformer_end_rated_s)
+    @deprecated("Use s_ratings.append(transformer_end_rated_s) instead.")
+    def add_transformer_end_rated_s(
+        self,
+        transformer_end_rated_s: TransformerEndRatedS,
+    ) -> PowerTransformerEnd:
+        self.s_ratings.append(transformer_end_rated_s)
         return self
 
-    def remove_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
-        if self._s_ratings:
-            for transformer_end_rated_s in self._s_ratings:
-                if transformer_end_rated_s.cooling_type == cooling_type:
-                    self._s_ratings.remove(transformer_end_rated_s)
-                    self._s_ratings = self._s_ratings if self._s_ratings else None
-                    return transformer_end_rated_s
-        raise IndexError(cooling_type)
+    @deprecated("Use s_ratings.remove(transformer_end_rated_s) instead.")
+    def remove_rating(
+        self,
+        transformer_end_rated_s: TransformerEndRatedS,
+    ) -> PowerTransformerEnd:
+        self.s_ratings.remove(transformer_end_rated_s)
+        return self
 
+    @deprecated("Use s_ratings.remove_by_cooling_type(cooling_type) instead.")
+    def remove_rating_by_cooling_type(
+        self,
+        cooling_type: TransformerCoolingType,
+    ) -> TransformerEndRatedS:
+        rating = self.s_ratings.remove_by_cooling_type(cooling_type)
+
+        if rating is None:
+            raise IndexError(cooling_type)
+
+        return rating
+
+    @deprecated("Use s_ratings.clear() instead.")
     def clear_ratings(self) -> PowerTransformerEnd:
-        self._s_ratings = None
+        self.s_ratings.clear()
         return self
+
+    # endregion
+
+    # endregion

@@ -12,6 +12,7 @@ from typing import Optional, List, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
+from zepben.ewb import Alias
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
 from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
@@ -146,83 +147,6 @@ class PowerElectronicsConnection(RegulatingCondEq):
     _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = field(default=None)
     """The individual units models for the power electronics connection."""
 
-    def __init__(self,
-                 *args,
-                 power_electronics_units: List[PowerElectronicsUnit] = None,
-                 power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
-                 inv_watt_resp_v1=None,
-                 inv_watt_resp_v2=None,
-                 inv_watt_resp_v3=None,
-                 inv_watt_resp_v4=None,
-                 inv_watt_resp_p_at_v1=None,
-                 inv_watt_resp_p_at_v2=None,
-                 inv_watt_resp_p_at_v3=None,
-                 inv_watt_resp_p_at_v4=None,
-                 inv_var_resp_v1=None,
-                 inv_var_resp_v2=None,
-                 inv_var_resp_v3=None,
-                 inv_var_resp_v4=None,
-                 inv_var_resp_q_at_v1=None,
-                 inv_var_resp_q_at_v2=None,
-                 inv_var_resp_q_at_v3=None,
-                 inv_var_resp_q_at_v4=None,
-                 **kwargs):
-        super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
-        if power_electronics_units:
-            for unit in power_electronics_units:
-                self.add_unit(unit)
-
-        if power_electronics_connection_phases:
-            for phase in power_electronics_connection_phases:
-                self.add_phase(phase)
-
-        if inv_watt_resp_v1 is not None:
-            self.inv_watt_resp_v1 = inv_watt_resp_v1
-
-        if inv_watt_resp_v2 is not None:
-            self.inv_watt_resp_v2 = inv_watt_resp_v2
-
-        if inv_watt_resp_v3 is not None:
-            self.inv_watt_resp_v3 = inv_watt_resp_v3
-
-        if inv_watt_resp_v4 is not None:
-            self.inv_watt_resp_v4 = inv_watt_resp_v4
-
-        if inv_watt_resp_p_at_v1 is not None:
-            self.inv_watt_resp_p_at_v1 = inv_watt_resp_p_at_v1
-
-        if inv_watt_resp_p_at_v2 is not None:
-            self.inv_watt_resp_p_at_v2 = inv_watt_resp_p_at_v2
-
-        if inv_watt_resp_p_at_v3 is not None:
-            self.inv_watt_resp_p_at_v3 = inv_watt_resp_p_at_v3
-
-        if inv_watt_resp_p_at_v4 is not None:
-            self.inv_watt_resp_p_at_v4 = inv_watt_resp_p_at_v4
-
-        if inv_var_resp_v1 is not None:
-            self.inv_var_resp_v1 = inv_var_resp_v1
-
-        if inv_var_resp_v2 is not None:
-            self.inv_var_resp_v2 = inv_var_resp_v2
-
-        if inv_var_resp_v3 is not None:
-            self.inv_var_resp_v3 = inv_var_resp_v3
-
-        if inv_var_resp_v4 is not None:
-            self.inv_var_resp_v4 = inv_var_resp_v4
-
-        if inv_var_resp_q_at_v1 is not None:
-            self.inv_var_resp_q_at_v1 = inv_var_resp_q_at_v1
-
-        if inv_var_resp_q_at_v2 is not None:
-            self.inv_var_resp_q_at_v2 = inv_var_resp_q_at_v2
-
-        if inv_var_resp_q_at_v3 is not None:
-            self.inv_var_resp_q_at_v3 = inv_var_resp_q_at_v3
-
-        if inv_var_resp_q_at_v4 is not None:
-            self.inv_var_resp_q_at_v4 = inv_var_resp_q_at_v4
 
     @property
     def inv_watt_resp_v1(self):
@@ -423,13 +347,14 @@ class PowerElectronicsConnection(RegulatingCondEq):
         _power_electronics_units,
         "A PowerElectronicsUnit",
     )
+    power_electronics_units = Alias(units)
 
     phases: MridCollection[PowerElectronicsConnectionPhase] = LazyMridList(
         _power_electronics_connection_phases,
         "A PowerElectronicsConnectionPhase",
         backfill=Backfill(PowerElectronicsConnectionPhase.power_electronics_connection)
     )
-
+    power_electronics_connection_phases = Alias(phases)
 
 
 

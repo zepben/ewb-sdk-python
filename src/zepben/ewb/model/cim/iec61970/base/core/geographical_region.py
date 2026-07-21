@@ -25,13 +25,6 @@ class GeographicalRegion(IdentifiedObject):
     """
     _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = field(default=None)
 
-    def __init__(self, *args, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
-        super(GeographicalRegion, self).__init__(*args, **kwargs)
-        if sub_geographical_regions:
-            for sgr in sub_geographical_regions:
-                self.add_sub_geographical_region(sgr)
-
-
     sub_geographical_regions: MridCollection[SubGeographicalRegion] = LazyMridList(
         _sub_geographical_regions,
         "A SubGeographicalRegion",

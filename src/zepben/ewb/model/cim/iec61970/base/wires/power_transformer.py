@@ -11,7 +11,7 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb import remove_descriptor_annotations
+from zepben.ewb import remove_descriptor_annotations, Alias
 from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
 
 if sys.version_info >= (3, 13):
@@ -120,13 +120,6 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
-    def __init__(self, *args, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
-        super(PowerTransformer, self).__init__(*args, **kwargs)
-        if power_transformer_ends:
-            for end in power_transformer_ends:
-                if end.power_transformer is None:
-                    end.power_transformer = self
-                self.add_end(end)
 
     ends: PowerTransformerEndList = PowerTransformerEndList(
         _power_transformer_ends,
@@ -135,6 +128,7 @@ class PowerTransformer(ConductingEquipment):
         validate=lambda self, it: self._validate_end(it),
         sort_by=lambda it: it.end_number
     )
+    power_transformer_ends = Alias(ends)
 
     def _validate_end(self, end: PowerTransformerEnd):
         self._validate_reference_by_field(end, end.end_number, self.ends.get_by_num, "end_number")

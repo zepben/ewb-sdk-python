@@ -62,13 +62,7 @@ class UsagePoint(IdentifiedObject):
 
     _equipment: list[Equipment] | None = field(default=None)
     _end_devices: list[EndDevice] | None = field(default=None)
-    _contacts: list[ContactDetails] | None = None
-
-    def __init__(self, *args, contacts: List[ContactDetails] = None, **kwargs):
-        super(UsagePoint, self).__init__(*args, **kwargs)
-        if contacts:
-            for c in contacts:
-                self.add_contact(c)
+    _contacts: list[ContactDetails] | None = field(default=None)
 
 
     end_devices: MridCollection[EndDevice] = LazyMridList(
@@ -81,6 +75,10 @@ class UsagePoint(IdentifiedObject):
         "An Equipment",
     )
 
+    contacts: MridCollection[ContactDetails] = LazyMridList(
+        _contacts,
+        "A ContactDetails"
+    )
 
     def num_equipment(self):
         """
@@ -88,51 +86,35 @@ class UsagePoint(IdentifiedObject):
         """
         return nlen(self._equipment)
 
-    def get_equipment(self, mrid: str) -> Equipment:
-        """
-        Get the `Equipment` for this `UsagePoint` identified by `mrid`
-
-        `mrid` The mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._equipment, mrid)
-
-    def add_equipment(self, equipment: Equipment) -> UsagePoint:
-        """
-        Associate an `Equipment` with this `UsagePoint`
-
-        `equipment` The `Equipment` to associate with this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `UsagePoint`.
-        """
-        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
-            return self
-
-        self._equipment = list() if self._equipment is None else self._equipment
-        self._equipment.append(equipment)
-        return self
-
-    def remove_equipment(self, equipment: Equipment) -> UsagePoint:
-        """
-        Disassociate an `Equipment` from this `UsagePoint`
-
-        `equipment` The `Equipment` to disassociate with this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if `equipment` was not associated with this `UsagePoint`.
-        """
-        self._equipment = safe_remove(self._equipment, equipment)
-        return self
-
-    def clear_equipment(self) -> UsagePoint:
-        """
-        Clear all equipment.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        """
-        self._equipment = None
-        return self
-
     # region deprecated list boilerplate
+
+    # region contacts boilerplate
+
+    @deprecated("Use len(contacts) instead.")
+    def num_contacts(self) -> int:
+        return len(self.contacts)
+
+    @deprecated("Use contacts.get_by_mrid(mrid) instead.")
+    def get_contact(self, mrid: str) -> ContactDetails:
+        return self.contacts.get_by_mrid(mrid)
+
+    @deprecated("Use contacts.append(contact) instead.")
+    def add_contact(self, contact: ContactDetails) -> UsagePoint:
+        self.contacts.append(contact)
+        return self
+
+    @deprecated("Use contacts.remove(contact) instead.")
+    def remove_contact(self, contact: ContactDetails) -> UsagePoint:
+        self.contacts.remove(contact)
+        return self
+
+    @deprecated("Use contacts.clear() instead.")
+    def clear_contacts(self) -> UsagePoint:
+        self.contacts.clear()
+        return self
+
+    # endregion
+
     # region end_devices boilerplate
 
     @deprecated("Use len(obj.end_devices) instead.")

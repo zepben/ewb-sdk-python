@@ -10,6 +10,9 @@ __all__ = ["ConnectivityNode"]
 from typing import Generator, List, TYPE_CHECKING
 from dataclasses import field
 
+from typing_extensions import deprecated
+
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import get_by_mrid, ngen
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -30,21 +33,15 @@ class ConnectivityNode(IdentifiedObject, WeakrefSlot):
     """
     _terminals: List[Terminal] = field(default_factory=list)
 
-    def __init__(self, *args, terminals: List[Terminal] = None, **kwargs):
-        super(ConnectivityNode, self).__init__(*args, **kwargs)
-        if terminals:
-            for term in terminals:
-                self.add_terminal(term)
+    terminals: MridCollection[Terminal] = LazyMridList(
+        _terminals,
+        "A Terminal"
+    )
+    """The `Terminal`s attached to this `ConnectivityNode`"""
 
     def __iter__(self):
         return iter(self._terminals)
 
-    @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        """
-        The `Terminal`s attached to this `ConnectivityNode`
-        """
-        return ngen(self._terminals)
 
     def is_switched(self):
         return self.get_switch() is not None
@@ -59,51 +56,33 @@ class ConnectivityNode(IdentifiedObject, WeakrefSlot):
                 pass
         return None
 
-    def num_terminals(self):
-        """
-        Get the number of `Terminal`s for this `ConnectivityNode`.
-        """
-        return len(self._terminals)
+    # region deprecated list boilerplate
 
+    # region terminals boilerplate
+
+    @deprecated("Use len(terminals) instead.")
+    def num_terminals(self) -> int:
+        return len(self.terminals)
+
+    @deprecated("Use terminals.get_by_mrid(mrid) instead.")
     def get_terminal(self, mrid: str) -> Terminal:
-        """
-        Get the `Terminal` for this `ConnectivityNode` identified by `mrid`
+        return self.terminals.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Terminal`
-        Returns The `Terminal` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._terminals, mrid)
-
+    @deprecated("Use terminals.append(terminal) instead.")
     def add_terminal(self, terminal: Terminal) -> ConnectivityNode:
-        """
-        Associate a `terminal.Terminal` with this `ConnectivityNode`
-
-        `terminal` The `Terminal` to add. Will only add to this object if it is not already associated.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConnectivityNode`.
-        """
-        if self._validate_reference(terminal, self.get_terminal, "A Terminal"):
-            return self
-
-        self._terminals.append(terminal)
+        self.terminals.append(terminal)
         return self
 
+    @deprecated("Use terminals.remove(terminal) instead.")
     def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
-        """
-        Disassociate `terminal` from this `ConnectivityNode`.
-
-        `terminal` The `Terminal` to disassociate from this `ConnectivityNode`.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
-        """
-        self._terminals.remove(terminal)
+        self.terminals.remove(terminal)
         return self
 
+    @deprecated("Use terminals.clear() instead.")
     def clear_terminals(self) -> ConnectivityNode:
-        """
-        Clear all terminals.
-        Returns A reference to this `ConnectivityNode` to allow fluent use.
-        """
-        self._terminals.clear()
+        self.terminals.clear()
         return self
+
+    # endregion
+
+    # endregion
