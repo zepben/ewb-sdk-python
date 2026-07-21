@@ -173,6 +173,7 @@ class LazyValidatedList(_IterableWrapper, IndexedMutableCollection[T]):
         return (self._get_or_empty())[item]
 
 
+
 if __name__ == '__main__':
     @zb_dataclass
     class C(DataclassBase):
