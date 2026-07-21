@@ -5,7 +5,7 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field, Field
 from types import MemberDescriptorType
-from typing import Any, TypeVar, Protocol
+from typing import Any, TypeVar, Protocol, Callable
 
 import pytest
 from typing_extensions import Self
@@ -59,14 +59,27 @@ class Backfill:
             name = self.backfill_prop.fget.__name__
         else:
             name = self.backfill_prop.__name__
-            
-        if getattr(element, name) is None:
-            setattr(element, name, owner)
 
-        ref = getattr(element, name)
+        if hasattr(self.backfill_prop, "__target"):
+            backing_name = self.backfill_prop.__target.__name__
+        else:
+            backing_name = name
+
+        if getattr(element, backing_name) is None:
+            setattr(element, backing_name, owner)
+
+        ref = getattr(element, backing_name)
         if ref is not owner:
             raise ValueError(f"{element} `{name}` property references {ref}, expected {owner}.")
 
+def targets(target: Any):
+    if not any(isinstance(target, cls) for cls in (Field, MemberDescriptorType, BackedDescriptor, property)):
+        raise TypeError(f"target parameter of the target decorator has to be an instance of dataclass Field, instead is {target}")
+
+    def dec(func: Callable):
+        setattr(func, "__target", target)
+        return func
+    return dec
 
 class LazyMridList(LazyValidatedList, MridCollection[S]):
     def __init__(self,

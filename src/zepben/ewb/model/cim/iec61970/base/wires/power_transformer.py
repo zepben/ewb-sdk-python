@@ -11,6 +11,7 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
+from zepben.ewb import remove_descriptor_annotations
 from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
 
 if sys.version_info >= (3, 13):

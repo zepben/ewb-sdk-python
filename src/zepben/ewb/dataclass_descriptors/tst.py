@@ -130,6 +130,9 @@ class C:
     _x: list[int] | None = field(default=None)
     x: ListWrapper = ListWrapper(_x, sort_by=lambda it: -it)
 
+    @property
+    def thing(self):
+        return 42
 
 if __name__ == '__main__':
     c = C([1, 2, 3])
@@ -140,6 +143,8 @@ if __name__ == '__main__':
     c.x.append(42)
     print(c)
     print(c.x)
+
+    c.thing = 24
 
     # class C:
     #     def __init__(self, x, f1, f2):
