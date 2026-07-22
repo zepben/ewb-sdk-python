@@ -9,6 +9,8 @@ __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -24,8 +26,7 @@ class SubGeographicalRegion(IdentifiedObject):
     A subset of a geographical region of a power system network model.
     """
 
-    geographical_region: Optional[GeographicalRegion] = None
-    """The geographical region to which this sub-geographical region is within."""
+    _geographical_region: Optional[GeographicalRegion] = None
 
     _substations: Optional[List[Substation]] = None
 
@@ -34,6 +35,17 @@ class SubGeographicalRegion(IdentifiedObject):
         if substations:
             for sub in substations:
                 self.add_substation(sub)
+
+
+    @property
+    def geographical_region(self):
+        """The geographical region to which this sub-geographical region is within."""
+        return self._geographical_region
+
+    @geographical_region.setter
+    @deprecated("geographical_region should never be set directly - it is automatically set when adding it to the `sub_geographical_regions` list")
+    def geographical_region(self, value):
+        self._geographical_region = value
 
     def num_substations(self) -> int:
         """

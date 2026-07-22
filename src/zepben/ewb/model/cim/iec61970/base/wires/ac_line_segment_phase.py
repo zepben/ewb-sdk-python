@@ -9,6 +9,8 @@ __all__ = ['AcLineSegmentPhase']
 
 from typing import TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -45,6 +47,7 @@ class AcLineSegmentPhase(PowerSystemResource):
         return self._ac_line_segment
 
     @ac_line_segment.setter
+    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `phases` list")
     def ac_line_segment(self, ac_line_segment: 'AcLineSegment') -> None:
         if self._ac_line_segment is None or self._ac_line_segment is ac_line_segment:
             self._ac_line_segment = ac_line_segment

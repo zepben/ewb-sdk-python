@@ -11,6 +11,8 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -91,6 +93,7 @@ class Terminal(AcDcTerminal):
         return self._conducting_equipment
 
     @conducting_equipment.setter
+    @deprecated("conducting_equipment should never be set directly - it is automatically set when adding it to the `terminals` list")
     def conducting_equipment(self, ce):
         if self._conducting_equipment is None or self._conducting_equipment is ce:
             self._conducting_equipment = ce

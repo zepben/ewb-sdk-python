@@ -7,6 +7,8 @@ __all__ = ["EnergyConsumerPhase"]
 
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -51,6 +53,7 @@ class EnergyConsumerPhase(PowerSystemResource):
         return self._energy_consumer
 
     @energy_consumer.setter
+    @deprecated("energy_consumer should never be set directly - it is automatically set when adding it to the `phases` list")
     def energy_consumer(self, ec):
         if self._energy_consumer is None or self._energy_consumer is ec:
             self._energy_consumer = ec
