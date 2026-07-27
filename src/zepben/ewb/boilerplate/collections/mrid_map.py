@@ -2,13 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclasses import dataclass, field
 from typing import Protocol, TypeVar, Collection
 
-import pytest
-
+from zepben.ewb.boilerplate.backfill import Backfill
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, Backfill
 
 
 class HasMrid(Protocol):
@@ -103,50 +101,3 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
 
     def __getitem__(self, item):
         return (self._get_or_empty())[item]
-
-
-if __name__ == '__main__':
-    @dataclass(slots=True)
-    class Ido:
-        mrid: str
-        n: int = 42
-
-    @dataclass(slots=True)
-    class A:
-        _x: list[Ido] | None = field(default=None)
-        x: MridCollection[Ido] = LazyMridMap(
-            _x,
-            "A Thingo",
-            validate=(lambda self, it: self.validate_x(it)),
-            # cached=False
-        )
-
-        def validate_x(self, item):
-            print(f"{self} validating {item}")
-
-
-        def __hash__(self):
-            return object.__hash__(self)
-
-    o1 = Ido("1")
-    o2 = Ido("2", 24)
-    oX = Ido("2", 32)
-
-    a = A()
-    print(a, a.x)
-    a.x.append(o1)
-    print(a, a.x)
-    a.x.append(o2)
-    print(a, a.x)
-    for t in a.x:
-        print(t)
-    a.x.remove(o1)
-    print(a, a.x)
-    a.x.remove(o2)
-    print(a, a.x)
-
-    a.x.append(o2)
-    print(a, a.x)
-    with pytest.raises(ValueError):
-        a.x.append(oX)
-    print(a, a.x)

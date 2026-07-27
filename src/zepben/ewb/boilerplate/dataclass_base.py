@@ -13,56 +13,6 @@ def _is_set(obj: object, name: str) -> bool:
         return False
     return True
 
-@dataclass(slots=True)
-class DataclassBase:
-    """
-    Instantiate the default fields and interpret the kwargs like ``@dataclass`` does
-
-    This class serves as a base class for mostly init-less dataclasses used in CIM,
-    allowing custom inits to not break the entire inheritance tree.
-    It fills fields with default values, and treats kwargs the same way @dataclass does.
-
-    For more motivation, refer to `MANIFESTO.md`
-    """
-    def __init__(self, **kwargs) -> None:
-
-        # Manually assign defaults in dataclass fields
-        for f in fields(type(self)):
-            # We cannot just check kwargs because fields could be set in subclass __init__'s
-            if _is_set(self, f.name) or f.name in kwargs:
-                continue
-
-            resolve_default(self, f)
-
-        # Assign all of the kwargs manually.
-        # str-based setattr triggers descriptors, allowing us to intercept __set__.
-        for attr, value in kwargs.items():
-            setattr(self, attr, value)
-
-
-        # Currently post init implementation requires a lot of extra logic,
-        # which would mess with readability. If you require it - add it.
-        if callable(getattr(self, "__post_init__", None)):
-            raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
-
-def resolve_default(instance, field: Field):
-    # Set field defaults
-    if field.default is not MISSING:
-        setattr(instance, field.name, field.default)
-    elif field.default_factory is not MISSING:
-        setattr(instance, field.name, field.default_factory())
-
-    # Ignore custom descriptors
-    elif hasattr(field, '__get__'):
-        return
-
-    # Mimic default Python missing arg error
-    else:
-        raise TypeError(
-            f"Missing required field {field.name!r} "
-            f"for {type(instance).__name__}"
-        )
-
 T = TypeVar("T", bound=type)
 
 def remove_descriptor_annotations(cls: T) -> T:
@@ -143,3 +93,54 @@ def zb_dataclass(cls: type[object]):
     """
     cls = remove_descriptor_annotations(cls)
     return dataclass(init=False, eq=False, slots=True, repr=False)(cls)
+
+
+@zb_dataclass
+class DataclassBase:
+    """
+    Instantiate the default fields and interpret the kwargs like ``@dataclass`` does
+
+    This class serves as a base class for mostly init-less dataclasses used in CIM,
+    allowing custom inits to not break the entire inheritance tree.
+    It fills fields with default values, and treats kwargs the same way @dataclass does.
+
+    For more motivation, refer to `MANIFESTO.md`
+    """
+    def __init__(self, **kwargs) -> None:
+
+        # Manually assign defaults in dataclass fields
+        for f in fields(type(self)):
+            # We cannot just check kwargs because fields could be set in subclass __init__'s
+            if _is_set(self, f.name) or f.name in kwargs:
+                continue
+
+            resolve_default(self, f)
+
+        # Assign all of the kwargs manually.
+        # str-based setattr triggers descriptors, allowing us to intercept __set__.
+        for attr, value in kwargs.items():
+            setattr(self, attr, value)
+
+
+        # Currently post init implementation requires a lot of extra logic,
+        # which would mess with readability. If you require it - add it.
+        if callable(getattr(self, "__post_init__", None)):
+            raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
+
+def resolve_default(instance, field: Field):
+    # Set field defaults
+    if field.default is not MISSING:
+        setattr(instance, field.name, field.default)
+    elif field.default_factory is not MISSING:
+        setattr(instance, field.name, field.default_factory())
+
+    # Ignore custom descriptors
+    elif hasattr(field, '__get__'):
+        return
+
+    # Mimic default Python missing arg error
+    else:
+        raise TypeError(
+            f"Missing required field {field.name!r} "
+            f"for {type(instance).__name__}"
+        )

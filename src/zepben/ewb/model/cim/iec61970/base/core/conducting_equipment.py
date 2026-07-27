@@ -14,7 +14,8 @@ from dataclasses import field
 
 from typing_extensions import deprecated
 
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList, Backfill
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import require

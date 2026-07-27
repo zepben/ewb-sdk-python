@@ -12,7 +12,8 @@ from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList, Backfill
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.backfill import Backfill
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated

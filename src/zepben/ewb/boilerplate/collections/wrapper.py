@@ -7,7 +7,7 @@ from typing import Any
 from typing_extensions import Self, deprecated
 
 from zepben.ewb import BackedDescriptor, resolve_default
-from zepben.ewb.boilerplate.collections.base import AbstractBackedList
+from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList, AbstractBackedCollection
 
 
 class _Wrapper(BackedDescriptor):
@@ -63,7 +63,7 @@ class _WrapperFgetFix(_Wrapper):
     def fget(self, instance): ...
 
 
-class _IterableWrapper(_WrapperFgetFix, AbstractBackedList, ABC):
+class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection, ABC):
     """
     This class allows us to assign lists at init time to avoid special-case handling.
     """
