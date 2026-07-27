@@ -8,25 +8,22 @@ from __future__ import annotations
 __all__ = ["ProtectionRelayFunction"]
 
 import sys
-import warnings
-from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING, Any
+from typing import Optional, List, Callable, TYPE_CHECKING, Any
 from abc import ABCMeta
 
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
 from dataclasses import field
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.util import require, nlen, ngen, safe_remove, get_by_mrid
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo

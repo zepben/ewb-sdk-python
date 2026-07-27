@@ -8,7 +8,7 @@ __all__ = ["ConnectivityNodeContainer"]
 from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

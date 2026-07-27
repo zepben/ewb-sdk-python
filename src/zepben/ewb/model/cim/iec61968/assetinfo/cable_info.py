@@ -6,7 +6,7 @@
 __all__ = ["CableInfo"]
 
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

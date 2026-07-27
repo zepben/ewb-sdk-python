@@ -6,16 +6,16 @@
 __all__ = ["Curve"]
 
 from dataclasses import field
-from typing import Optional, List, Generator
+from typing import Optional
 from abc import ABCMeta
 
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations, zb_dataclass
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList
+from zepben.ewb import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import require, ngen, nlen, safe_remove
+from zepben.ewb.util import require
 
 
 class CurveDataList(LazyValidatedList[CurveData]):

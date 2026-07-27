@@ -12,8 +12,8 @@ from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList, Backfill
 from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLineSegmentPhase
 from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor

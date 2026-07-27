@@ -8,17 +8,16 @@ from __future__ import annotations
 __all__ = ['EquipmentContainer']
 
 from dataclasses import field
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
+from typing import Dict, Generator, TYPE_CHECKING, TypeVar, Iterable, Type
 from abc import ABCMeta
 
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
-from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
+from zepben.ewb import Alias
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.ewb.util import nlen, ngen, safe_remove_by_id
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators

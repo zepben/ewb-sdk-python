@@ -9,7 +9,7 @@ from abc import ABCMeta
 from typing import TypeVar, overload, Callable, Any
 
 from zepben.ewb import require
-from zepben.ewb.dataclass_descriptors.dataclass_base import DataclassBase, zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import DataclassBase, zb_dataclass
 
 TIdentifiable = TypeVar('TIdentifiable')
 

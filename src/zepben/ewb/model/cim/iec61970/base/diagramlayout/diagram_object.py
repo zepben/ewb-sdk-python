@@ -8,17 +8,16 @@ from __future__ import annotations
 __all__ = ["DiagramObject"]
 
 from dataclasses import field
-from typing import Optional, List, Generator, Callable, TYPE_CHECKING, Any
+from typing import Optional, List, Callable, TYPE_CHECKING, Any
 
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-from zepben.ewb.util import nlen, ngen, require, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram

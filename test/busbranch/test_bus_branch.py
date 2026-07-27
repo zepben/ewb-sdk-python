@@ -309,15 +309,15 @@ async def test_switches_excluded_when_getting_voltage():
 
 def _get_expected(nb_network, line, pt, es, ec, pec, eb, ec_eb1, ec_eb2):
     # -- Bus
-    exp_bb0 = (create_terminal_based_id({next(es.terminals), get_term(pt, 1)}),
+    exp_bb0 = (create_terminal_based_id({next(iter(es.terminals)), get_term(pt, 1)}),
                (20000, frozenset(), frozenset({get_term(es, 1), get_term(pt, 1)}), frozenset(), nb_network))
     exp_bb1 = (create_terminal_based_id({get_term(pt, 2), get_term(line, 1)}),
                (400, frozenset(), frozenset({get_term(line, 1), get_term(pt, 2)}), frozenset(), nb_network))
-    exp_bb2 = (create_terminal_based_id({get_term(line, 2), next(ec.terminals), next(pec.terminals), get_term(eb, 1)}),
+    exp_bb2 = (create_terminal_based_id({get_term(line, 2), next(iter(ec.terminals)), next(iter(pec.terminals)), get_term(eb, 1)}),
                (400, frozenset(), frozenset({get_term(ec, 1), get_term(line, 2), get_term(pec, 1), get_term(eb, 1)}), frozenset(), nb_network))
 
-    exp_bb3 = (create_terminal_based_id({get_term(eb, 2), next(ec_eb1.terminals), next(ec_eb2.terminals)}),
-               (400, frozenset(), frozenset({get_term(eb, 2), next(ec_eb1.terminals), next(ec_eb2.terminals)}), frozenset(), nb_network))
+    exp_bb3 = (create_terminal_based_id({get_term(eb, 2), next(iter(ec_eb1.terminals)), next(iter(ec_eb2.terminals))}),
+               (400, frozenset(), frozenset({get_term(eb, 2), next(iter(ec_eb1.terminals)), next(iter(ec_eb2.terminals))}), frozenset(), nb_network))
 
     # -- Branch
     exp_branch = (f"tb_{line.mrid}", ((exp_bb1[1], exp_bb2[1]), 100, frozenset({line}), frozenset({*line.terminals}), frozenset(), nb_network))

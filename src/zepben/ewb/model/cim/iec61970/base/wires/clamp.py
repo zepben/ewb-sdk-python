@@ -10,9 +10,9 @@ from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment

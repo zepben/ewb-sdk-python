@@ -14,13 +14,13 @@ from weakref import ref, ReferenceType
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment

@@ -10,10 +10,10 @@ from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection

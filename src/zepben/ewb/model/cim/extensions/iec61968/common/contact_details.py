@@ -6,19 +6,18 @@
 __all__ = ["ContactDetails"]
 
 from dataclasses import field
-from typing import Generator, Any
+from typing import Any
 
 from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
-from zepben.ewb.util import ngen, nlen
 
 
 @zbex

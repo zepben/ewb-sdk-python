@@ -9,24 +9,20 @@ __all__ = ["LvFeeder"]
 
 import typing
 from dataclasses import field
-from typing import Generator, Optional, Dict, List
+from typing import Optional, Dict
 
-from pygments.lexer import default
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
-from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import safe_remove_by_id, nlen, ngen
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if typing.TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
     from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
-    from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
 
 
 @zb_dataclass

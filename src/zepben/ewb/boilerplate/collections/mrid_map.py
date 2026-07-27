@@ -3,13 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import dataclass, field
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, Collection
 
 import pytest
 
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.lazy_list import _IterableWrapper
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, Backfill
+from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, Backfill
 
 
 class HasMrid(Protocol):
@@ -20,6 +19,9 @@ S = TypeVar("S", bound=HasMrid)
 
 
 class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
+    def _get_collection(self) -> Collection[T]:
+        pass
+
     def __init__(
         self,
         private_field,

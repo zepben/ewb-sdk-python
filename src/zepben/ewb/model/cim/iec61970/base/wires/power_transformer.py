@@ -11,15 +11,15 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
+from zepben.ewb import Alias
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList, Backfill
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind

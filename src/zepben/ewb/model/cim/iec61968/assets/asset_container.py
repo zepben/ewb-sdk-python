@@ -8,7 +8,7 @@ __all__ = ["AssetContainer"]
 from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61968.assets.asset import Asset
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

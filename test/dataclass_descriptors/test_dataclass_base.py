@@ -7,7 +7,7 @@ from typing import List
 
 import pytest
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass, DataclassBase
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass, DataclassBase
 
 
 @zb_dataclass

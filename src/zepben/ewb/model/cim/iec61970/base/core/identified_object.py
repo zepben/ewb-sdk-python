@@ -15,7 +15,7 @@ from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.util import require, nlen, ngen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 logger = logging.getLogger(__name__)
 

@@ -5,13 +5,15 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field, Field
 from types import MemberDescriptorType
-from typing import Any, TypeVar, Protocol, Callable
+from typing import Any, TypeVar, Protocol, Callable, Sequence
 
 import pytest
 from typing_extensions import Self
 
-from zepben.ewb import remove_descriptor_annotations, BackedDescriptor, require
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList, MutableCollection, IndexedMutableCollection, _IterableWrapper
+from zepben.ewb import BackedDescriptor
+from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
+from zepben.ewb.boilerplate.collections.base import AbstractBackedCollection, AbstractBackedList
 
 
 class HasMrid(Protocol):
@@ -20,7 +22,7 @@ class HasMrid(Protocol):
 T = TypeVar("T")
 S = TypeVar("S", bound=HasMrid)
 
-class MridCollection(MutableCollection[S], ABC):
+class MridCollection(AbstractBackedCollection[S], ABC):
     instance: Any
     element_description: str
 
@@ -104,7 +106,7 @@ class LazyMridList(LazyValidatedList, MridCollection[S]):
         super().append(item)
 
 
-class MridList(_IterableWrapper, IndexedMutableCollection[S], MridCollection[S]):
+class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
     def __init__(self,
                  private_field,
                  element_description: str,
@@ -125,6 +127,9 @@ class MridList(_IterableWrapper, IndexedMutableCollection[S], MridCollection[S])
 
     def __post_init__(self):
         self.backing_list = getattr(self.instance, self.backing_name)
+
+    def _get_collection(self) -> Sequence[T]:
+        return self.backing_list
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
         found = next((element for element in self.backing_list if element.mrid == mrid), None)

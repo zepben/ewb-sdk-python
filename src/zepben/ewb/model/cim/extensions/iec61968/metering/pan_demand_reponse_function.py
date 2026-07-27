@@ -12,7 +12,7 @@ from zepben.ewb.model.cim.iec61968.metering.controlled_appliance import Controll
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.ewb.util import require
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

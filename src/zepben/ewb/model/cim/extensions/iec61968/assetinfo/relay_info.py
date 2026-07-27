@@ -12,8 +12,8 @@ from typing import Optional, List, Callable, Any
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 

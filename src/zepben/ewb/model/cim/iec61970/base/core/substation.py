@@ -7,15 +7,14 @@ from __future__ import annotations
 
 __all__ = ["Substation"]
 
-from typing import Optional, Generator, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from dataclasses import field
 from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill, internal
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb import Alias
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList, Backfill, internal
 
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 if TYPE_CHECKING:
