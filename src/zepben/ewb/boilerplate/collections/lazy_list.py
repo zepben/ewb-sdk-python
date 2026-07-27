@@ -2,22 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclasses import field
-from typing import TypeVar, Protocol
+from typing import TypeVar
 
-from zepben.ewb import DataclassBase, zb_dataclass
-from zepben.ewb.boilerplate.collections.base import AbstractBackedList
+from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
-# from descriptor_fix import BackedDescriptor, remove_descriptor_annotations
-
-
-class HasMrid(Protocol):
-    mrid: str
-
 T = TypeVar("T")
-S = TypeVar("S", bound=HasMrid)
 
 
 class LazyValidatedList(_IterableWrapper, AbstractBackedList[T]):
@@ -35,8 +26,6 @@ class LazyValidatedList(_IterableWrapper, AbstractBackedList[T]):
 
     def _get_collection(self) -> list[T]:
         return getattr(self.instance, self.backing_name) or []
-
-    # clearIfEmpty is inlined for performance
 
     def append(self, item):
         if self.validate is not None:
@@ -140,25 +129,3 @@ class LazyIndexedList(LazyValidatedList[T]):
             self.clear()
 
         return item
-
-if __name__ == '__main__':
-    @zb_dataclass
-    class C(DataclassBase):
-        _xs: list[int] | None = field(default=None)
-        xs: LazyIndexedList[int] = LazyIndexedList(
-            _xs,
-            "Thing"
-        )
-
-    c = C(xs=[24, 42])
-    print(c._xs, c.xs)
-    c.xs.clear()
-    print(c._xs, c.xs)
-    c.xs.append(1)
-    c.xs.append(2)
-    c.xs.append(3)
-    print(c._xs, c.xs)
-    c.xs.insert(2, 42)
-    print(c._xs, c.xs)
-    c.xs.pop(2)
-    print(c._xs, c.xs)

@@ -14,7 +14,8 @@ from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList, Backfill, internal
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.backfill import Backfill, internal
 
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 if TYPE_CHECKING:

@@ -14,7 +14,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb import Alias
 from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
-from zepben.ewb.boilerplate.collections.mrid_list import internal
+from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass

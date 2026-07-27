@@ -10,9 +10,6 @@
 from __future__ import annotations
 
 from dataclasses import Field
-from typing import TypeVar
-
-
 
 
 class BackedDescriptor:

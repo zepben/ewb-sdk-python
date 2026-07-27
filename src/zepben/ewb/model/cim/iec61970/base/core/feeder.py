@@ -12,7 +12,8 @@ from typing import Optional, Dict, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, internal
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
