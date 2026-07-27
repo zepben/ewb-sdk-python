@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Protocol, TypeVar
 
-from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedCollection
+from zepben.ewb.boilerplate.collections.abstract_backed_collection import AbstractBackedCollection
 
 
 class HasMrid(Protocol):

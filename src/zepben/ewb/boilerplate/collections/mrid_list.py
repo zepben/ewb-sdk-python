@@ -2,24 +2,26 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Protocol, Sequence
+from typing import Sequence
 
 from typing_extensions import Self
 
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList
-from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
-class LazyMridList(LazyValidatedList, MridCollection[S]):
-    def __init__(self,
-                 private_field,
-                 element_description: str,
-                 backfill: Backfill = None,
-                 validate=None,
-                 sort_by=None):
+class LazyMridList(LazyCollection[S], MridCollection[S]):
+    def __init__(
+        self,
+        private_field,
+        element_description: str,
+        backfill: Backfill = None,
+        validate=None,
+        sort_by=None
+    ) -> None:
         super().__init__(private_field, validate, sort_by)
         self.element_description = element_description
         self.backfill = backfill
@@ -31,7 +33,7 @@ class LazyMridList(LazyValidatedList, MridCollection[S]):
         found = next((element for element in existing if element.mrid == mrid), None)
         return found
 
-    def append(self, item: S):
+    def append(self, item: S) -> None:
         if not self._can_add_by_mrid(item):
             return
 
@@ -41,13 +43,15 @@ class LazyMridList(LazyValidatedList, MridCollection[S]):
         super().append(item)
 
 
-class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
-    def __init__(self,
-                 private_field,
-                 element_description: str,
-                 backfill: Backfill = None,
-                 validate=None,
-                 sort_by=None):
+class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
+    def __init__(
+        self,
+        private_field,
+        element_description: str,
+        backfill: Backfill = None,
+        validate=None,
+        sort_by=None
+    ) -> None:
         super().__init__(private_field)
         self.element_description = element_description
         self.backfill = backfill
@@ -62,7 +66,7 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
             obj.__post_init__()
         return obj
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.backing_list = getattr(self.instance, self.backing_name)
 
     def _get_collection(self) -> Sequence[S]:
@@ -72,7 +76,7 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
         found = next((element for element in self.backing_list if element.mrid == mrid), None)
         return found
 
-    def append(self, item: S):
+    def append(self, item: S) -> None:
         if not self._can_add_by_mrid(item):
             return
 
@@ -87,11 +91,13 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
         if self.sort_by is not None:
             self.backing_list.sort(key=self.sort_by)
 
-    def remove(self, item):
+    def remove(self, item: S) -> None:
         self.backing_list.remove(item)
 
-    def clear(self):
+    def clear(self) -> None:
         self.backing_list.clear()
 
-    def __repr__(self):
-        return str(self.backing_list)
+    def __repr__(self) -> str:
+        if self.instance is None:
+            return object.__repr__(self)
+        return repr(self.backing_list)

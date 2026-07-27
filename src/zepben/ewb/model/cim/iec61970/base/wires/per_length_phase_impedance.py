@@ -13,14 +13,14 @@ from typing import List, Generator
 from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
-from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import require, none
 
 
-class PhaseImpedanceDataList(LazyValidatedList):
+class PhaseImpedanceDataList(LazyCollection):
     def get(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
         """
         Get the matrix entry for the corresponding to and from phases.

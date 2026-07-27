@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC, abstractmethod
-from typing import Collection, Iterable, Generic, Iterator, Callable, Any, Sequence, overload, TypeVar
+from typing import Collection, Iterable, Generic, Iterator, Callable, TypeVar
 
 
 T = TypeVar("T")
@@ -40,7 +40,7 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
     def __contains__(self, element: object) -> bool:
         return element in self._get_collection()
 
-    def for_each_indexed(self, action: Callable[[int, T], Any]):
+    def for_each_indexed(self, action: Callable[[int, T], object]) -> None:
         """
         Call the `action` on each item in the list
 
@@ -50,24 +50,3 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
             action(index, item)
 
 
-class AbstractBackedList(
-    AbstractBackedCollection[T],
-    Sequence[T],
-    Generic[T],
-    ABC,
-):
-
-    @abstractmethod
-    def _get_collection(self) -> Sequence[T]:
-        ...
-
-    @overload
-    def __getitem__(self, index: int) -> T:
-        ...
-
-    @overload
-    def __getitem__(self, index: slice) -> Sequence[T]:
-        ...
-
-    def __getitem__(self, index: int | slice) -> T | Sequence[T]:
-        return self._get_collection()[index]

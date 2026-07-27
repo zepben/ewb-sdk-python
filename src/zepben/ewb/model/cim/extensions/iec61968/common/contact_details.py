@@ -11,7 +11,8 @@ from typing import Any
 from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
-from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
@@ -66,12 +67,12 @@ class ContactDetails(Identifiable):
 
     _phone_numbers: list[TelephoneNumber] | None = field(default=None)
 
-    phone_numbers: LazyValidatedList[TelephoneNumber] = LazyValidatedList(_phone_numbers)
+    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyCollection(_phone_numbers)
     """[ZBEX] Phone numbers."""
 
     _electronic_addresses: list[ElectronicAddress] | None = field(default=None)
 
-    electronic_addresses: LazyValidatedList[ElectronicAddress] = LazyValidatedList(_electronic_addresses)
+    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyCollection(_electronic_addresses)
     """[ZBEX] Electronic addresses."""
 
     def __init__(self, id: str|None=None, *args, **kwargs):

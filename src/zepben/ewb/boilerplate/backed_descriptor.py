@@ -2,10 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-#  Copyright 2026 Zeppelin Bend Pty Ltd
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
@@ -39,6 +35,9 @@ class BackedDescriptor:
         return getattr(instance, self.backing_name)
 
     def __set__(self, instance, value):
+        if self.backing_name is None:
+            raise ValueError(f"Descriptor {self} is not yet aware of the supporting field - `__set__` cannot be called")
         return setattr(instance, self.backing_name, value)
+
 
 Alias = BackedDescriptor

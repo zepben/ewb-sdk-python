@@ -13,7 +13,7 @@ from typing import Optional, List, Callable, Any
 from typing_extensions import deprecated
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 
@@ -31,7 +31,7 @@ class RelayInfo(AssetInfo):
 
     _reclose_delays: Optional[List[float]] = field(default=None)
 
-    reclose_delays: LazyIndexedList[float] = LazyIndexedList(
+    reclose_delays: LazyList[float] = LazyList(
         _reclose_delays,
         "float"
     )
