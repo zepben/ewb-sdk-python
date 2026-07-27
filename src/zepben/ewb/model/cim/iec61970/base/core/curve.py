@@ -12,13 +12,13 @@ from abc import ABCMeta
 from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
-from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.model.cim.iec61970.base.core.curve_data import CurveData
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require
 
 
-class CurveDataList(LazyValidatedList[CurveData]):
+class CurveDataList(LazyCollection[CurveData]):
 
     def get(self, x: float) -> CurveData:
         """

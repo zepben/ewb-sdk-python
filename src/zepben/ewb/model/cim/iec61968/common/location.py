@@ -14,7 +14,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb import Alias
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -31,7 +31,7 @@ class Location(IdentifiedObject):
 
     _position_points: Optional[List[PositionPoint]] = field(default=None)
 
-    points: LazyIndexedList[PositionPoint] = LazyIndexedList(
+    points: LazyList[PositionPoint] = LazyList(
         _position_points,
         "PositionPoint",
     )

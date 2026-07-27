@@ -2,36 +2,36 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Protocol, TypeVar, Collection
+from typing import TypeVar, ValuesView
 
 from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
-
 T = TypeVar("T")
 
 
-class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
+class LazyMridMap(_IterableWrapper[T], MridCollection[S]):
     def __init__(
         self,
         private_field,
         element_description: str,
         backfill: Backfill = None,
-        validate=None):
+        validate=None
+    ) -> None:
         super().__init__(private_field)
         self.element_description = element_description
         self.backfill = backfill
         self.validate = validate
 
-    def _get(self):
+    def _get(self) -> dict[str, S] | None:
         return getattr(self.instance, self.backing_name)
 
     def _get_or_empty(self) -> dict[str, S]:
         return getattr(self.instance, self.backing_name) or {}
 
-    def _get_collection(self) -> list[S]:
-        return list(self._get_or_empty().values())
+    def _get_collection(self) -> ValuesView[S]:
+        return self._get_or_empty().values()
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
         return self._get_or_empty().get(mrid, None)
@@ -39,7 +39,7 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     def get_by_mrid(self, mrid: str) -> S:
         return self._get_or_empty()[mrid]
 
-    def append(self, element: S):
+    def append(self, element: S) -> None:
         if not self._can_add_by_mrid(element):
             return
 
@@ -56,24 +56,26 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         else:
             existing[element.mrid] = element
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._get_or_empty())
 
-    def __contains__(self, item: S):
-        return self._get_or_empty().get(getattr(item, "mrid", None), None) == item
+    def __contains__(self, item: S) -> bool:
+        return self._get_or_empty().get(getattr(item, "mrid", None)) == item
 
-    def remove(self, item):
+    def remove(self, item) -> None:
         existing = self._get_or_empty()
 
         del existing[item.mrid]
         if not existing:
             self.clear()
 
-    def clear(self):
+    def clear(self) -> None:
         setattr(self.instance, self.backing_name, None)
 
-    def __repr__(self):
-        return str(self._get_or_empty())
+    def __repr__(self) -> str:
+        if self.instance is None:
+            return object.__repr__(self)
+        return repr(self._get_or_empty())
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> S:
         return (self._get_or_empty())[item]

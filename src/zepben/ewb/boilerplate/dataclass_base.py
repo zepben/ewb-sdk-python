@@ -2,8 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from dataclasses import dataclass, fields, MISSING, Field
-from typing import TypeVar, dataclass_transform
+from typing import TypeVar, cast
+
+from typing_extensions import dataclass_transform
+
+
+T = TypeVar("T")
 
 
 def _is_set(obj: object, name: str) -> bool:
@@ -13,9 +19,7 @@ def _is_set(obj: object, name: str) -> bool:
         return False
     return True
 
-T = TypeVar("T", bound=type)
-
-def remove_descriptor_annotations(cls: T) -> T:
+def remove_descriptor_annotations(cls: type[T]) -> T:
     """
     Remove annotations for class attributes that are data descriptors.
 
@@ -85,13 +89,23 @@ def remove_descriptor_annotations(cls: T) -> T:
 
     return cls
 
-def zb_dataclass(cls: type[object]):
+@dataclass_transform(eq_default=False, order_default=False)
+def zb_dataclass(cls: type[T]) -> type[T]:
     """
-    Shorthand alias for ``@dataclass(init=False,eq=False,slots=True,repr=False)``
+    Shorthand alias for ``@dataclass(init=False, eq=False, slots=True, repr=False)``
     Allows us to modify dataclass parameters for all of CIM from a single reference point
     """
     cls = remove_descriptor_annotations(cls)
-    return dataclass(init=False, eq=False, slots=True, repr=False)(cls)
+    # The cast is purely for type checkers to be aware of the true class of cls
+    return cast(
+        type[T],
+        dataclass(
+            init=False,
+            eq=False,
+            slots=True,
+            repr=False,
+        )(cls),
+    )
 
 def resolve_default(instance, field: Field):
     # Set field defaults
@@ -100,9 +114,7 @@ def resolve_default(instance, field: Field):
     elif field.default_factory is not MISSING:
         setattr(instance, field.name, field.default_factory())
 
-    # Ignore custom descriptors
-    elif hasattr(field, '__get__') and not isinstance(field, Field):
-        return
+    # Note: custom descriptors are not included in `fields(cls)`, so we don't need to handle them here
 
     # Mimic default Python missing arg error
     else:

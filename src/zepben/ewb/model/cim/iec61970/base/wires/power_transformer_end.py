@@ -14,7 +14,7 @@ from typing import Optional, List, TYPE_CHECKING
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 
 
-class TransformerEndRatedSList(LazyValidatedList[TransformerEndRatedS]):
+class TransformerEndRatedSList(LazyCollection[TransformerEndRatedS]):
 
     def get_by_cooling_type(
         self,

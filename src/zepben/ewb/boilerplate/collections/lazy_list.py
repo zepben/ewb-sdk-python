@@ -2,69 +2,19 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
 
-from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList
-from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
+from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection, T
 
 
-T = TypeVar("T")
-
-
-class LazyValidatedList(_IterableWrapper, AbstractBackedList[T]):
-
-    def __init__(self,
-                 private_field,
-                 validate=None,
-                 sort_by=None):
-        super().__init__(private_field)
-        self.validate = validate
-        self.sort_by = sort_by
-
-    def _get(self):
-        return getattr(self.instance, self.backing_name)
-
-    def _get_collection(self) -> list[T]:
-        return getattr(self.instance, self.backing_name) or []
-
-    def append(self, item):
-        if self.validate is not None:
-            self.validate(self.instance, item)
-
-        existing = getattr(self.instance, self.backing_name)
-        if existing is None:
-            existing = [item]
-            setattr(self.instance, self.backing_name, existing)
-        else:
-            existing.append(item)
-
-        if self.sort_by is not None:
-            existing.sort(key=self.sort_by)
-
-    def remove(self, item):
-        existing = self._get_collection()
-        existing.remove(item)
-        if not existing:
-            self.clear()
-
-    def clear(self):
-        setattr(self.instance, self.backing_name, None)
-
-    def __repr__(self):
-        if self.instance is None:
-            return self.__class__.__repr__()
-        return str(self._get_collection())
-
-
-class LazyIndexedList(LazyValidatedList[T]):
+class LazyList(LazyCollection[T]):
 
     def __init__(
         self,
         private_field,
         element_description: str,
-        validate = None,
-    ):
-        super().__init__(private_field, validate=validate)
+        validate=None,
+    ) -> None:
+        super().__init__(private_field, validate=validate, sort_by=None)
         self.element_description = element_description
 
     def insert(self, index: int, item: T) -> None:
@@ -93,9 +43,6 @@ class LazyIndexedList(LazyValidatedList[T]):
             setattr(self.instance, self.backing_name, existing)
         else:
             existing.insert(index, item)
-
-        if self.sort_by is not None:
-            existing.sort(key=self.sort_by)
 
     def append(self, item: T) -> None:
         self.insert(len(self), item)

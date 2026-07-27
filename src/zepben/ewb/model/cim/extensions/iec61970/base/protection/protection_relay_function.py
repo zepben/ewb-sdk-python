@@ -11,7 +11,7 @@ import sys
 from typing import Optional, List, Callable, TYPE_CHECKING, Any
 from abc import ABCMeta
 
-from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
@@ -84,12 +84,12 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     def relay_info(self, relay_info: Optional[RelayInfo]):
         self.asset_info = relay_info
 
-    time_limits: LazyIndexedList[float] = LazyIndexedList(
+    time_limits: LazyList[float] = LazyList(
         _time_limits,
         "float"
     )
 
-    thresholds: LazyIndexedList[RelaySetting] = LazyIndexedList(
+    thresholds: LazyList[RelaySetting] = LazyList(
         _thresholds,
         "RelaySetting"
     )

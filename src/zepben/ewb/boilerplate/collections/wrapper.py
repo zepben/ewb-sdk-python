@@ -2,12 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from abc import ABC
-from typing import Any
+from typing import Any, TypeVar
+
 from typing_extensions import Self, deprecated
 
 from zepben.ewb import BackedDescriptor, resolve_default
-from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList, AbstractBackedCollection
+from zepben.ewb.boilerplate.collections.abstract_backed_collection import AbstractBackedCollection
 
 
 class _Wrapper(BackedDescriptor):
@@ -25,7 +27,7 @@ class _Wrapper(BackedDescriptor):
         obj._init_kwargs = kwargs.copy()
         return obj
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.instance = None
         self.backing_name = None
@@ -48,7 +50,7 @@ class _WrapperFgetFix(_Wrapper):
     This class exists to fix the tests that rely on the old lists being @property.
     TODO: Remove in a separate PR fixing tests
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         def fget(instance):
             return self.__get__(instance)
@@ -62,12 +64,13 @@ class _WrapperFgetFix(_Wrapper):
     @deprecated("Lists are no longer a property")
     def fget(self, instance): ...
 
+T = TypeVar("T")
 
-class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection, ABC):
+class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
     """
     This class allows us to assign lists at init time to avoid special-case handling.
     """
-    def __set__(self, instance, value):
+    def __set__(self, instance, value) -> None:
         if instance is None:
             return
         if not hasattr(instance, self.backing_name):

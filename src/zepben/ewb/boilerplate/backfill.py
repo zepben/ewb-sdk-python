@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from dataclasses import Field
 from types import MemberDescriptorType
 from typing import Any, Callable, TypeVar
@@ -15,6 +16,9 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 class Backfill:
     def __init__(self, backfill_prop: property) -> None:
+        if backfill_prop.fget is None:
+            raise TypeError(f"Cannot backfill a property without a getter: {backfill_prop!r}")
+
         self.backfill_prop = backfill_prop
 
     def apply(self, element: S, owner: Any) -> None:
@@ -24,7 +28,7 @@ class Backfill:
         backing_name = name if target is None else (
             getattr(target, "name", None)
             or getattr(target, "__name__", None)
-            or getattr(target.fget, "__name__", None)
+            or getattr(getattr(target, "fget", None), "__name__", None)
         )
 
         if backing_name is None:

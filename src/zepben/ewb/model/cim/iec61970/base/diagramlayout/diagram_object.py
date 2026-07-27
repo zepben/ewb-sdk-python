@@ -13,7 +13,7 @@ from typing import Optional, List, Callable, TYPE_CHECKING, Any
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -49,7 +49,7 @@ class DiagramObject(IdentifiedObject):
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = field(default=None)
 
-    points: LazyIndexedList[DiagramObjectPoint] = LazyIndexedList(
+    points: LazyList[DiagramObjectPoint] = LazyList(
         _diagram_object_points,
         "DiagramObjectPoint",
     )
