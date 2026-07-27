@@ -13,7 +13,7 @@ from dataclasses import field
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.descriptor_fix import BackedDescriptor
+from zepben.ewb.boilerplate.backed_descriptor import BackedDescriptor
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject

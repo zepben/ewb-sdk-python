@@ -15,7 +15,8 @@ from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationR
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement

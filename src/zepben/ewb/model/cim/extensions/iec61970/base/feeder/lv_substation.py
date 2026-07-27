@@ -12,7 +12,7 @@ from typing import Generator, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer

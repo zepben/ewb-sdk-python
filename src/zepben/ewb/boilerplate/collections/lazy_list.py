@@ -41,15 +41,6 @@ class LazyValidatedList(_IterableWrapper, AbstractBackedList[T]):
         if self.sort_by is not None:
             existing.sort(key=self.sort_by)
 
-    def __len__(self):
-        return len(self._get_collection())
-
-    def __iter__(self):
-        return iter(self._get_collection())
-
-    def __contains__(self, item):
-        return item in (self._get_collection())
-
     def remove(self, item):
         existing = self._get_collection()
         existing.remove(item)
@@ -64,21 +55,16 @@ class LazyValidatedList(_IterableWrapper, AbstractBackedList[T]):
             return self.__class__.__repr__()
         return str(self._get_collection())
 
-    def __str__(self):
-        return self.__repr__()
-
-    def __getitem__(self, item):
-        return (self._get_collection())[item]
-
 
 class LazyIndexedList(LazyValidatedList[T]):
 
     def __init__(
         self,
         private_field,
-        element_description: str
+        element_description: str,
+        validate = None,
     ):
-        super().__init__(private_field)
+        super().__init__(private_field, validate=validate)
         self.element_description = element_description
 
     def insert(self, index: int, item: T) -> None:
@@ -96,6 +82,9 @@ class LazyIndexedList(LazyValidatedList[T]):
                 "Make sure you are adding the items in order and there are "
                 "no gaps in the numbering."
             )
+
+        if self.validate is not None:
+            self.validate(self.instance, item)
 
         existing = getattr(self.instance, self.backing_name)
 

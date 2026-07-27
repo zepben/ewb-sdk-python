@@ -23,7 +23,8 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_ki
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo

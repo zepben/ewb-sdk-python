@@ -34,12 +34,11 @@ class BackedDescriptor:
             self.backing_name = self.private_field.name
 
     def __get__(self, instance, _):
+        if instance is None:
+            return self
         return getattr(instance, self.backing_name)
 
     def __set__(self, instance, value):
         return setattr(instance, self.backing_name, value)
 
 Alias = BackedDescriptor
-
-# Alias for dataclass with params. Makes it easier to edit params for all of CIM at once.
-# zb_dataclass = dataclass(init=False, eq=False, slots=True, repr=False)

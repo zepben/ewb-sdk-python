@@ -14,7 +14,7 @@ from abc import ABCMeta
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass

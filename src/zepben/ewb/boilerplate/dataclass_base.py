@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import dataclass, fields, MISSING, Field
-from typing import TypeVar
+from typing import TypeVar, dataclass_transform
 
 
 def _is_set(obj: object, name: str) -> bool:
@@ -85,7 +85,6 @@ def remove_descriptor_annotations(cls: T) -> T:
 
     return cls
 
-
 def zb_dataclass(cls: type[object]):
     """
     Shorthand alias for ``@dataclass(init=False,eq=False,slots=True,repr=False)``
@@ -93,6 +92,24 @@ def zb_dataclass(cls: type[object]):
     """
     cls = remove_descriptor_annotations(cls)
     return dataclass(init=False, eq=False, slots=True, repr=False)(cls)
+
+def resolve_default(instance, field: Field):
+    # Set field defaults
+    if field.default is not MISSING:
+        setattr(instance, field.name, field.default)
+    elif field.default_factory is not MISSING:
+        setattr(instance, field.name, field.default_factory())
+
+    # Ignore custom descriptors
+    elif hasattr(field, '__get__') and not isinstance(field, Field):
+        return
+
+    # Mimic default Python missing arg error
+    else:
+        raise TypeError(
+            f"Missing required field {field.name!r} "
+            f"for {type(instance).__name__}"
+        )
 
 
 @zb_dataclass
@@ -107,6 +124,10 @@ class DataclassBase:
     For more motivation, refer to `MANIFESTO.md`
     """
     def __init__(self, **kwargs) -> None:
+        # Currently post init implementation requires a lot of extra logic,
+        # which would mess with readability. If you require it - add it.
+        if callable(getattr(self, "__post_init__", None)):
+            raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
 
         # Manually assign defaults in dataclass fields
         for f in fields(type(self)):
@@ -120,27 +141,3 @@ class DataclassBase:
         # str-based setattr triggers descriptors, allowing us to intercept __set__.
         for attr, value in kwargs.items():
             setattr(self, attr, value)
-
-
-        # Currently post init implementation requires a lot of extra logic,
-        # which would mess with readability. If you require it - add it.
-        if callable(getattr(self, "__post_init__", None)):
-            raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
-
-def resolve_default(instance, field: Field):
-    # Set field defaults
-    if field.default is not MISSING:
-        setattr(instance, field.name, field.default)
-    elif field.default_factory is not MISSING:
-        setattr(instance, field.name, field.default_factory())
-
-    # Ignore custom descriptors
-    elif hasattr(field, '__get__'):
-        return
-
-    # Mimic default Python missing arg error
-    else:
-        raise TypeError(
-            f"Missing required field {field.name!r} "
-            f"for {type(instance).__name__}"
-        )
