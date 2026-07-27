@@ -7,12 +7,14 @@ from __future__ import annotations
 
 __all__ = ["Terminal"]
 
+from dataclasses import field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
 from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -31,7 +33,7 @@ class Terminal(AcDcTerminal):
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    _conducting_equipment: Optional['ConductingEquipment'] = None
+    _conducting_equipment: Optional['ConductingEquipment'] = field(default=None)
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
@@ -75,6 +77,7 @@ class Terminal(AcDcTerminal):
         return self._current_phases
 
     @property
+    @internal(_conducting_equipment)
     def conducting_equipment(self):
         """
         The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
@@ -162,6 +165,7 @@ class Terminal(AcDcTerminal):
         for feeder in filter(lambda c: isinstance(c, Feeder), self.conducting_equipment.containers):
             if feeder.normal_head_terminal == self:
                 return True
+        return False
 
     def has_connected_busbars(self):
         from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection

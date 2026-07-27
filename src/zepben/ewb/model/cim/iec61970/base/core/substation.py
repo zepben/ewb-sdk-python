@@ -15,7 +15,7 @@ from zepben.ewb.model.cim.iec61970.base.core.equipment_container import Equipmen
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill, internal
 
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 if TYPE_CHECKING:
@@ -31,14 +31,30 @@ class Substation(EquipmentContainer):
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    sub_geographical_region: Optional[SubGeographicalRegion] = field(default=None)
-    """The SubGeographicalRegion containing the substation."""
+    _sub_geographical_region: Optional[SubGeographicalRegion] = field(default=None)
 
     _normal_energized_feeders: Optional[List[Feeder]] = field(default=None)
 
+    feeders: MridCollection[Feeder] = LazyMridList(
+        _normal_energized_feeders,
+        "A Feeder",
+        backfill=Backfill(Feeder.normal_energizing_substation)
+    )
+    normal_energized_feeders = Alias(feeders)
+
     _loops: Optional[List[Loop]] = field(default=None)
 
+    loops: MridCollection[Loop] = LazyMridList(
+        _loops,
+        "A Loop",
+    )
+
     _energized_loops: Optional[List[Loop]] = field(default=None)
+
+    energized_loops: MridCollection[Loop] = LazyMridList(
+        _energized_loops,
+        "A Loop",
+    )
 
     _circuits: Optional[List[Circuit]] = field(default=None)
 
@@ -48,39 +64,17 @@ class Substation(EquipmentContainer):
     )
 
     @property
+    @internal(_sub_geographical_region)
     def sub_geographical_region(self):
         """The SubGeographicalRegion containing the substation."""
         return self._sub_geographical_region
+
+
 
     @sub_geographical_region.setter
     @deprecated("sub_geographical_region should never be set directly - it is automatically set when adding it to the `substations` list")
     def sub_geographical_region(self, value):
         self._sub_geographical_region = value
-
-    @property
-    def circuits(self) -> Generator[Circuit, None, None]:
-        """
-        The `Circuit`s originating from this substation.
-        """
-        return ngen(self._circuits)
-
-    loops: MridCollection[Loop] = LazyMridList(
-        _loops,
-        "A Loop",
-    )
-
-    energized_loops: MridCollection[Loop] = LazyMridList(
-        _energized_loops,
-        "A Loop",
-    )
-
-    feeders: MridCollection[Feeder] = LazyMridList(
-        _normal_energized_feeders,
-        "A Feeder",
-        backfill=Backfill(Feeder.normal_energizing_substation)
-    )
-    normal_energized_feeders = Alias(feeders)
-
 
     # region deprecated list boilerplate
     # region circuits boilerplate

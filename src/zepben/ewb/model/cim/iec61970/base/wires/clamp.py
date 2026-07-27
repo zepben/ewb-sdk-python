@@ -8,6 +8,9 @@ __all__ = ["Clamp"]
 from dataclasses import field
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
+from zepben.ewb.dataclass_descriptors.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
 
@@ -25,21 +28,22 @@ class Clamp(ConductingEquipment):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
-    ac_line_segment: Optional['AcLineSegment'] = field(default=None)
+    _ac_line_segment: Optional['AcLineSegment'] = field(default=None)
     """The line segment to which the clamp is connected."""
+
+    @property
+    @internal(_ac_line_segment)
+    def ac_line_segment(self) -> Optional['AcLineSegment']:
+        """The line segment to which the clamp is connected."""
+        return self._ac_line_segment
 
     max_terminals = 1
 
     @property
-    def ac_line_segment(self) -> Optional['AcLineSegment']:
-        """The line segment to which the clamp is connected."""
-        return self._ac_line_segment
+    def length_from_t1_or_0(self) -> float:
+        return self.length_from_terminal_1 or 0.0
 
     @ac_line_segment.setter
     @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `clamps` list")
     def ac_line_segment(self, value):
         self._ac_line_segment = value
-
-    @property
-    def length_from_t1_or_0(self) -> float:
-        return self.length_from_terminal_1 or 0.0

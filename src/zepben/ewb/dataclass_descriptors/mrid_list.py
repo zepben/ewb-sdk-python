@@ -49,16 +49,11 @@ class MridCollection(MutableCollection[S], ABC):
 
 
 class Backfill:
-    def __init__(self, backfill_prop: Any):
-        if not any(isinstance(backfill_prop, cls) for cls in (Field, MemberDescriptorType, BackedDescriptor, property)):
-            raise TypeError(f"backfill_prop parameter of the Descriptor constructor has to be an instance of dataclass Field, instead is {backfill_prop}")
+    def __init__(self, backfill_prop: property):
         self.backfill_prop = backfill_prop
 
     def apply(self, element: S, owner: Any):
-        if isinstance(self.backfill_prop, property):
-            name = self.backfill_prop.fget.__name__
-        else:
-            name = self.backfill_prop.__name__
+        name = self.backfill_prop.fget.__name__
 
         if hasattr(self.backfill_prop, "__target"):
             backing_name = self.backfill_prop.__target.__name__
@@ -72,7 +67,7 @@ class Backfill:
         if ref is not owner:
             raise ValueError(f"{element} `{name}` property references {ref}, expected {owner}.")
 
-def targets(target: Any):
+def internal(target: Any):
     if not any(isinstance(target, cls) for cls in (Field, MemberDescriptorType, BackedDescriptor, property)):
         raise TypeError(f"target parameter of the target decorator has to be an instance of dataclass Field, instead is {target}")
 

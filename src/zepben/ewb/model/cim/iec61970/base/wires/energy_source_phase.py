@@ -5,10 +5,12 @@
 
 __all__ = ["EnergySourcePhase"]
 
+from dataclasses import field
 from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
+from zepben.ewb.dataclass_descriptors.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
@@ -23,21 +25,21 @@ class EnergySourcePhase(PowerSystemResource):
     A single phase of an energy source.
     """
 
-    _energy_source: Optional['EnergySource'] = None
-    """The `zepben.ewb.model.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
+    _energy_source: Optional['EnergySource'] = field(default=None)
+
+    @property
+    @internal(_energy_source)
+    def energy_source(self):
+        """The `EnergySource` with this `EnergySourcePhase`"""
+        return self._energy_source
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE
     """A `zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
 
-    @property
-    def energy_source(self):
-        """The `EnergySource` with this `EnergySourcePhase`"""
-        return self._energy_source
-
     @energy_source.setter
-    @deprecated("energy_sounrce should never be set directly - it is automatically set when adding it to the `phases` list")
+    @deprecated("energy_source should never be set directly - it is automatically set when adding it to the `phases` list")
     def energy_source(self, es):
         if self._energy_source is None or self._energy_source is es:
             self._energy_source = es

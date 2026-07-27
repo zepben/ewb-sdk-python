@@ -13,7 +13,7 @@ from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 from typing_extensions import deprecated
 
 from zepben.ewb import get_by_mrid, remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, internal
 from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
@@ -38,8 +38,7 @@ class Feeder(EquipmentContainer):
     _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Substation | None = field(default=None)
-    """The substation that normally energizes the feeder. Also used for naming purposes."""
+    _normal_energizing_substation: Substation | None = field(default=None)
 
     _current_equipment_by_id: Dict[str, Equipment] | None = field(default=None)
     """The equipment contained in this feeder in the current state of the network."""
@@ -96,6 +95,7 @@ class Feeder(EquipmentContainer):
     )
     """[ZBEX]"""
     @property
+    @internal(_normal_energizing_substation)
     def normal_energizing_substation(self):
         """The substation that normally energizes the feeder. Also used for naming purposes."""
         return self._normal_energizing_substation
@@ -104,13 +104,6 @@ class Feeder(EquipmentContainer):
     @deprecated("normal_energizing_substation should never be set directly - it is automatically set when adding it to the `feeders` list")
     def normal_energizing_substation(self, value):
         self._normal_energizing_substation = value
-
-    @property
-    def current_equipment(self) -> Generator[Equipment, None, None]:
-        """
-        Contained `Equipment` using the current state of the network.
-        """
-        return ngen(self._current_equipment)
 
 
     # region deprecated list boilerplate
