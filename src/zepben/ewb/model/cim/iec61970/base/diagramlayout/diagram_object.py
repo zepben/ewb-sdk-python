@@ -14,6 +14,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb import Alias
 from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
+from zepben.ewb.dataclass_descriptors.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.ewb.util import nlen, ngen, require, safe_remove
@@ -30,7 +31,13 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    _diagram: Optional[Diagram] = None
+    _diagram: Optional[Diagram] = field(default=None)
+
+    @property
+    @internal(_diagram)
+    def diagram(self):
+        """A diagram object is part of a diagram."""
+        return self._diagram
 
     identified_object_mrid: Optional[str] = None
     """The domain object to which this diagram object is associated."""
@@ -43,11 +50,12 @@ class DiagramObject(IdentifiedObject):
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = field(default=None)
 
+    points: LazyIndexedList[DiagramObjectPoint] = LazyIndexedList(
+        _diagram_object_points,
+        "DiagramObjectPoint",
+    )
+    diagram_object_points = Alias(points)
 
-    @property
-    def diagram(self):
-        """A diagram object is part of a diagram."""
-        return self._diagram
 
     @diagram.setter
     @deprecated("diagram should never be set directly - it is automatically set when adding it to the `diagram_objects` list")
@@ -56,13 +64,6 @@ class DiagramObject(IdentifiedObject):
             self._diagram = diag
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
-
-    points: LazyIndexedList[DiagramObjectPoint] = LazyIndexedList(
-        _diagram_object_points,
-        "DiagramObjectPoint",
-    )
-    diagram_object_points = Alias(points)
-
 
     # region deprecated list boilerplate
     #

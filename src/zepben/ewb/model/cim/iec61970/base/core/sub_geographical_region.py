@@ -13,7 +13,7 @@ from typing import Optional, List, TYPE_CHECKING
 from typing_extensions import deprecated
 
 from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill, targets
+from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill, internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
@@ -31,33 +31,11 @@ class SubGeographicalRegion(IdentifiedObject):
 
     _substations: Optional[List[Substation]] = field(default=None)
 
-
     @property
-    @targets(_geographical_region)
+    @internal(_geographical_region)
     def geographical_region(self):
         """The geographical region to which this sub-geographical region is within."""
         return self._geographical_region
-
-    @geographical_region.setter
-    @deprecated("Geographical region is a backfill property - it should only be set by adding the sub region to the sub regions list")
-    def geographical_region(self, value):
-        self._geographical_region = value
-
-    @property
-    def geographical_region(self):
-        """The geographical region to which this sub-geographical region is within."""
-        return self._geographical_region
-
-    @geographical_region.setter
-    @deprecated("geographical_region should never be set directly - it is automatically set when adding it to the `sub_geographical_regions` list")
-    def geographical_region(self, value):
-        self._geographical_region = value
-
-    def num_substations(self) -> int:
-        """
-        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
-        """
-        return nlen(self._substations)
 
     substations: MridCollection[Substation] = LazyMridList(
         _substations,
@@ -65,6 +43,10 @@ class SubGeographicalRegion(IdentifiedObject):
         backfill=Backfill(Substation.sub_geographical_region)
     )
 
+    @geographical_region.setter
+    @deprecated("Geographical region is a backfill property - it should only be set by adding the sub region to the sub regions list")
+    def geographical_region(self, value):
+        self._geographical_region = value
 
     # region deprecated list boilerplate
     # region substations boilerplate
@@ -95,7 +77,3 @@ class SubGeographicalRegion(IdentifiedObject):
     # endregion substations boilerplate
 
     # endregion deprecated list boilerplate
-
-if __name__ == '__main__':
-    s = SubGeographicalRegion("")
-    s.geographical_region = GeographicalRegion("")

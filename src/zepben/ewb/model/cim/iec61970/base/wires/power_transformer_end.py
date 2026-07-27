@@ -13,7 +13,9 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
+from zepben.ewb import Alias
 from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList
+from zepben.ewb.dataclass_descriptors.mrid_list import internal
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
@@ -62,7 +64,7 @@ class PowerTransformerEnd(TransformerEnd):
     Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
     """
 
-    _power_transformer: Optional[PowerTransformer] = None
+    _power_transformer: Optional[PowerTransformer] = field(default=None)
     """The power transformer of this power transformer end."""
     _rated_s: Optional[int] = None
 
@@ -110,7 +112,7 @@ class PowerTransformerEnd(TransformerEnd):
 
     def __init__(self, *args, rated_s: int = None, **kwargs):
         super(PowerTransformerEnd, self).__init__(*args, **kwargs)
-        if self._s_ratings:
+        if "_s_ratings" in kwargs:
             raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
         if rated_s and self._rated_s:
             raise ValueError(f"Cannot specify both rated_s and _rated_s properties when constructing {self}. Check your constructor parameters.")
@@ -126,6 +128,7 @@ class PowerTransformerEnd(TransformerEnd):
             self._rated_s = None
 
     @property
+    @internal(_power_transformer)
     def power_transformer(self):
         """The power transformer of this power transformer end."""
         return self._power_transformer
@@ -167,6 +170,7 @@ class PowerTransformerEnd(TransformerEnd):
         validate=lambda self, it: self._validate_rating(it),
         sort_by=lambda it: -it.rated_s
     )
+    ratings = Alias(s_ratings)
 
     def _validate_rating(self, rating: TransformerEndRatedS):
         if any(it.cooling_type == rating.cooling_type for it in self.s_ratings):
