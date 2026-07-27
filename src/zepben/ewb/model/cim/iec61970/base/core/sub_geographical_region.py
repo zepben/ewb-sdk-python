@@ -13,7 +13,8 @@ from typing import Optional, List, TYPE_CHECKING
 from typing_extensions import deprecated
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.backfill import Backfill, internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation

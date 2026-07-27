@@ -6,7 +6,7 @@ from dataclasses import field
 
 from zepben.ewb.boilerplate.dataclass_base import DataclassBase
 from zepben.ewb import zb_dataclass, remove_descriptor_annotations
-from zepben.ewb.boilerplate.descriptor_fix import BackedDescriptor
+from zepben.ewb.boilerplate.backed_descriptor import BackedDescriptor
 
 
 @zb_dataclass

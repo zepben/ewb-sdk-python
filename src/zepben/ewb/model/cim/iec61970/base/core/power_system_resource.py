@@ -15,7 +15,8 @@ from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import nlen
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.asset import Asset

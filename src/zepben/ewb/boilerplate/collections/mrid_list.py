@@ -2,55 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from abc import abstractmethod, ABC
-from typing import Any, TypeVar, Protocol, Sequence
+from typing import TypeVar, Protocol, Sequence
 
 from typing_extensions import Self
 
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedCollection, AbstractBackedList
+from zepben.ewb.boilerplate.collections.abstract_backed_collections import AbstractBackedList
 from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
-
-
-class HasMrid(Protocol):
-    mrid: str
-
-
-S = TypeVar("S", bound=HasMrid)
-
-
-class MridCollection(AbstractBackedCollection[S], ABC):
-    instance: Any
-    element_description: str
-
-    @abstractmethod
-    def _safe_get_by_mrid(self, mrid: str) -> S | None: ...
-
-    def get_by_mrid(self, mrid: str) -> S:
-        """
-        Get an element matching given ``mrid``
-
-        raises KeyError if one is not present
-        """
-        res = self._safe_get_by_mrid(mrid)
-        if res is None:
-            raise KeyError
-        return res
-
-    def _can_add_by_mrid(self, element: S) -> bool:
-        existing = self._safe_get_by_mrid(element.mrid)
-
-        if existing is None:
-            return True
-
-        if existing is not element:
-            raise ValueError(
-                f"{self.element_description} with mRID {element.mrid} "
-                f"already exists in {self.instance}."
-            )
-
-        return False
 
 
 class LazyMridList(LazyValidatedList, MridCollection[S]):
@@ -85,10 +45,12 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
     def __init__(self,
                  private_field,
                  element_description: str,
+                 backfill: Backfill = None,
                  validate=None,
                  sort_by=None):
         super().__init__(private_field)
         self.element_description = element_description
+        self.backfill = backfill
         self.validate = validate
         self.sort_by = sort_by
         self.backing_list = None
@@ -114,6 +76,9 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
         if not self._can_add_by_mrid(item):
             return
 
+        if self.backfill is not None:
+            self.backfill.apply(item, self.instance)
+
         if self.validate is not None:
             self.validate(self.instance, item)
 
@@ -121,15 +86,6 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
 
         if self.sort_by is not None:
             self.backing_list.sort(key=self.sort_by)
-
-    def __len__(self):
-        return len(self.backing_list)
-
-    def __iter__(self):
-        return iter(self.backing_list)
-
-    def __contains__(self, item):
-        return item in self.backing_list
 
     def remove(self, item):
         self.backing_list.remove(item)
@@ -139,9 +95,3 @@ class MridList(_IterableWrapper, AbstractBackedList[S], MridCollection[S]):
 
     def __repr__(self):
         return str(self.backing_list)
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __getitem__(self, item):
-        return self.backing_list[item]

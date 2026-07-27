@@ -4,29 +4,31 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import Field
 from types import MemberDescriptorType
-from typing import Any, Callable, TypeVar, Protocol
+from typing import Any, Callable, TypeVar
 
 from zepben.ewb import BackedDescriptor
+from zepben.ewb.boilerplate.collections.mrid_collection import S
 
 
-class HasMrid(Protocol):
-    mrid: str
-
-
-S = TypeVar("S", bound=HasMrid)
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class Backfill:
-    def __init__(self, backfill_prop: property):
+    def __init__(self, backfill_prop: property) -> None:
         self.backfill_prop = backfill_prop
 
-    def apply(self, element: S, owner: Any):
+    def apply(self, element: S, owner: Any) -> None:
         name = self.backfill_prop.fget.__name__
 
-        if hasattr(self.backfill_prop, "__target"):
-            backing_name = self.backfill_prop.__target.__name__
-        else:
-            backing_name = name
+        target = getattr(self.backfill_prop.fget, "_internal_target", None)
+        backing_name = name if target is None else (
+            getattr(target, "name", None)
+            or getattr(target, "__name__", None)
+            or getattr(target.fget, "__name__", None)
+        )
+
+        if backing_name is None:
+            raise TypeError(f"Cannot determine backing name for {target!r}")
 
         if getattr(element, backing_name) is None:
             setattr(element, backing_name, owner)
@@ -36,11 +38,14 @@ class Backfill:
             raise ValueError(f"{element} `{name}` property references {ref}, expected {owner}.")
 
 
-def internal(target: Any):
+def internal(target: Any) -> Callable[[F], F]:
     if not any(isinstance(target, cls) for cls in (Field, MemberDescriptorType, BackedDescriptor, property)):
-        raise TypeError(f"target parameter of the target decorator has to be an instance of dataclass Field, instead is {target}")
+        raise TypeError(f"target parameter of the target decorator has to be an instance of property or dataclass Field, instead is {target}")
+
+    if isinstance(target, property) and target.fget is None:
+        raise TypeError(f"Cannot backfill a property without a getter: {target}")
 
     def dec(func: Callable):
-        setattr(func, "__target", target)
+        setattr(func, "_internal_target", target)
         return func
     return dec
