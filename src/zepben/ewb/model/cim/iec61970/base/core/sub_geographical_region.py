@@ -12,8 +12,8 @@ from typing import Optional, List, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList, Backfill, internal
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList, Backfill, internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 

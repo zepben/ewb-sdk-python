@@ -7,16 +7,14 @@ from __future__ import annotations
 
 __all__ = ["Sensor"]
 
-from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
+from typing import Optional, List, TYPE_CHECKING
 from abc import ABCMeta
 from dataclasses import field
 from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
-from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction

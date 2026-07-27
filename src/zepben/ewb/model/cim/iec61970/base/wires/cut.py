@@ -10,7 +10,7 @@ from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 

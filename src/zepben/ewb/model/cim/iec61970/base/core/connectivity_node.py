@@ -7,14 +7,13 @@ from __future__ import annotations
 
 __all__ = ["ConnectivityNode"]
 
-from typing import Generator, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 from dataclasses import field
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import get_by_mrid, ngen
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:

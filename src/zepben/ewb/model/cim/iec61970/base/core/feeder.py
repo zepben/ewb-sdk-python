@@ -8,16 +8,13 @@ from __future__ import annotations
 __all__ = ["Feeder"]
 
 from dataclasses import field
-from typing import Optional, Dict, List, Generator, TYPE_CHECKING
+from typing import Optional, Dict, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb import get_by_mrid, remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, internal
-from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
-from zepben.ewb.model.cim.extensions.zbex import zbex
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, internal
+from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import ngen, nlen, safe_remove_by_id
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:

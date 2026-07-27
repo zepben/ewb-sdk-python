@@ -19,10 +19,10 @@ from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.util import ngen
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb import Alias
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint

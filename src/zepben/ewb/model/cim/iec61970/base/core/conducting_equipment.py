@@ -8,16 +8,16 @@ from __future__ import annotations
 __all__ = ['ConductingEquipment']
 
 import sys
-from typing import List, Optional, Generator, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 from abc import ABCMeta
 from dataclasses import field
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList, Backfill
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.ewb.util import get_by_mrid, require, ngen
+from zepben.ewb.util import require
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:

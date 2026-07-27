@@ -182,7 +182,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             in_source,
             target_empty,
             {
-                _prop_name(prop): CollectionDifference(missing_from_target=[next(_get_prop(in_source, prop))])
+                _prop_name(prop): CollectionDifference(missing_from_target=[next(iter(_get_prop(in_source, prop)))])
             },
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
@@ -191,7 +191,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             source_empty,
             in_target,
             {
-                _prop_name(prop): CollectionDifference(missing_from_source=[next(_get_prop(in_target, prop))])
+                _prop_name(prop): CollectionDifference(missing_from_source=[next(iter(_get_prop(in_target, prop)))])
             },
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
@@ -201,8 +201,8 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             in_target_difference,
             {
                 _prop_name(prop): CollectionDifference(
-                    missing_from_source=[next(_get_prop(in_target_difference, prop))],
-                    missing_from_target=[next(_get_prop(in_source, prop))],
+                    missing_from_source=[next(iter(_get_prop(in_target_difference, prop)))],
+                    missing_from_target=[next(iter(_get_prop(in_source, prop)))],
                 )
             },
         )
@@ -235,7 +235,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             in_source,
             target_empty,
             {
-                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))])
+                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_target=[next(iter(_get_prop(in_source, IdentifiedObject.names)))])
             },
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
@@ -244,7 +244,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             source_empty,
             in_target,
             {
-                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_source=[next(_get_prop(in_target, IdentifiedObject.names))])
+                _prop_name(IdentifiedObject.names): CollectionDifference(missing_from_source=[next(iter(_get_prop(in_target, IdentifiedObject.names)))])
             },
         )
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
@@ -254,8 +254,8 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
             in_target_difference,
             {
                 _prop_name(IdentifiedObject.names): CollectionDifference(
-                    missing_from_source=[next(_get_prop(in_target_difference, IdentifiedObject.names))],
-                    missing_from_target=[next(_get_prop(in_source, IdentifiedObject.names))],
+                    missing_from_source=[next(iter(_get_prop(in_target_difference, IdentifiedObject.names)))],
+                    missing_from_target=[next(iter(_get_prop(in_source, IdentifiedObject.names)))],
                 )
             },
         )
@@ -286,7 +286,7 @@ class ServiceComparatorValidator(Generic[TService, TComparator]):
         self.validate_compare(in_source, in_target, options=options, options_stop_compare=options_stop_compare)
 
         def get_item(obj) -> Optional[R]:
-            return next(_get_prop(obj, prop), None)
+            return next(iter(_get_prop(obj, prop)), None)
 
         diff = ObjectDifference(
             in_source,

@@ -4,9 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import field
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import DataclassBase
+from zepben.ewb.boilerplate.dataclass_base import DataclassBase
 from zepben.ewb import zb_dataclass, remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.descriptor_fix import BackedDescriptor
+from zepben.ewb.boilerplate.descriptor_fix import BackedDescriptor
 
 
 @zb_dataclass

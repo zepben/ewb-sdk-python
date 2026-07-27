@@ -14,7 +14,7 @@ from weakref import ref, ReferenceType
 
 from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.mrid_list import internal
+from zepben.ewb.boilerplate.collections.mrid_list import internal
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode

@@ -7,16 +7,14 @@ from __future__ import annotations
 
 __all__ = ["Asset"]
 
-from typing import Optional, Generator, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from abc import ABCMeta
 from dataclasses import field
 from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb import remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection, LazyMridList
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection, LazyMridList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole

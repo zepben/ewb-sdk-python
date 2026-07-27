@@ -12,12 +12,12 @@ from typing import List, Generator
 
 from typing_extensions import deprecated
 
-from zepben.ewb import remove_descriptor_annotations, zb_dataclass
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyValidatedList
+from zepben.ewb import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_list import LazyValidatedList
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.ewb.util import require, ngen, nlen, safe_remove, none
+from zepben.ewb.util import require, none
 
 
 class PhaseImpedanceDataList(LazyValidatedList):

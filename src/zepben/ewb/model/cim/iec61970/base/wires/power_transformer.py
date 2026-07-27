@@ -11,8 +11,8 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb import remove_descriptor_annotations, Alias
-from zepben.ewb.dataclass_descriptors.mrid_list import LazyMridList, Backfill
+from zepben.ewb import Alias
+from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList, Backfill
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated

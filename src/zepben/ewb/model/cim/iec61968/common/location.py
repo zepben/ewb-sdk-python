@@ -13,8 +13,8 @@ from typing import List, Optional, Callable, Any
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
-from zepben.ewb.dataclass_descriptors.lazy_list import LazyIndexedList
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_list import LazyIndexedList
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject

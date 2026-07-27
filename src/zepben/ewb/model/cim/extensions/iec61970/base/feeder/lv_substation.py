@@ -12,9 +12,8 @@ from typing import Generator, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
-from zepben.ewb import ngen, nlen, safe_remove_by_id, get_by_mrid, remove_descriptor_annotations
-from zepben.ewb.dataclass_descriptors.mrid_list import MridCollection
-from zepben.ewb.dataclass_descriptors.mrid_map import LazyMridMap
+from zepben.ewb.boilerplate.collections.mrid_list import MridCollection
+from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
