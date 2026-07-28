@@ -32,18 +32,18 @@ class Pole(Structure):
             for light in streetlights:
                 self.add_streetlight(light)
 
-    def num_streetlights(self) -> int:
-        """
-        Get the number of `Streetlight`s associated with this `Pole`.
-        """
-        return nlen(self._streetlights)
-
     @property
     def streetlights(self) -> Generator[Streetlight, None, None]:
         """
         The `Streetlight`s of this `Pole`.
         """
         return ngen(self._streetlights)
+
+    def num_streetlights(self) -> int:
+        """
+        Get the number of `Streetlight`s associated with this `Pole`.
+        """
+        return nlen(self._streetlights)
 
     def get_streetlight(self, mrid: str) -> Streetlight:
         """

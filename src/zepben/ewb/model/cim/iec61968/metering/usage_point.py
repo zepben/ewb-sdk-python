@@ -72,18 +72,6 @@ class UsagePoint(IdentifiedObject):
             for c in contacts:
                 self.add_contact(c)
 
-    def num_equipment(self):
-        """
-        Returns The number of `Equipment`s associated with this `UsagePoint`
-        """
-        return nlen(self._equipment)
-
-    def num_end_devices(self):
-        """
-        Returns The number of `EndDevice`s associated with this `UsagePoint`
-        """
-        return nlen(self._end_devices)
-
     @property
     def end_devices(self) -> Generator[EndDevice, None, None]:
         """
@@ -98,49 +86,52 @@ class UsagePoint(IdentifiedObject):
         """
         return ngen(self._equipment)
 
-    def get_equipment(self, mrid: str) -> Equipment:
+    def is_metered(self):
         """
-        Get the `Equipment` for this `UsagePoint` identified by `mrid`
+        Check whether this `UsagePoint` is metered. A `UsagePoint` is metered if it's associated with at least one `EndDevice`.
+        Returns True if this `UsagePoint` has an `EndDevice`, False otherwise.
+        """
+        return nlen(self._end_devices) > 0
 
-        `mrid` The mRID of the required `Equipment`
-        Returns The `Equipment` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._equipment, mrid)
+    @property
+    def contacts(self) -> Generator[ContactDetails, None, None]:
+        """[ZBEX] All contact details for this `UsagePoint`"""
+        return ngen(self._contacts)
 
-    def add_equipment(self, equipment: Equipment) -> UsagePoint:
-        """
-        Associate an `Equipment` with this `UsagePoint`
+    def num_contacts(self):
+        """Get the number of entries in the `ContactDetails` collection"""
+        return nlen(self._contacts)
 
-        `equipment` The `Equipment` to associate with this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `UsagePoint`.
-        """
-        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
+    def get_contact(self, _id: str) -> ContactDetails:
+        """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
+        try:
+            return next((it for it in self.contacts if it.id == _id))
+        except StopIteration:
+            raise KeyError(_id)
+
+    def add_contact(self, contact: ContactDetails) -> UsagePoint:
+        """Add a `ContactDetails` to this `UsagePoint`"""
+        if self._validate_reference(contact, self.get_contact, "A ContactDetails"):
             return self
 
-        self._equipment = list() if self._equipment is None else self._equipment
-        self._equipment.append(equipment)
+        if self._contacts is None:
+            self._contacts = list()
+        self._contacts.append(contact)
         return self
 
-    def remove_equipment(self, equipment: Equipment) -> UsagePoint:
-        """
-        Disassociate an `Equipment` from this `UsagePoint`
-
-        `equipment` The `Equipment` to disassociate with this `UsagePoint`.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        Raises `ValueError` if `equipment` was not associated with this `UsagePoint`.
-        """
-        self._equipment = safe_remove(self._equipment, equipment)
+    def remove_contact(self, contact: ContactDetails) -> UsagePoint:
+        self._contacts = safe_remove(self._contacts, contact)
         return self
 
-    def clear_equipment(self) -> UsagePoint:
-        """
-        Clear all equipment.
-        Returns A reference to this `UsagePoint` to allow fluent use.
-        """
-        self._equipment = None
+    def clear_contacts(self) -> UsagePoint:
+        self._contacts = None
         return self
+
+    def num_end_devices(self):
+        """
+        Returns The number of `EndDevice`s associated with this `UsagePoint`
+        """
+        return nlen(self._end_devices)
 
     def get_end_device(self, mrid: str) -> EndDevice:
         """
@@ -185,43 +176,52 @@ class UsagePoint(IdentifiedObject):
         self._end_devices = None
         return self
 
-    def is_metered(self):
+    def num_equipment(self):
         """
-        Check whether this `UsagePoint` is metered. A `UsagePoint` is metered if it's associated with at least one `EndDevice`.
-        Returns True if this `UsagePoint` has an `EndDevice`, False otherwise.
+        Returns The number of `Equipment`s associated with this `UsagePoint`
         """
-        return nlen(self._end_devices) > 0
+        return nlen(self._equipment)
 
-    @property
-    def contacts(self) -> Generator[ContactDetails, None, None]:
-        """[ZBEX] All contact details for this `UsagePoint`"""
-        return ngen(self._contacts)
+    def get_equipment(self, mrid: str) -> Equipment:
+        """
+        Get the `Equipment` for this `UsagePoint` identified by `mrid`
 
-    def num_contacts(self):
-        """Get the number of entries in the `ContactDetails` collection"""
-        return nlen(self._contacts)
+        `mrid` The mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._equipment, mrid)
 
-    def get_contact(self, _id: str) -> ContactDetails:
-        """All End devices at this usage point."""  # TODO: again, lol, also jvmsdk
-        try:
-            return next((it for it in self.contacts if it.id == _id))
-        except StopIteration:
-            raise KeyError(_id)
+    def add_equipment(self, equipment: Equipment) -> UsagePoint:
+        """
+        Associate an `Equipment` with this `UsagePoint`
 
-    def add_contact(self, contact: ContactDetails) -> UsagePoint:
-        """Add a `ContactDetails` to this `UsagePoint`"""
-        if self._validate_reference(contact, self.get_contact, "A ContactDetails"):
+        `equipment` The `Equipment` to associate with this `UsagePoint`.
+        Returns A reference to this `UsagePoint` to allow fluent use.
+        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `UsagePoint`.
+        """
+        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
             return self
 
-        if self._contacts is None:
-            self._contacts = list()
-        self._contacts.append(contact)
+        self._equipment = list() if self._equipment is None else self._equipment
+        self._equipment.append(equipment)
         return self
 
-    def remove_contact(self, contact: ContactDetails) -> UsagePoint:
-        self._contacts = safe_remove(self._contacts, contact)
+    def remove_equipment(self, equipment: Equipment) -> UsagePoint:
+        """
+        Disassociate an `Equipment` from this `UsagePoint`
+
+        `equipment` The `Equipment` to disassociate with this `UsagePoint`.
+        Returns A reference to this `UsagePoint` to allow fluent use.
+        Raises `ValueError` if `equipment` was not associated with this `UsagePoint`.
+        """
+        self._equipment = safe_remove(self._equipment, equipment)
         return self
 
-    def clear_contacts(self) -> UsagePoint:
-        self._contacts = None
+    def clear_equipment(self) -> UsagePoint:
+        """
+        Clear all equipment.
+        Returns A reference to this `UsagePoint` to allow fluent use.
+        """
+        self._equipment = None
         return self

@@ -39,18 +39,18 @@ class BatteryUnit(PowerElectronicsUnit):
     _controls: Optional[List['BatteryControl']] = None
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
-    def num_battery_controls(self):
-        """
-        Returns The number of `BatteryControl`s associated with this `BatteryUnit`
-        """
-        return nlen(self._controls)
-
     @property
     def controls(self) -> Generator['BatteryControl', None, None]:
         """
         [ZBEX] The `BatteryControl`s associated with this `BatteryUnit`
         """
         return ngen(self._controls)
+
+    def num_battery_controls(self):
+        """
+        Returns The number of `BatteryControl`s associated with this `BatteryUnit`
+        """
+        return nlen(self._controls)
 
     def get_control(self, mrid: str) -> 'BatteryControl':
         """

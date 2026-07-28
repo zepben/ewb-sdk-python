@@ -111,6 +111,31 @@ class Feeder(EquipmentContainer):
         """
         return ngen(self._current_equipment)
 
+    @property
+    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The LV feeders that are normally energized by this feeder.
+        """
+        return ngen(self._normal_energized_lv_feeders)
+
+    @zbex
+    @property
+    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The LV feeders that are currently energized by this feeder.
+        """
+        return ngen(self._current_energized_lv_feeders)
+
+    @zbex
+    @property
+    def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
+        return ngen(self._normal_energized_lv_substations)
+
+    @zbex
+    @property
+    def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
+        return ngen(self._current_energized_lv_substations)
+
     def num_current_equipment(self):
         """
         :returns: The number of `Equipment` associated with this `Feeder`
@@ -159,13 +184,6 @@ class Feeder(EquipmentContainer):
         """
         self._current_equipment = None
         return self
-
-    @property
-    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are normally energized by this feeder.
-        """
-        return ngen(self._normal_energized_lv_feeders)
 
     def num_normal_energized_lv_feeders(self) -> int:
         """
@@ -216,14 +234,6 @@ class Feeder(EquipmentContainer):
         self._normal_energized_lv_feeders = None
         return self
 
-    @zbex
-    @property
-    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are currently energized by this feeder.
-        """
-        return ngen(self._current_energized_lv_feeders)
-
     def num_current_energized_lv_feeders(self) -> int:
         """
         Get the number of LV feeders that are currently energized by this feeder.
@@ -273,11 +283,6 @@ class Feeder(EquipmentContainer):
         self._current_energized_lv_feeders = None
         return self
 
-    @zbex
-    @property
-    def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._normal_energized_lv_substations)
-
     def num_normal_energized_lv_substations(self) -> int:
         """
         Get the number of entries in the normal [LvSubstation] collection.
@@ -325,11 +330,6 @@ class Feeder(EquipmentContainer):
         """
         self._normal_energized_lv_substations = None
         return self
-
-    @zbex
-    @property
-    def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._current_energized_lv_substations)
 
     def num_current_energized_lv_substations(self) -> int:
         """

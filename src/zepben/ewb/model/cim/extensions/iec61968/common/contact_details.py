@@ -93,6 +93,31 @@ class ContactDetails(Identifiable):
         """[ZBEX] Phone numbers."""
         return ngen(self._phone_numbers)
 
+    @zbex
+    @property
+    def electronic_addresses(self) -> Generator[ElectronicAddress, None, None]:
+        """[ZBEX] Electronic addresses."""
+        return ngen(self._electronic_addresses)
+
+    def __eq__(self, other: Any) -> bool:
+        #
+        # NOTE: We implement the equals to allow us to compare the entire ``ContactDetails`` as a value. We do this since it isnt an
+        #       ``IdentifiedObject``, so our other helpers don't support it.
+        if not isinstance(other, ContactDetails):
+            return False
+        return all((
+            self.is_primary == other.is_primary,
+            self.mrid == other.mrid,
+            self.contact_address == other.contact_address,
+            self.contact_type == other.contact_type,
+            self.first_name == other.first_name,
+            self.last_name == other.last_name,
+            self.preferred_contact_method == other.preferred_contact_method,
+            self.business_name == other.business_name,
+            self._phone_numbers == other._phone_numbers,
+            self._electronic_addresses == other._electronic_addresses,
+        ))
+
     def num_phone_numbers(self) -> int:
         """Get the number of entries in the ``TelephoneNumber`` collection."""
         return nlen(self._phone_numbers)
@@ -130,12 +155,6 @@ class ContactDetails(Identifiable):
         """
         self._phone_numbers = None
         return self
-
-    @zbex
-    @property
-    def electronic_addresses(self) -> Generator[ElectronicAddress, None, None]:
-        """[ZBEX] Electronic addresses."""
-        return ngen(self._electronic_addresses)
 
     def num_electronic_addresses(self) -> int:
         """Get the number of entries in the [ElectronicAddress] collection."""
@@ -175,22 +194,3 @@ class ContactDetails(Identifiable):
         """
         self._electronic_addresses = None
         return self
-
-    def __eq__(self, other: Any) -> bool:
-        #
-        # NOTE: We implement the equals to allow us to compare the entire ``ContactDetails`` as a value. We do this since it isnt an
-        #       ``IdentifiedObject``, so our other helpers don't support it.
-        if not isinstance(other, ContactDetails):
-            return False
-        return all((
-            self.is_primary == other.is_primary,
-            self.mrid == other.mrid,
-            self.contact_address == other.contact_address,
-            self.contact_type == other.contact_type,
-            self.first_name == other.first_name,
-            self.last_name == other.last_name,
-            self.preferred_contact_method == other.preferred_contact_method,
-            self.business_name == other.business_name,
-            self._phone_numbers == other._phone_numbers,
-            self._electronic_addresses == other._electronic_addresses,
-        ))

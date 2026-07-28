@@ -95,120 +95,12 @@ class LvFeeder(EquipmentContainer):
         """
         return ngen(self._normal_energizing_feeders)
 
-    def num_normal_energizing_feeders(self) -> int:
-        """
-        Get the number of HV/MV feeders that normally energize this LV feeder.
-        """
-        return nlen(self._normal_energizing_feeders)
-
-    def get_normal_energizing_feeder(self, mrid: str) -> Feeder:
-        """
-        Energizing feeder using the normal state of the network.
-
-        @param mrid: The mrid of the `Feeder`.
-        @return A matching `Feeder` that energizes this `LvFeeder` in the normal state of the network.
-        @raise A `KeyError` if no matching `Feeder` was found.
-        """
-        if not self._normal_energizing_feeders:
-            raise KeyError(mrid)
-        try:
-            return self._normal_energizing_feeders[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
-
-    def add_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Associate this `LvFeeder` with a `Feeder` in the normal state of the network.
-
-        @param feeder: the HV/MV feeder to associate with this LV feeder in the normal state of the network.
-        @return: This `LvFeeder` for fluent use.
-        """
-        if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A Feeder"):
-            return self
-        self._normal_energizing_feeders = dict() if self._normal_energizing_feeders is None else self._normal_energizing_feeders
-        self._normal_energizing_feeders[feeder.mrid] = feeder
-        return self
-
-    def remove_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Disassociate this `LvFeeder` from a `Feeder` in the normal state of the network.
-
-        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the normal state of the network.
-        @return: This `LvFeeder` for fluent use.
-        @raise: A `ValueError` if `feeder` is not found in the normal energizing feeders collection.
-        """
-        self._normal_energizing_feeders = safe_remove_by_id(self._normal_energizing_feeders, feeder)
-        return self
-
-    def clear_normal_energizing_feeders(self) -> LvFeeder:
-        """
-        Clear all `Feeder`s associated with `LvFeeder` in the normal state of the network.
-
-        @return: This `LvFeeder` for fluent use.
-        """
-        self._normal_energizing_feeders = None
-        return self
-
     @property
     def current_energizing_feeders(self) -> Generator[Feeder, None, None]:
         """
         [ZBEX] The HV/MV feeders that currently energize this LV feeder.
         """
         return ngen(self._current_energizing_feeders)
-
-    def num_current_energizing_feeders(self) -> int:
-        """
-        Get the number of HV/MV feeders that currently energize this LV feeder.
-        """
-        return nlen(self._current_energizing_feeders)
-
-    def get_current_energizing_feeder(self, mrid: str) -> Feeder:
-        """
-        Energizing feeder using the current state of the network.
-
-        @param mrid: The mrid of the `Feeder`.
-        @return A matching `Feeder` that energizes this `LvFeeder` in the current state of the network.
-        @raise A `KeyError` if no matching `Feeder` was found.
-        """
-        if not self._current_energizing_feeders:
-            raise KeyError(mrid)
-        try:
-            return self._current_energizing_feeders[mrid]
-        except AttributeError:
-            raise KeyError(mrid)
-
-    def add_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Associate this `LvFeeder` with a `Feeder` in the current state of the network.
-
-        @param feeder: the HV/MV feeder to associate with this LV feeder in the current state of the network.
-        @return: This `LvFeeder` for fluent use.
-        """
-        if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
-            return self
-        self._current_energizing_feeders = dict() if self._current_energizing_feeders is None else self._current_energizing_feeders
-        self._current_energizing_feeders[feeder.mrid] = feeder
-        return self
-
-    def remove_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
-        """
-        Disassociate this `LvFeeder` from a `Feeder` in the current state of the network.
-
-        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the current state of the network.
-        @return: This `LvFeeder` for fluent use.
-        @raise: A `ValueError` if `feeder` is not found in the current energizing feeders collection.
-        """
-        self._current_energizing_feeders = safe_remove_by_id(self._current_energizing_feeders, feeder)
-        return self
-
-    def clear_current_energizing_feeders(self) -> LvFeeder:
-        """
-        Clear all `Feeder`s associated with `LvFeeder` in the current state of the network.
-
-        @return: This `LvFeeder` for fluent use.
-        """
-        self._current_energizing_feeders = None
-        return self
 
     @property
     def current_equipment(self) -> Generator[Equipment, None, None]:
@@ -269,4 +161,112 @@ class LvFeeder(EquipmentContainer):
         Returns A reference to this `LvFeeder` to allow fluent use.
         """
         self._current_equipment = None
+        return self
+
+    def num_normal_energizing_feeders(self) -> int:
+        """
+        Get the number of HV/MV feeders that normally energize this LV feeder.
+        """
+        return nlen(self._normal_energizing_feeders)
+
+    def get_normal_energizing_feeder(self, mrid: str) -> Feeder:
+        """
+        Energizing feeder using the normal state of the network.
+
+        @param mrid: The mrid of the `Feeder`.
+        @return A matching `Feeder` that energizes this `LvFeeder` in the normal state of the network.
+        @raise A `KeyError` if no matching `Feeder` was found.
+        """
+        if not self._normal_energizing_feeders:
+            raise KeyError(mrid)
+        try:
+            return self._normal_energizing_feeders[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
+
+    def add_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Associate this `LvFeeder` with a `Feeder` in the normal state of the network.
+
+        @param feeder: the HV/MV feeder to associate with this LV feeder in the normal state of the network.
+        @return: This `LvFeeder` for fluent use.
+        """
+        if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A Feeder"):
+            return self
+        self._normal_energizing_feeders = dict() if self._normal_energizing_feeders is None else self._normal_energizing_feeders
+        self._normal_energizing_feeders[feeder.mrid] = feeder
+        return self
+
+    def remove_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Disassociate this `LvFeeder` from a `Feeder` in the normal state of the network.
+
+        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the normal state of the network.
+        @return: This `LvFeeder` for fluent use.
+        @raise: A `ValueError` if `feeder` is not found in the normal energizing feeders collection.
+        """
+        self._normal_energizing_feeders = safe_remove_by_id(self._normal_energizing_feeders, feeder)
+        return self
+
+    def clear_normal_energizing_feeders(self) -> LvFeeder:
+        """
+        Clear all `Feeder`s associated with `LvFeeder` in the normal state of the network.
+
+        @return: This `LvFeeder` for fluent use.
+        """
+        self._normal_energizing_feeders = None
+        return self
+
+    def num_current_energizing_feeders(self) -> int:
+        """
+        Get the number of HV/MV feeders that currently energize this LV feeder.
+        """
+        return nlen(self._current_energizing_feeders)
+
+    def get_current_energizing_feeder(self, mrid: str) -> Feeder:
+        """
+        Energizing feeder using the current state of the network.
+
+        @param mrid: The mrid of the `Feeder`.
+        @return A matching `Feeder` that energizes this `LvFeeder` in the current state of the network.
+        @raise A `KeyError` if no matching `Feeder` was found.
+        """
+        if not self._current_energizing_feeders:
+            raise KeyError(mrid)
+        try:
+            return self._current_energizing_feeders[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
+
+    def add_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Associate this `LvFeeder` with a `Feeder` in the current state of the network.
+
+        @param feeder: the HV/MV feeder to associate with this LV feeder in the current state of the network.
+        @return: This `LvFeeder` for fluent use.
+        """
+        if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
+            return self
+        self._current_energizing_feeders = dict() if self._current_energizing_feeders is None else self._current_energizing_feeders
+        self._current_energizing_feeders[feeder.mrid] = feeder
+        return self
+
+    def remove_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Disassociate this `LvFeeder` from a `Feeder` in the current state of the network.
+
+        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the current state of the network.
+        @return: This `LvFeeder` for fluent use.
+        @raise: A `ValueError` if `feeder` is not found in the current energizing feeders collection.
+        """
+        self._current_energizing_feeders = safe_remove_by_id(self._current_energizing_feeders, feeder)
+        return self
+
+    def clear_current_energizing_feeders(self) -> LvFeeder:
+        """
+        Clear all `Feeder`s associated with `LvFeeder` in the current state of the network.
+
+        @return: This `LvFeeder` for fluent use.
+        """
+        self._current_energizing_feeders = None
         return self

@@ -53,18 +53,18 @@ class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
         """
         return nlen(self.num_controls) > 0
 
-    def num_assets(self) -> int:
-        """
-        Get the number of `Asset`s associated with this `PowerSystemResource`.
-        """
-        return nlen(self._assets)
-
     @property
     def assets(self) -> Generator[Asset, None, None]:
         """
         The `Asset`s of this `PowerSystemResource`.
         """
         return ngen(self._assets)
+
+    def num_assets(self) -> int:
+        """
+        Get the number of `Asset`s associated with this `PowerSystemResource`.
+        """
+        return nlen(self._assets)
 
     def get_asset(self, mrid: str) -> Asset:
         """

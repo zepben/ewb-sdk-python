@@ -39,18 +39,31 @@ class ConnectivityNode(IdentifiedObject, WeakrefSlot):
     def __iter__(self):
         return iter(self._terminals)
 
-    def num_terminals(self):
-        """
-        Get the number of `Terminal`s for this `ConnectivityNode`.
-        """
-        return len(self._terminals)
-
     @property
     def terminals(self) -> Generator[Terminal, None, None]:
         """
         The `Terminal`s attached to this `ConnectivityNode`
         """
         return ngen(self._terminals)
+
+    def is_switched(self):
+        return self.get_switch() is not None
+
+    def get_switch(self):
+        for term in self._terminals:
+            try:
+                # All switches should implement is_open
+                _ = term.conducting_equipment.is_open()
+                return term.conducting_equipment
+            except AttributeError:
+                pass
+        return None
+
+    def num_terminals(self):
+        """
+        Get the number of `Terminal`s for this `ConnectivityNode`.
+        """
+        return len(self._terminals)
 
     def get_terminal(self, mrid: str) -> Terminal:
         """
@@ -94,16 +107,3 @@ class ConnectivityNode(IdentifiedObject, WeakrefSlot):
         """
         self._terminals.clear()
         return self
-
-    def is_switched(self):
-        return self.get_switch() is not None
-
-    def get_switch(self):
-        for term in self._terminals:
-            try:
-                # All switches should implement is_open
-                _ = term.conducting_equipment.is_open()
-                return term.conducting_equipment
-            except AttributeError:
-                pass
-        return None

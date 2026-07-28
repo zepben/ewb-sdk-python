@@ -61,18 +61,27 @@ class DiagramObject(IdentifiedObject):
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
 
-    def num_points(self):
-        """
-        Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
-        """
-        return nlen(self._diagram_object_points)
-
     @property
     def points(self) -> Generator[DiagramObjectPoint, None, None]:
         """
         The `DiagramObjectPoint`s for this `DiagramObject`.
         """
         return ngen(self._diagram_object_points)
+
+    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], Any]):
+        """
+        Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`DiagramObjectPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
+
+    def num_points(self):
+        """
+        Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
+        """
+        return nlen(self._diagram_object_points)
 
     def get_point(self, sequence_number: int) -> DiagramObjectPoint:
         """
@@ -91,15 +100,6 @@ class DiagramObject(IdentifiedObject):
 
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
-
-    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], Any]):
-        """
-        Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
-
-        :param action: An action to apply to each :class:`DiagramObjectPoint` in the `points` collection, taking the index of the point, and the point itself.
-        """
-        for index, point in enumerate(self.points):
-            action(index, point)
 
     def add_point(self, point: DiagramObjectPoint) -> DiagramObject:
         """

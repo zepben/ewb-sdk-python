@@ -47,6 +47,14 @@ class ProtectionRelayScheme(IdentifiedObject):
         """
         return ngen(self._functions)
 
+    def num_functions(self) -> int:
+        """
+        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
+
+        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
+        """
+        return nlen(self._functions)
+
     def get_function(self, mrid: str) -> ProtectionRelayFunction:
         """
         Get a :class:`ProtectionRelayFunction` operated as part of this :class:`ProtectionRelayScheme`.
@@ -69,14 +77,6 @@ class ProtectionRelayScheme(IdentifiedObject):
         self._functions = list() if self._functions is None else self._functions
         self._functions.append(function)
         return self
-
-    def num_functions(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
-
-        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
-        """
-        return nlen(self._functions)
 
     def remove_function(self, function: Optional[ProtectionRelayFunction]) -> ProtectionRelayScheme:
         """

@@ -47,18 +47,18 @@ class SubGeographicalRegion(IdentifiedObject):
     def geographical_region(self, value):
         self._geographical_region = value
 
-    def num_substations(self) -> int:
-        """
-        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
-        """
-        return nlen(self._substations)
-
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         All substations belonging to this sub geographical region.
         """
         return ngen(self._substations)
+
+    def num_substations(self) -> int:
+        """
+        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
+        """
+        return nlen(self._substations)
 
     def get_substation(self, mrid: str) -> Substation:
         """
