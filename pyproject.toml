@@ -63,6 +63,9 @@
 line-length = 120
 
 [tool.ruff.lint]
+extend-select = [
+    "W292"  # Newline at EOF
+]
 ignore = [
     "F405",  # undefined-local-with-import-star-usage
     "E731",  # lambda-assignment
