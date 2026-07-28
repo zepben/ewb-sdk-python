@@ -38,18 +38,18 @@ class Customer(OrganisationRole):
             for agreement in customer_agreements:
                 self.add_agreement(agreement)
 
-    def num_agreements(self) -> int:
-        """
-        Get the number of `CustomerAgreement`s associated with this `Customer`.
-        """
-        return nlen(self._customer_agreements)
-
     @property
     def agreements(self) -> Generator[CustomerAgreement, None, None]:
         """
         The `CustomerAgreement`s for this `Customer`.
         """
         return ngen(self._customer_agreements)
+
+    def num_agreements(self) -> int:
+        """
+        Get the number of `CustomerAgreement`s associated with this `Customer`.
+        """
+        return nlen(self._customer_agreements)
 
     def get_agreement(self, mrid: str) -> CustomerAgreement:
         """

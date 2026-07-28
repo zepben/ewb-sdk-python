@@ -37,18 +37,18 @@ class OperationalRestriction(Document):
             for eq in equipment:
                 self.add_equipment(eq)
 
-    def num_equipment(self):
-        """
-        Returns the number of `Equipment` associated with this `OperationalRestriction`
-        """
-        return nlen(self._equipment)
-
     @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
         The `Equipment` to which this `OperationalRestriction` applies.
         """
         return ngen(self._equipment)
+
+    def num_equipment(self):
+        """
+        Returns the number of `Equipment` associated with this `OperationalRestriction`
+        """
+        return nlen(self._equipment)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """

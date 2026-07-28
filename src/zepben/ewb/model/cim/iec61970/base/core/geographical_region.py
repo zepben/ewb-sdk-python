@@ -28,18 +28,18 @@ class GeographicalRegion(IdentifiedObject):
             for sgr in sub_geographical_regions:
                 self.add_sub_geographical_region(sgr)
 
-    def num_sub_geographical_regions(self) -> int:
-        """
-        Returns The number of `SubGeographicalRegion`s associated with this `GeographicalRegion`
-        """
-        return nlen(self._sub_geographical_regions)
-
     @property
     def sub_geographical_regions(self) -> Generator[SubGeographicalRegion, None, None]:
         """
         The `SubGeographicalRegion`s of this `GeographicalRegion`.
         """
         return ngen(self._sub_geographical_regions)
+
+    def num_sub_geographical_regions(self) -> int:
+        """
+        Returns The number of `SubGeographicalRegion`s associated with this `GeographicalRegion`
+        """
+        return nlen(self._sub_geographical_regions)
 
     def get_sub_geographical_region(self, mrid: str) -> SubGeographicalRegion:
         """

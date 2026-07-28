@@ -149,6 +149,23 @@ class PowerTransformerEnd(TransformerEnd):
     def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
         return ngen(self._s_ratings)
 
+    def resistance_reactance(self):
+        """
+        Get the `ResistanceReactance` for this `PowerTransformerEnd` from either:
+        1. directly assigned values or
+        2. the pre-calculated `starImpedance` or
+        3. from the datasheet information of the associated `powerTransformer`
+
+        If the data is not complete in any of the above it will merge in the missing values from the subsequent sources.
+        :return:
+        """
+        ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
+            lambda: self.star_impedance.resistance_reactance() if self.star_impedance is not None else None
+        ).merge_if_incomplete(
+            lambda: self.power_transformer.power_transformer_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None
+            else None
+        )
+
     def num_ratings(self) -> int:
         return nlen(self._s_ratings)
 
@@ -194,20 +211,3 @@ class PowerTransformerEnd(TransformerEnd):
     def clear_ratings(self) -> PowerTransformerEnd:
         self._s_ratings = None
         return self
-
-    def resistance_reactance(self):
-        """
-        Get the `ResistanceReactance` for this `PowerTransformerEnd` from either:
-        1. directly assigned values or
-        2. the pre-calculated `starImpedance` or
-        3. from the datasheet information of the associated `powerTransformer`
-
-        If the data is not complete in any of the above it will merge in the missing values from the subsequent sources.
-        :return:
-        """
-        ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
-            lambda: self.star_impedance.resistance_reactance() if self.star_impedance is not None else None
-        ).merge_if_incomplete(
-            lambda: self.power_transformer.power_transformer_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None
-            else None
-        )

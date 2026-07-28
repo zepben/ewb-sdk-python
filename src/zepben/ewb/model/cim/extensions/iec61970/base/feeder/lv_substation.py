@@ -57,6 +57,32 @@ class LvSubstation(EquipmentContainer):
         """[ZBEX] The HV/MV feeders that normally energize this ``LvSubstation``."""
         return ngen(self._normal_energizing_feeders_by_id)
 
+    @zbex
+    @property
+    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """[ZBEX] the ``LvFeeders`` that are normally energized by this ``LvSubstation``."""
+        return ngen(self._normal_energized_lv_feeders_by_id)
+
+    @zbex
+    @property
+    def current_energizing_feeders(self) -> Generator['Feeder', None, None]:
+        """
+        [ZBEX] The HV/MV feeders that currently energize this LV substation.
+        """
+        return ngen(self._current_energizing_feeders_by_id)
+
+    def normal_energized_lv_switch_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        Retrieves all normally energized LvFeeders that represent low voltage network connected below a switch on the edge of this LvSubstation. This is all
+        LvFeeders in the normalEnergizedLvFeeders that has a normalHeadTerminal attached to a Switch.
+        """
+        # NOTE: import exists here due to a circular import problem
+        from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+
+        for lv_feeder in self.normal_energized_lv_feeders:
+            if (it := lv_feeder.normal_head_terminal) is not None and isinstance(it.conducting_equipment, Switch):
+                yield lv_feeder
+
     def num_normal_energizing_feeders(self) -> int:
         """Get the number of entries in the normal ``Feeder`` collection."""
         return nlen(self._normal_energizing_feeders_by_id)
@@ -103,66 +129,6 @@ class LvSubstation(EquipmentContainer):
         """
         self._normal_energizing_feeders_by_id = None
         return self
-
-    @zbex
-    @property
-    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """[ZBEX] the ``LvFeeders`` that are normally energized by this ``LvSubstation``."""
-        return ngen(self._normal_energized_lv_feeders_by_id)
-
-    def num_normal_energized_lv_feeders(self) -> int:
-        """Get the number of entries in the normal ``LvFeeder`` collection."""
-        return nlen(self._normal_energized_lv_feeders_by_id)
-
-    def get_normal_energized_lv_feeder(self, mrid: str) -> LvFeeder | None:
-        """
-        Retrieve an energized ``LvFeeder`` using the normal state of the network.
-
-        :param mrid: the mRID of the required normal ``LvFeeder``
-        :returns: The ``LvFeeder`` with the specified ``mRID`` if it exists, otherwise null
-        """
-        return get_by_mrid(self._normal_energized_lv_feeders_by_id, mrid)
-
-    def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
-        """
-        Associate this ``LvSubstation`` with an ``LvFeeder`` in the normal state of the network.
-
-        :param lv_feeder: the ``LvFeeder`` to associate with this feeder in the normal state of the network.
-        :returns: This ``LvSubstation`` for fluent use.
-        """
-        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
-            return self
-
-        if self._normal_energized_lv_feeders_by_id is None:
-            self._normal_energized_lv_feeders_by_id = dict()
-        self._normal_energized_lv_feeders_by_id[lv_feeder.mrid] = lv_feeder
-        return self
-
-    def remove_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
-        """ 
-        Disassociate this ``LvSubstation`` from an ``LvFeeder`` in the normal state of the network.
-
-        :param lv_feeder: the ``LvFeeder`` to disassociate from this HV/MV feeder in the normal state of the network.
-        """
-        self._normal_energized_lv_feeders_by_id = safe_remove_by_id(self._normal_energized_lv_feeders_by_id, lv_feeder)
-        return self
-
-    def clear_normal_energized_lv_feeders(self) -> "LvSubstation":
-        """
-        Clear all ``LvFeeder``'s associated with this ``LvSubstation`` in the normal state of the network.
-
-        :returns: This ``LvSubstation`` for fluent use.
-        """
-        self._normal_energized_lv_feeders_by_id = None
-        return self
-
-    @zbex
-    @property
-    def current_energizing_feeders(self) -> Generator['Feeder', None, None]:
-        """
-        [ZBEX] The HV/MV feeders that currently energize this LV substation.
-        """
-        return ngen(self._current_energizing_feeders_by_id)
 
     def num_current_energizing_feeders(self) -> int:
         """
@@ -212,14 +178,48 @@ class LvSubstation(EquipmentContainer):
         self._current_energizing_feeders_by_id = None
         return self
 
-    def normal_energized_lv_switch_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        Retrieves all normally energized LvFeeders that represent low voltage network connected below a switch on the edge of this LvSubstation. This is all
-        LvFeeders in the normalEnergizedLvFeeders that has a normalHeadTerminal attached to a Switch.
-        """
-        # NOTE: import exists here due to a circular import problem
-        from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+    def num_normal_energized_lv_feeders(self) -> int:
+        """Get the number of entries in the normal ``LvFeeder`` collection."""
+        return nlen(self._normal_energized_lv_feeders_by_id)
 
-        for lv_feeder in self.normal_energized_lv_feeders:
-            if (it := lv_feeder.normal_head_terminal) is not None and isinstance(it.conducting_equipment, Switch):
-                yield lv_feeder
+    def get_normal_energized_lv_feeder(self, mrid: str) -> LvFeeder | None:
+        """
+        Retrieve an energized ``LvFeeder`` using the normal state of the network.
+
+        :param mrid: the mRID of the required normal ``LvFeeder``
+        :returns: The ``LvFeeder`` with the specified ``mRID`` if it exists, otherwise null
+        """
+        return get_by_mrid(self._normal_energized_lv_feeders_by_id, mrid)
+
+    def add_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
+        """
+        Associate this ``LvSubstation`` with an ``LvFeeder`` in the normal state of the network.
+
+        :param lv_feeder: the ``LvFeeder`` to associate with this feeder in the normal state of the network.
+        :returns: This ``LvSubstation`` for fluent use.
+        """
+        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
+            return self
+
+        if self._normal_energized_lv_feeders_by_id is None:
+            self._normal_energized_lv_feeders_by_id = dict()
+        self._normal_energized_lv_feeders_by_id[lv_feeder.mrid] = lv_feeder
+        return self
+
+    def remove_normal_energized_lv_feeder(self, lv_feeder: LvFeeder) -> "LvSubstation":
+        """ 
+        Disassociate this ``LvSubstation`` from an ``LvFeeder`` in the normal state of the network.
+
+        :param lv_feeder: the ``LvFeeder`` to disassociate from this HV/MV feeder in the normal state of the network.
+        """
+        self._normal_energized_lv_feeders_by_id = safe_remove_by_id(self._normal_energized_lv_feeders_by_id, lv_feeder)
+        return self
+
+    def clear_normal_energized_lv_feeders(self) -> "LvSubstation":
+        """
+        Clear all ``LvFeeder``'s associated with this ``LvSubstation`` in the normal state of the network.
+
+        :returns: This ``LvSubstation`` for fluent use.
+        """
+        self._normal_energized_lv_feeders_by_id = None
+        return self

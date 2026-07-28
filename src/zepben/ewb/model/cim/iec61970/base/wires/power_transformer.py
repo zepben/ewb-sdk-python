@@ -94,12 +94,6 @@ class PowerTransformer(ConductingEquipment):
                     end.power_transformer = self
                 self.add_end(end)
 
-    def num_ends(self):
-        """
-        Get the number of `PowerTransformerEnd`s for this `PowerTransformer`.
-        """
-        return nlen(self._power_transformer_ends)
-
     @property
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
@@ -128,6 +122,36 @@ class PowerTransformer(ConductingEquipment):
                 return end.base_voltage
         else:
             return None
+
+    def _validate_end(self, end: PowerTransformerEnd) -> bool:
+        """
+        Validate an end against this `PowerTransformer`'s `PowerTransformerEnd`s.
+
+        `end` The `PowerTransformerEnd` to validate.
+        Returns True if `end` is already associated with this `PowerTransformer`, otherwise False.
+        Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
+        with the same mRID.
+        """
+        if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
+            return True
+
+        if self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number"):
+            return True
+
+        if not end.power_transformer:
+            end.power_transformer = self
+
+        require(
+            end.power_transformer is self,
+            lambda: f"{end} `power_transformer` property references {end.power_transformer}, expected {str(self)}.",
+        )
+        return False
+
+    def num_ends(self):
+        """
+        Get the number of `PowerTransformerEnd`s for this `PowerTransformer`.
+        """
+        return nlen(self._power_transformer_ends)
 
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
         """
@@ -203,27 +227,3 @@ class PowerTransformer(ConductingEquipment):
         """
         self._power_transformer_ends.clear()
         return self
-
-    def _validate_end(self, end: PowerTransformerEnd) -> bool:
-        """
-        Validate an end against this `PowerTransformer`'s `PowerTransformerEnd`s.
-
-        `end` The `PowerTransformerEnd` to validate.
-        Returns True if `end` is already associated with this `PowerTransformer`, otherwise False.
-        Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
-        with the same mRID.
-        """
-        if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
-            return True
-
-        if self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number"):
-            return True
-
-        if not end.power_transformer:
-            end.power_transformer = self
-
-        require(
-            end.power_transformer is self,
-            lambda: f"{end} `power_transformer` property references {end.power_transformer}, expected {str(self)}.",
-        )
-        return False

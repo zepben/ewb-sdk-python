@@ -40,18 +40,18 @@ class Diagram(IdentifiedObject):
             for obj in diagram_objects:
                 self.add_diagram_object(obj)
 
-    def num_diagram_objects(self):
-        """
-        Returns The number of `DiagramObject`s associated with this `Diagram`
-        """
-        return nlen(self._diagram_objects)
-
     @property
     def diagram_objects(self) -> Generator[DiagramObject, None, None]:
         """
         The diagram objects belonging to this diagram.
         """
         return ngen(self._diagram_objects)
+
+    def num_diagram_objects(self):
+        """
+        Returns The number of `DiagramObject`s associated with this `Diagram`
+        """
+        return nlen(self._diagram_objects)
 
     def get_diagram_object(self, mrid: str) -> DiagramObject:
         """

@@ -36,12 +36,6 @@ class Location(IdentifiedObject):
             for point in position_points:
                 self.add_point(point)
 
-    def num_points(self):
-        """
-        Returns The number of `PositionPoint`s in this `Location`
-        """
-        return nlen(self._position_points)
-
     @property
     def points(self) -> Generator[PositionPoint, None, None]:
         """
@@ -49,6 +43,21 @@ class Location(IdentifiedObject):
         """
         for point in ngen(self._position_points):
             yield point
+
+    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
+        """
+        Call the `action` on each :class:`PositionPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
+
+    def num_points(self):
+        """
+        Returns The number of `PositionPoint`s in this `Location`
+        """
+        return nlen(self._position_points)
 
     def get_point(self, sequence_number: int) -> PositionPoint:
         """
@@ -62,15 +71,6 @@ class Location(IdentifiedObject):
 
     def __getitem__(self, item):
         return self.get_point(item)
-
-    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
-        """
-        Call the `action` on each :class:`PositionPoint` in the `points` collection
-
-        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
-        """
-        for index, point in enumerate(self.points):
-            action(index, point)
 
     def add_point(self, point: PositionPoint) -> Location:
         """

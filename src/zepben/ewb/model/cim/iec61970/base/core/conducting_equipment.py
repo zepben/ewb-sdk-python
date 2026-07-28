@@ -78,6 +78,33 @@ class ConductingEquipment(Equipment, metaclass=ABCMeta):
         """
         return ngen(self._terminals)
 
+    def __repr__(self):
+        return (f"{super(ConductingEquipment, self).__repr__()}, in_service={self.in_service}, "
+                f"normally_in_service={self.normally_in_service}, location={self.location}"
+                )
+
+    def _validate_terminal(self, terminal: Terminal) -> bool:
+        """
+        Validate a terminal against this `ConductingEquipment`'s `Terminal`s.
+
+        `terminal` The `Terminal` to validate.
+        Returns True if `Terminal`` is already associated with this `ConductingEquipment`, otherwise False.
+        Raises `ValueError` if `Terminal`s `conducting_equipment` is not this `ConductingEquipment`,
+        or if this `ConductingEquipment` has a different `Terminal` with the same mRID.
+        """
+        if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
+            return True
+
+        if self._validate_reference_by_field(terminal, terminal.sequence_number, self.get_terminal_by_sn, "sequence_number"):
+            return True
+
+        if not terminal.conducting_equipment:
+            terminal.conducting_equipment = self
+
+        require(terminal.conducting_equipment is self,
+                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.",)
+        return False
+
     def num_terminals(self):
         """
         Get the number of `Terminal`s for this `ConductingEquipment`.
@@ -173,30 +200,3 @@ class ConductingEquipment(Equipment, metaclass=ABCMeta):
         """
         self._terminals.clear()
         return self
-
-    def __repr__(self):
-        return (f"{super(ConductingEquipment, self).__repr__()}, in_service={self.in_service}, "
-                f"normally_in_service={self.normally_in_service}, location={self.location}"
-                )
-
-    def _validate_terminal(self, terminal: Terminal) -> bool:
-        """
-        Validate a terminal against this `ConductingEquipment`'s `Terminal`s.
-
-        `terminal` The `Terminal` to validate.
-        Returns True if `Terminal`` is already associated with this `ConductingEquipment`, otherwise False.
-        Raises `ValueError` if `Terminal`s `conducting_equipment` is not this `ConductingEquipment`,
-        or if this `ConductingEquipment` has a different `Terminal` with the same mRID.
-        """
-        if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
-            return True
-
-        if self._validate_reference_by_field(terminal, terminal.sequence_number, self.get_terminal_by_sn, "sequence_number"):
-            return True
-
-        if not terminal.conducting_equipment:
-            terminal.conducting_equipment = self
-
-        require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.",)
-        return False

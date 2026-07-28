@@ -41,6 +41,16 @@ class RelayInfo(AssetInfo):
         """
         return ngen(self._reclose_delays)
 
+    def set_delays(self, delays: List[float]) -> RelayInfo:
+        """
+        Set the reclose delays for this :class:`RelayInfo`.
+
+        :param delays: The delays to set. The provided list will be copied.
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
+        """
+        self._reclose_delays = delays.copy()
+        return self
+
     def num_delays(self) -> int:
         """
         Get the number of reclose delays for this :class:`RelayInfo`
@@ -84,16 +94,6 @@ class RelayInfo(AssetInfo):
                         f"adding the items in order and there are no gaps in the numbering.")
         self._reclose_delays = list() if self._reclose_delays is None else self._reclose_delays
         self._reclose_delays.insert(index, delay)
-        return self
-
-    def set_delays(self, delays: List[float]) -> RelayInfo:
-        """
-        Set the reclose delays for this :class:`RelayInfo`.
-
-        :param delays: The delays to set. The provided list will be copied.
-        :return: A reference to this :class:`RelayInfo` to allow fluent use.
-        """
-        self._reclose_delays = delays.copy()
         return self
 
     def remove_delay(self, delay: float) -> RelayInfo:

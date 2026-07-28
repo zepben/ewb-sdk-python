@@ -35,18 +35,32 @@ class TransformerTankInfo(AssetInfo):
             for tei in transformer_end_infos:
                 self.add_transformer_end_info(tei)
 
-    def num_transformer_end_infos(self):
-        """
-        Get the number of `TransformerEndInfo`s associated with this `TransformerTankInfo`.
-        """
-        return nlen(self._transformer_end_infos)
-
     @property
     def transformer_end_infos(self) -> Generator[TransformerEndInfo, None, None]:
         """
         The `TransformerEndInfo`s of this `TransformerTankInfo`.
         """
         return ngen(self._transformer_end_infos)
+
+    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
+        """
+        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
+        `end_number` The number of the end to fetch the ResistanceReactance for.
+        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
+        """
+        for tei in self.transformer_end_infos:
+            if tei.end_number == end_number:
+                rr = tei.resistance_reactance()
+                if rr is not None:
+                    return rr
+        else:
+            return None
+
+    def num_transformer_end_infos(self):
+        """
+        Get the number of `TransformerEndInfo`s associated with this `TransformerTankInfo`.
+        """
+        return nlen(self._transformer_end_infos)
 
     def get_transformer_end_info(self, mrid: str) -> TransformerEndInfo:
         """
@@ -94,17 +108,3 @@ class TransformerTankInfo(AssetInfo):
         """
         self._transformer_end_infos = None
         return self
-
-    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
-        """
-        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
-        `end_number` The number of the end to fetch the ResistanceReactance for.
-        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
-        """
-        for tei in self.transformer_end_infos:
-            if tei.end_number == end_number:
-                rr = tei.resistance_reactance()
-                if rr is not None:
-                    return rr
-        else:
-            return None

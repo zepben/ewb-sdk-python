@@ -121,6 +121,42 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         """
         return ngen(self._thresholds)
 
+    @property
+    def time_limits(self) -> Generator[float, None, None]:
+        """
+        [ZBEX] Yields all the time limits (in seconds) for this relay function. Order of entries corresponds to the order of entries in thresholds.
+
+        :return: A generator that iterates over all time limits for this relay function.
+        """
+        return ngen(self._time_limits)
+
+    @property
+    def sensors(self) -> Generator[Sensor, None, None]:
+        """
+        [ZBEX] Yields all the :class:`Sensors<Sensor>` for this relay function.
+
+        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
+        """
+        return ngen(self._sensors)
+
+    @property
+    def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
+        """
+        [ZBEX] Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+
+        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+        """
+        return ngen(self._protected_switches)
+
+    @property
+    def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
+        """
+        [ZBEX] Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+
+        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        """
+        return ngen(self._schemes)
+
     def for_each_threshold(self, action: Callable[[int, RelaySetting], Any]):
         """
         Call the `action` on each :class:`RelaySetting` in the `thresholds` collection
@@ -200,15 +236,6 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._thresholds = None
         return self
 
-    @property
-    def time_limits(self) -> Generator[float, None, None]:
-        """
-        [ZBEX] Yields all the time limits (in seconds) for this relay function. Order of entries corresponds to the order of entries in thresholds.
-
-        :return: A generator that iterates over all time limits for this relay function.
-        """
-        return ngen(self._time_limits)
-
     def for_each_time_limit(self, action: Callable[[int, float], Any]):
         """
         Call the `action` on each time limit in the `time_limits` collection
@@ -285,14 +312,13 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._time_limits = None
         return self
 
-    @property
-    def sensors(self) -> Generator[Sensor, None, None]:
+    def num_sensors(self) -> int:
         """
-        [ZBEX] Yields all the :class:`Sensors<Sensor>` for this relay function.
+        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
 
-        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
+        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
         """
-        return ngen(self._sensors)
+        return nlen(self._sensors)
 
     def get_sensor(self, mrid: str) -> Sensor:
         """
@@ -317,14 +343,6 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._sensors.append(sensor)
         return self
 
-    def num_sensors(self) -> int:
-        """
-        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
-
-        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._sensors)
-
     def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
         """
         Disassociate this :class:`ProtectionRelayFunction` from a :class:`Sensor`.
@@ -345,14 +363,13 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._sensors = None
         return self
 
-    @property
-    def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
+    def num_protected_switches(self) -> int:
         """
-        [ZBEX] Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
 
-        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
         """
-        return ngen(self._protected_switches)
+        return nlen(self._protected_switches)
 
     def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
         """
@@ -377,14 +394,6 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._protected_switches.append(protected_switch)
         return self
 
-    def num_protected_switches(self) -> int:
-        """
-        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-
-        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._protected_switches)
-
     def remove_protected_switch(self, protected_switch: Optional[ProtectedSwitch]) -> ProtectionRelayFunction:
         """
         Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectedSwitch`.
@@ -405,14 +414,13 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._protected_switches = None
         return self
 
-    @property
-    def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
+    def num_schemes(self) -> int:
         """
-        [ZBEX] Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
 
-        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
         """
-        return ngen(self._schemes)
+        return nlen(self._schemes)
 
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """
@@ -436,14 +444,6 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
         self._schemes = list() if self._schemes is None else self._schemes
         self._schemes.append(scheme)
         return self
-
-    def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-
-        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._schemes)
 
     def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelayFunction:
         """

@@ -55,18 +55,25 @@ class EndDevice(AssetContainer, metaclass=ABCMeta):
             for edf in functions:
                 self.add_function(edf)
 
-    def num_usage_points(self):
-        """
-        Returns The number of `UsagePoint`s associated with this `EndDevice`
-        """
-        return nlen(self._usage_points)
-
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
         """
         The `UsagePoint`s associated with this `EndDevice`
         """
         return ngen(self._usage_points)
+
+    @property
+    def functions(self) -> Generator[EndDeviceFunction, None, None]:
+        """
+        The `EndDeviceFunction`s associated with this `EndDevice`
+        """
+        return ngen(self._functions)
+
+    def num_usage_points(self):
+        """
+        Returns The number of `UsagePoint`s associated with this `EndDevice`
+        """
+        return nlen(self._usage_points)
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
@@ -116,13 +123,6 @@ class EndDevice(AssetContainer, metaclass=ABCMeta):
         Returns The number of `EndDeviceFunction`s associated with this `EndDevice`
         """
         return nlen(self._functions)
-
-    @property
-    def functions(self) -> Generator[EndDeviceFunction, None, None]:
-        """
-        The `EndDeviceFunction`s associated with this `EndDevice`
-        """
-        return ngen(self._functions)
 
     def get_function(self, mrid: str) -> EndDeviceFunction:
         """

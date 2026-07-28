@@ -55,14 +55,14 @@ class EnergyConsumer(EnergyConnection):
             for phase in energy_consumer_phases:
                 self.add_phase(phase)
 
-    def num_phases(self):
-        """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
-        return nlen(self._energy_consumer_phases)
-
     @property
     def phases(self) -> Generator[EnergyConsumerPhase, None, None]:
         """The individual phase models for this energy consumer."""
         return ngen(self._energy_consumer_phases)
+
+    def num_phases(self):
+        """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
+        return nlen(self._energy_consumer_phases)
 
     def get_phase(self, mrid: str) -> EnergyConsumerPhase:
         """

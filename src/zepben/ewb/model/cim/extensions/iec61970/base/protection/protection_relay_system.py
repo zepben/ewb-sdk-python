@@ -47,6 +47,14 @@ class ProtectionRelaySystem(Equipment):
         """
         return ngen(self._schemes)
 
+    def num_schemes(self) -> int:
+        """
+        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
+
+        :return: The number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
+        """
+        return nlen(self._schemes)
+
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """
         Get a :class:`ProtectionRelayScheme` for this :class:`ProtectionRelaySystem` by its mRID.
@@ -69,14 +77,6 @@ class ProtectionRelaySystem(Equipment):
         self._schemes = list() if self._schemes is None else self._schemes
         self._schemes.append(scheme)
         return self
-
-    def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
-
-        :return: The number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
-        """
-        return nlen(self._schemes)
 
     def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelaySystem:
         """

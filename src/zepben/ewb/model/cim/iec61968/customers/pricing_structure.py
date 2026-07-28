@@ -39,18 +39,18 @@ class PricingStructure(Document):
             for tariff in tariffs:
                 self.add_tariff(tariff)
 
-    def num_tariffs(self):
-        """
-        Returns The number of `Tariff`s associated with this `PricingStructure`
-        """
-        return nlen(self._tariffs)
-
     @property
     def tariffs(self) -> Generator[Tariff, None, None]:
         """
         The `Tariff`s of this `PricingStructure`.
         """
         return ngen(self._tariffs)
+
+    def num_tariffs(self):
+        """
+        Returns The number of `Tariff`s associated with this `PricingStructure`
+        """
+        return nlen(self._tariffs)
 
     def get_tariff(self, mrid: str) -> Tariff:
         """

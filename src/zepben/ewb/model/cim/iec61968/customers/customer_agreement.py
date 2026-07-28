@@ -51,18 +51,18 @@ class CustomerAgreement(Agreement):
         else:
             raise ValueError(f"customer for {str(self)} has already been set to {self._customer}, cannot reset this field to {cust}")
 
-    def num_pricing_structures(self):
-        """
-        The number of `PricingStructure`s associated with this `CustomerAgreement`
-        """
-        return nlen(self._pricing_structures)
-
     @property
     def pricing_structures(self) -> Generator[PricingStructure, None, None]:
         """
         The `PricingStructure`s of this `CustomerAgreement`.
         """
         return ngen(self._pricing_structures)
+
+    def num_pricing_structures(self):
+        """
+        The number of `PricingStructure`s associated with this `CustomerAgreement`
+        """
+        return nlen(self._pricing_structures)
 
     def get_pricing_structure(self, mrid: str) -> PricingStructure:
         """
