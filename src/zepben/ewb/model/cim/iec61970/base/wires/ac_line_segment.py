@@ -21,22 +21,11 @@ from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.ewb.boilerplate.relations.ac_line_segment_phase_list import AcLineSegmentPhaseList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-
-
-class AcLineSegmentPhaseList(LazyMridList):
-    def get_by_phase(self, phase: SinglePhaseKind):
-        """
-        The individual phase models for an AcLineSegment.
-        `phase` the phase of the required [AcLineSegmentPhase]
-        """
-        res = next((it for it in self if it.phase == phase), None)
-        if res is None:
-            raise KeyError(phase)
-        return res
 
 
 @zb_dataclass

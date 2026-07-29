@@ -14,35 +14,17 @@ from typing import Optional, List, TYPE_CHECKING
 from typing_extensions import deprecated
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import WindingConnection
+from zepben.ewb.boilerplate.relations.transformer_end_rated_s_list import TransformerEndRatedSList
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
-
-
-class TransformerEndRatedSList(LazyCollection[TransformerEndRatedS]):
-
-    def get_by_cooling_type(
-        self,
-        cooling_type: TransformerCoolingType,
-    ) -> TransformerEndRatedS | None:
-        return next((rating for rating in self if rating.cooling_type == cooling_type), None)
-
-    def remove_by_cooling_type(
-        self,
-        cooling_type: TransformerCoolingType,
-    ) -> TransformerEndRatedS | None:
-        rating = self.get_by_cooling_type(cooling_type)
-        if rating is not None:
-            self.remove(rating)
-        return rating
 
 
 @zb_dataclass

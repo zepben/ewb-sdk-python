@@ -12,8 +12,8 @@ from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
 from zepben.ewb import Alias
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
 from zepben.ewb.boilerplate.backfill import Backfill
+from zepben.ewb.boilerplate.relations.power_transformer_end_list import PowerTransformerEndList
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -30,36 +30,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import Power
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
-
-
-class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
-
-    def get_by_num(self, end_number: int) -> PowerTransformerEnd:
-        """
-        Get the `PowerTransformerEnd` on this `PowerTransformer` by its `end_number`.
-
-        `end_number` The `end_number` of the `PowerTransformerEnd` in relation to this `PowerTransformer`s VectorGroup.
-        Returns The `PowerTransformerEnd` referred to by `end_number`
-        Raises IndexError if no `PowerTransformerEnd` was found with end_number `end_number`.
-        """
-        end = next((it for it in self if it.end_number == end_number), None)
-        if end:
-            return end
-        raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self.instance)}")
-
-    def get_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
-        """
-        Get the `PowerTransformerEnd` on this `PowerTransformer` by its `terminal`.
-
-        `terminal` The `terminal` to find a `PowerTransformerEnd` for.
-        Returns The `PowerTransformerEnd` connected to the specified `terminal`
-        Raises IndexError if no `PowerTransformerEnd` connected to `terminal` was found on this `PowerTransformer`.
-        """
-
-        end = next((it for it in self if it.terminal == terminal), None)
-        if end:
-            return end
-        raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self.instance)}")
 
 
 @zb_dataclass

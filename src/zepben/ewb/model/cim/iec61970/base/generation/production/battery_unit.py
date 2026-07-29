@@ -15,25 +15,10 @@ from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode im
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.relations.battery_control_list import BatteryControlList
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
-
-
-class BatteryControlList(LazyMridList):
-    def get_by_mode(self, control_mode: BatteryControlMode):
-        """
-        Get the `BatteryControl` identified by its `control_mode`
-
-        `control_mode` the `BatteryControlMode` of the desired `BatteryControl`
-        Returns The `BatteryControl` with the specified `control_mode` if it exists
-        Raises `KeyError` if a `BatteryControl` with `control_mode` wasn't present.
-        """
-        for control in self:
-            if control.control_mode == control_mode:
-                return control
-        raise IndexError(f"No BatteryControl with a control_mode of {control_mode} was found in BatteryUnit {str(self)}")
 
 
 @zb_dataclass
