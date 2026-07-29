@@ -38,7 +38,7 @@ class LazyMridList(LazyCollection[S], MridCollection[S]):
             return
 
         if self.backfill is not None:
-            self.backfill.apply(item, self.instance)
+            self.backfill.apply(item, self._instance)
 
         super().append(item)
 
@@ -57,7 +57,7 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
         self.backfill = backfill
         self.validate = validate
         self.sort_by = sort_by
-        self.backing_list = None
+        self._backing_list = None
 
     def __get__(self, instance, owner=None) -> Self:
         obj = super().__get__(instance, owner)
@@ -67,13 +67,13 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
         return obj
 
     def __post_init__(self) -> None:
-        self.backing_list = getattr(self.instance, self.backing_name)
+        self._backing_list = getattr(self._instance, self._backing_name)
 
     def _get_collection(self) -> Sequence[S]:
-        return self.backing_list
+        return self._backing_list
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
-        found = next((element for element in self.backing_list if element.mrid == mrid), None)
+        found = next((element for element in self._backing_list if element.mrid == mrid), None)
         return found
 
     def append(self, item: S) -> None:
@@ -81,23 +81,23 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
             return
 
         if self.backfill is not None:
-            self.backfill.apply(item, self.instance)
+            self.backfill.apply(item, self._instance)
 
         if self.validate is not None:
-            self.validate(self.instance, item)
+            self.validate(self._instance, item)
 
-        self.backing_list.append(item)
+        self._backing_list.append(item)
 
         if self.sort_by is not None:
-            self.backing_list.sort(key=self.sort_by)
+            self._backing_list.sort(key=self.sort_by)
 
     def remove(self, item: S) -> None:
-        self.backing_list.remove(item)
+        self._backing_list.remove(item)
 
     def clear(self) -> None:
-        self.backing_list.clear()
+        self._backing_list.clear()
 
     def __repr__(self) -> str:
-        if self.instance is None:
+        if self._instance is None:
             return object.__repr__(self)
-        return repr(self.backing_list)
+        return repr(self._backing_list)

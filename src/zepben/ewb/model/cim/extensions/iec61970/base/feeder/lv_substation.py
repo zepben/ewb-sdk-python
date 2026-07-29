@@ -57,9 +57,13 @@ class LvSubstation(EquipmentContainer):
     )
     """[ZBEX] the ``LvFeeders`` that are normally energized by this ``LvSubstation``."""
 
-    def num_normal_energized_lv_feeders(self) -> int:
-        """Get the number of entries in the normal ``LvFeeder`` collection."""
-        return nlen(self._normal_energized_lv_feeders_by_id)
+    def normal_energized_lv_switch_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        Retrieves all normally energized LvFeeders that represent low voltage network connected below a switch on the edge of this LvSubstation. This is all
+        LvFeeders in the normalEnergizedLvFeeders that has a normalHeadTerminal attached to a Switch.
+        """
+        # NOTE: import exists here due to a circular import problem
+        from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 
         for lv_feeder in self.normal_energized_lv_feeders:
             if (it := lv_feeder.normal_head_terminal) is not None and isinstance(it.conducting_equipment, Switch):

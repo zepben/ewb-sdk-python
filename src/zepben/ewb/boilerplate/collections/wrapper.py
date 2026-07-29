@@ -14,8 +14,8 @@ from zepben.ewb.boilerplate.collections.abstract_backed_collection import Abstra
 
 class _Wrapper(BackedDescriptor):
 
-    instance: Any
-    backing_name: Any
+    _instance: Any
+    _backing_name: Any
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         """
@@ -29,8 +29,8 @@ class _Wrapper(BackedDescriptor):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.instance = None
-        self.backing_name = None
+        self._instance = None
+        self._backing_name = None
 
     def __get__(self, instance, _=None) -> Self:
         """
@@ -40,8 +40,8 @@ class _Wrapper(BackedDescriptor):
         if instance is None:
             return self
         obj = type(self)(*self._init_args, **self._init_kwargs)
-        obj.instance = instance
-        obj.backing_name = self.private_field.name
+        obj._instance = instance
+        obj._backing_name = self.private_field.name
         return obj
 
 
@@ -73,9 +73,9 @@ class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
     def __set__(self, instance, value) -> None:
         if instance is None:
             return
-        if not hasattr(instance, self.backing_name):
+        if not hasattr(instance, self._backing_name):
             resolve_default(instance, self.private_field)
-        elif getattr(instance, self.backing_name):
+        elif getattr(instance, self._backing_name):
             raise ValueError(f"Cannot assign list {self.__name__} for {instance}: currently non-empty")
         if value is not None:
             self.__get__(instance).extend(value)

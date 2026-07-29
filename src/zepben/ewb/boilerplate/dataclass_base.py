@@ -89,7 +89,6 @@ def remove_descriptor_annotations(cls: type[T]) -> T:
 
     return cls
 
-@dataclass_transform(eq_default=False, order_default=False)
 def zb_dataclass(cls: type[T]) -> type[T]:
     """
     Shorthand alias for ``@dataclass(init=False, eq=False, slots=True, repr=False)``

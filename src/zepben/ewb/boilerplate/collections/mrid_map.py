@@ -25,10 +25,10 @@ class LazyMridMap(_IterableWrapper[T], MridCollection[S]):
         self.validate = validate
 
     def _get(self) -> dict[str, S] | None:
-        return getattr(self.instance, self.backing_name)
+        return getattr(self._instance, self._backing_name)
 
     def _get_or_empty(self) -> dict[str, S]:
-        return getattr(self.instance, self.backing_name) or {}
+        return getattr(self._instance, self._backing_name) or {}
 
     def _get_collection(self) -> ValuesView[S]:
         return self._get_or_empty().values()
@@ -44,15 +44,15 @@ class LazyMridMap(_IterableWrapper[T], MridCollection[S]):
             return
 
         if self.backfill is not None:
-            self.backfill.apply(element, self.instance)
+            self.backfill.apply(element, self._instance)
 
         if self.validate is not None:
-            self.validate(self.instance, element)
+            self.validate(self._instance, element)
 
-        existing = getattr(self.instance, self.backing_name)
+        existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = {element.mrid: element}
-            setattr(self.instance, self.backing_name, existing)
+            setattr(self._instance, self._backing_name, existing)
         else:
             existing[element.mrid] = element
 
@@ -70,10 +70,10 @@ class LazyMridMap(_IterableWrapper[T], MridCollection[S]):
             self.clear()
 
     def clear(self) -> None:
-        setattr(self.instance, self.backing_name, None)
+        setattr(self._instance, self._backing_name, None)
 
     def __repr__(self) -> str:
-        if self.instance is None:
+        if self._instance is None:
             return object.__repr__(self)
         return repr(self._get_or_empty())
 

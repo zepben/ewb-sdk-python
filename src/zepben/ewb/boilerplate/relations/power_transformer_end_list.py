@@ -25,7 +25,7 @@ class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
         end = next((it for it in self if it.end_number == end_number), None)
         if end:
             return end
-        raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self.instance)}")
+        raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self._instance)}")
 
     def get_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
         """
@@ -39,4 +39,4 @@ class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
         end = next((it for it in self if it.terminal == terminal), None)
         if end:
             return end
-        raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self.instance)}")
+        raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self._instance)}")

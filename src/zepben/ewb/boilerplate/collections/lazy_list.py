@@ -26,7 +26,7 @@ class LazyList(LazyCollection[T]):
         if not 0 <= index <= size:
             raise ValueError(
                 f"Unable to add {self.element_description} to "
-                f"{self.instance}. "
+                f"{self._instance}. "
                 f"Sequence number {index} is invalid. "
                 f"Expected a value between 0 and {size}. "
                 "Make sure you are adding the items in order and there are "
@@ -34,13 +34,13 @@ class LazyList(LazyCollection[T]):
             )
 
         if self.validate is not None:
-            self.validate(self.instance, item)
+            self.validate(self._instance, item)
 
-        existing = getattr(self.instance, self.backing_name)
+        existing = getattr(self._instance, self._backing_name)
 
         if existing is None:
             existing = [item]
-            setattr(self.instance, self.backing_name, existing)
+            setattr(self._instance, self._backing_name, existing)
         else:
             existing.insert(index, item)
 
@@ -54,7 +54,7 @@ class LazyList(LazyCollection[T]):
         Uses normal Python list semantics, including support for negative
         indexes and raising ``IndexError`` when the index is invalid.
         """
-        existing = getattr(self.instance, self.backing_name)
+        existing = getattr(self._instance, self._backing_name)
 
         if existing is None:
             raise IndexError("pop from empty list")
