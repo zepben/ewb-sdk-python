@@ -19,8 +19,8 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
     def append(self, element: T) -> None:
         ...
 
-    def extend(self, elements: Iterable[T]) -> None:
-        for element in elements:
+    def extend(self, elements: Iterable[T] | None) -> None:
+        for element in elements or []:
             self.append(element)
 
     @abstractmethod

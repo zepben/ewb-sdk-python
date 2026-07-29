@@ -91,8 +91,9 @@ class PowerTransformerEnd(TransformerEnd):
     Should not be used directly, instead use add_rating and get_rating functions. 
     """
 
-    def __init__(self, *args, rated_s: int = None, **kwargs):
+    def __init__(self, *args, rated_s: int = None, ratings=None, **kwargs):
         super(PowerTransformerEnd, self).__init__(*args, **kwargs)
+        self.s_ratings.extend(ratings)
         if "_s_ratings" in kwargs:
             raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
         if rated_s and self._rated_s:
@@ -151,7 +152,6 @@ class PowerTransformerEnd(TransformerEnd):
         validate=lambda self, it: self._validate_rating(it),
         sort_by=lambda it: -it.rated_s
     )
-    ratings = Alias(s_ratings)
 
     def _validate_rating(self, rating: TransformerEndRatedS):
         if any(it.cooling_type == rating.cooling_type for it in self.s_ratings):

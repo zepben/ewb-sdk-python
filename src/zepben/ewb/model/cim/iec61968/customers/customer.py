@@ -40,7 +40,10 @@ class Customer(OrganisationRole):
         _customer_agreements,
         "A CustomerAgreement",
     )
-    customer_agreements = Alias(agreements)
+
+    def __init__(self, *args, customer_agreements=None, **kwargs):
+        super(Customer, self).__init__(*args, **kwargs)
+        self.agreements.extend(customer_agreements)
 
 
     # region deprecated list boilerplate

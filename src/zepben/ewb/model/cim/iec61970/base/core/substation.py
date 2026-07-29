@@ -41,7 +41,6 @@ class Substation(EquipmentContainer):
         "A Feeder",
         backfill=Backfill(Feeder.normal_energizing_substation)
     )
-    normal_energized_feeders = Alias(feeders)
 
     _loops: Optional[List[Loop]] = field(default=None)
 
@@ -63,6 +62,10 @@ class Substation(EquipmentContainer):
         _circuits,
         "A Circuit",
     )
+
+    def __init__(self, *args, normal_energized_feeders=None, **kwargs):
+        super(Substation, self).__init__(*args, **kwargs)
+        self.feeders.extend(normal_energized_feeders)
 
     @property
     @internal(_sub_geographical_region)

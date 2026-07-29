@@ -53,8 +53,10 @@ class DiagramObject(IdentifiedObject):
         _diagram_object_points,
         "DiagramObjectPoint",
     )
-    diagram_object_points = Alias(points)
 
+    def __init__(self, *args, diagram_object_points=None, **kwargs):
+        super(DiagramObject, self).__init__(*args, **kwargs)
+        self.points.extend(diagram_object_points)
 
     @diagram.setter
     @deprecated("diagram should never be set directly - it is automatically set when adding it to the `diagram_objects` list")

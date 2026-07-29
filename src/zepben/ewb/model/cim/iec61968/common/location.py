@@ -35,7 +35,10 @@ class Location(IdentifiedObject):
         _position_points,
         "PositionPoint",
     )
-    position_points = Alias(points)
+
+    def __init__(self, *args, position_points=None, **kwargs):
+        super(Location, self).__init__(*args, **kwargs)
+        self.points.extend(position_points)
 
 
     # region deprecated list boilerplate
