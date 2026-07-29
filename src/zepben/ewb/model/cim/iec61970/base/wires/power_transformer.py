@@ -99,7 +99,10 @@ class PowerTransformer(ConductingEquipment):
         validate=lambda self, it: self._validate_end(it),
         sort_by=lambda it: it.end_number
     )
-    power_transformer_ends = Alias(ends)
+
+    def __init__(self, *args, power_transformer_ends=None, **kwargs):
+        super(PowerTransformer, self).__init__(*args, **kwargs)
+        self.ends.extend(power_transformer_ends)
 
     def _validate_end(self, end: PowerTransformerEnd):
         self._validate_reference_by_field(end, end.end_number, self.ends.get_by_num, "end_number")

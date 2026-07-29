@@ -58,9 +58,11 @@ class EnergyConsumer(EnergyConnection):
         "An EnergyConsumerPhase",
         backfill=Backfill(EnergyConsumerPhase.energy_consumer)
     )
-    # TODO: Remove hack
-    # Old inits used the wrong name. This allows backwards compatibility
-    energy_consumer_phases: None = Alias(phases)
+
+
+    def __init__(self, *args, energy_consumer_phases=None, **kwargs):
+        super(EnergyConsumer, self).__init__(*args, **kwargs)
+        self.phases.extend(energy_consumer_phases)
 
 
     # region deprecated list boilerplate

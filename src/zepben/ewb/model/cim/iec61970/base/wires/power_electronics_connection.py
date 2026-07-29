@@ -349,16 +349,23 @@ class PowerElectronicsConnection(RegulatingCondEq):
         _power_electronics_units,
         "A PowerElectronicsUnit",
     )
-    power_electronics_units = Alias(units)
 
     phases: MridCollection[PowerElectronicsConnectionPhase] = LazyMridList(
         _power_electronics_connection_phases,
         "A PowerElectronicsConnectionPhase",
         backfill=Backfill(PowerElectronicsConnectionPhase.power_electronics_connection)
     )
-    power_electronics_connection_phases = Alias(phases)
 
-
+    def __init__(
+        self,
+        *args,
+        power_electronics_units=None,
+        power_electronics_connection_phases=None,
+        **kwargs
+    ):
+        super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
+        self.units.extend(power_electronics_units)
+        self.phases.extend(power_electronics_connection_phases)
 
 
     # region deprecated list boilerplate

@@ -56,7 +56,6 @@ class Equipment(PowerSystemResource, metaclass=ABCMeta):
         _equipment_containers,
         "An EquipmentContainer",
     )
-    equipment_containers = Alias(containers)
 
     current_containers: MridCollection[EquipmentContainer] = LazyMridList(
         _current_containers,
@@ -73,6 +72,9 @@ class Equipment(PowerSystemResource, metaclass=ABCMeta):
         "An OperationalRestriction",
     )
 
+    def __init__(self, *args, equipment_containers=None, **kwargs):
+        super(Equipment, self).__init__(*args, **kwargs)
+        self.containers.extend(equipment_containers)
 
     @property
     def sites(self) -> Generator['Site', None, None]:

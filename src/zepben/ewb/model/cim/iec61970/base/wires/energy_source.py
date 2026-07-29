@@ -122,7 +122,10 @@ class EnergySource(EnergyConnection):
         "An EnergySourcePhase",
         backfill=Backfill(EnergySourcePhase.energy_source)
     )
-    energy_source_phases = Alias(phases)
+
+    def __init__(self, *args, energy_source_phases=None, **kwargs):
+        super(EnergySource, self).__init__(*args, **kwargs)
+        self.phases.extend(energy_source_phases)
 
 
     # region deprecated list boilerplate
