@@ -42,7 +42,7 @@ class MridCollection(AbstractBackedCollection[S], ABC):
         if existing is not element:
             raise ValueError(
                 f"{self.element_description} with mRID {element.mrid} "
-                f"already exists in {self.instance}."
+                f"already exists in {self._instance}."
             )
 
         return False

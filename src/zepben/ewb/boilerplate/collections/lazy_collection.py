@@ -24,19 +24,19 @@ class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
         self.sort_by = sort_by
 
     def _get(self) -> list[T] | None:
-        return getattr(self.instance, self.backing_name)
+        return getattr(self._instance, self._backing_name)
 
     def _get_collection(self) -> list[T]:
-        return getattr(self.instance, self.backing_name) or []
+        return getattr(self._instance, self._backing_name) or []
 
     def append(self, item: T) -> None:
         if self.validate is not None:
-            self.validate(self.instance, item)
+            self.validate(self._instance, item)
 
-        existing = getattr(self.instance, self.backing_name)
+        existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = [item]
-            setattr(self.instance, self.backing_name, existing)
+            setattr(self._instance, self._backing_name, existing)
         else:
             existing.append(item)
 
@@ -50,10 +50,10 @@ class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
             self.clear()
 
     def clear(self) -> None:
-        setattr(self.instance, self.backing_name, None)
+        setattr(self._instance, self._backing_name, None)
 
     def __repr__(self) -> str:
-        if self.instance is None:
+        if self._instance is None:
             return object.__repr__(self)
         return repr(self._get_collection())
 
