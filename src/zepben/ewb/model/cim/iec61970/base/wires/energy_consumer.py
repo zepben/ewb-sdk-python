@@ -12,7 +12,6 @@ from typing import Optional, List
 
 from typing_extensions import deprecated
 
-from zepben.ewb import Alias
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection

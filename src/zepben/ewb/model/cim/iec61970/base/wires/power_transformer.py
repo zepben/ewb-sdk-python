@@ -11,7 +11,6 @@ import sys
 from dataclasses import field
 from typing import List, Optional, TYPE_CHECKING
 
-from zepben.ewb import Alias
 from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.boilerplate.relations.power_transformer_end_list import PowerTransformerEndList
 

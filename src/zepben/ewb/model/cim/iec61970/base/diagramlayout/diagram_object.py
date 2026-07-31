@@ -12,7 +12,6 @@ from typing import Optional, List, Callable, TYPE_CHECKING, Any
 
 from typing_extensions import deprecated
 
-from zepben.ewb import Alias
 from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -138,4 +137,3 @@ class DiagramObject(IdentifiedObject):
     # endregion
 
     # endregion
-

@@ -12,7 +12,6 @@ from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.services.network.network_service import NetworkService
-from zepben.ewb import NetworkStateOperators, TestNetworkBuilder, NetworkTraceStep, Terminal, NominalPhasePath, Breaker, AcLineSegment, Clamp, Cut
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
 

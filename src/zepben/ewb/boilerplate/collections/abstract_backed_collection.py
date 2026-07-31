@@ -48,5 +48,3 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
         """
         for index, item in enumerate(self._get_collection()):
             action(index, item)
-
-
