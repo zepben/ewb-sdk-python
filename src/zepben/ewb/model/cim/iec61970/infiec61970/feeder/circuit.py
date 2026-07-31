@@ -13,7 +13,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.wires.line import Line
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:

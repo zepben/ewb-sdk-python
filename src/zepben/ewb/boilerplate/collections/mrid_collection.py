@@ -16,7 +16,13 @@ S = TypeVar("S", bound=HasMrid)
 
 
 class MridCollection(AbstractBackedCollection[S], ABC):
-    instance: Any
+    """
+    Collection of objects identified by a unique ``mrid``.
+
+    Provides lookup by mRID and rejects distinct objects with duplicate mRIDs.
+    """
+
+    _instance: Any
     element_description: str
 
     @abstractmethod

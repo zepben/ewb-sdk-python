@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from zepben.ewb import SinglePhaseKind
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 
 
 class AcLineSegmentPhaseList(LazyMridList):

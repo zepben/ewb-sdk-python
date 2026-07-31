@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 if TYPE_CHECKING:
     from zepben.ewb import PowerTransformerEnd, Terminal
 

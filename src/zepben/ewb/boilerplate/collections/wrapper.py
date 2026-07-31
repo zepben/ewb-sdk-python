@@ -3,7 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
+
 from abc import ABC
+from dataclasses import Field
 from typing import Any, TypeVar
 
 from typing_extensions import Self, deprecated
@@ -13,6 +16,29 @@ from zepben.ewb.boilerplate.collections.abstract_backed_collection import Abstra
 
 
 class _Wrapper(BackedDescriptor):
+    """
+    Descriptor base for collection views backed by another dataclass field.
+
+    Access through an instance creates a short-lived wrapper bound to that
+    instance and its backing field. For example::
+
+        class Container:
+            _items = field(default=None)
+            items = LazyCollection(_items)
+
+        container = Container()
+
+        # Calls Container.items.__get__(container, Container), returning a
+        # wrapper whose _instance is container and _backing_name is "_items".
+        bound_items = container.items
+        bound_items.append("value")
+
+        assert container._items == ["value"]
+
+    Access through the class returns the original shared descriptor::
+
+        assert isinstance(Container.items, LazyCollection)
+    """
 
     _instance: Any
     _backing_name: Any
@@ -48,6 +74,7 @@ class _Wrapper(BackedDescriptor):
 class _WrapperFgetFix(_Wrapper):
     """
     This class exists to fix the tests that rely on the old lists being @property.
+    It implements a minimalistic callable fget with a name.
     TODO: Remove in a separate PR fixing tests
     """
     def __init__(self, *args, **kwargs) -> None:
@@ -73,7 +100,7 @@ class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
     def __set__(self, instance, value) -> None:
         if instance is None:
             return
-        if not hasattr(instance, self._backing_name):
+        if not hasattr(instance, self._backing_name) and isinstance(self.private_field, Field):
             resolve_default(instance, self.private_field)
         elif getattr(instance, self._backing_name):
             raise ValueError(f"Cannot assign list {self.__name__} for {instance}: currently non-empty")
@@ -81,3 +108,5 @@ class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
             self.__get__(instance).extend(value)
         else:
             self.__get__(instance).clear()
+
+

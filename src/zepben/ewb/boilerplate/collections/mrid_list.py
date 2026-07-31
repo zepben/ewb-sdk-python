@@ -8,39 +8,8 @@ from typing_extensions import Self
 
 from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
-
-
-class LazyMridList(LazyCollection[S], MridCollection[S]):
-    def __init__(
-        self,
-        private_field: list[S] | None,
-        element_description: str,
-        backfill: Backfill | None = None,
-        validate=None,
-        sort_by=None
-    ) -> None:
-        super().__init__(private_field, validate, sort_by)
-        self.element_description = element_description
-        self.backfill = backfill
-
-    def _safe_get_by_mrid(self, mrid: str) -> S | None:
-        existing = self._get()
-        if existing is None:
-            return None
-        found = next((element for element in existing if element.mrid == mrid), None)
-        return found
-
-    def append(self, item: S) -> None:
-        if not self._can_add_by_mrid(item):
-            return
-
-        if self.backfill is not None:
-            self.backfill.apply(item, self._instance)
-
-        super().append(item)
 
 
 class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
@@ -77,6 +46,13 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
         return found
 
     def append(self, item: S) -> None:
+        """
+        Append an item to the collection.
+        Check for mRID collisions with existing items.
+        Optionally fill the backref field on the added item.
+        Run optional validation.
+        Sort the collection if key lambda is provided.
+        """
         if not self._can_add_by_mrid(item):
             return
 

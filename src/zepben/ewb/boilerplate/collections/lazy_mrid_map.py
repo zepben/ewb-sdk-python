@@ -12,6 +12,24 @@ T = TypeVar("T")
 
 
 class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
+    """
+    Lazy mRID collection backed by a nullable dictionary.
+
+    Items are stored by their ``mrid`` while iteration exposes the dictionary
+    values. A backing value of ``None`` is treated as an empty collection. The
+    dictionary is created when the first item is appended and reset to ``None``
+    when the collection becomes empty.
+
+    For example::
+
+        container.items.append(item)
+
+        assert container._items == {item.mrid: item}
+        assert container.items.get_by_mrid(item.mrid) is item
+
+        container.items.remove(item)
+        assert container._items is None
+    """
     def __init__(
         self,
         private_field: list[S] | None,
@@ -39,27 +57,33 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     def get_by_mrid(self, mrid: str) -> S:
         return self._get_or_empty()[mrid]
 
-    def append(self, element: S) -> None:
-        if not self._can_add_by_mrid(element):
+    def append(self, item: S) -> None:
+        """
+        Add an item to the collection.
+        Check for mRID collisions with existing items.
+        Optionally fill the backref field on the added item.
+        Run optional validation.
+        """
+        if not self._can_add_by_mrid(item):
             return
 
         if self.backfill is not None:
-            self.backfill.apply(element, self._instance)
+            self.backfill.apply(item, self._instance)
 
         if self.validate is not None:
-            self.validate(self._instance, element)
+            self.validate(self._instance, item)
 
         existing = getattr(self._instance, self._backing_name)
         if existing is None:
-            existing = {element.mrid: element}
+            existing = {item.mrid: item}
             setattr(self._instance, self._backing_name, existing)
         else:
-            existing[element.mrid] = element
+            existing[item.mrid] = item
 
     def __len__(self) -> int:
         return len(self._get_or_empty())
 
-    def __contains__(self, item: S) -> bool:
+    def __contains__(self, item: object) -> bool:
         return self._get_or_empty().get(getattr(item, "mrid", None)) == item
 
     def remove(self, item) -> None:

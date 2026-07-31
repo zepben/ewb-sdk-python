@@ -24,8 +24,13 @@ class AbstractBackedList(
         ...
 
     @overload
-    def __getitem__(self, index: slice) -> Sequence[T]:
-        ...
+    def __getitem__(self, index: int) -> T: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[T]: ...
 
     def __getitem__(self, index: int | slice) -> T | Sequence[T]:
-        return self._get_collection()[index]
+        collection = self._get_collection()
+        if isinstance(index, slice):
+            return collection[index]
+        return collection[index]

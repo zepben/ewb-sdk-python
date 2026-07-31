@@ -13,7 +13,7 @@ from typing import Optional, List
 from typing_extensions import deprecated
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
