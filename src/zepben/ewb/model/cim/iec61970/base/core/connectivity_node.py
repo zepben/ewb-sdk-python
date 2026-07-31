@@ -12,7 +12,7 @@ from dataclasses import field
 
 from typing_extensions import deprecated
 
-from zepben.ewb.boilerplate.collections.mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass

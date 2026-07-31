@@ -7,7 +7,21 @@ from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection, T
 
 
 class LazyList(LazyCollection[T]):
+    """
+    Lazy collection with list-style index-based insertion and deletion.
 
+    It retains the nullable backing-list behaviour of ``LazyCollection``,
+    creating the backing list when an item is inserted and resetting it to
+    ``None`` when the final item is deleted.
+
+    For example::
+
+        container.items.insert(0, "value")
+        assert container._items == ["value"]
+
+        del container.items[0]
+        assert container._items is None
+    """
     def __init__(
         self,
         private_field: list[T] | None,
@@ -19,7 +33,9 @@ class LazyList(LazyCollection[T]):
 
     def insert(self, index: int, item: T) -> None:
         """
-        Insert ``item`` at ``index``.
+        Insert an item into the collection at a given index.
+        Check for mRID collisions and run optional validation.
+        Sort the collection if key lambda is provided.
         """
         size = len(self)
 
@@ -45,6 +61,11 @@ class LazyList(LazyCollection[T]):
             existing.insert(index, item)
 
     def append(self, item: T) -> None:
+        """
+        Append an item to the collection.
+        Run optional validation.
+        Sort the collection if key lambda is provided.
+        """
         self.insert(len(self), item)
 
     def pop(self, index: int = -1) -> T:

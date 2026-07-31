@@ -16,19 +16,23 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
         ...
 
     @abstractmethod
-    def append(self, element: T) -> None:
+    def append(self, item: T, /) -> None:
+        """Append an item to the collection."""
         ...
 
-    def extend(self, elements: Iterable[T] | None) -> None:
-        for element in elements or []:
+    def extend(self, items: Iterable[T] | None, /) -> None:
+        """Append each item to the collection."""
+        for element in items or []:
             self.append(element)
 
     @abstractmethod
-    def remove(self, element: T) -> None:
+    def remove(self, item: T, /) -> None:
+        """Remove an item from the collection."""
         ...
 
     @abstractmethod
     def clear(self) -> None:
+        """Remove all items from the collection."""
         ...
 
     def __len__(self) -> int:
@@ -37,14 +41,10 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
     def __iter__(self) -> Iterator[T]:
         return iter(self._get_collection())
 
-    def __contains__(self, element: object) -> bool:
-        return element in self._get_collection()
+    def __contains__(self, item: object) -> bool:
+        return item in self._get_collection()
 
     def for_each_indexed(self, action: Callable[[int, T], object]) -> None:
-        """
-        Call the `action` on each item in the list
-
-        :param action: An action to apply to each :class:`RelaySetting` in the `thresholds` collection, taking the index of the threshold, and the threshold itself.
-        """
+        """Call the `action` on each item in the list."""
         for index, item in enumerate(self._get_collection()):
             action(index, item)

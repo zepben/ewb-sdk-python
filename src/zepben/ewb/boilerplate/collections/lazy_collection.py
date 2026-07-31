@@ -12,7 +12,31 @@ T = TypeVar("T")
 
 
 class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
+    """
+    Concrete collection wrapper that treats its backing field as a nullable
+    list.
 
+    A backing value of ``None`` is exposed as an empty collection. The backing
+    list is created when the first item is appended and reset to ``None`` when
+    the last item is removed or the collection is cleared.
+
+    For example::
+
+        class Container:
+            _items = field(default=None)
+            items = LazyCollection(_items)
+
+        container = Container()
+
+        assert list(container.items) == []
+        assert container._items is None
+
+        container.items.append("value")
+        assert container._items == ["value"]
+
+        container.items.clear()
+        assert container._items is None
+    """
     def __init__(
         self,
         private_field: list[T] | None,
@@ -30,6 +54,11 @@ class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
         return getattr(self._instance, self._backing_name) or []
 
     def append(self, item: T) -> None:
+        """
+        Append an item to the collection.
+        Run optional validation.
+        Sort the collection if key lambda is provided.
+        """
         if self.validate is not None:
             self.validate(self._instance, item)
 

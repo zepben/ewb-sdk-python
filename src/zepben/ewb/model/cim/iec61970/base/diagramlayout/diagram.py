@@ -15,7 +15,7 @@ from typing_extensions import deprecated
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.mrid_map import LazyMridMap
+from zepben.ewb.boilerplate.collections.lazy_mrid_map import LazyMridMap
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
