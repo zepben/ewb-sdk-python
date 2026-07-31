@@ -4,13 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TYPE_CHECKING
 
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 
 if TYPE_CHECKING:
     from zepben.ewb import CurveData
 
 
-class CurveDataList(LazyCollection):
+class CurveDataList(LazyList):
 
     def get(self, x: float) -> 'CurveData':
         """

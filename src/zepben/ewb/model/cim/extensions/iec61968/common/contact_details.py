@@ -12,7 +12,7 @@ from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
 from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
@@ -83,10 +83,10 @@ class ContactDetails(Identifiable):
         # noinspection PyUnresolvedReferences
         return hash((type(self), *(getattr(self, s) for s in self.__slots__)))
 
-    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyCollection(_phone_numbers)
+    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyList(_phone_numbers)
     """[ZBEX] Phone numbers."""
 
-    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyCollection(_electronic_addresses)
+    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyList(_electronic_addresses)
     """[ZBEX] Electronic addresses."""
 
     def __eq__(self, other: Any) -> bool:

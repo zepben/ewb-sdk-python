@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 if TYPE_CHECKING:
     from zepben.ewb import SinglePhaseKind, PhaseImpedanceData
 
 
-class PhaseImpedanceDataList(LazyCollection):
+class PhaseImpedanceDataList(LazyList):
     def get(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
         """
         Get the matrix entry for the corresponding to and from phases.

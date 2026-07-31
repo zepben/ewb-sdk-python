@@ -12,7 +12,7 @@ from typing import Optional, List, Callable, TYPE_CHECKING, Any
 
 from typing_extensions import deprecated
 
-from zepben.ewb.boilerplate.collections.lazy_list import LazyList
+from zepben.ewb.boilerplate.collections.lazy_index_list import LazyIndexList
 from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
@@ -60,7 +60,7 @@ class DiagramObject(IdentifiedObject):
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
 
-    points: LazyList[DiagramObjectPoint] = LazyList(
+    points: LazyIndexList[DiagramObjectPoint] = LazyIndexList(
         _diagram_object_points,
         "DiagramObjectPoint",
     )
