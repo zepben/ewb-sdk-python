@@ -36,32 +36,11 @@ class Substation(EquipmentContainer):
 
     _normal_energized_feeders: Optional[List[Feeder]] = field(default=None)
 
-    feeders: MridCollection[Feeder] = LazyMridList(
-        _normal_energized_feeders,
-        "A Feeder",
-        backfill=Backfill(Feeder.normal_energizing_substation)
-    )
-
     _loops: Optional[List[Loop]] = field(default=None)
-
-    loops: MridCollection[Loop] = LazyMridList(
-        _loops,
-        "A Loop",
-    )
 
     _energized_loops: Optional[List[Loop]] = field(default=None)
 
-    energized_loops: MridCollection[Loop] = LazyMridList(
-        _energized_loops,
-        "A Loop",
-    )
-
     _circuits: Optional[List[Circuit]] = field(default=None)
-
-    circuits: MridCollection[Circuit] = LazyMridList(
-        _circuits,
-        "A Circuit",
-    )
 
     def __init__(self, *args, normal_energized_feeders=None, **kwargs):
         super(Substation, self).__init__(*args, **kwargs)
@@ -79,6 +58,27 @@ class Substation(EquipmentContainer):
     @deprecated("sub_geographical_region should never be set directly - it is automatically set when adding it to the `substations` list")
     def sub_geographical_region(self, value):
         self._sub_geographical_region = value
+
+    circuits: MridCollection[Circuit] = LazyMridList(
+        _circuits,
+        "A Circuit",
+    )
+
+    loops: MridCollection[Loop] = LazyMridList(
+        _loops,
+        "A Loop",
+    )
+
+    energized_loops: MridCollection[Loop] = LazyMridList(
+        _energized_loops,
+        "A Loop",
+    )
+
+    feeders: MridCollection[Feeder] = LazyMridList(
+        _normal_energized_feeders,
+        "A Feeder",
+        backfill=Backfill(Feeder.normal_energizing_substation)
+    )
 
     # region deprecated list boilerplate
     # region circuits boilerplate

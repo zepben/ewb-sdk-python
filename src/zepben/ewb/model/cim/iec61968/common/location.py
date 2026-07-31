@@ -31,15 +31,14 @@ class Location(IdentifiedObject):
 
     _position_points: Optional[List[PositionPoint]] = field(default=None)
 
-    points: LazyList[PositionPoint] = LazyList(
-        _position_points,
-        "PositionPoint",
-    )
-
     def __init__(self, *args, position_points=None, **kwargs):
         super(Location, self).__init__(*args, **kwargs)
         self.points.extend(position_points)
 
+    points: LazyList[PositionPoint] = LazyList(
+        _position_points,
+        "PositionPoint",
+    )
 
     # region deprecated list boilerplate
     #

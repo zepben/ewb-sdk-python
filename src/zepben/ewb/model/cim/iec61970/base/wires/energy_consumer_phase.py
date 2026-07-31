@@ -25,12 +25,6 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     _energy_consumer: Optional['EnergyConsumer'] = field(default=None)
 
-    @property
-    @internal(_energy_consumer)
-    def energy_consumer(self):
-        """The `EnergyConsumer` that has this phase."""
-        return self._energy_consumer
-
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
     neutral point. If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next
@@ -49,6 +43,12 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
+
+    @property
+    @internal(_energy_consumer)
+    def energy_consumer(self):
+        """The `EnergyConsumer` that has this phase."""
+        return self._energy_consumer
 
     @energy_consumer.setter
     @deprecated("energy_consumer should never be set directly - it is automatically set when adding it to the `phases` list")

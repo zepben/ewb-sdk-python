@@ -36,15 +36,14 @@ class Customer(OrganisationRole):
 
     _customer_agreements: Optional[List[CustomerAgreement]] = field(default=None)
 
-    agreements: MridCollection[CustomerAgreement] = LazyMridList(
-        _customer_agreements,
-        "A CustomerAgreement",
-    )
-
     def __init__(self, *args, customer_agreements=None, **kwargs):
         super(Customer, self).__init__(*args, **kwargs)
         self.agreements.extend(customer_agreements)
 
+    agreements: MridCollection[CustomerAgreement] = LazyMridList(
+        _customer_agreements,
+        "A CustomerAgreement",
+    )
 
     # region deprecated list boilerplate
     # region agreements boilerplate

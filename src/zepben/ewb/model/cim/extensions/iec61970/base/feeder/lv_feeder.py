@@ -55,24 +55,6 @@ class LvFeeder(EquipmentContainer):
     normal_energizing_lv_substation: 'LvSubstation | None' = None
     """[ZBEX] The normally energizing LvSubstation for this LvFeeder"""
 
-    current_equipment: MridCollection[Equipment] = LazyMridMap(
-        _current_equipment_by_id,
-        "A current Equipment",
-    )
-    """Contained `Equipment` using the current state of the network."""
-
-    normal_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
-        _normal_energizing_feeders_by_id,
-        "A Feeder",
-    )
-    """[ZBEX] The HV/MV feeders that normally energize this LV feeder."""
-
-    current_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
-        _current_energizing_feeders_by_id,
-        "A Feeder",
-    )
-    """[ZBEX] The HV/MV feeders that currently energize this LV feeder."""
-
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
         """
@@ -87,6 +69,23 @@ class LvFeeder(EquipmentContainer):
         else:
             raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
 
+    normal_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
+        _normal_energizing_feeders_by_id,
+        "A Feeder",
+    )
+    """[ZBEX] The HV/MV feeders that normally energize this LV feeder."""
+
+    current_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
+        _current_energizing_feeders_by_id,
+        "A Feeder",
+    )
+    """[ZBEX] The HV/MV feeders that currently energize this LV feeder."""
+
+    current_equipment: MridCollection[Equipment] = LazyMridMap(
+        _current_equipment_by_id,
+        "A current Equipment",
+    )
+    """Contained `Equipment` using the current state of the network."""
 
     # region deprecated list boilerplate
     # region current_equipment boilerplate

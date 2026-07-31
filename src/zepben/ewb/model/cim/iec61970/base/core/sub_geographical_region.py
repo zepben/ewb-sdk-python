@@ -39,16 +39,16 @@ class SubGeographicalRegion(IdentifiedObject):
         """The geographical region to which this sub-geographical region is within."""
         return self._geographical_region
 
+    @geographical_region.setter
+    @deprecated("Geographical region is a backfill property - it should only be set by adding the sub region to the sub regions list")
+    def geographical_region(self, value):
+        self._geographical_region = value
+
     substations: MridCollection[Substation] = LazyMridList(
         _substations,
         "A Substation",
         backfill=Backfill(Substation.sub_geographical_region)
     )
-
-    @geographical_region.setter
-    @deprecated("Geographical region is a backfill property - it should only be set by adding the sub region to the sub regions list")
-    def geographical_region(self, value):
-        self._geographical_region = value
 
     # region deprecated list boilerplate
     # region substations boilerplate

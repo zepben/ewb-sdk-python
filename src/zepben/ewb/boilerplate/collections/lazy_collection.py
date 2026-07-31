@@ -15,7 +15,7 @@ class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
 
     def __init__(
         self,
-        private_field,
+        private_field: list[T] | None,
         validate=None,
         sort_by=None
     ) -> None:

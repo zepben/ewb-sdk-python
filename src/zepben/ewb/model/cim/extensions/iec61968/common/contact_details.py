@@ -67,13 +67,7 @@ class ContactDetails(Identifiable):
 
     _phone_numbers: list[TelephoneNumber] | None = field(default=None)
 
-    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyCollection(_phone_numbers)
-    """[ZBEX] Phone numbers."""
-
     _electronic_addresses: list[ElectronicAddress] | None = field(default=None)
-
-    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyCollection(_electronic_addresses)
-    """[ZBEX] Electronic addresses."""
 
     def __init__(self, id: str|None=None, *args, **kwargs):
         if id is not None:
@@ -82,7 +76,6 @@ class ContactDetails(Identifiable):
             kwargs["mrid"] = id
         super(ContactDetails, self).__init__(*args, **kwargs)
 
-
     def __str__(self):
         return f"ContactDetails({self.mrid})"
 
@@ -90,6 +83,11 @@ class ContactDetails(Identifiable):
         # noinspection PyUnresolvedReferences
         return hash((type(self), *(getattr(self, s) for s in self.__slots__)))
 
+    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyCollection(_phone_numbers)
+    """[ZBEX] Phone numbers."""
+
+    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyCollection(_electronic_addresses)
+    """[ZBEX] Electronic addresses."""
 
     def __eq__(self, other: Any) -> bool:
         #

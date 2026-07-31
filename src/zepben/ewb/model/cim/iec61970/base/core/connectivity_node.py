@@ -33,15 +33,14 @@ class ConnectivityNode(IdentifiedObject, WeakrefSlot):
     """
     _terminals: List[Terminal] = field(default_factory=list)
 
+    def __iter__(self):
+        return iter(self._terminals)
+
     terminals: MridCollection[Terminal] = LazyMridList(
         _terminals,
         "A Terminal"
     )
     """The `Terminal`s attached to this `ConnectivityNode`"""
-
-    def __iter__(self):
-        return iter(self._terminals)
-
 
     def is_switched(self):
         return self.get_switch() is not None

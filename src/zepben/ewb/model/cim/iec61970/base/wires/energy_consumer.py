@@ -53,16 +53,15 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: Optional[float] = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
+    def __init__(self, *args, energy_consumer_phases=None, **kwargs):
+        super(EnergyConsumer, self).__init__(*args, **kwargs)
+        self.phases.extend(energy_consumer_phases)
+
     phases: MridCollection[EnergyConsumerPhase] = LazyMridList(
         _energy_consumer_phases,
         "An EnergyConsumerPhase",
         backfill=Backfill(EnergyConsumerPhase.energy_consumer)
     )
-
-
-    def __init__(self, *args, energy_consumer_phases=None, **kwargs):
-        super(EnergyConsumer, self).__init__(*args, **kwargs)
-        self.phases.extend(energy_consumer_phases)
 
 
     # region deprecated list boilerplate

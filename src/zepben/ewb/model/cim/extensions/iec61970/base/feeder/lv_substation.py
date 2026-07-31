@@ -44,18 +44,17 @@ class LvSubstation(EquipmentContainer):
     )
     """[ZBEX] The HV/MV feeders that normally energize this ``LvSubstation``."""
 
-    current_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
-        _current_energizing_feeders_by_id,
-        "A Feeder",
-    )
-    """[ZBEX] The HV/MV feeders that currently energize this LV substation."""
-
-
     normal_energized_lv_feeders: MridCollection[LvFeeder] = LazyMridMap(
         _normal_energized_lv_feeders_by_id,
         "An LvFeeder",
     )
     """[ZBEX] the ``LvFeeders`` that are normally energized by this ``LvSubstation``."""
+
+    current_energizing_feeders: MridCollection[Feeder] = LazyMridMap(
+        _current_energizing_feeders_by_id,
+        "A Feeder",
+    )
+    """[ZBEX] The HV/MV feeders that currently energize this LV substation."""
 
     def normal_energized_lv_switch_feeders(self) -> Generator[LvFeeder, None, None]:
         """

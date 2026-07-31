@@ -42,11 +42,12 @@ class Cut(Switch):
         """The line segment to which the cut is applied."""
         return self._ac_line_segment
 
-    @property
-    def length_from_t1_or_0(self) -> float:
-        return self.length_from_terminal_1 or 0.0
-
     @ac_line_segment.setter
     @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `cuts` list")
     def ac_line_segment(self, value):
         self._ac_line_segment = value
+
+    @property
+    def length_from_t1_or_0(self) -> float:
+        return self.length_from_terminal_1 or 0.0
+

@@ -117,16 +117,15 @@ class EnergySource(EnergyConnection):
     x0_max: Optional[float] = None
     """Maximum zero sequence Thevenin reactance."""
 
+    def __init__(self, *args, energy_source_phases=None, **kwargs):
+        super(EnergySource, self).__init__(*args, **kwargs)
+        self.phases.extend(energy_source_phases)
+
     phases: MridCollection[EnergySourcePhase] = LazyMridList(
         _energy_source_phases,
         "An EnergySourcePhase",
         backfill=Backfill(EnergySourcePhase.energy_source)
     )
-
-    def __init__(self, *args, energy_source_phases=None, **kwargs):
-        super(EnergySource, self).__init__(*args, **kwargs)
-        self.phases.extend(energy_source_phases)
-
 
     # region deprecated list boilerplate
     # region phases boilerplate

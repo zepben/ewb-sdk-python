@@ -84,14 +84,14 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     def relay_info(self, relay_info: Optional[RelayInfo]):
         self.asset_info = relay_info
 
-    time_limits: LazyList[float] = LazyList(
-        _time_limits,
-        "float"
-    )
-
     thresholds: LazyList[RelaySetting] = LazyList(
         _thresholds,
         "RelaySetting"
+    )
+
+    time_limits: LazyList[float] = LazyList(
+        _time_limits,
+        "float"
     )
 
     sensors: MridCollection[Sensor] = LazyMridList(

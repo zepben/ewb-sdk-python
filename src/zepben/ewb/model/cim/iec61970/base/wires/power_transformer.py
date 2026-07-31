@@ -91,6 +91,9 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
+    def __init__(self, *args, power_transformer_ends=None, **kwargs):
+        super(PowerTransformer, self).__init__(*args, **kwargs)
+        self.ends.extend(power_transformer_ends)
 
     ends: PowerTransformerEndList = PowerTransformerEndList(
         _power_transformer_ends,
@@ -99,17 +102,6 @@ class PowerTransformer(ConductingEquipment):
         validate=lambda self, it: self._validate_end(it),
         sort_by=lambda it: it.end_number
     )
-
-    def __init__(self, *args, power_transformer_ends=None, **kwargs):
-        super(PowerTransformer, self).__init__(*args, **kwargs)
-        self.ends.extend(power_transformer_ends)
-
-    def _validate_end(self, end: PowerTransformerEnd):
-        self._validate_reference_by_field(end, end.end_number, self.ends.get_by_num, "end_number")
-
-        if end.end_number == 0:
-            end.end_number = self.num_ends() + 1
-
 
     @property
     @deprecated("use asset_info instead.")
@@ -134,6 +126,12 @@ class PowerTransformer(ConductingEquipment):
                 return end.base_voltage
         else:
             return None
+
+    def _validate_end(self, end: PowerTransformerEnd):
+        self._validate_reference_by_field(end, end.end_number, self.ends.get_by_num, "end_number")
+
+        if end.end_number == 0:
+            end.end_number = self.num_ends() + 1
 
 
     # region deprecated list boilerplate

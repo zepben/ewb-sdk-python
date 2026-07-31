@@ -32,12 +32,6 @@ class DiagramObject(IdentifiedObject):
 
     _diagram: Optional[Diagram] = field(default=None)
 
-    @property
-    @internal(_diagram)
-    def diagram(self):
-        """A diagram object is part of a diagram."""
-        return self._diagram
-
     identified_object_mrid: Optional[str] = None
     """The domain object to which this diagram object is associated."""
 
@@ -49,14 +43,15 @@ class DiagramObject(IdentifiedObject):
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = field(default=None)
 
-    points: LazyList[DiagramObjectPoint] = LazyList(
-        _diagram_object_points,
-        "DiagramObjectPoint",
-    )
-
     def __init__(self, *args, diagram_object_points=None, **kwargs):
         super(DiagramObject, self).__init__(*args, **kwargs)
         self.points.extend(diagram_object_points)
+
+    @property
+    @internal(_diagram)
+    def diagram(self):
+        """A diagram object is part of a diagram."""
+        return self._diagram
 
     @diagram.setter
     @deprecated("diagram should never be set directly - it is automatically set when adding it to the `diagram_objects` list")
@@ -65,6 +60,11 @@ class DiagramObject(IdentifiedObject):
             self._diagram = diag
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
+
+    points: LazyList[DiagramObjectPoint] = LazyList(
+        _diagram_object_points,
+        "DiagramObjectPoint",
+    )
 
     # region deprecated list boilerplate
     #
