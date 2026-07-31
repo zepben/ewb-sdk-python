@@ -32,7 +32,7 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     """
     def __init__(
         self,
-        private_field: list[S] | None,
+        private_field: dict[str, S] | None,
         element_description: str,
         backfill: Backfill | None = None,
         validate=None

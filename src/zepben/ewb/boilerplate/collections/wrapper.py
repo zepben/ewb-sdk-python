@@ -24,7 +24,7 @@ class _Wrapper(BackedDescriptor):
 
         class Container:
             _items = field(default=None)
-            items = LazyCollection(_items)
+            items = LazyList(_items)
 
         container = Container()
 
@@ -37,7 +37,7 @@ class _Wrapper(BackedDescriptor):
 
     Access through the class returns the original shared descriptor::
 
-        assert isinstance(Container.items, LazyCollection)
+        assert isinstance(Container.items, LazyList)
     """
 
     _instance: Any
@@ -108,5 +108,3 @@ class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
             self.__get__(instance).extend(value)
         else:
             self.__get__(instance).clear()
-
-

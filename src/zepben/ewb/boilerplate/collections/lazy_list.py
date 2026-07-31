@@ -24,7 +24,7 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
 
         class Container:
             _items = field(default=None)
-            items = LazyCollection(_items)
+            items = LazyList(_items)
 
         container = Container()
 
