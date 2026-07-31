@@ -6,7 +6,6 @@
 from dataclasses import dataclass, fields, MISSING, Field
 from typing import TypeVar, cast
 
-from typing_extensions import dataclass_transform
 
 
 T = TypeVar("T")

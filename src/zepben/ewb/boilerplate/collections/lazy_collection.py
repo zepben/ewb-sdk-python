@@ -56,5 +56,3 @@ class LazyCollection(_IterableWrapper[T], AbstractBackedList[T]):
         if self._instance is None:
             return object.__repr__(self)
         return repr(self._get_collection())
-
-

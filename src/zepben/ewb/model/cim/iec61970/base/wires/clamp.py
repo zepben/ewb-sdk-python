@@ -47,4 +47,3 @@ class Clamp(ConductingEquipment):
     @property
     def length_from_t1_or_0(self) -> float:
         return self.length_from_terminal_1 or 0.0
-

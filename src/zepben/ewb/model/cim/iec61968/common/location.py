@@ -12,7 +12,6 @@ from typing import List, Optional, Callable, Any
 
 from typing_extensions import deprecated
 
-from zepben.ewb import Alias
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint

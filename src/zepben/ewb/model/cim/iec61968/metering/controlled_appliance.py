@@ -9,7 +9,7 @@ __all__ = ["ControlledAppliance", "Appliance"]
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Union
+from typing import List
 
 from zepben.ewb import unique
 

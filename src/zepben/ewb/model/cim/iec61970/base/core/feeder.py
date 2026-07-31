@@ -235,4 +235,3 @@ class Feeder(EquipmentContainer):
 
     # endregion
     # endregion
-
