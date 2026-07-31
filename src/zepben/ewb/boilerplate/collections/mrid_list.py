@@ -15,7 +15,7 @@ from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
     def __init__(
         self,
-        private_field,
+        private_field: list[S],
         element_description: str,
         backfill: Backfill | None = None,
         validate=None,

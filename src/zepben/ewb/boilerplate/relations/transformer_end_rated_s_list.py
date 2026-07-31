@@ -6,10 +6,10 @@
 from __future__ import annotations
 
 from zepben.ewb import TransformerEndRatedS, TransformerCoolingType
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 
 
-class TransformerEndRatedSList(LazyCollection[TransformerEndRatedS]):
+class TransformerEndRatedSList(LazyList[TransformerEndRatedS]):
 
     def get_by_cooling_type(
         self,

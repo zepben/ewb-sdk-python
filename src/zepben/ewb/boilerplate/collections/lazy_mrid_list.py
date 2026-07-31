@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.boilerplate.collections.mrid_collection import S, MridCollection
 
 
-class LazyMridList(LazyCollection[S], MridCollection[S]):
+class LazyMridList(LazyList[S], MridCollection[S]):
     """
     Nullable list implementation of :class:`MridCollection`.
 

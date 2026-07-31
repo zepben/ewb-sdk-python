@@ -2,63 +2,56 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar
 
-from zepben.ewb.boilerplate.collections.lazy_collection import LazyCollection, T
+from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
+from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
-class LazyList(LazyCollection[T]):
+T = TypeVar("T")
+
+
+class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
     """
-    Lazy collection with list-style index-based insertion and deletion.
+    Concrete collection wrapper that treats its backing field as a nullable
+    list.
 
-    It retains the nullable backing-list behaviour of ``LazyCollection``,
-    creating the backing list when an item is inserted and resetting it to
-    ``None`` when the final item is deleted.
+    A backing value of ``None`` is exposed as an empty collection. The backing
+    list is created when the first item is appended and reset to ``None`` when
+    the last item is removed or the collection is cleared.
 
     For example::
 
-        container.items.insert(0, "value")
+        class Container:
+            _items = field(default=None)
+            items = LazyCollection(_items)
+
+        container = Container()
+
+        assert list(container.items) == []
+        assert container._items is None
+
+        container.items.append("value")
         assert container._items == ["value"]
 
-        del container.items[0]
+        container.items.clear()
         assert container._items is None
     """
     def __init__(
         self,
         private_field: list[T] | None,
-        element_description: str,
         validate=None,
+        sort_by=None
     ) -> None:
-        super().__init__(private_field, validate=validate, sort_by=None)
-        self.element_description = element_description
+        super().__init__(private_field)
+        self.validate = validate
+        self.sort_by = sort_by
 
-    def insert(self, index: int, item: T) -> None:
-        """
-        Insert an item into the collection at a given index.
-        Check for mRID collisions and run optional validation.
-        Sort the collection if key lambda is provided.
-        """
-        size = len(self)
+    def _get(self) -> list[T] | None:
+        return getattr(self._instance, self._backing_name)
 
-        if not 0 <= index <= size:
-            raise ValueError(
-                f"Unable to add {self.element_description} to "
-                f"{self._instance}. "
-                f"Sequence number {index} is invalid. "
-                f"Expected a value between 0 and {size}. "
-                "Make sure you are adding the items in order and there are "
-                "no gaps in the numbering."
-            )
-
-        if self.validate is not None:
-            self.validate(self._instance, item)
-
-        existing = getattr(self._instance, self._backing_name)
-
-        if existing is None:
-            existing = [item]
-            setattr(self._instance, self._backing_name, existing)
-        else:
-            existing.insert(index, item)
+    def _get_collection(self) -> list[T]:
+        return getattr(self._instance, self._backing_name) or []
 
     def append(self, item: T) -> None:
         """
@@ -66,23 +59,29 @@ class LazyList(LazyCollection[T]):
         Run optional validation.
         Sort the collection if key lambda is provided.
         """
-        self.insert(len(self), item)
+        if self.validate is not None:
+            self.validate(self._instance, item)
 
-    def pop(self, index: int = -1) -> T:
-        """
-        Remove and return the item at ``index``.
-
-        Uses normal Python list semantics, including support for negative
-        indexes and raising ``IndexError`` when the index is invalid.
-        """
         existing = getattr(self._instance, self._backing_name)
-
         if existing is None:
-            raise IndexError("pop from empty list")
+            existing = [item]
+            setattr(self._instance, self._backing_name, existing)
+        else:
+            existing.append(item)
 
-        item = existing.pop(index)
+        if self.sort_by is not None:
+            existing.sort(key=self.sort_by)
 
+    def remove(self, item: T) -> None:
+        existing = self._get_collection()
+        existing.remove(item)
         if not existing:
             self.clear()
 
-        return item
+    def clear(self) -> None:
+        setattr(self._instance, self._backing_name, None)
+
+    def __repr__(self) -> str:
+        if self._instance is None:
+            return object.__repr__(self)
+        return repr(self._get_collection())
