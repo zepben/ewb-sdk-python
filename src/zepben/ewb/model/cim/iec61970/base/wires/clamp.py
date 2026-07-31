@@ -31,19 +31,20 @@ class Clamp(ConductingEquipment):
     _ac_line_segment: Optional['AcLineSegment'] = field(default=None)
     """The line segment to which the clamp is connected."""
 
+    max_terminals = 1
+
     @property
     @internal(_ac_line_segment)
     def ac_line_segment(self) -> Optional['AcLineSegment']:
         """The line segment to which the clamp is connected."""
         return self._ac_line_segment
 
-    max_terminals = 1
+    @ac_line_segment.setter
+    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `clamps` list")
+    def ac_line_segment(self, value):
+        self._ac_line_segment = value
 
     @property
     def length_from_t1_or_0(self) -> float:
         return self.length_from_terminal_1 or 0.0
 
-    @ac_line_segment.setter
-    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `clamps` list")
-    def ac_line_segment(self, value):
-        self._ac_line_segment = value

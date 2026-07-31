@@ -63,6 +63,17 @@ class Feeder(EquipmentContainer):
         else:
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
 
+    @property
+    @internal(_normal_energizing_substation)
+    def normal_energizing_substation(self):
+        """The substation that normally energizes the feeder. Also used for naming purposes."""
+        return self._normal_energizing_substation
+
+    @normal_energizing_substation.setter
+    @deprecated("normal_energizing_substation should never be set directly - it is automatically set when adding it to the `feeders` list")
+    def normal_energizing_substation(self, value):
+        self._normal_energizing_substation = value
+
     current_equipment: MridCollection[Equipment] = LazyMridMap(
         _current_equipment_by_id,
         "A current Equipment",
@@ -92,18 +103,6 @@ class Feeder(EquipmentContainer):
         "An LvSubstation",
     )
     """[ZBEX]"""
-    @property
-    @internal(_normal_energizing_substation)
-    def normal_energizing_substation(self):
-        """The substation that normally energizes the feeder. Also used for naming purposes."""
-        return self._normal_energizing_substation
-
-    @normal_energizing_substation.setter
-    @deprecated("normal_energizing_substation should never be set directly - it is automatically set when adding it to the `feeders` list")
-    def normal_energizing_substation(self, value):
-        self._normal_energizing_substation = value
-
-
     # region deprecated list boilerplate
     # region current_equipment boilerplate
 

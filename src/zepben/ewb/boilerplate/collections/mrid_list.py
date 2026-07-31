@@ -16,9 +16,9 @@ from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 class LazyMridList(LazyCollection[S], MridCollection[S]):
     def __init__(
         self,
-        private_field,
+        private_field: list[S] | None,
         element_description: str,
-        backfill: Backfill = None,
+        backfill: Backfill | None = None,
         validate=None,
         sort_by=None
     ) -> None:
@@ -48,7 +48,7 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
         self,
         private_field,
         element_description: str,
-        backfill: Backfill = None,
+        backfill: Backfill | None = None,
         validate=None,
         sort_by=None
     ) -> None:

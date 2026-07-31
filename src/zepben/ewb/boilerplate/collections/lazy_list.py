@@ -10,7 +10,7 @@ class LazyList(LazyCollection[T]):
 
     def __init__(
         self,
-        private_field,
+        private_field: list[T] | None,
         element_description: str,
         validate=None,
     ) -> None:

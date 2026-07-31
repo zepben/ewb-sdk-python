@@ -11,12 +11,12 @@ from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 T = TypeVar("T")
 
 
-class LazyMridMap(_IterableWrapper[T], MridCollection[S]):
+class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     def __init__(
         self,
-        private_field,
+        private_field: list[S] | None,
         element_description: str,
-        backfill: Backfill = None,
+        backfill: Backfill | None = None,
         validate=None
     ) -> None:
         super().__init__(private_field)

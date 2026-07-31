@@ -44,8 +44,6 @@ class AcLineSegmentPhase(PowerSystemResource):
     def ac_line_segment(self) -> 'AcLineSegment | None':
         return self._ac_line_segment
 
-    asset_info: WireInfo | None = None
-
     @ac_line_segment.setter
     @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `phases` list")
     def ac_line_segment(self, ac_line_segment: 'AcLineSegment') -> None:
@@ -53,3 +51,5 @@ class AcLineSegmentPhase(PowerSystemResource):
             self._ac_line_segment = ac_line_segment
         else:
             raise ValueError(f"ac_line_segment has already been set to {self._ac_line_segment}. Cannot set this field again")
+
+    asset_info: WireInfo | None = None

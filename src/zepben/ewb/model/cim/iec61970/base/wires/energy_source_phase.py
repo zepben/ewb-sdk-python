@@ -27,16 +27,16 @@ class EnergySourcePhase(PowerSystemResource):
 
     _energy_source: Optional['EnergySource'] = field(default=None)
 
+    phase: SinglePhaseKind = SinglePhaseKind.NONE
+    """A `zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
+    the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
+    source connected from the indicated phase to the next logical non-neutral phase."""
+
     @property
     @internal(_energy_source)
     def energy_source(self):
         """The `EnergySource` with this `EnergySourcePhase`"""
         return self._energy_source
-
-    phase: SinglePhaseKind = SinglePhaseKind.NONE
-    """A `zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
-    the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
-    source connected from the indicated phase to the next logical non-neutral phase."""
 
     @energy_source.setter
     @deprecated("energy_source should never be set directly - it is automatically set when adding it to the `phases` list")

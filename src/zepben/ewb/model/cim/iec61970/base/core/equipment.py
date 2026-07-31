@@ -50,27 +50,8 @@ class Equipment(PowerSystemResource, metaclass=ABCMeta):
     _usage_points: Optional[List[UsagePoint]] = field(default=None)
     _equipment_containers: Optional[List[EquipmentContainer]] = field(default=None)
     _operational_restrictions: Optional[List[OperationalRestriction]] = field(default=None)
+
     _current_containers: Optional[List[EquipmentContainer]] = field(default=None)
-
-    containers: MridCollection[EquipmentContainer] = LazyMridList(
-        _equipment_containers,
-        "An EquipmentContainer",
-    )
-
-    current_containers: MridCollection[EquipmentContainer] = LazyMridList(
-        _current_containers,
-        "A current EquipmentContainer",
-    )
-
-    usage_points: MridCollection[UsagePoint] = LazyMridList(
-        _usage_points,
-        "A UsagePoint",
-    )
-
-    operational_restrictions: MridCollection[OperationalRestriction] = LazyMridList(
-        _operational_restrictions,
-        "An OperationalRestriction",
-    )
 
     def __init__(self, *args, equipment_containers=None, **kwargs):
         super(Equipment, self).__init__(*args, **kwargs)
@@ -143,6 +124,10 @@ class Equipment(PowerSystemResource, metaclass=ABCMeta):
         """
         return ngen(_of_type(self._current_containers, LvFeeder))
 
+    containers: MridCollection[EquipmentContainer] = LazyMridList(
+        _equipment_containers,
+        "An EquipmentContainer",
+    )
 
     def num_sites(self) -> int:
         """
@@ -150,6 +135,20 @@ class Equipment(PowerSystemResource, metaclass=ABCMeta):
         """
         return len(list(self.sites))
 
+    current_containers: MridCollection[EquipmentContainer] = LazyMridList(
+        _current_containers,
+        "A current EquipmentContainer",
+    )
+
+    usage_points: MridCollection[UsagePoint] = LazyMridList(
+        _usage_points,
+        "A UsagePoint",
+    )
+
+    operational_restrictions: MridCollection[OperationalRestriction] = LazyMridList(
+        _operational_restrictions,
+        "An OperationalRestriction",
+    )
 
     # region deprecated list boilerplate
     # region containers boilerplate

@@ -44,18 +44,17 @@ class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
 
     _assets: Optional[List[Asset]] = field(default=None)
 
-    assets: MridCollection[Asset] = LazyMridList(
-        _assets,
-        "An Asset",
-    )
-
-
     @property
     def has_controls(self) -> bool:
         """
         * :return: True if this [PowerSystemResource] has at least 1 Control associated with it, false otherwise.
         """
         return nlen(self.num_controls) > 0
+
+    assets: MridCollection[Asset] = LazyMridList(
+        _assets,
+        "An Asset",
+    )
 
 
     # region deprecated list boilerplate

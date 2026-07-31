@@ -26,12 +26,6 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     _power_electronics_connection: Optional['PowerElectronicsConnection'] = field(default=None)
     """The power electronics connection to which the phase belongs."""
 
-    @property
-    @internal(_power_electronics_connection)
-    def power_electronics_connection(self):
-        """The power electronics connection to which the phase belongs."""
-        return self._power_electronics_connection
-
     p: Optional[float] = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
@@ -44,6 +38,12 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
 
     q: Optional[float] = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
+
+    @property
+    @internal(_power_electronics_connection)
+    def power_electronics_connection(self):
+        """The power electronics connection to which the phase belongs."""
+        return self._power_electronics_connection
 
     @power_electronics_connection.setter
     @deprecated("power_electronics_connection should never be set directly - it is automatically set when adding it to the `phases` list")
