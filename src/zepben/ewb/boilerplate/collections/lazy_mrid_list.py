@@ -13,7 +13,7 @@ class LazyMridList(LazyList[S], MridCollection[S]):
     Nullable list implementation of :class:`MridCollection`.
 
     Inherits mRID lookup and uniqueness semantics from ``MridCollection`` and
-    lazy backing-list behavior from ``LazyCollection``.
+    lazy backing-list behavior from ``LazyList``.
     """
     def __init__(
         self,

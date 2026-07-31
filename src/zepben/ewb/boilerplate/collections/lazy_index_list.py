@@ -10,7 +10,7 @@ class LazyIndexList(LazyList[T]):
     """
     Lazy collection with list-style index-based insertion and deletion.
 
-    It retains the nullable backing-list behaviour of ``LazyCollection``,
+    It retains the nullable backing-list behaviour of ``LazyList``,
     creating the backing list when an item is inserted and resetting it to
     ``None`` when the final item is deleted.
 
@@ -34,8 +34,7 @@ class LazyIndexList(LazyList[T]):
     def insert(self, index: int, item: T) -> None:
         """
         Insert an item into the collection at a given index.
-        Check for mRID collisions and run optional validation.
-        Sort the collection if key lambda is provided.
+        Run optional validation.
         """
         size = len(self)
 
@@ -86,3 +85,7 @@ class LazyIndexList(LazyList[T]):
             self.clear()
 
         return item
+
+    def __delitem__(self, index: int, /) -> None:
+        """Remove the item at the given index."""
+        self.remove(self[index])

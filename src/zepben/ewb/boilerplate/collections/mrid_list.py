@@ -13,6 +13,16 @@ from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
 class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
+    """
+    mRID collection backed by a non-nullable list.
+
+    Items are kept in insertion order and retrieved by mRID using a linear search.
+    Appending enforces mRID uniqueness and can optionally apply backfill,
+    validation, and sorting.
+
+    Unlike ``LazyMridList``, clearing the collection leaves an empty backing list
+    rather than resetting the backing field to ``None``.
+    """
     def __init__(
         self,
         private_field: list[S],

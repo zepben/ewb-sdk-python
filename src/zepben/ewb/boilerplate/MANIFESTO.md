@@ -38,13 +38,13 @@ Since `@dataclass` generates an init for every subclass without one, the `@zb_da
 
 Positional args are very hard to get consistent with the use of `@dataclass` - to know the order, you must parse the inheritance tree. `@property` values are not included in dataclass inits by default, meaning that adding them as an argument would create arbitrary ordering, and that is a readability nightmare. Moreover, we have custom inits in subclasses, making maintaining the arg order functionally impossible.
 
-That is why, from this version onwards, any argument that is not the object's `mrid` (or equivalent identifier) must be passed as a keyword argument (`MyClass("mrid", 42)` bad, `MyClass("mrid", thing=42)` good).
+That is why, from this version onwards, any argument that is not the object's `mrid` (or equivalent identifier) must be passed as a keyword argument (`MyClass("mRID", 42)` bad, `MyClass("mRID", thing=42)` good).
 
 While it would be possible to bring args back if all subclass inits are removed (probable future feature), it is a terrible idea. Do not do it unless you are very sure of yourself.
 
 ## Eq, Hash, Str, Repr
 
-CIM classes need to be homogenous in their behaviour. Normally, dataclasses define these four methods on subclass level, but we need them to be propagated all the way up to `Identifiable` (or any overriding children such as `NameType`), where `__eq__` and `__hash__` both asses memory reference equality, and `__str__` and `__repr__` represent the class as `<ClassName>{<mrid>}` eg `Terminal{terminal_mrid}`. 
+CIM classes need to be homogenous in their behaviour. Normally, dataclasses define these four methods on subclass level, but we need them to be propagated all the way up to `Identifiable` (or any overriding children such as `NameType`), where `__eq__` and `__hash__` both asses memory reference equality, and `__str__` and `__repr__` represent the class as `<ClassName>{<mRID>}` eg `Terminal{terminal_mRID}`. 
 
 ## Descriptors
 
@@ -58,20 +58,20 @@ Since CIM is UML-based, there are a lot of one-to-many and many-to-many class re
 
 Consequently, we have created a hierarchy of nullable descriptors backed by private fields. Each descriptor implements a list-like interface, allowing the user to interact with the relations normally, blissfully unaware of the nullable insanity going on under the hood.
 
-Due to the high diversity of the relationship behaviours, there is a lot of optional functionality shared by some these lists:
+Due to the high diversity of the relationship behaviours, there is a lot of optional functionality shared by some of these lists:
 
-- *mRID collision checks*: for mrid collections, we perform an mRID lookup when an item is added. If another item comes back, we check if the identities match. If they do, we disregard the addition. If they don't, we throw an appropriate error.
+- *mRID collision checks*: for mRID collections, we perform an mRID lookup when an item is added. If another item comes back, we check if the identities match. If they do, we disregard the addition. If they don't, we throw an appropriate error.
 - *backfill*: some items contained in lists link back to the owner item. In that case, we perform a backfill to do this automatically. We also ensure that the item is not already linked to another owner. 
-- *validation*: some lists are create with validation lambdas, calling a validator function on the owner itself. This is useful when additional validation is required, eg sequence number matching.
+- *validation*: some lists are created with validation lambdas, calling a validator function on the owner itself. This is useful when additional validation is required, eg sequence number matching.
 - *sorting*: passing a sorting lambda to ordered collections automatically re-sorts the list after an item is added. 
 
 Here are the concrete implementations of the lists that are used in the SDK:
 
-- `LazyList`: A nullable list of non-`Identifiable` objects that has validation and sorting built in.
+- `LazyList`: A nullable list of objects that has validation and sorting built in. Typically used for non-`Identifiable` relationships.
 - `LazyIndexList`: `LazyList` with index-based insertion and deletion, for strictly ordered relationships such as diagram points.
 
-The remaining collections all implement `MridCollection` - an interface that declares functionality of interaction with a collection of `Identifiable` objects, mainly focusing on `get_by_mrid`, `append`, `remove`, and `clear` methods. This allows us to have a common way of interacting with inter-object relationships, while hiding the underlying implementation (eg `list` vs `dict`)
+The remaining collections all implement `MridCollection` - an interface that declares functionality of interaction with a collection of `Identifiable` objects, mainly focusing on `get_by_mRID`, `append`, `remove`, and `clear` methods. This allows us to have a common way of interacting with inter-object relationships, while hiding the underlying implementation (eg `list` vs `dict`)
 
-- `LazyMridList`: A `LazyList` with an mrid check and backfill added. `O(N)` mRID lookup.
+- `LazyMridList`: A `LazyList` with an mRID check and backfill added. `O(N)` mRID lookup.
 - `MridList`: An mRID collection backed by a non-nullable list. Useful for relationships that are most likely to be filled (eg `ConnectivityNode.terminals`). `O(N)` mRID lookup.
-- `LazyMridMap`: A nullable map of Identifiable objects keyed on their mRID. Supports mRID checks and `O(1)` mRID lookup. Does not support sorting (duh). Useful fot large-scale collections (for which the lookup speedup is significant) 
+- `LazyMridMap`: A nullable map of Identifiable objects keyed on their mRID. Supports mRID checks and `O(1)` mRID lookup. Does not support sorting (duh). Useful for large-scale collections (for which the lookup speedup is significant) 
