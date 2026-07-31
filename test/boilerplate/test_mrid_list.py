@@ -252,6 +252,8 @@ def test_repr_matches_owner_backing_list_repr(owner: Owner):
     assert repr(owner.feeders) == repr(owner._feeders)
 
 
+def test_class_field_repr_uses_descriptor_repr() -> None:
+    assert repr(Owner.feeders) == object.__repr__(Owner.feeders)
 
 
 def test_mrid_list_all_functionality_together(owner: Owner):
