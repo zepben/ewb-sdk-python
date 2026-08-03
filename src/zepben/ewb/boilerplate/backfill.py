@@ -21,7 +21,7 @@ class Backfill:
 
         self.backfill_prop = backfill_prop
 
-    def apply(self, element: S, owner: Any) -> None:
+    def _get_backing_name(self) -> str:
         name = self.backfill_prop.fget.__name__
 
         target = getattr(self.backfill_prop.fget, "_internal_target", None)
@@ -33,13 +33,21 @@ class Backfill:
 
         if backing_name is None:
             raise TypeError(f"Cannot determine backing name for {target!r}")
+        return backing_name
 
+
+    def apply(self, element: S, owner: Any) -> None:
+        backing_name = self._get_backing_name()
         if getattr(element, backing_name) is None:
             setattr(element, backing_name, owner)
 
         ref = getattr(element, backing_name)
         if ref is not owner:
-            raise ValueError(f"{element} `{name}` property references {ref}, expected {owner}.")
+            raise ValueError(f"{element} `{self.backfill_prop.fget.__name__}` property references {ref}, expected {owner}.")
+
+    def clear(self, element: S) -> None:
+        backing_name = self._get_backing_name()
+        setattr(element, backing_name, None)
 
 
 def internal(target: Any) -> Callable[[F], F]:

@@ -23,6 +23,7 @@
 * Added `skip_install = true` to the lint environment to avoid installing package dependencies that aren't needed for linting.
 * Added E402 noqa comments for intentional mid-file imports used to avoid circular dependency issues in `dataclassy/dataclass.py`, `context_value_computer.py`, `queue_condition.py`, `direction_logger.py`, and `test_network_trace.py`.
 * Switched from using `dataclassy` to native dataclasses
+* Every UML relationship is now a custom list wrapper that takes no memory and has a reference to the backing field - usage interface is nearly identical to lists
 
 ### Fixes
 * added python3.14 to compatibility list.
