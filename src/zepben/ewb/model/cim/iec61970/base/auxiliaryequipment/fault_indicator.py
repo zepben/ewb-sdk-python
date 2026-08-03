@@ -6,7 +6,7 @@
 __all__ = ["FaultIndicator"]
 
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

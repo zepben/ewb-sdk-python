@@ -15,7 +15,7 @@ from zepben.ewb import get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import ngen, nlen, safe_remove_by_id
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation

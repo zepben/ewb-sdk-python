@@ -14,7 +14,7 @@ from typing_extensions import deprecated
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment

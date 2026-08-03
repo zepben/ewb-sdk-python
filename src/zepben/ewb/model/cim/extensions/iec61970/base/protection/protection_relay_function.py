@@ -16,7 +16,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex

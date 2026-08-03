@@ -12,7 +12,7 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.util import nlen, ngen, safe_remove, get_by_mrid
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo

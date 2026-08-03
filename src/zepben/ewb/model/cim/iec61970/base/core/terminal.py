@@ -19,7 +19,7 @@ from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment

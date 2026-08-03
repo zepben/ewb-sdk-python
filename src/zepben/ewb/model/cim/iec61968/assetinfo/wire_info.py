@@ -10,7 +10,7 @@ from abc import ABCMeta
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_insulation_kind import WireInsulationKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_material_kind import WireMaterialKind
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

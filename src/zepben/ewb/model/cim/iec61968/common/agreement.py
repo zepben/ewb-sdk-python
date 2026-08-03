@@ -9,7 +9,7 @@ from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.model.cim.iec61970.base.domain.date_time_interval import DateTimeInterval
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

@@ -16,7 +16,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import Transformer
 from zepben.ewb.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.util import ngen, nlen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer import PowerTransformer

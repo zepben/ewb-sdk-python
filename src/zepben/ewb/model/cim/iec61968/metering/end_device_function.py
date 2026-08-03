@@ -8,7 +8,7 @@ __all__ = ["EndDeviceFunction"]
 from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

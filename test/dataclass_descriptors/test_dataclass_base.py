@@ -8,8 +8,8 @@ from typing import List
 import pytest
 
 from zepben.ewb import Cut
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass, DataclassBase
-from zepben.ewb.dataclass_descriptors.descriptor_fix import remove_descriptor_annotations
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass, DataclassBase
+from zepben.ewb.boilerplate.backed_descriptor import remove_descriptor_annotations
 
 
 @zb_dataclass

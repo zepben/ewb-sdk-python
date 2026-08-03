@@ -10,7 +10,7 @@ __all__ = ["RatioTapChanger"]
 from typing import Optional, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd

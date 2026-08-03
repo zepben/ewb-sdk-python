@@ -12,7 +12,7 @@ from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.ewb.util import nlen, ngen, safe_remove_by_id
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators

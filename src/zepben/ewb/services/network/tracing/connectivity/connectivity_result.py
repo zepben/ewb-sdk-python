@@ -13,7 +13,7 @@ from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb import NominalPhasePath

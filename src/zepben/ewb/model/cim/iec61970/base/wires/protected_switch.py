@@ -12,7 +12,7 @@ from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
 from zepben.ewb.util import get_by_mrid, ngen, nlen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction

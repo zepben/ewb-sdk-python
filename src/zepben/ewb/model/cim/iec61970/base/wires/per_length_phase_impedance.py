@@ -11,7 +11,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLen
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import require, ngen, nlen, safe_remove, none
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

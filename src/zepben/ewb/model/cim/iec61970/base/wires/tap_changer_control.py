@@ -8,7 +8,7 @@ __all__ = ["TapChangerControl"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

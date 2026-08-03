@@ -12,7 +12,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 

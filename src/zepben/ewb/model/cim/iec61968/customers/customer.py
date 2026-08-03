@@ -12,7 +12,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.ewb.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
