@@ -13,7 +13,7 @@ from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLin
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo

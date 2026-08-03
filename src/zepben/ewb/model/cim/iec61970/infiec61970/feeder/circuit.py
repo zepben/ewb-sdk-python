@@ -11,7 +11,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.line import Line
 from zepben.ewb.util import ngen, get_by_mrid, safe_remove, nlen
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop

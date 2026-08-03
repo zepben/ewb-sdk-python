@@ -8,7 +8,7 @@ __all__ = ["EquivalentEquipment"]
 from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

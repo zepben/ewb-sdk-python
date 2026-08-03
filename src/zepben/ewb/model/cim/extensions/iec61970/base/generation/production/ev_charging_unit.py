@@ -7,7 +7,7 @@ __all__ = ["EvChargingUnit"]
 
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.ewb.model.cim.extensions.zbex import zbex
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

@@ -8,7 +8,7 @@ __all__ = ["Analog"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass

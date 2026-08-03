@@ -8,7 +8,7 @@ __all__ = ["Meter"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
-from zepben.ewb.dataclass_descriptors.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass
