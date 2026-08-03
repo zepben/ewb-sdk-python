@@ -12,6 +12,7 @@
   * `EnergySource.phases`
   * `PowerElectronicsConnection.phases`
 * ContactDetails are now Identifiable and no longer have default id generation. The constructor now requires a string. The `id` field is deprecated, to be replaced with mrid.
+* Removing items with backref from a containing object's list automatically clears the backref field on the item - it is not accessible after removal.
 
 ### New Features
 * Added a `lint` tox environment that runs `ruff check .` to enforce code quality standards. The test environments now depend on lint passing first, so CI will fail if any new lint violations are introduced.
@@ -24,6 +25,7 @@
 * Added E402 noqa comments for intentional mid-file imports used to avoid circular dependency issues in `dataclassy/dataclass.py`, `context_value_computer.py`, `queue_condition.py`, `direction_logger.py`, and `test_network_trace.py`.
 * Switched from using `dataclassy` to native dataclasses
 * Every UML relationship is now a custom list wrapper that takes no memory and has a reference to the backing field - usage interface is nearly identical to lists
+* UML relationships can now automatically set backref values where needed (eg `Cut.ac_line_segment`). They also clear the backref field when the item is removed.
 
 ### Fixes
 * added python3.14 to compatibility list.
