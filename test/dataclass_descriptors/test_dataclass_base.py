@@ -32,6 +32,11 @@ class Child(Root):
     dc_default_factory: List[int] = field(default_factory=lambda : [33])
 
 
+@zb_dataclass
+class InitFalseFields(DataclassBase):
+    with_default: int = field(default=42, init=False)
+
+
 def test_dataclass_base():
     mrid = "CLARKSOOOOOOOON"
 
@@ -72,3 +77,22 @@ def test_dataclass_base():
     other = Child("mrid2", y=42)
     other.dc_default_factory.append(24)
     assert obj.dc_default_factory == [33]
+
+
+def test_init_false_field_uses_default():
+    obj = InitFalseFields()
+
+    assert obj.with_default == 42
+
+
+def test_init_false_field_cannot_be_passed_to_constructor():
+    with pytest.raises(
+        TypeError,
+        match="unexpected keyword argument 'with_default'",
+    ):
+        InitFalseFields(with_default=24)
+
+
+def test_unknown_constructor_value_is_rejected_by_slots():
+    with pytest.raises(AttributeError, match="unknown"):
+        Child("mrid", y=33, unknown=24)

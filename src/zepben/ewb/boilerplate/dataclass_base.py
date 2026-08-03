@@ -139,8 +139,9 @@ class DataclassBase:
         if callable(getattr(self, "__post_init__", None)):
             raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
 
+        field_dict = {f.name: f for f in fields(type(self))}
         # Manually assign defaults in dataclass fields
-        for f in fields(type(self)):
+        for f in field_dict.values():
             # We cannot just check kwargs because fields could be set in subclass __init__'s
             if _is_set(self, f.name) or f.name in kwargs:
                 continue
@@ -150,4 +151,10 @@ class DataclassBase:
         # Assign all of the kwargs manually.
         # str-based setattr triggers descriptors, allowing us to intercept __set__.
         for attr, value in kwargs.items():
+            field = field_dict.get(attr)
+            if field is not None and not field.init:
+                raise TypeError(
+                    f"{type(self).__name__}.__init__() got an "
+                    f"unexpected keyword argument {attr!r}"
+                )
             setattr(self, attr, value)
