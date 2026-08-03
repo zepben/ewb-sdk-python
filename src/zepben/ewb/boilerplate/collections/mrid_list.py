@@ -79,8 +79,13 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
 
     def remove(self, item: S) -> None:
         self._backing_list.remove(item)
+        if self.backfill is not None:
+            self.backfill.clear(item)
 
     def clear(self) -> None:
+        if self.backfill is not None:
+            for item in self._backing_list:
+                self.backfill.clear(item)
         self._backing_list.clear()
 
     def __repr__(self) -> str:
