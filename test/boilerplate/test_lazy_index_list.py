@@ -59,7 +59,7 @@ def test_insert_rejects_index_outside_valid_range(index: int):
     owner = Owner()
 
     with pytest.raises(
-        ValueError,
+        IndexError,
         match=rf"Sequence number {index} is invalid.*between 0 and 0",
     ):
         owner.items.insert(index, "item")

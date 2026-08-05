@@ -39,7 +39,7 @@ class LazyIndexList(LazyList[T]):
         size = len(self)
 
         if not 0 <= index <= size:
-            raise ValueError(
+            raise IndexError(
                 f"Unable to add {self.element_description} to "
                 f"{self._instance}. "
                 f"Sequence number {index} is invalid. "
