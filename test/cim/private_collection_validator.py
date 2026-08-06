@@ -376,10 +376,10 @@ def _validate_ordered_other(
 
         # Adding to an invalid index is not valid.
         expected_message = (
-            rf"Unable to add {other4.__class__.__name__} to {it}. \w* number 5 is invalid. Expected a value between 0 and {num(it)}. "
+            rf"An? {other4.__class__.__name__} could not be added to {it}. \w* number 5 is invalid. Expected a value between 0 and {num(it)}. "
             "Make sure you are adding the items in order and there are no gaps in the numbering."
         )
-        with pytest.raises(ValueError, match=expected_message):
+        with pytest.raises(IndexError, match=expected_message):
             add_with_index(it, other4, 5)
 
         # Python has reverse index support
@@ -534,7 +534,7 @@ def _validate(
     # NOTE: inlining `remove_exception_types` directly into `pytest.raises` as `(ValueError, KeyError)` causes type errors (which are incorrect).
     #       We check for both ValueError and KeyError as different underlying collections throw different exceptions.
     #
-    remove_exception_types: Tuple[Type[Exception], Type[Exception]] = (ValueError, KeyError)
+    remove_exception_types: Tuple[Type[Exception], Type[Exception], Type[Exception]] = (ValueError, KeyError, IndexError)
     with pytest.raises(remove_exception_types):
         remove(it, other1)
 

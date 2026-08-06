@@ -7,15 +7,21 @@ from __future__ import annotations
 
 __all__ = ["PowerElectronicsConnection"]
 
-from typing import Optional, List, Generator, TYPE_CHECKING
+from dataclasses import field
+from typing import Optional, List, TYPE_CHECKING
+
+from typing_extensions import deprecated
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
+from zepben.ewb.boilerplate.backfill import Backfill
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
-from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
+from zepben.ewb.util import require
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
-    from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 
 @zb_dataclass
@@ -136,91 +142,22 @@ class PowerElectronicsConnection(RegulatingCondEq):
     Permitted range is between -1.0 and 1.0 (inclusive), with a negative sign referring to “sink”.
     """
 
-    _power_electronics_units: Optional[List[PowerElectronicsUnit]] = None
+    _power_electronics_units: Optional[List[PowerElectronicsUnit]] = field(default=None)
     """An AC network connection may have several power electronics units connecting through it."""
 
-    _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
+    _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = field(default=None)
     """The individual units models for the power electronics connection."""
 
     def __init__(
         self,
         *args,
-        power_electronics_units: List[PowerElectronicsUnit] = None,
-        power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
-        inv_watt_resp_v1=None,
-        inv_watt_resp_v2=None,
-        inv_watt_resp_v3=None,
-        inv_watt_resp_v4=None,
-        inv_watt_resp_p_at_v1=None,
-        inv_watt_resp_p_at_v2=None,
-        inv_watt_resp_p_at_v3=None,
-        inv_watt_resp_p_at_v4=None,
-        inv_var_resp_v1=None,
-        inv_var_resp_v2=None,
-        inv_var_resp_v3=None,
-        inv_var_resp_v4=None,
-        inv_var_resp_q_at_v1=None,
-        inv_var_resp_q_at_v2=None,
-        inv_var_resp_q_at_v3=None,
-        inv_var_resp_q_at_v4=None,
-        **kwargs,
+        power_electronics_units=None,
+        power_electronics_connection_phases=None,
+        **kwargs
     ):
         super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
-        if power_electronics_units:
-            for unit in power_electronics_units:
-                self.add_unit(unit)
-
-        if power_electronics_connection_phases:
-            for phase in power_electronics_connection_phases:
-                self.add_phase(phase)
-
-        if inv_watt_resp_v1 is not None:
-            self.inv_watt_resp_v1 = inv_watt_resp_v1
-
-        if inv_watt_resp_v2 is not None:
-            self.inv_watt_resp_v2 = inv_watt_resp_v2
-
-        if inv_watt_resp_v3 is not None:
-            self.inv_watt_resp_v3 = inv_watt_resp_v3
-
-        if inv_watt_resp_v4 is not None:
-            self.inv_watt_resp_v4 = inv_watt_resp_v4
-
-        if inv_watt_resp_p_at_v1 is not None:
-            self.inv_watt_resp_p_at_v1 = inv_watt_resp_p_at_v1
-
-        if inv_watt_resp_p_at_v2 is not None:
-            self.inv_watt_resp_p_at_v2 = inv_watt_resp_p_at_v2
-
-        if inv_watt_resp_p_at_v3 is not None:
-            self.inv_watt_resp_p_at_v3 = inv_watt_resp_p_at_v3
-
-        if inv_watt_resp_p_at_v4 is not None:
-            self.inv_watt_resp_p_at_v4 = inv_watt_resp_p_at_v4
-
-        if inv_var_resp_v1 is not None:
-            self.inv_var_resp_v1 = inv_var_resp_v1
-
-        if inv_var_resp_v2 is not None:
-            self.inv_var_resp_v2 = inv_var_resp_v2
-
-        if inv_var_resp_v3 is not None:
-            self.inv_var_resp_v3 = inv_var_resp_v3
-
-        if inv_var_resp_v4 is not None:
-            self.inv_var_resp_v4 = inv_var_resp_v4
-
-        if inv_var_resp_q_at_v1 is not None:
-            self.inv_var_resp_q_at_v1 = inv_var_resp_q_at_v1
-
-        if inv_var_resp_q_at_v2 is not None:
-            self.inv_var_resp_q_at_v2 = inv_var_resp_q_at_v2
-
-        if inv_var_resp_q_at_v3 is not None:
-            self.inv_var_resp_q_at_v3 = inv_var_resp_q_at_v3
-
-        if inv_var_resp_q_at_v4 is not None:
-            self.inv_var_resp_q_at_v4 = inv_var_resp_q_at_v4
+        self.units.extend(power_electronics_units)
+        self.phases.extend(power_electronics_connection_phases)
 
     @property
     def inv_watt_resp_v1(self):
@@ -417,121 +354,70 @@ class PowerElectronicsConnection(RegulatingCondEq):
         require(value is None or -0.6 <= value <= 0.0, lambda: f"inv_var_resp_q_at_v4 [{value}] must be between -0.6 and 0.0.")
         self._inv_var_resp_q_at_v4 = value
 
-    @property
-    def units(self) -> Generator[PowerElectronicsUnit, None, None]:
-        """
-        The `PowerElectronicsUnit`s for this `PowerElectronicsConnection`.
-        """
-        return ngen(self._power_electronics_units)
+    units: MridCollection[PowerElectronicsUnit] = LazyMridList(
+        _power_electronics_units,
+        "A PowerElectronicsUnit",
+    )
 
-    @property
-    def phases(self) -> Generator[PowerElectronicsConnectionPhase, None, None]:
-        """
-        The `PowerElectronicsConnectionPhase`s for this `PowerElectronicsConnection`.
-        """
-        return ngen(self._power_electronics_connection_phases)
+    phases: MridCollection[PowerElectronicsConnectionPhase] = LazyMridList(
+        _power_electronics_connection_phases,
+        "A PowerElectronicsConnectionPhase",
+        backfill=Backfill(PowerElectronicsConnectionPhase.power_electronics_connection)
+    )
 
+    # region deprecated list boilerplate
+    # region units boilerplate
+
+    @deprecated("Use len(obj.units) instead.")
     def num_units(self):
-        """Return the number of `PowerElectronicsUnit`s associated with this `PowerElectronicsConnection`"""
-        return nlen(self._power_electronics_units)
+        return len(self.units)
 
+    @deprecated("Use obj.units.get_by_mrid(mrid) instead.")
     def get_unit(self, mrid: str) -> PowerElectronicsUnit:
-        """
-        Get the `PowerElectronicsUnit` for this
-        `PowerElectronicsConnection` identified by `mrid`
+        return self.units.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `PowerElectronicsUnit`
-        Returns The `PowerElectronicsUnit` with the specified `mrid`
-        if it exists
-
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._power_electronics_units, mrid)
-
+    @deprecated("Use obj.units.append(unit) instead.")
     def add_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
-        """
-        Associate an `PowerElectronicsUnit` with this
-        `PowerElectronicsConnection`
-
-        `unit` the `PowerElectronicsUnit` to associate with this `PowerElectronicsConnection`.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if another `PowerElectronicsUnit` with the same `mrid` already exists for this `PowerElectronicsConnection`.
-        """
-        if self._validate_reference(unit, self.get_unit, "A PowerElectronicsUnit"):
-            return self
-        self._power_electronics_units = list() if self._power_electronics_units is None else self._power_electronics_units
-        self._power_electronics_units.append(unit)
+        self.units.append(unit)
         return self
 
+    @deprecated("Use obj.units.remove(unit) instead.")
     def remove_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
-        """
-        Disassociate `unit` from this `PowerElectronicsConnection`
-
-        `unit` the `PowerElectronicsUnit` to disassociate from this `PowerElectronicsConnection`.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if `unit` was not associated with this `PowerElectronicsConnection`.
-        """
-        self._power_electronics_units = safe_remove(self._power_electronics_units, unit)
+        self.units.remove(unit)
         return self
 
+    @deprecated("Use obj.units.clear() instead.")
     def clear_units(self) -> PowerElectronicsConnection:
-        """
-        Clear all units.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        """
-        self._power_electronics_units = None
+        self.units.clear()
         return self
 
+    # endregion units boilerplate
+
+    # region phases boilerplate
+
+    @deprecated("Use len(obj.phases) instead.")
     def num_phases(self):
-        """Return the number of `PowerElectronicsConnectionPhase`s associated with this `PowerElectronicsConnection`"""
-        return nlen(self._power_electronics_connection_phases)
+        return len(self.phases)
 
+    @deprecated("Use obj.phases.get_by_mrid(mrid) instead.")
     def get_phase(self, mrid: str) -> PowerElectronicsConnectionPhase:
-        """
-        Get the `PowerElectronicsConnectionPhase` for this `PowerElectronicsConnection` identified by `mrid`
+        return self.phases.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `PowerElectronicsConnectionPhase`
-        Returns The `PowerElectronicsConnectionPhase` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._power_electronics_connection_phases, mrid)
-
+    @deprecated("Use obj.phases.append(phase) instead.")
     def add_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
-        """
-        Associate a `PowerElectronicsConnectionPhase` with this `PowerElectronicsConnection`
-
-        `phase` the `PowerElectronicsConnectionPhase` to associate with this `PowerElectronicsConnection`.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`, or if
-        `phase.power_electronics_connection` is not this `PowerElectronicsConnection`.
-        """
-        if self._validate_reference(phase, self.get_phase, "A PowerElectronicsConnectionPhase"):
-            return self
-
-        if phase.power_electronics_connection is None:
-            phase.power_electronics_connection = self
-
-        require(phase.power_electronics_connection is self, lambda: f"{phase} `power_electronics_connection` property references {phase.power_electronics_connection}, expected {self}.")
-
-        self._power_electronics_connection_phases = list() if self._power_electronics_connection_phases is None else self._power_electronics_connection_phases
-        self._power_electronics_connection_phases.append(phase)
+        self.phases.append(phase)
         return self
 
+    @deprecated("Use obj.phases.remove(phase) instead.")
     def remove_phase(self, phase: PowerElectronicsConnectionPhase) -> PowerElectronicsConnection:
-        """
-        Disassociate `phase` from this `PowerElectronicsConnection`
-
-        `phase` the `PowerElectronicsConnectionPhase` to disassociate from this `PowerElectronicsConnection`.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if `phase` was not associated with this `PowerElectronicsConnection`.
-        """
-        self._power_electronics_connection_phases = safe_remove(self._power_electronics_connection_phases, phase)
+        self.phases.remove(phase)
         return self
 
+    @deprecated("Use obj.phases.clear() instead.")
     def clear_phases(self) -> PowerElectronicsConnection:
-        """
-        Clear all phases.
-        Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-       """
-        self._power_electronics_connection_phases = None
+        self.phases.clear()
         return self
+
+    # endregion phases boilerplate
+
+    # endregion deprecated list boilerplate

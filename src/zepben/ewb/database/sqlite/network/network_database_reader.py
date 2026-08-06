@@ -139,7 +139,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         for it in missing_containers:
             count_by_class[type(it).__name__] += 1
 
-        for (className, count) in count_by_class:
+        for (className, count) in count_by_class.items():
             self._logger.warning(f"{count} {className}s were missing an equipment container.")
 
         if count_by_class:

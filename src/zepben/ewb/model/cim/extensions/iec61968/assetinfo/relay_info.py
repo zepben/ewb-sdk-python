@@ -7,12 +7,15 @@ from __future__ import annotations
 
 __all__ = ["RelayInfo"]
 
-from typing import Optional, List, Generator, Callable, Any
+from dataclasses import field
+from typing import Optional, List, Callable, Any
 
+from typing_extensions import deprecated
+
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_index_list import LazyIndexList
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.ewb.util import ngen, nlen, safe_remove, require
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass
@@ -26,20 +29,12 @@ class RelayInfo(AssetInfo):
     reclose_fast: Optional[bool] = None
     """True if reclose_delays are associated with a fast Curve, false otherwise."""
 
-    _reclose_delays: Optional[List[float]] = None
+    _reclose_delays: Optional[List[float]] = field(default=None)
 
-    def __init__(self, *args, reclose_delays: Optional[List[float]] = None, **kwargs):
-        super(RelayInfo, self).__init__(*args, **kwargs)
-        if reclose_delays:
-            for index, delay in enumerate(reclose_delays):
-                self.add_delay(delay, index)
-
-    @property
-    def reclose_delays(self) -> Generator[float, None, None]:
-        """
-        The reclose delays for this curve and relay type. The index of the list is the reclose step, and the value is the overall delay time.
-        """
-        return ngen(self._reclose_delays)
+    reclose_delays: LazyIndexList[float] = LazyIndexList(
+        _reclose_delays,
+        "A float"
+    )
 
     def set_delays(self, delays: List[float]) -> RelayInfo:
         """
@@ -48,83 +43,53 @@ class RelayInfo(AssetInfo):
         :param delays: The delays to set. The provided list will be copied.
         :return: A reference to this :class:`RelayInfo` to allow fluent use.
         """
-        self._reclose_delays = delays.copy()
+        self.reclose_delays.clear()
+        self.reclose_delays.extend(delays)
         return self
 
+    # region deprecated methods
+
+    # region reclose_delays boilerplate
+
+    @deprecated("Use len(reclose_delays) instead.")
     def num_delays(self) -> int:
-        """
-        Get the number of reclose delays for this :class:`RelayInfo`
-        """
-        return nlen(self._reclose_delays)
+        return len(self.reclose_delays)
 
+    @deprecated("Use reclose_delays[index] instead.")
     def get_delay(self, index: int) -> float:
-        """
-        Get the reclose delay at the specified index, if it exists. Otherwise, this returns
+        return self.reclose_delays[index]
 
-        :param index: The index of the delay to retrieve.
-        :return: The reclose delay at `index` if it exists, otherwise None.
-        """
-        if self._reclose_delays:
-            return self._reclose_delays[index]
-        else:
-            raise IndexError(index)
+    @deprecated("Use reclose_delays.for_each_indexed(action) instead.")
+    def for_each_delay(
+        self,
+        action: Callable[[int, float], Any],
+    ) -> None:
+        self.reclose_delays.for_each_indexed(action)
 
-    def for_each_delay(self, action: Callable[[int, float], Any]):
-        """
-        Call the `action` on each delay in the `reclose_delays` collection
-
-        :param action: An action to apply to each delay in the `reclose_delays` collection, taking the index of the delay, and the delay itself.
-        """
-        for index, point in enumerate(self._reclose_delays):
-            action(index, point)
-
-    def add_delay(self, delay: float, index: int = None) -> RelayInfo:
-        """
-        Add a reclose delay.
-
-        :param delay: The delay in seconds to add.
-        :param index: The index into the list to add the delay at. Defaults to the end of the list.
-        :return: A reference to this :class:`RelayInfo` to allow fluent use.
-        """
-        if index is None:
-            index = self.num_delays()
-        require(0 <= index <= self.num_delays(),
-                lambda: f"Unable to add float to {str(self)}. Index number {index} "
-                        f"is invalid. Expected a value between 0 and {self.num_delays()}. Make sure you are "
-                        f"adding the items in order and there are no gaps in the numbering.")
-        self._reclose_delays = list() if self._reclose_delays is None else self._reclose_delays
-        self._reclose_delays.insert(index, delay)
+    @deprecated("Use reclose_delays.append(delay)")
+    def add_delay(
+        self,
+        delay: float,
+        index: int | None = None,
+    ) -> RelayInfo:
+        if index is None: index = len(self.reclose_delays)
+        self.reclose_delays.insert(index, delay)
         return self
 
+    @deprecated("Use reclose_delays.remove(delay) instead.")
     def remove_delay(self, delay: float) -> RelayInfo:
-        """
-        Remove a delay from the list.
-
-        :param delay: The delay to remove.
-        :return: A reference to this :class:`RelayInfo` to allow fluent use.
-        """
-        self._reclose_delays = safe_remove(self._reclose_delays, delay)
+        self.reclose_delays.remove(delay)
         return self
 
+    @deprecated("Use reclose_delays.pop(index) instead.")
     def remove_delay_at(self, index: int) -> float:
-        """
-        Remove a delay from the list.
+        return self.reclose_delays.pop(index)
 
-        :param index: The index of the delay to remove.
-        :return: The delay that was removed, or `None` if no delay was present at `index`.
-        :raises IndexError: If `sequence_number` is out of range.
-        """
-        if self._reclose_delays:
-            delay = self._reclose_delays.pop(index)
-            self._reclose_delays = self._reclose_delays if self._reclose_delays else None
-            return delay
-        raise IndexError(index)
-
+    @deprecated("Use reclose_delays.clear() instead.")
     def clear_delays(self) -> RelayInfo:
-        """
-        Clear all reclose delays.
-
-        :return: A reference to this :class:`RelayInfo` to allow fluent use.
-        """
-        self._reclose_delays = None
+        self.reclose_delays.clear()
         return self
+
+    # endregion
+
+    # endregion
