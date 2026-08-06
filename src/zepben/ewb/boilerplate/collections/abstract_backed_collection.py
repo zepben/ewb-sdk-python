@@ -81,6 +81,10 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
         """Return whether the backing collection contains ``item``."""
         return item in self._get_collection()
 
+    def find_by(self, predicate: Callable[[T], bool], /) -> T:
+        """Return first item that satisfies ``predicate`` or ``None`` if no items do"""
+        return next((it for it in self if predicate(it)), None)
+
     def for_each_indexed(self, action: Callable[[int, T], object]) -> None:
         """Call the `action` on each item in the list."""
         for index, item in enumerate(self._get_collection()):

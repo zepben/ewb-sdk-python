@@ -22,7 +22,8 @@ class PhaseImpedanceDataList(LazyList):
         :param to_phase: The "to" phase to look up.
         :raises KeyError: If no matching phase impedance data exists.
         """
-        phase_impedance_data = next((it for it in self if it.from_phase == from_phase and it.to_phase == to_phase), None)
+
+        phase_impedance_data = self.find_by(lambda it: it.to_phase == to_phase)
         if phase_impedance_data:
             return phase_impedance_data
 

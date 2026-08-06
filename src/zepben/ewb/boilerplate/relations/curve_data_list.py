@@ -19,7 +19,8 @@ class CurveDataList(LazyList):
         :param x: The x-value of the requested data.
         :raises KeyError: If no data has the requested x-value.
         """
-        curve_data = next((it for it in self if it.x_value == x), None)
+
+        curve_data = self.find_by(lambda it: it.x_value == x)
         if curve_data:
             return curve_data
         raise KeyError(x)

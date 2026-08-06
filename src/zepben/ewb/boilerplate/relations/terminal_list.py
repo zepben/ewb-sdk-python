@@ -17,7 +17,7 @@ class TerminalsList(LazyMridList[Terminal]):
 
         :raises IndexError: If no terminal has the requested sequence number.
         """
-        term = next((it for it in self if it.sequence_number == sequence_number), None)
+        term = self.find_by(lambda it: it.sequence_number == sequence_number)
         if term is None:
             raise IndexError(f"No Terminal with sequence_number {sequence_number} was found in ConductingEquipment {str(self._instance)}")
         return term

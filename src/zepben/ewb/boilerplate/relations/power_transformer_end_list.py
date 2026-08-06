@@ -21,7 +21,7 @@ class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
         :param end_number: The number of the required transformer end.
         :raises IndexError: If no transformer end has the requested number.
         """
-        end = next((it for it in self if it.end_number == end_number), None)
+        end = self.find_by(lambda it: it.end_number == end_number)
         if end:
             return end
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self._instance)}")
@@ -33,7 +33,7 @@ class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
         :raises IndexError: If no transformer end uses ``terminal``.
         """
 
-        end = next((it for it in self if it.terminal == terminal), None)
+        end = self.find_by(lambda it: it.terminal == terminal)
         if end:
             return end
         raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self._instance)}")

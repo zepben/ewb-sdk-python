@@ -17,7 +17,7 @@ class TransformerEndRatedSList(LazyList[TransformerEndRatedS]):
         cooling_type: TransformerCoolingType,
     ) -> TransformerEndRatedS | None:
         """Return the entry for ``cooling_type``, or ``None``."""
-        return next((rating for rating in self if rating.cooling_type == cooling_type), None)
+        return self.find_by(lambda it: it.cooling_type == cooling_type)
 
     def remove_by_cooling_type(
         self,

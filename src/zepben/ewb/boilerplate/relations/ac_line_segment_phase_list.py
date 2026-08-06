@@ -18,7 +18,7 @@ class AcLineSegmentPhaseList(LazyMridList):
         :param phase: The phase of the required ``AcLineSegmentPhase``.
         :raises KeyError: If no model has the requested phase.
         """
-        res = next((it for it in self if it.phase == phase), None)
+        res = self.find_by(lambda it: it.phase == phase)
         if res is None:
             raise KeyError(phase)
         return res

@@ -18,7 +18,7 @@ class BatteryControlList(LazyMridList):
         :param control_mode: The mode of the required ``BatteryControl``.
         :raises IndexError: If no control has the requested mode.
         """
-        for control in self:
-            if control.control_mode == control_mode:
-                return control
+        res = self.find_by(lambda it: it.control_mode == control_mode)
+        if res is not None:
+            return res
         raise IndexError(f"No BatteryControl with a control_mode of {control_mode} was found in BatteryUnit {str(self)}")
