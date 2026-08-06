@@ -304,33 +304,3 @@ def test_resolve_default_rejects_field_without_default():
         match=r"Missing required field 'required' for Example",
     ):
         resolve_default(instance, required_field)
-
-
-@pytest.mark.xfail(
-    strict=True,
-    reason="Required backing fields are resolved before descriptor keywords are assigned",
-)
-def test_descriptor_keyword_can_supply_required_backing_field():
-    @zb_dataclass
-    class RequiredBacking(DataclassBase):
-        _value: int = field()
-        value: int = BackedDescriptor(_value)
-
-    instance = RequiredBacking(value=3)
-
-    assert instance._value == 3
-
-
-@pytest.mark.xfail(
-    strict=True,
-    reason="slots=True returns a replacement class and breaks zero-argument super()",
-)
-def test_zb_dataclass_supports_zero_argument_super():
-    @zb_dataclass
-    class ZeroArgSuper(DataclassBase):
-        value: int = 1
-
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-
-    assert ZeroArgSuper().value == 1

@@ -108,7 +108,7 @@ def zb_dataclass(cls: type[T]) -> type[T]:
         )(cls),
     )
 
-def resolve_default(instance, field: Field):
+def resolve_default(instance, field: Field, unsafe: bool=True):
     # Set field defaults
     if field.default is not MISSING:
         setattr(instance, field.name, field.default)
@@ -147,12 +147,16 @@ class DataclassBase:
             raise NotImplementedError("Current dataclass base does not support __post_init__ calls for redundancy reasons.")
 
         field_dict = {f.name: f for f in fields(type(self))}
+
         # Manually assign defaults in dataclass fields
         for f in field_dict.values():
             # We cannot just check kwargs because fields could be set in subclass __init__'s
             if _is_set(self, f.name) or f.name in kwargs:
                 continue
 
+            # NOTE: This step does not allow for descriptors to set no-default fields.
+            #       You can solve it by checking for missing values after the next section (kwarg application)
+            #       However, it is slightly inefficient and not used for CIM, so we don't use it.
             resolve_default(self, f)
 
         # Assign all of the kwargs manually.

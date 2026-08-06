@@ -19,7 +19,7 @@ class BackedDescriptor:
     def __init__(self, private_field):
         if not isinstance(private_field, Field) and not isinstance(private_field, BackedDescriptor):
             raise TypeError(f"private_field parameter of the Descriptor constructor has to be an instance of dataclass Field, instead is {private_field}")
-        self.private_field: Field | 'BackedDescriptor' = private_field
+        self.private_field: 'Field | BackedDescriptor' = private_field
         self._backing_name: str | None = None
         self.name = None
 
