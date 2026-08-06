@@ -13,10 +13,11 @@ S = TypeVar("S", bound=Identifiable)
 
 
 class MridCollection(AbstractBackedCollection[S], ABC):
-    """
-    Collection of objects identified by a unique ``mrid``.
+    """Base collection for objects identified by a unique ``mrid``.
 
-    Provides lookup by mRID and rejects distinct objects with duplicate mRIDs.
+    Provides lookup through :meth:`get_by_mrid` and read-only string indexing.
+    Additions enforce mRID uniqueness and apply optional backfill before base
+    collection validation.
     """
 
     _instance: Any
@@ -27,17 +28,24 @@ class MridCollection(AbstractBackedCollection[S], ABC):
     def _safe_get_by_mrid(self, mrid: str) -> S | None: ...
 
     def get_by_mrid(self, mrid: str) -> S:
-        """
-        Get an element matching given ``mrid``
+        """Return the element with ``mrid``.
 
-        raises KeyError if one is not present
+        :raises KeyError: If no element has the requested mRID.
         """
         res = self._safe_get_by_mrid(mrid)
         if res is None:
             raise KeyError(mrid)
         return res
 
+    def __getitem__(self, mrid: str, /) -> S:
+        """Return the element with ``mrid``.
+
+        :raises KeyError: If no element has the requested mRID.
+        """
+        return self.get_by_mrid(mrid)
+
     def _can_add_by_mrid(self, element: S) -> bool:
+        """Accept a new mRID, ignore the same instance, and reject collisions."""
         existing = self._safe_get_by_mrid(element.mrid)
 
         if existing is None:
@@ -52,6 +60,11 @@ class MridCollection(AbstractBackedCollection[S], ABC):
         return False
 
     def append(self, item: S, /) -> None:
+        """Append ``item`` when its mRID and validation permit it.
+
+        This performs the mRID check, backfill, validation, and storage, but no
+        sorting.
+        """
         if not self._can_add_by_mrid(item):
             return
 
@@ -61,10 +74,12 @@ class MridCollection(AbstractBackedCollection[S], ABC):
         super().append(item)
 
     def _post_remove(self, item: S, /) -> None:
+        """Clear ``item``'s backfill after removal."""
         if self.backfill is not None:
             self.backfill.clear(item)
 
     def clear(self) -> None:
+        """Clear the collection and all backfilled references."""
         collection = self._get_collection()
         if self.backfill is None:
             self._clear_raw(collection)

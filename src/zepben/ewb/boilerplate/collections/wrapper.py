@@ -17,14 +17,15 @@ from zepben.ewb.boilerplate.collections.abstract_backed_collection import Abstra
 
 class _Wrapper(BackedDescriptor):
     """
-    Descriptor base for collection views backed by another dataclass field.
+    Descriptor base for collection views backed by a dataclass field or alias.
 
     Access through an instance creates a short-lived wrapper bound to that
     instance and its backing field. For example::
 
-        class Container:
-            _items = field(default=None)
-            items = LazyList(_items)
+        @zb_dataclass
+        class Container(DataclassBase):
+            _items: list[str] | None = field(default=None)
+            items: LazyList[str] = LazyList(_items)
 
         container = Container()
 
@@ -59,9 +60,10 @@ class _Wrapper(BackedDescriptor):
         self._backing_name = None
 
     def __get__(self, instance, _=None) -> Self:
-        """
-        This creates a copy of self, pointing it to the specific instance that the wrapper is attached to.
-        From there on, the wrapper functions as a lazy list.
+        """Return a collection wrapper bound to ``instance``.
+
+        A fresh wrapper is created on each instance access and points at the
+        descriptor's backing field. Class access returns the shared descriptor.
         """
         if instance is None:
             return self
@@ -94,9 +96,7 @@ class _WrapperFgetFix(_Wrapper):
 T = TypeVar("T")
 
 class _IterableWrapper(_WrapperFgetFix, AbstractBackedCollection[T], ABC):
-    """
-    This class allows us to assign lists at init time to avoid special-case handling.
-    """
+    """Allow an iterable to populate a backed collection during assignment."""
     def __set__(self, instance, value) -> None:
         if instance is None:
             return

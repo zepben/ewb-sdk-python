@@ -10,23 +10,34 @@ from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
 
 class AbstractMridList(MridCollection[S], Sequence[S], ABC):
     """
-    Common list behaviour for mRID-addressable collections.
+    List-shaped specialisation of :class:`MridCollection`.
 
-    NOTE: This can be simplified by inheriting from AbstractBackedList.
-          But that cannot be done on the Kotlin side, so for better parity,
-          this class duplicates some of the functionality from that class
+    This class represents the deliberate intersection of the mRID collection
+    and backed-list branches so downstream mRID list implementations do not
+    duplicate sequence delegation or sorting behaviour. It intentionally does
+    not inherit :class:`AbstractBackedList` to preserve SDK hierarchy parity.
     """
 
     sort_by: Callable[[S], Any] | None = None
 
     @abstractmethod
     def _get_collection(self) -> Sequence[S]:
+        """Return the current backing list."""
         ...
 
     def append(self, item: S, /) -> None:
+        """Append ``item`` when its mRID and validation permit it.
+
+        This performs the mRID check, backfill, validation, storage, and
+        optional sorting.
+        """
         MridCollection.append(self, item)
         if self.sort_by is not None:
             self._get_collection().sort(key=self.sort_by)  # type: ignore[attr-defined]
+
+    @overload
+    def __getitem__(self, index: str) -> S:
+        ...
 
     @overload
     def __getitem__(self, index: int) -> S:
@@ -36,5 +47,8 @@ class AbstractMridList(MridCollection[S], Sequence[S], ABC):
     def __getitem__(self, index: slice) -> Sequence[S]:
         ...
 
-    def __getitem__(self, index: int | slice) -> S | Sequence[S]:
+    def __getitem__(self, index: str | int | slice) -> S | Sequence[S]:
+        """Return an element by mRID or an item or slice by list index."""
+        if isinstance(index, str):
+            return self.get_by_mrid(index)
         return self._get_collection()[index]

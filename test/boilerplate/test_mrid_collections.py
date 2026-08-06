@@ -49,6 +49,47 @@ def assert_public_state(
         for item in expected:
             assert item in collection
             assert collection.get_by_mrid(item.mrid) is item
+            assert collection[item.mrid] is item
+
+
+@pytest.mark.parametrize("collection_name", ["list_items", "lazy_list_items"])
+def test_mrid_lists_preserve_integer_and_slice_addressing(collection_name: str):
+    first = Item("first")
+    second = Item("second")
+    container = Container()
+    collection = getattr(container, collection_name)
+    collection.extend([first, second])
+
+    assert collection[0] is first
+    assert collection[-1] is second
+    assert collection[1:] == [second]
+    assert collection["first"] is first
+
+
+@pytest.mark.parametrize(
+    ("collection_name", "index"),
+    [
+        ("list_items", "item"),
+        ("list_items", 0),
+        ("lazy_list_items", "item"),
+        ("lazy_list_items", 0),
+        ("lazy_map_items", "item"),
+    ],
+)
+def test_mrid_collection_indexing_is_read_only(
+    collection_name: str,
+    index: str | int,
+):
+    item = Item("item")
+    replacement = Item("replacement")
+    container = Container()
+    collection = getattr(container, collection_name)
+    collection.append(item)
+
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        collection[index] = replacement
+
+    assert list(collection) == [item]
 
 
 def test_mrid_collections_have_the_same_public_effects():

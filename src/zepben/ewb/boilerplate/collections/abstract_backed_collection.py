@@ -10,33 +10,48 @@ T = TypeVar("T")
 
 
 class AbstractBackedCollection(Collection[T], Generic[T], ABC):
+    """A mutable collection whose contents are stored elsewhere.
+
+    Implementations provide the current contents through
+    :meth:`_get_collection`. Element validation and the append lifecycle are
+    centralised here, with hooks for raw storage and removal cleanup.
+
+    :meth:`_post_remove` is invoked after individual removal. :meth:`clear`
+    clears the backing storage directly, avoiding repeated removal bookkeeping
+    when bulk cleanup is unnecessary.
+    """
 
     _instance: Any
     validate: Callable[[Any, T], object] | None = None
 
     @abstractmethod
     def _get_collection(self) -> Collection[T]:
+        """Return the current backing collection."""
         ...
 
     def _append_raw(self, item: T, /) -> None:
-        """Append without running collection lifecycle hooks."""
+        """Append ``item`` to storage without validation or other hooks."""
         self._get_collection().append(item)  # type: ignore[attr-defined]
 
     def _post_remove(self, item: T, /) -> None:
-        """Run cleanup after one item has been removed."""
+        """Perform cleanup after ``item`` is removed."""
 
     def _clear_raw(self, collection: Collection[T], /) -> None:
-        """Clear the backing storage without per-item cleanup."""
+        """Clear ``collection`` without per-item cleanup."""
         collection.clear()  # type: ignore[attr-defined]
 
     def _clear_and_copy(self, collection: Collection[T], /) -> Collection[T]:
-        """Clear the backing storage and return its former contents."""
+        """Clear ``collection`` and return its former elements."""
         former_items = list(collection)
         self._clear_raw(collection)
         return former_items
 
     def append(self, item: T, /) -> None:
-        """Validate and append an item to the collection."""
+        """Append ``item`` after validation.
+
+        This performs validation and storage, but no mRID check, backfill, or
+        sorting.
+        """
         if self.validate is not None:
             self.validate(self._instance, item)
         self._append_raw(item)
@@ -47,21 +62,23 @@ class AbstractBackedCollection(Collection[T], Generic[T], ABC):
             self.append(element)
 
     def remove(self, item: T, /) -> None:
-        """Remove an item from the collection."""
+        """Remove ``item`` and perform per-item cleanup."""
         self._get_collection().remove(item)  # type: ignore[attr-defined]
         self._post_remove(item)
 
     def clear(self) -> None:
-        """Remove all items from the collection."""
+        """Clear the backing collection."""
         self._clear_raw(self._get_collection())
 
     def __len__(self) -> int:
         return len(self._get_collection())
 
     def __iter__(self) -> Iterator[T]:
+        """Return an iterator over the backing collection."""
         return iter(self._get_collection())
 
     def __contains__(self, item: object) -> bool:
+        """Return whether the backing collection contains ``item``."""
         return item in self._get_collection()
 
     def for_each_indexed(self, action: Callable[[int, T], object]) -> None:

@@ -10,10 +10,13 @@ from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 
 
 class AcLineSegmentPhaseList(LazyMridList):
+    """A list of ``AcLineSegmentPhase`` objects for an ``AcLineSegment``."""
+
     def get_by_phase(self, phase: SinglePhaseKind):
-        """
-        The individual phase models for an AcLineSegment.
-        `phase` the phase of the required [AcLineSegmentPhase]
+        """Return the individual phase model for an ``AcLineSegment``.
+
+        :param phase: The phase of the required ``AcLineSegmentPhase``.
+        :raises KeyError: If no model has the requested phase.
         """
         res = next((it for it in self if it.phase == phase), None)
         if res is None:

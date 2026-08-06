@@ -29,14 +29,17 @@ def remove_descriptor_annotations(cls: type[T]) -> T:
     descriptor-backed attributes before ``@dataclass`` runs, those attributes are
     left alone and can continue to behave as descriptors.
 
-    Use this decorator below ``@dataclass`` so that it is called first. Python
-    applies decorators from the bottom up::
+    Use this decorator below ``@dataclass`` so that it is called first. A
+    slotted dataclass is required for field-backed descriptors to be rebound
+    after dataclass field names are assigned. Python applies decorators from
+    the bottom up::
 
-        @dataclass
-                class MyClass:
+        @dataclass(slots=True)
+        @remove_descriptor_annotations
+        class MyClass:
             _x: int = field(default=0)
 
-            x: int = MyDescriptor("_x")
+            x: int = BackedDescriptor(_x)
 
     In the example above, ``x`` is annotated, but its class value is a descriptor.
     Without ``remove_descriptor_annotations``, ``@dataclass`` would treat ``x`` as
@@ -44,8 +47,8 @@ def remove_descriptor_annotations(cls: type[T]) -> T:
     repr, etc. With this decorator, the annotation for ``x`` is removed before
     dataclass processing, while normal fields such as ``_x`` are left intact.
 
-    Dataclass ``Field`` instances are themselves descriptors and are thus skipped.
-    In the example above, the slot for ``_x`` is still created.
+    Dataclass ``Field`` instances are explicitly preserved. In the example
+    above, the slot for ``_x`` is still created.
 
     Before decoration::
 
@@ -124,14 +127,18 @@ def resolve_default(instance, field: Field):
 
 @zb_dataclass
 class DataclassBase:
-    """
-    Instantiate the default fields and interpret the kwargs like ``@dataclass`` does
+    """Base class providing keyword-driven initialisation for CIM dataclasses.
 
-    This class serves as a base class for mostly init-less dataclasses used in CIM,
-    allowing custom inits to not break the entire inheritance tree.
-    It fills fields with default values, and treats kwargs the same way @dataclass does.
+    It populates unset dataclass fields from their defaults or factories, then
+    assigns keyword arguments through :func:`setattr` so properties and custom
+    descriptors participate in construction. Subclass constructors may set
+    fields first and delegate the remaining keywords here.
 
-    For more motivation, refer to `MANIFESTO.md`
+    This is intentionally not a complete replacement for a generated dataclass
+    initializer: positional arguments belong to subclass constructors and
+    ``__post_init__`` is unsupported.
+
+    See ``MANIFESTO.md`` for the design constraints behind this approach.
     """
     def __init__(self, **kwargs) -> None:
         # Currently post init implementation requires a lot of extra logic,

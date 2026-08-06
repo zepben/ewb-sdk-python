@@ -15,6 +15,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 class Backfill:
+    """Maintains an element's reference to its owning object."""
+
     def __init__(self, backfill_prop: property) -> None:
         if backfill_prop.fget is None:
             raise TypeError(f"Cannot backfill a property without a getter: {backfill_prop!r}")
@@ -37,6 +39,7 @@ class Backfill:
 
 
     def apply(self, element: S, owner: Any) -> None:
+        """Set or verify ``element``'s reference to ``owner``."""
         backing_name = self._get_backing_name()
         if getattr(element, backing_name) is None:
             setattr(element, backing_name, owner)
@@ -46,6 +49,7 @@ class Backfill:
             raise ValueError(f"{element} `{self.backfill_prop.fget.__name__}` property references {ref}, expected {owner}.")
 
     def clear(self, element: S) -> None:
+        """Clear the owner reference on ``element``."""
         backing_name = self._get_backing_name()
         setattr(element, backing_name, None)
 

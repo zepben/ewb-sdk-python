@@ -13,8 +13,7 @@ T = TypeVar("T")
 
 class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
     """
-    Concrete collection wrapper that treats its backing field as a nullable
-    list.
+    A list-like wrapper backed by a nullable list.
 
     A backing value of ``None`` is exposed as an empty collection. The backing
     list is created when the first item is appended and reset to ``None`` when
@@ -22,9 +21,10 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
 
     For example::
 
-        class Container:
-            _items = field(default=None)
-            items = LazyList(_items)
+        @zb_dataclass
+        class Container(DataclassBase):
+            _items: list[str] | None = field(default=None)
+            items: LazyList[str] = LazyList(_items)
 
         container = Container()
 
@@ -51,9 +51,15 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
         return getattr(self._instance, self._backing_name)
 
     def _get_collection(self) -> list[T]:
+        """Return the backing list, or an unbound empty list when absent."""
         return getattr(self._instance, self._backing_name) or []
 
     def _append_raw(self, item: T) -> None:
+        """Append ``item`` to the backing list, creating it if needed.
+
+        This hook performs storage; validation and optional sorting are
+        inherited.
+        """
         existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = [item]
@@ -62,10 +68,12 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
             existing.append(item)
 
     def _post_remove(self, item: T) -> None:
+        """Reset the backing list after its last item is removed."""
         if not self._get_collection():
             self._clear_raw(self._get_collection())
 
     def _clear_raw(self, collection) -> None:
+        """Reset the backing list to ``None``."""
         setattr(self._instance, self._backing_name, None)
 
     def __repr__(self) -> str:

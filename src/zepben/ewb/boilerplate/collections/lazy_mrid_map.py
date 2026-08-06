@@ -13,7 +13,7 @@ T = TypeVar("T")
 
 class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     """
-    Lazy mRID collection backed by a nullable dictionary.
+    An mRID collection backed by a nullable dictionary.
 
     Items are stored by their ``mrid`` while iteration exposes the dictionary
     values. A backing value of ``None`` is treated as an empty collection. The
@@ -22,10 +22,18 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
 
     For example::
 
+        @zb_dataclass
+        class Container(DataclassBase):
+            _items: dict[str, Identifiable] | None = field(default=None)
+            items: MridCollection[Identifiable] = LazyMridMap(_items, "item")
+
+        container = Container()
+        item = Identifiable("item")
         container.items.append(item)
 
         assert container._items == {item.mrid: item}
         assert container.items.get_by_mrid(item.mrid) is item
+        assert container.items[item.mrid] is item
 
         container.items.remove(item)
         assert container._items is None
@@ -49,15 +57,26 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         return getattr(self._instance, self._backing_name) or {}
 
     def _get_collection(self) -> ValuesView[S]:
+        """Return the map values, or an unbound empty view when absent."""
         return self._get_or_empty().values()
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
+        """Return the element with ``mrid``, or ``None``."""
         return self._get_or_empty().get(mrid, None)
 
     def get_by_mrid(self, mrid: str) -> S:
+        """Return the element with ``mrid``.
+
+        :raises KeyError: If no element has the requested mRID.
+        """
         return self._get_or_empty()[mrid]
 
     def _append_raw(self, item: S) -> None:
+        """Store ``item`` by mRID, creating the backing map if needed.
+
+        This hook performs storage; mRID checking, backfill, and validation are
+        inherited.
+        """
         existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = {item.mrid: item}
@@ -69,9 +88,11 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         return len(self._get_or_empty())
 
     def __contains__(self, item: object) -> bool:
+        """Return whether ``item`` is stored under its mRID by identity."""
         return self._get_or_empty().get(getattr(item, "mrid", None)) is item
 
     def remove(self, item: S) -> None:
+        """Remove ``item`` only when the stored instance is identical."""
         existing = self._get_or_empty()
         if existing.get(item.mrid) is not item:
             raise ValueError(f"{item!r} not in collection")
@@ -79,14 +100,17 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         self._post_remove(item)
 
     def _post_remove(self, item: S) -> None:
+        """Reset an empty map and clear backfill for ``item``."""
         if not self._get_or_empty():
             self._clear_raw(self._get_collection())
         super()._post_remove(item)
 
     def _clear_raw(self, collection) -> None:
+        """Reset the backing map to ``None``."""
         setattr(self._instance, self._backing_name, None)
 
     def _clear_and_copy(self, collection):
+        """Reset the backing map and return its former values."""
         former_items = self._get_collection()
         self._clear_raw(collection)
         return former_items
@@ -95,6 +119,3 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         if self._instance is None:
             return object.__repr__(self)
         return repr(self._get_or_empty())
-
-    def __getitem__(self, item) -> S:
-        return (self._get_or_empty())[item]

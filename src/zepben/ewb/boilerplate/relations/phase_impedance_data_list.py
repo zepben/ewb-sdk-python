@@ -13,14 +13,14 @@ if TYPE_CHECKING:
 
 
 class PhaseImpedanceDataList(LazyList):
-    def get(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
-        """
-        Get the matrix entry for the corresponding to and from phases.
+    """A list of phase impedance data for a per-length phase impedance."""
 
-        :param from_phase: The from_phase to lookup.
-        :param to_phase: The to_phase to lookup.
-        :returns: The :class:`PhaseImpedanceData` with the specified `from_phase` and `to_phase` if it exists.
-        :raises KeyError: When no `PhaseImpedanceData` was found with a matching `from_phase` and `to_phase`.
+    def get(self, from_phase: SinglePhaseKind, to_phase: SinglePhaseKind) -> PhaseImpedanceData:
+        """Return the matrix entry for the corresponding phases.
+
+        :param from_phase: The "from" phase to look up.
+        :param to_phase: The "to" phase to look up.
+        :raises KeyError: If no matching phase impedance data exists.
         """
         phase_impedance_data = next((it for it in self if it.from_phase == from_phase and it.to_phase == to_phase), None)
         if phase_impedance_data:
@@ -30,7 +30,5 @@ class PhaseImpedanceDataList(LazyList):
 
     @property
     def diagonal(self):
-        """
-        Get only the diagonal elements of the matrix, i.e toPhase == fromPhase.
-        """
+        """Return the diagonal entries where ``to_phase == from_phase``."""
         return (pid for pid in self if pid.from_phase == pid.to_phase)

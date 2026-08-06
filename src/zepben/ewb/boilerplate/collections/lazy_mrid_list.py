@@ -11,10 +11,12 @@ from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 class LazyMridList(_IterableWrapper[S], AbstractMridList[S]):
     """
-    Nullable list implementation of :class:`MridCollection`.
+    A nullable-list implementation of :class:`MridCollection`.
 
     Inherits mRID lookup and uniqueness semantics from ``MridCollection`` and
-    lazy backing-list behavior from ``LazyList``.
+    exposes mRID, integer-index, and slice reads through
+    :class:`AbstractMridList`. An absent backing list is exposed as empty; the
+    list is created by the first append and reset to ``None`` when emptied.
     """
     def __init__(
         self,
@@ -34,9 +36,11 @@ class LazyMridList(_IterableWrapper[S], AbstractMridList[S]):
         return getattr(self._instance, self._backing_name)
 
     def _get_collection(self) -> list[S]:
+        """Return the backing list, or an unbound empty list when absent."""
         return self._get() or []
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
+        """Return the element with ``mrid``, or ``None``."""
         existing = self._get()
         if existing is None:
             return None
@@ -44,6 +48,11 @@ class LazyMridList(_IterableWrapper[S], AbstractMridList[S]):
         return found
 
     def _append_raw(self, item: S) -> None:
+        """Append ``item`` to the backing list, creating it if needed.
+
+        This hook performs storage; mRID checking, backfill, validation, and
+        optional sorting are inherited.
+        """
         existing = self._get()
         if existing is None:
             setattr(self._instance, self._backing_name, [item])
@@ -51,14 +60,17 @@ class LazyMridList(_IterableWrapper[S], AbstractMridList[S]):
             existing.append(item)
 
     def _post_remove(self, item: S) -> None:
+        """Clear backfill and reset an empty backing list."""
         super()._post_remove(item)
         if not self._get_collection():
             self._clear_raw(self._get_collection())
 
     def _clear_raw(self, collection) -> None:
+        """Reset the backing list to ``None``."""
         setattr(self._instance, self._backing_name, None)
 
     def _clear_and_copy(self, collection):
+        """Reset the backing list and return its former elements."""
         self._clear_raw(collection)
         return collection
 

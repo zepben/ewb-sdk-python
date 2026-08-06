@@ -10,13 +10,13 @@ from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 
 
 class BatteryControlList(LazyMridList):
-    def get_by_mode(self, control_mode: BatteryControlMode):
-        """
-        Get the `BatteryControl` identified by its `control_mode`
+    """A list of ``BatteryControl`` objects for a ``BatteryUnit``."""
 
-        `control_mode` the `BatteryControlMode` of the desired `BatteryControl`
-        Returns The `BatteryControl` with the specified `control_mode` if it exists
-        Raises `KeyError` if a `BatteryControl` with `control_mode` wasn't present.
+    def get_by_mode(self, control_mode: BatteryControlMode):
+        """Return a ``BatteryControl`` by its control mode.
+
+        :param control_mode: The mode of the required ``BatteryControl``.
+        :raises IndexError: If no control has the requested mode.
         """
         for control in self:
             if control.control_mode == control_mode:

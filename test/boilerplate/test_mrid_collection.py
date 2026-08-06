@@ -53,6 +53,30 @@ def test_get_by_mrid_raises_for_missing_item():
         collection.get_by_mrid("missing")
 
 
+def test_getitem_returns_item_by_mrid():
+    item = Item("item")
+    collection = MridCollectionImpl([item])
+
+    assert collection["item"] is item
+
+
+def test_getitem_raises_for_missing_mrid():
+    collection = MridCollectionImpl()
+
+    with pytest.raises(KeyError, match="missing"):
+        collection["missing"]
+
+
+def test_getitem_does_not_enable_item_assignment():
+    item = Item("item")
+    collection = MridCollectionImpl([item])
+
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        collection["item"] = Item("replacement")  # type: ignore[index]
+
+    assert collection["item"] is item
+
+
 def test_append_accepts_new_mrid():
     item = Item("item")
     collection = MridCollectionImpl()

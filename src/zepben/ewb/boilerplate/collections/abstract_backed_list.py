@@ -14,14 +14,26 @@ class AbstractBackedList(
     Generic[T],
     ABC,
 ):
+    """An :class:`AbstractBackedCollection` with sequence-style access.
+
+    Integer indexes return individual items and slices return sequences. When
+    a sort selector is supplied, additions reorder the backing list. Indexed
+    mutation is only exposed by specialisations such as :class:`LazyIndexList`.
+    """
 
     sort_by: Callable[[T], Any] | None = None
 
     @abstractmethod
     def _get_collection(self) -> Sequence[T]:
+        """Return the current backing list."""
         ...
 
     def append(self, item: T, /) -> None:
+        """Append ``item`` with validation and optional sorting.
+
+        This performs validation, storage, and optional sorting, but no mRID
+        check or backfill.
+        """
         super().append(item)
         if self.sort_by is not None:
             self._get_collection().sort(key=self.sort_by)  # type: ignore[attr-defined]
@@ -35,6 +47,7 @@ class AbstractBackedList(
         ...
 
     def __getitem__(self, index: int | slice) -> T | Sequence[T]:
+        """Return the item or slice at ``index``."""
         collection = self._get_collection()
         if isinstance(index, slice):
             return collection[index]

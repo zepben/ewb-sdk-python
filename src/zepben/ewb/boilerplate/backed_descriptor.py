@@ -9,10 +9,11 @@ from dataclasses import Field
 
 
 class BackedDescriptor:
-    """
-    A simple descriptor that references a dataclass field as a backing value.
-    This allows it to have internal side effects and stateful implementation.
-    Used for name shadowing and lazy fields (fields that can be None on instance level)
+    """Expose a dataclass field or another descriptor under a public name.
+
+    Reads and writes are delegated to the backing attribute. Descriptor
+    chaining supports aliases, while field-backed descriptors support public
+    views over private or nullable dataclass storage.
     """
 
     def __init__(self, private_field):

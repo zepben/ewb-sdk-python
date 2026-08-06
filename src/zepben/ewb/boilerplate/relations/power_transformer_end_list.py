@@ -13,14 +13,13 @@ if TYPE_CHECKING:
 
 
 class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
+    """A list of ``PowerTransformerEnd`` objects for a transformer."""
 
     def get_by_num(self, end_number: int) -> PowerTransformerEnd:
-        """
-        Get the `PowerTransformerEnd` on this `PowerTransformer` by its `end_number`.
+        """Return a transformer end by its end number.
 
-        `end_number` The `end_number` of the `PowerTransformerEnd` in relation to this `PowerTransformer`s VectorGroup.
-        Returns The `PowerTransformerEnd` referred to by `end_number`
-        Raises IndexError if no `PowerTransformerEnd` was found with end_number `end_number`.
+        :param end_number: The number of the required transformer end.
+        :raises IndexError: If no transformer end has the requested number.
         """
         end = next((it for it in self if it.end_number == end_number), None)
         if end:
@@ -28,12 +27,10 @@ class PowerTransformerEndList(LazyMridList['PowerTransformerEnd']):
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self._instance)}")
 
     def get_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
-        """
-        Get the `PowerTransformerEnd` on this `PowerTransformer` by its `terminal`.
+        """Return a transformer end by its terminal.
 
-        `terminal` The `terminal` to find a `PowerTransformerEnd` for.
-        Returns The `PowerTransformerEnd` connected to the specified `terminal`
-        Raises IndexError if no `PowerTransformerEnd` connected to `terminal` was found on this `PowerTransformer`.
+        :param terminal: The terminal of the required transformer end.
+        :raises IndexError: If no transformer end uses ``terminal``.
         """
 
         end = next((it for it in self if it.terminal == terminal), None)
