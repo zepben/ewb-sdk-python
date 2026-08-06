@@ -33,7 +33,7 @@ class RelayInfo(AssetInfo):
 
     reclose_delays: LazyIndexList[float] = LazyIndexList(
         _reclose_delays,
-        "float"
+        "A float"
     )
 
     def set_delays(self, delays: List[float]) -> RelayInfo:

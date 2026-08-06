@@ -376,7 +376,7 @@ def _validate_ordered_other(
 
         # Adding to an invalid index is not valid.
         expected_message = (
-            rf"Unable to add {other4.__class__.__name__} to {it}. \w* number 5 is invalid. Expected a value between 0 and {num(it)}. "
+            rf"An? {other4.__class__.__name__} could not be added to {it}. \w* number 5 is invalid. Expected a value between 0 and {num(it)}. "
             "Make sure you are adding the items in order and there are no gaps in the numbering."
         )
         with pytest.raises(IndexError, match=expected_message):

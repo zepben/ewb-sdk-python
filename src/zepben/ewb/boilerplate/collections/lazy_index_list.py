@@ -47,8 +47,7 @@ class LazyIndexList(LazyList[T]):
 
         if not 0 <= index <= size:
             raise IndexError(
-                f"Unable to add {self.element_description} to "
-                f"{self._instance}. "
+                f"{self.element_description} could not be added to {self._instance}. "
                 f"Sequence number {index} is invalid. "
                 f"Expected a value between 0 and {size}. "
                 "Make sure you are adding the items in order and there are "

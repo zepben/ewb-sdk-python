@@ -36,7 +36,7 @@ class Location(IdentifiedObject):
 
     points: LazyIndexList[PositionPoint] = LazyIndexList(
         _position_points,
-        "PositionPoint",
+        "A PositionPoint",
     )
 
     # region deprecated list boilerplate

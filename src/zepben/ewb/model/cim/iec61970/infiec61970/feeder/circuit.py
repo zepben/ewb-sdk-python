@@ -32,12 +32,12 @@ class Circuit(Line):
 
     end_terminals: MridCollection[Terminal] = LazyMridList(
         _end_terminals,
-        "An Terminal",
+        "A Terminal",
     )
 
     end_substations: MridCollection[Substation] = LazyMridList(
         _end_substations,
-        "An Substation",
+        "A Substation",
     )
 
 

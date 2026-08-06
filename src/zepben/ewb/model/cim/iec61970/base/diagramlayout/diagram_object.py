@@ -62,7 +62,7 @@ class DiagramObject(IdentifiedObject):
 
     points: LazyIndexList[DiagramObjectPoint] = LazyIndexList(
         _diagram_object_points,
-        "DiagramObjectPoint",
+        "A DiagramObjectPoint",
     )
 
     # region deprecated list boilerplate

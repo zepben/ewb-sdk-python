@@ -86,12 +86,12 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
 
     thresholds: LazyIndexList[RelaySetting] = LazyIndexList(
         _thresholds,
-        "RelaySetting"
+        "A RelaySetting"
     )
 
     time_limits: LazyIndexList[float] = LazyIndexList(
         _time_limits,
-        "float"
+        "A float"
     )
 
     sensors: MridCollection[Sensor] = LazyMridList(

@@ -46,7 +46,7 @@ class Asset(IdentifiedObject, metaclass=ABCMeta):
 
     power_system_resources: MridCollection[PowerSystemResource] = LazyMridList(
         _power_system_resources,
-        "An PowerSystemResource",
+        "A PowerSystemResource",
     )
 
 

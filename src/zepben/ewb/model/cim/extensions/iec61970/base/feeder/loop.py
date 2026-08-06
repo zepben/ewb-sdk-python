@@ -38,17 +38,17 @@ class Loop(IdentifiedObject):
 
     circuits: MridCollection[Circuit] = LazyMridList(
         _circuits,
-        "An Circuit",
+        "A Circuit",
     )
 
     substations: MridCollection[Substation] = LazyMridList(
         _substations,
-        "An Substation",
+        "A Substation",
     )
 
     energizing_substations: MridCollection[Substation] = LazyMridList(
         _energizing_substations,
-        "An Substation",
+        "A Substation",
     )
 
 
