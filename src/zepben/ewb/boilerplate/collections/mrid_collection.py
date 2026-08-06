@@ -3,16 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC, abstractmethod
-from typing import Any, Protocol, TypeVar
+from typing import Any, TypeVar
 
 from zepben.ewb.boilerplate.collections.abstract_backed_collection import AbstractBackedCollection
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
-class HasMrid(Protocol):
-    mrid: str
-
-
-S = TypeVar("S", bound=HasMrid)
+S = TypeVar("S", bound=Identifiable)
 
 
 class MridCollection(AbstractBackedCollection[S], ABC):
