@@ -3,19 +3,22 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 import pytest
 
+from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
+from zepben.ewb.boilerplate.collections.abstract_mrid_list import AbstractMridList
 from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
 from zepben.ewb.boilerplate.collections.lazy_mrid_map import LazyMridMap
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 from zepben.ewb.boilerplate.collections.mrid_list import MridList
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
-@dataclass(eq=False)
-class Item:
-    mrid: str
+class Item(Identifiable):
+    pass
 
 
 @dataclass
@@ -27,6 +30,12 @@ class Container:
     list_items = MridList(list_backing, "Item")
     lazy_list_items = LazyMridList(lazy_list_backing, "Item")
     lazy_map_items = LazyMridMap(lazy_map_backing, "Item")
+
+
+def test_abstract_mrid_list_implements_sequence_directly():
+    assert issubclass(AbstractMridList, MridCollection)
+    assert issubclass(AbstractMridList, Sequence)
+    assert not issubclass(AbstractMridList, AbstractBackedList)
 
 
 def assert_public_state(

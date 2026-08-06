@@ -21,6 +21,7 @@ class MridCollection(AbstractBackedCollection[S], ABC):
 
     _instance: Any
     element_description: str
+    backfill: Any = None
 
     @abstractmethod
     def _safe_get_by_mrid(self, mrid: str) -> S | None: ...
@@ -49,3 +50,26 @@ class MridCollection(AbstractBackedCollection[S], ABC):
             )
 
         return False
+
+    def append(self, item: S, /) -> None:
+        if not self._can_add_by_mrid(item):
+            return
+
+        if self.backfill is not None:
+            self.backfill.apply(item, self._instance)
+
+        super().append(item)
+
+    def _post_remove(self, item: S, /) -> None:
+        if self.backfill is not None:
+            self.backfill.clear(item)
+
+    def clear(self) -> None:
+        collection = self._get_collection()
+        if self.backfill is None:
+            self._clear_raw(collection)
+            return
+
+        former_items = self._clear_and_copy(collection)
+        for item in former_items:
+            self.backfill.clear(item)

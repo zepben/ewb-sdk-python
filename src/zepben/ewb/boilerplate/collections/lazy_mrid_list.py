@@ -4,11 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.lazy_list import LazyList
-from zepben.ewb.boilerplate.collections.mrid_collection import S, MridCollection
+from zepben.ewb.boilerplate.collections.abstract_mrid_list import AbstractMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import S
+from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
-class LazyMridList(LazyList[S], MridCollection[S]):
+class LazyMridList(_IterableWrapper[S], AbstractMridList[S]):
     """
     Nullable list implementation of :class:`MridCollection`.
 
@@ -23,9 +24,17 @@ class LazyMridList(LazyList[S], MridCollection[S]):
         validate=None,
         sort_by=None
     ) -> None:
-        super().__init__(private_field, validate, sort_by)
+        super().__init__(private_field)
         self.element_description = element_description
         self.backfill = backfill
+        self.validate = validate
+        self.sort_by = sort_by
+
+    def _get(self) -> list[S] | None:
+        return getattr(self._instance, self._backing_name)
+
+    def _get_collection(self) -> list[S]:
+        return self._get() or []
 
     def _safe_get_by_mrid(self, mrid: str) -> S | None:
         existing = self._get()
@@ -34,18 +43,26 @@ class LazyMridList(LazyList[S], MridCollection[S]):
         found = next((element for element in existing if element.mrid == mrid), None)
         return found
 
-    def append(self, item: S) -> None:
-        """
-        Append an item to the collection.
-        Check for mRID collisions with existing items.
-        Optionally fill the backref field on the added item.
-        Run optional validation.
-        Sort the collection if key lambda is provided.
-        """
-        if not self._can_add_by_mrid(item):
-            return
+    def _append_raw(self, item: S) -> None:
+        existing = self._get()
+        if existing is None:
+            setattr(self._instance, self._backing_name, [item])
+        else:
+            existing.append(item)
 
-        if self.backfill is not None:
-            self.backfill.apply(item, self._instance)
+    def _post_remove(self, item: S) -> None:
+        super()._post_remove(item)
+        if not self._get_collection():
+            self._clear_raw(self._get_collection())
 
-        super().append(item)
+    def _clear_raw(self, collection) -> None:
+        setattr(self._instance, self._backing_name, None)
+
+    def _clear_and_copy(self, collection):
+        self._clear_raw(collection)
+        return collection
+
+    def __repr__(self) -> str:
+        if self._instance is None:
+            return object.__repr__(self)
+        return repr(self._get_collection())

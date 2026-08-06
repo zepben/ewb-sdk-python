@@ -70,8 +70,8 @@ Here are the concrete implementations of the lists that are used in the SDK:
 - `LazyList`: A nullable list of objects that has validation and sorting built in. Typically used for non-`Identifiable` relationships.
 - `LazyIndexList`: `LazyList` with index-based insertion and deletion, for strictly ordered relationships such as diagram points.
 
-The remaining collections all implement `MridCollection` - an interface that declares functionality of interaction with a collection of `Identifiable` objects, mainly focusing on `get_by_mRID`, `append`, `remove`, and `clear` methods. This allows us to have a common way of interacting with inter-object relationships, while hiding the underlying implementation (eg `list` vs `dict`)
+The remaining collections inherit `MridCollection`, which extends the common backed-collection lifecycle with mRID lookup, identity-based collision checks, and optional backfill. List-backed implementations share indexing and sorting through `AbstractMridList`, which inherits `MridCollection` and implements the read-only sequence interface directly. This intentionally mirrors the JVM hierarchy while keeping validation, removal cleanup, and disregarded-add behaviour in one place and hiding the underlying storage (eg `list` vs `dict`).
 
-- `LazyMridList`: A `LazyList` with an mRID check and backfill added. `O(N)` mRID lookup.
+- `LazyMridList`: A nullable `AbstractMridList` implementation with `O(N)` mRID lookup.
 - `MridList`: An mRID collection backed by a non-nullable list. Useful for relationships that are most likely to be filled (eg `ConnectivityNode.terminals`). `O(N)` mRID lookup.
 - `LazyMridMap`: A nullable map of Identifiable objects keyed on their mRID. Supports mRID checks and `O(1)` mRID lookup. Does not support sorting (duh). Useful for large-scale collections (for which the lookup speedup is significant) 

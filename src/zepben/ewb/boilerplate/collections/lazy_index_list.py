@@ -59,14 +59,6 @@ class LazyIndexList(LazyList[T]):
         else:
             existing.insert(index, item)
 
-    def append(self, item: T) -> None:
-        """
-        Append an item to the collection.
-        Run optional validation.
-        Sort the collection if key lambda is provided.
-        """
-        self.insert(len(self), item)
-
     def pop(self, index: int = -1) -> T:
         """
         Remove and return the item at ``index``.
@@ -80,9 +72,7 @@ class LazyIndexList(LazyList[T]):
             raise IndexError("pop from empty list")
 
         item = existing.pop(index)
-
-        if not existing:
-            self.clear()
+        self._post_remove(item)
 
         return item
 

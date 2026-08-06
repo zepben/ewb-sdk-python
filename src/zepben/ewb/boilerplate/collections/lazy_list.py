@@ -53,15 +53,7 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
     def _get_collection(self) -> list[T]:
         return getattr(self._instance, self._backing_name) or []
 
-    def append(self, item: T) -> None:
-        """
-        Append an item to the collection.
-        Run optional validation.
-        Sort the collection if key lambda is provided.
-        """
-        if self.validate is not None:
-            self.validate(self._instance, item)
-
+    def _append_raw(self, item: T) -> None:
         existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = [item]
@@ -69,16 +61,11 @@ class LazyList(_IterableWrapper[T], AbstractBackedList[T]):
         else:
             existing.append(item)
 
-        if self.sort_by is not None:
-            existing.sort(key=self.sort_by)
+    def _post_remove(self, item: T) -> None:
+        if not self._get_collection():
+            self._clear_raw(self._get_collection())
 
-    def remove(self, item: T) -> None:
-        existing = self._get_collection()
-        existing.remove(item)
-        if not existing:
-            self.clear()
-
-    def clear(self) -> None:
+    def _clear_raw(self, collection) -> None:
         setattr(self._instance, self._backing_name, None)
 
     def __repr__(self) -> str:

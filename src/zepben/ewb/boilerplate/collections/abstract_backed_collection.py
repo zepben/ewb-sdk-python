@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC, abstractmethod
-from typing import Collection, Iterable, Generic, Iterator, Callable, TypeVar
+from typing import Any, Callable, Collection, Generic, Iterable, Iterator, TypeVar
 
 
 T = TypeVar("T")
@@ -11,29 +11,49 @@ T = TypeVar("T")
 
 class AbstractBackedCollection(Collection[T], Generic[T], ABC):
 
+    _instance: Any
+    validate: Callable[[Any, T], object] | None = None
+
     @abstractmethod
     def _get_collection(self) -> Collection[T]:
         ...
 
-    @abstractmethod
+    def _append_raw(self, item: T, /) -> None:
+        """Append without running collection lifecycle hooks."""
+        self._get_collection().append(item)  # type: ignore[attr-defined]
+
+    def _post_remove(self, item: T, /) -> None:
+        """Run cleanup after one item has been removed."""
+
+    def _clear_raw(self, collection: Collection[T], /) -> None:
+        """Clear the backing storage without per-item cleanup."""
+        collection.clear()  # type: ignore[attr-defined]
+
+    def _clear_and_copy(self, collection: Collection[T], /) -> Collection[T]:
+        """Clear the backing storage and return its former contents."""
+        former_items = list(collection)
+        self._clear_raw(collection)
+        return former_items
+
     def append(self, item: T, /) -> None:
-        """Append an item to the collection."""
-        ...
+        """Validate and append an item to the collection."""
+        if self.validate is not None:
+            self.validate(self._instance, item)
+        self._append_raw(item)
 
     def extend(self, items: Iterable[T] | None, /) -> None:
         """Append each item to the collection."""
         for element in items or []:
             self.append(element)
 
-    @abstractmethod
     def remove(self, item: T, /) -> None:
         """Remove an item from the collection."""
-        ...
+        self._get_collection().remove(item)  # type: ignore[attr-defined]
+        self._post_remove(item)
 
-    @abstractmethod
     def clear(self) -> None:
         """Remove all items from the collection."""
-        ...
+        self._clear_raw(self._get_collection())
 
     def __len__(self) -> int:
         return len(self._get_collection())

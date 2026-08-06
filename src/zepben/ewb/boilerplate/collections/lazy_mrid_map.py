@@ -57,22 +57,7 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
     def get_by_mrid(self, mrid: str) -> S:
         return self._get_or_empty()[mrid]
 
-    def append(self, item: S) -> None:
-        """
-        Add an item to the collection.
-        Check for mRID collisions with existing items.
-        Optionally fill the backref field on the added item.
-        Run optional validation.
-        """
-        if not self._can_add_by_mrid(item):
-            return
-
-        if self.backfill is not None:
-            self.backfill.apply(item, self._instance)
-
-        if self.validate is not None:
-            self.validate(self._instance, item)
-
+    def _append_raw(self, item: S) -> None:
         existing = getattr(self._instance, self._backing_name)
         if existing is None:
             existing = {item.mrid: item}
@@ -84,17 +69,27 @@ class LazyMridMap(_IterableWrapper[S], MridCollection[S]):
         return len(self._get_or_empty())
 
     def __contains__(self, item: object) -> bool:
-        return self._get_or_empty().get(getattr(item, "mrid", None)) == item
+        return self._get_or_empty().get(getattr(item, "mrid", None)) is item
 
-    def remove(self, item) -> None:
+    def remove(self, item: S) -> None:
         existing = self._get_or_empty()
-
+        if existing.get(item.mrid) is not item:
+            raise ValueError(f"{item!r} not in collection")
         del existing[item.mrid]
-        if not existing:
-            self.clear()
+        self._post_remove(item)
 
-    def clear(self) -> None:
+    def _post_remove(self, item: S) -> None:
+        if not self._get_or_empty():
+            self._clear_raw(self._get_collection())
+        super()._post_remove(item)
+
+    def _clear_raw(self, collection) -> None:
         setattr(self._instance, self._backing_name, None)
+
+    def _clear_and_copy(self, collection):
+        former_items = self._get_collection()
+        self._clear_raw(collection)
+        return former_items
 
     def __repr__(self) -> str:
         if self._instance is None:

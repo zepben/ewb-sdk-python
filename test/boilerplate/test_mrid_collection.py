@@ -3,16 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from dataclasses import dataclass
-
 import pytest
 
 from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
-@dataclass
-class Item:
-    mrid: str
+class Item(Identifiable):
+    pass
 
 
 class MridCollectionImpl(MridCollection[Item]):

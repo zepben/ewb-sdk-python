@@ -160,6 +160,19 @@ def test_append_sorts_owner_backing_list():
     assert owner.backing_feeders == [first, second]
 
 
+def test_readding_same_item_still_sorts_owner_backing_list():
+    owner = Owner()
+    first = Feeder("first")
+    second = Feeder("second")
+    owner.sorted_feeders.extend([first, second])
+    second.mrid = "before-first"
+
+    owner.sorted_feeders.append(second)
+
+    assert owner.backing_feeders == [second, first]
+    assert len(owner.backing_feeders) == 2
+
+
 def test_remove_removes_item_from_owner_backing_list():
     owner = Owner()
     retained = Feeder("retained")

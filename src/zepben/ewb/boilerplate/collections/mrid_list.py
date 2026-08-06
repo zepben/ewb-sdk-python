@@ -7,12 +7,12 @@ from typing import Sequence
 from typing_extensions import Self
 
 from zepben.ewb.boilerplate.backfill import Backfill
-from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
-from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection, S
+from zepben.ewb.boilerplate.collections.abstract_mrid_list import AbstractMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import S
 from zepben.ewb.boilerplate.collections.wrapper import _IterableWrapper
 
 
-class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
+class MridList(_IterableWrapper[S], AbstractMridList[S]):
     """
     mRID collection backed by a non-nullable list.
 
@@ -55,38 +55,8 @@ class MridList(_IterableWrapper[S], AbstractBackedList[S], MridCollection[S]):
         found = next((element for element in self._backing_list if element.mrid == mrid), None)
         return found
 
-    def append(self, item: S) -> None:
-        """
-        Append an item to the collection.
-        Check for mRID collisions with existing items.
-        Optionally fill the backref field on the added item.
-        Run optional validation.
-        Sort the collection if key lambda is provided.
-        """
-        if not self._can_add_by_mrid(item):
-            return
-
-        if self.backfill is not None:
-            self.backfill.apply(item, self._instance)
-
-        if self.validate is not None:
-            self.validate(self._instance, item)
-
+    def _append_raw(self, item: S) -> None:
         self._backing_list.append(item)
-
-        if self.sort_by is not None:
-            self._backing_list.sort(key=self.sort_by)
-
-    def remove(self, item: S) -> None:
-        self._backing_list.remove(item)
-        if self.backfill is not None:
-            self.backfill.clear(item)
-
-    def clear(self) -> None:
-        if self.backfill is not None:
-            for item in self._backing_list:
-                self.backfill.clear(item)
-        self._backing_list.clear()
 
     def __repr__(self) -> str:
         if self._instance is None:

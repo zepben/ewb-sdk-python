@@ -10,11 +10,11 @@ from dataclasses import dataclass, field
 import pytest
 
 from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
-@dataclass(eq=False)
-class Item:
-    mrid: str
+class Item(Identifiable):
+    pass
 
 
 class RecordingBackfill:

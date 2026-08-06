@@ -10,11 +10,11 @@ from dataclasses import dataclass, field
 import pytest
 
 from zepben.ewb.boilerplate.collections.lazy_mrid_map import LazyMridMap
+from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 
-@dataclass(eq=False)
-class Item:
-    mrid: str
+class Item(Identifiable):
+    pass
 
 
 class RecordingBackfill:
@@ -154,6 +154,16 @@ def test_remove_last_item_nulls_backing_map():
     owner.items.remove(item)
 
     assert owner.backing_items is None
+
+
+def test_remove_rejects_different_instance_with_same_mrid():
+    item = Item("item")
+    owner = Owner({"item": item})
+
+    with pytest.raises(ValueError, match="not in collection"):
+        owner.items.remove(Item("item"))
+
+    assert owner.backing_items == {"item": item}
 
 
 def test_clear_nulls_backing_map():
