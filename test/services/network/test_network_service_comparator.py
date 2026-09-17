@@ -1418,7 +1418,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerTransformerEnd.phase_angle_clock, PowerTransformerEnd, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerTransformerEnd.r, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerTransformerEnd.r0, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(PowerTransformerEnd.rated_s, PowerTransformerEnd, lambda _: 1, lambda _: 2, expected_differences={"s_ratings"})
         self.validator.validate_property(PowerTransformerEnd.rated_u, PowerTransformerEnd, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerTransformerEnd.x, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerTransformerEnd.x0, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
@@ -1433,7 +1432,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerEnd,
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1),
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 2),
-            expected_differences={"rated_s"},
         )
 
     def _compare_protected_switch(self, creator: Type[ProtectedSwitch]):
