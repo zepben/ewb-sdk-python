@@ -14,6 +14,7 @@ from typing import Type
 
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable, TIdentifiable
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
+from zepben.ewb.services.common.exceptions import UnsupportedIdentifiableException, IllegalStateException
 from zepben.ewb.services.common.meta.metadata_collection import MetadataCollection
 from zepben.ewb.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
@@ -21,6 +22,14 @@ _GET_DEFAULT = (1,)
 
 
 class BaseService(ABC):
+
+    #
+    # The set of `Identifiable` types this service supports. `None` means "all types" (the default,
+    # preserving the historical generic behaviour). Subclasses that only support a fixed set of types
+    # (e.g. the network/customer/diagram services) override this with an explicit set so that
+    # `try_add` can raise `UnsupportedIdentifiableException` for unsupported types.
+    #
+    supported_types: Optional[Set[type]] = None
 
     def __init__(
         self,
@@ -247,7 +256,31 @@ class BaseService(ABC):
         self._objects_by_type[identifiable.__class__] = objs
         return True
 
-    def resolve_or_defer_reference(self, bound_resolver: BoundReferenceResolver, to_mrid: str) -> bool:
+    def try_add(self, identifiable: Identifiable) -> bool:
+        """
+        Add an object to this service, raising `UnsupportedIdentifiableException` if the service does
+        not support the object's type.
+
+        Mirrors the JVM `tryAdd`/`addFunctions` dispatch: when `supported_types` is defined, only
+        those types (or their subclasses) may be added; otherwise the type is rejected.
+
+        :param identifiable: The object to add.
+        :returns: True if the object was added, False if it already existed.
+        :raises UnsupportedIdentifiableException: if the service does not support `identifiable`'s type.
+        """
+        if self.supported_types is not None and not any(
+                isinstance(identifiable, t) for t in self.supported_types):
+            raise UnsupportedIdentifiableException(
+                f"{self.name} service does not support adding {type(identifiable).__name__}")
+        return self.add(identifiable)
+
+    def resolve_or_defer_reference(
+        self,
+        bound_resolver:
+        BoundReferenceResolver,
+        to_mrid: str,
+        from_mrid_override: Optional[str] = None
+    ) -> bool:
         """
         Resolves a property reference between two types by looking up the ``to_mrid`` in the service and
         using the provided ``bound_resolver`` to resolve the reference relationships (including any reverse relationship).
@@ -259,6 +292,9 @@ class BaseService(ABC):
 
         :param bound_resolver:
         :param to_mrid: The MRID of an object that is the subclass of the to_class of ``bound_resolver``.
+        :param from_mrid_override: A string that can be used instead of the actual mRID of the ``from`` item. In most cases,
+            this should be left as ``None``. The use case is when you have a modified version of the mRID, like variants
+            where the mRID might be prefixed with ``-``.
         :returns: true if the reference was resolved, otherwise false if it has been deferred.
         """
         if not to_mrid:
@@ -267,6 +303,7 @@ class BaseService(ABC):
         from_ = bound_resolver.from_obj
         resolver = bound_resolver.resolver
         reverse_resolver = bound_resolver.reverse_resolver
+        from_mrid = from_mrid_override if from_mrid_override is not None else from_.mrid
         try:
             # If to_mrid is present in the service, we resolve any references immediately.
             # noinspection PyTypeChecker
@@ -276,15 +313,16 @@ class BaseService(ABC):
                 reverse_resolver.resolve(to, from_)
 
                 # Clean up any reverse resolvers now that the reference has been resolved
-                if from_.mrid in self._unresolved_references_to:
+                if from_mrid in self._unresolved_references_to:
                     # noinspection PyArgumentList
-                    to_remove = UnresolvedReference(from_ref=to, to_mrid=from_.mrid, resolver=reverse_resolver)
-                    self._unresolved_references_to[from_.mrid].remove(to_remove)
-                    self._unresolved_references_from[to_remove.from_ref.mrid].remove(to_remove)
-                    if not self._unresolved_references_from[to_remove.from_ref.mrid]:
-                        del self._unresolved_references_from[to_remove.from_ref.mrid]
-                    if not self._unresolved_references_to[from_.mrid]:
-                        del self._unresolved_references_to[from_.mrid]
+                    to_remove = UnresolvedReference(from_ref=to, to_mrid=from_mrid, resolver=reverse_resolver)
+                    self._unresolved_references_to[from_mrid].remove(to_remove)
+                    if not self._unresolved_references_to[from_mrid]:
+                        del self._unresolved_references_to[from_mrid]
+                    if to.mrid in self._unresolved_references_from:
+                        self._unresolved_references_from[to.mrid].remove(to_remove)
+                        if not self._unresolved_references_from[to.mrid]:
+                            del self._unresolved_references_from[to.mrid]
 
             return True
         except KeyError:
@@ -294,9 +332,9 @@ class BaseService(ABC):
             uref = UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver, reverse_resolver=reverse_resolver)
             urefs.add(uref)
             self._unresolved_references_to[to_mrid] = urefs
-            rev_urefs = self._unresolved_references_from.get(from_.mrid, set())
+            rev_urefs = self._unresolved_references_from.get(from_mrid, set())
             rev_urefs.add(uref)
-            self._unresolved_references_from[from_.mrid] = rev_urefs
+            self._unresolved_references_from[from_mrid] = rev_urefs
             return False
 
     def get_unresolved_reference_mrids_by_resolver(

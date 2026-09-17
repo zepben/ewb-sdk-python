@@ -21,7 +21,8 @@ __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_te
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
            "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info", "cut_ac_line_segment", "cuts",
-           "clamp_ac_line_segment", "clamps"]
+           "clamp_ac_line_segment", "clamps", "stage", "change_set_stage", "change_set_member", "network_model_project_components",
+           "network_model_projects", "dependent_on_stage", "depending_stage", "dependency", "member"]
 
 from zepben.ewb import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEquipment, PowerTransformer, Pole, Streetlight, ConnectivityNode, \
     Control, Customer, CustomerAgreement, Equipment, EquipmentContainer, EnergyConsumer, EnergySource, \
@@ -55,6 +56,12 @@ from zepben.ewb.services.common.reference_resolvers import *
 from zepben.ewb.services.common.reference_resolvers import acls_to_acls_phase_resolver, acls_phase_to_acls_resolver, acls_phase_to_wire_info_resolver, \
     shunt_compensator_to_terminal_resolver, feeder_to_nelvs_resolver, feeder_to_celvs_resolver, lvs_to_nef_resolver, lvs_to_cef_resolver, lvf_to_nelvs_resolver, \
     lvs_to_nelvf_resolver
+from zepben.ewb.model.cim.iec61970.infiec61970.infpart303.networkmodelprojects.annotated_project_dependency import AnnotatedProjectDependency
+from zepben.ewb.model.cim.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project_stage import NetworkModelProjectStage
+from zepben.ewb.model.cim.iec61970.infiec61970.part303.genericdataset.change_set import ChangeSet
+from zepben.ewb.model.cim.iec61970.infiec61970.part303.genericdataset.change_set_member import ChangeSetMember
+from zepben.ewb.model.cim.extensions.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project import NetworkModelProject
+from zepben.ewb.model.cim.extensions.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project_component import NetworkModelProjectComponent
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -652,3 +659,76 @@ def asset_info(acls_phase: AcLineSegmentPhase) -> BoundReferenceResolver:
 def terminal(shunt_compensator: ShuntCompensator) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(shunt_compensator, shunt_compensator_to_terminal_resolver, None)
+
+
+#####################
+# Variants resolvers #
+#####################
+
+def stage(change_set: ChangeSet) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(change_set, change_set_to_network_model_project_stage_resolver, network_model_project_stage_to_change_set_resolver)
+
+
+def change_set_stage(stage: NetworkModelProjectStage) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(stage, network_model_project_stage_to_change_set_resolver, change_set_to_network_model_project_stage_resolver)
+
+
+def change_set_member(change_set_member: ChangeSetMember) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(change_set_member, change_set_member_to_change_set_resolver, change_set_to_change_set_member_resolver)
+
+
+def network_model_project_components(network_model_project: NetworkModelProject) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        network_model_project,
+        network_model_project_to_network_model_project_component_resolver,
+        network_model_project_component_to_network_model_project_resolver
+    )
+
+
+def network_model_projects(network_model_project_component: NetworkModelProjectComponent) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        network_model_project_component,
+        network_model_project_component_to_network_model_project_resolver,
+        network_model_project_to_network_model_project_component_resolver
+    )
+
+
+def dependent_on_stage(annotated_project_dependency: AnnotatedProjectDependency) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        annotated_project_dependency,
+        annotated_project_dependency_to_dependent_network_model_project_stage_resolver,
+        network_model_project_stage_to_annotated_project_dependency_resolver
+    )
+
+
+def depending_stage(annotated_project_dependency: AnnotatedProjectDependency) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        annotated_project_dependency,
+        annotated_project_dependency_to_depending_network_model_project_stage_resolver,
+        network_model_project_stage_to_annotated_project_dependency_resolver
+    )
+
+
+def dependency(network_model_project_stage: NetworkModelProjectStage) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        network_model_project_stage,
+        network_model_project_stage_to_annotated_project_dependency_resolver,
+        annotated_project_dependency_to_depending_network_model_project_stage_resolver
+    )
+
+
+def member(change_set: ChangeSet) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(
+        change_set,
+        change_set_to_change_set_member_resolver,
+        change_set_member_to_change_set_resolver
+    )

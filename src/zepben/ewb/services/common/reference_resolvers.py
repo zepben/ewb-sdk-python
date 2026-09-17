@@ -28,7 +28,11 @@ __all__ = [
     "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver", "acls_to_cut_resolver", "cut_to_acls_resolver", "acls_to_clamp_resolver",
     "clamp_to_acls_resolver", "asset_to_psr_resolver", "psr_to_asset_resolver", "acls_to_acls_phase_resolver", "acls_phase_to_acls_resolver",
     "acls_phase_to_wire_info_resolver", "shunt_compensator_to_terminal_resolver", "lvs_to_nelvf_resolver", "lvf_to_nelvs_resolver", "lvs_to_nef_resolver",
-    "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
+    "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver",
+    "network_model_project_to_network_model_project_component_resolver", "network_model_project_component_to_network_model_project_resolver",
+    "annotated_project_dependency_to_dependent_network_model_project_stage_resolver", "annotated_project_dependency_to_depending_network_model_project_stage_resolver",
+    "network_model_project_stage_to_annotated_project_dependency_resolver", "change_set_to_network_model_project_stage_resolver",
+    "network_model_project_stage_to_change_set_resolver", "change_set_to_change_set_member_resolver", "change_set_member_to_change_set_resolver", ]
 
 from typing import Callable, Optional
 from dataclasses import dataclass
@@ -119,6 +123,12 @@ from zepben.ewb.model.cim.iec61970.base.wires.tap_changer_control import TapChan
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.ewb.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
+from zepben.ewb.model.cim.iec61970.infiec61970.infpart303.networkmodelprojects.annotated_project_dependency import AnnotatedProjectDependency
+from zepben.ewb.model.cim.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project_stage import NetworkModelProjectStage
+from zepben.ewb.model.cim.iec61970.infiec61970.part303.genericdataset.change_set import ChangeSet
+from zepben.ewb.model.cim.iec61970.infiec61970.part303.genericdataset.change_set_member import ChangeSetMember
+from zepben.ewb.model.cim.extensions.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project import NetworkModelProject
+from zepben.ewb.model.cim.extensions.iec61970.infiec61970.infpart303.networkmodelprojects.network_model_project_component import NetworkModelProjectComponent
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -399,3 +409,21 @@ ed_to_edf_resolver = ReferenceResolver(EndDevice, EndDeviceFunction, lambda t, r
 
 asset_to_psr_resolver = ReferenceResolver(Asset, PowerSystemResource, lambda t, r: t.add_power_system_resource(r))
 psr_to_asset_resolver = ReferenceResolver(PowerSystemResource, Asset, lambda t, r: t.add_asset(r))
+
+####################
+# Variants resolvers #
+####################
+
+network_model_project_to_network_model_project_component_resolver = ReferenceResolver(NetworkModelProject, NetworkModelProjectComponent, lambda t, r: t.add_child(r))
+network_model_project_component_to_network_model_project_resolver = ReferenceResolver(NetworkModelProjectComponent, NetworkModelProject, lambda t, r: setattr(t, 'parent', r))
+
+annotated_project_dependency_to_dependent_network_model_project_stage_resolver = ReferenceResolver(AnnotatedProjectDependency, NetworkModelProjectStage, lambda t, r: setattr(t, 'dependency_dependent_on_stage', r))
+annotated_project_dependency_to_depending_network_model_project_stage_resolver = ReferenceResolver(AnnotatedProjectDependency, NetworkModelProjectStage, lambda t, r: setattr(t, 'dependency_depending_stage', r))
+
+network_model_project_stage_to_annotated_project_dependency_resolver = ReferenceResolver(NetworkModelProjectStage, AnnotatedProjectDependency, lambda t, r: t.add_dependency(r))
+
+change_set_to_network_model_project_stage_resolver = ReferenceResolver(ChangeSet, NetworkModelProjectStage, lambda t, r: setattr(t, 'network_model_project_stage', r))
+network_model_project_stage_to_change_set_resolver = ReferenceResolver(NetworkModelProjectStage, ChangeSet, lambda t, r: setattr(t, 'change_set', r))
+
+change_set_to_change_set_member_resolver = ReferenceResolver(ChangeSet, ChangeSetMember, lambda t, r: t.add_member(r))
+change_set_member_to_change_set_resolver = ReferenceResolver(ChangeSetMember, ChangeSet, lambda t, r: setattr(t, 'change_set', r))

@@ -1167,7 +1167,6 @@ class NetworkServiceComparator(BaseServiceComparator):
             diff,
             PowerTransformerEnd.connection_kind,
             PowerTransformerEnd.phase_angle_clock,
-            PowerTransformerEnd.rated_s,
             PowerTransformerEnd.rated_u
         )
         self._compare_floats(
