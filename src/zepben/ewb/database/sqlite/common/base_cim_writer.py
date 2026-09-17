@@ -6,7 +6,7 @@
 __all__ = ["BaseCimWriter"]
 
 from abc import ABC
-from typing import Optional
+from typing import Optional, Type
 
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.ewb.database.sqlite.common.base_entry_writer import BaseEntryWriter
@@ -23,7 +23,6 @@ from zepben.ewb.model.cim.iec61968.common.organisation_role import OrganisationR
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
 from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-
 
 class BaseCimWriter(BaseEntryWriter, ABC):
     """

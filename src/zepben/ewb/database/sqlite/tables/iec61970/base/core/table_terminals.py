@@ -19,6 +19,9 @@ class TableTerminals(TableAcDcTerminals):
         self.sequence_number: Column = self._create_column("sequence_number", "INTEGER", Nullable.NOT_NULL)
         self.connectivity_node_mrid: Column = self._create_column("connectivity_node_mrid", "TEXT", Nullable.NULL)
         self.phases: Column = self._create_column("phases", "TEXT", Nullable.NOT_NULL)
+        # Point of this is to allow directions to be used in variants, which only need to support current network for now. If they
+        # need to consider current state in the future we will need to add a `CURRENT_FEEDER_DIRECTION` column.
+        self.normal_feeder_direction: Column = self._create_column("normal_feeder_direction", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:
