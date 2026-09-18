@@ -10,6 +10,7 @@ from unittest.mock import Mock
 from pytest import raises
 
 from zepben.ewb import LocalEwbDataFilePaths, DatabaseType, EwbDataFilePaths
+from zepben.ewb.database.paths.database_type import VariantContents
 
 
 class TestLocalEwbDataFilePaths:
@@ -182,17 +183,22 @@ class TestLocalEwbDataFilePaths:
         assert self.ewb_paths.resolve_database(Path(path)) == self.base_dir.joinpath(path)
 
     def test_resolves_variant_databases(self):
-        def to_variant_path(variant: str, db_type: DatabaseType) -> Path:
+        def to_variant_path(variant: str, db_type: DatabaseType, contents: VariantContents) -> Path:
             return self.base_dir.joinpath(str(self.today)).joinpath(EwbDataFilePaths.VARIANTS_PATH) \
-                .joinpath(variant).joinpath(f"{self.today}-{db_type.file_descriptor}.sqlite")
+                .joinpath(variant).joinpath(contents.sub_directory).joinpath(f"{self.today}-{db_type.file_descriptor}.sqlite")
 
-        for database_type in DatabaseType:
-            if database_type.per_date:
-                assert self.ewb_paths.resolve(database_type, self.today, "my-variant1") == to_variant_path("my-variant1", database_type)
-                assert self.ewb_paths.resolve(database_type, self.today, "my-variant2") == to_variant_path("my-variant2", database_type)
-            else:
-                with raises(ValueError, match="database_type must have its per_date set to True to use this method with a database_date."):
-                    self.ewb_paths.resolve(database_type, self.today, "my-variant")
+        for contents in VariantContents:
+            for database_type in DatabaseType:
+                if database_type.per_date:
+                    if database_type in contents.types:
+                        assert self.ewb_paths.resolve(database_type, self.today, "my-variant1", contents) == to_variant_path("my-variant1", database_type, contents)
+                        assert self.ewb_paths.resolve(database_type, self.today, "my-variant2", contents) == to_variant_path("my-variant2", database_type, contents)
+                    else:
+                        with raises(ValueError, match="database_type must be compatible with variant_contents"):
+                            self.ewb_paths.resolve(database_type, self.today, "my-variant", contents)
+                else:
+                    with raises(ValueError, match="database_type must have its per_date set to True to use this method with a database_date."):
+                        self.ewb_paths.resolve(database_type, self.today, "my-variant", contents)
 
     def test_can_request_variants_for_a_day(self):
         yesterday = self.today - timedelta(days=1)

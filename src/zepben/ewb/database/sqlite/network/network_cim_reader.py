@@ -262,6 +262,7 @@ from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubG
 from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
 from zepben.ewb.model.cim.iec61970.base.equivalents.equivalent_branch import EquivalentBranch
@@ -361,7 +362,7 @@ class NetworkCimReader(BaseCimReader):
     def __init__(self, service: NetworkService):
         super().__init__(service)
 
-        self._service = service
+        self._service: NetworkService
         """The :class:`NetworkService` used to store any items read from the database."""
         
         #
@@ -1748,6 +1749,9 @@ class NetworkCimReader(BaseCimReader):
             ConductingEquipment
         )
         terminal.phases = PhaseCode[result_set.get_string(table.phases.query_index)]
+        normal_feeder_direction = result_set.get_string(table.normal_feeder_direction.query_index, on_none=None)
+        if normal_feeder_direction is not None:
+            terminal.normal_feeder_direction = FeederDirection[normal_feeder_direction]
 
         if terminal.conducting_equipment:
             terminal.conducting_equipment.add_terminal(terminal)

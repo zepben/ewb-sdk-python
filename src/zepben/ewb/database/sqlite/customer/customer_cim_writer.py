@@ -5,6 +5,7 @@
 
 __all__ = ["CustomerCimWriter"]
 
+from zepben.ewb.database.sqlite.common import using_table
 from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.customer.customer_database_tables import CustomerDatabaseTables
 from zepben.ewb.database.sqlite.extensions.prepared_statement import PreparedStatement
@@ -46,7 +47,8 @@ class CustomerCimWriter(BaseCimWriter):
     # IEC61968 Customers #
     ######################
 
-    def save_customer(self, customer: Customer) -> bool:
+    @using_table(TableCustomers)
+    def save_customer(self, customer: Customer, table, insert) -> bool:
         """
         Save the `Customer` fields to `TableCustomers`.
 
@@ -55,8 +57,6 @@ class CustomerCimWriter(BaseCimWriter):
         :return: True if the `Customer` was successfully written to the database, otherwise False.
         :raises SQLException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCustomers)
-        insert = self._database_tables.get_insert(TableCustomers)
 
         insert.add_value(table.kind.query_index, customer.kind.name)
         insert.add_value(table.num_end_devices.query_index, 0)  # Currently unused
@@ -64,7 +64,8 @@ class CustomerCimWriter(BaseCimWriter):
 
         return self._save_organisation_role(table, insert, customer, "customer")
 
-    def save_customer_agreement(self, customer_agreement: CustomerAgreement) -> bool:
+    @using_table(TableCustomerAgreements)
+    def save_customer_agreement(self, customer_agreement: CustomerAgreement, table, insert) -> bool:
         """
         Save the `CustomerAgreement` fields to `TableCustomerAgreements`.
 
@@ -73,8 +74,6 @@ class CustomerCimWriter(BaseCimWriter):
         :return: True if the `CustomerAgreement` was successfully written to the database, otherwise False.
         :raises SQLException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCustomerAgreements)
-        insert = self._database_tables.get_insert(TableCustomerAgreements)
 
         status = True
         for it in customer_agreement.pricing_structures:
@@ -84,7 +83,8 @@ class CustomerCimWriter(BaseCimWriter):
 
         return all([status, self._save_agreement(table, insert, customer_agreement, "customer agreement")])
 
-    def save_pricing_structure(self, pricing_structure: PricingStructure) -> bool:
+    @using_table(TablePricingStructures)
+    def save_pricing_structure(self, pricing_structure: PricingStructure, table, insert) -> bool:
         """
         Save the `PricingStructure` fields to `TablePricingStructures`.
 
@@ -93,8 +93,6 @@ class CustomerCimWriter(BaseCimWriter):
         :return: True if the `PricingStructure` was successfully written to the database, otherwise False.
         :raises SQLException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePricingStructures)
-        insert = self._database_tables.get_insert(TablePricingStructures)
 
         insert.add_value(table.code.query_index, pricing_structure.code)
 
@@ -104,7 +102,8 @@ class CustomerCimWriter(BaseCimWriter):
 
         return all([status, self._save_document(table, insert, pricing_structure, "pricing structure")])
 
-    def save_tariff(self, tariff: Tariff) -> bool:
+    @using_table(TableTariffs)
+    def save_tariff(self, tariff: Tariff, table, insert) -> bool:
         """
         Save the `Tariff` fields to `TableTariffs`.
 
@@ -113,8 +112,6 @@ class CustomerCimWriter(BaseCimWriter):
         :return: True if the `Tariff` was successfully written to the database, otherwise False.
         :raises SQLException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTariffs)
-        insert = self._database_tables.get_insert(TableTariffs)
 
         return self._save_document(table, insert, tariff, "tariff")
 
