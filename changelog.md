@@ -39,6 +39,7 @@
 * **F401**: Removed unused imports across multiple files.
 * **F403**: Resolved star-import usage by adding per-file-ignores in `pyproject.toml` for modules that intentionally use `from module import *`.
 * **E402**: Added inline `noqa` comments for intentional module-level imports placed mid-file to avoid circular import issues.
+* EquipmentTreeBuilder no longer overwrites existing leaves with children.
 
 ### Notes
 * The lint environment requires `ruff` to be installed. Run `tox -e lint` to check code quality.
