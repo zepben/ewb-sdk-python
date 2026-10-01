@@ -7,12 +7,17 @@ from __future__ import annotations
 
 __all__ = ["GeographicalRegion"]
 
-from typing import Optional, List, Generator
+from dataclasses import field
+from typing import Optional, List
 
+from typing_extensions import deprecated
+
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
+from zepben.ewb.boilerplate.backfill import Backfill
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
-from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
 @zb_dataclass
@@ -20,73 +25,41 @@ class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
-    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
+    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = field(default=None)
 
-    def __init__(self, *args, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
-        super(GeographicalRegion, self).__init__(*args, **kwargs)
-        if sub_geographical_regions:
-            for sgr in sub_geographical_regions:
-                self.add_sub_geographical_region(sgr)
+    sub_geographical_regions: MridCollection[SubGeographicalRegion] = LazyMridList(
+        _sub_geographical_regions,
+        "A SubGeographicalRegion",
+        backfill=Backfill(SubGeographicalRegion.geographical_region)
+    )
 
-    @property
-    def sub_geographical_regions(self) -> Generator[SubGeographicalRegion, None, None]:
-        """
-        The `SubGeographicalRegion`s of this `GeographicalRegion`.
-        """
-        return ngen(self._sub_geographical_regions)
 
+    # region deprecated list boilerplate
+    # region sub_geographical_regions boilerplate
+
+    @deprecated("Use len(obj.sub_geographical_regions) instead.")
     def num_sub_geographical_regions(self) -> int:
-        """
-        Returns The number of `SubGeographicalRegion`s associated with this `GeographicalRegion`
-        """
-        return nlen(self._sub_geographical_regions)
+        return len(self.sub_geographical_regions)
 
+    @deprecated("Use obj.sub_geographical_regions.get_by_mrid(mrid) instead.")
     def get_sub_geographical_region(self, mrid: str) -> SubGeographicalRegion:
-        """
-        Get the `SubGeographicalRegion` for this `GeographicalRegion` identified by `mrid`
+        return self.sub_geographical_regions.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `SubGeographicalRegion`
-        Returns The `SubGeographicalRegion` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._sub_geographical_regions, mrid)
-
+    @deprecated("Use obj.sub_geographical_regions.append(sub_geographical_region) instead.")
     def add_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        """
-        Associate a `SubGeographicalRegion` with this `GeographicalRegion`
-
-        `sub_geographical_region` The `SubGeographicalRegion` to associate with this `GeographicalRegion`.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`, or if
-        `sub_geographical_region.geographical_region` is not this `GeographicalRegion`.
-        """
-        if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubGeographicalRegion"):
-            return self
-
-        if sub_geographical_region.geographical_region is None:
-            sub_geographical_region.geographical_region = self
-
-        require(sub_geographical_region.geographical_region is self, lambda: f"{sub_geographical_region} `geographical_region` property references " +
-                                                                             f"{sub_geographical_region.geographical_region}, expected {self}.")
-
-        self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
-        self._sub_geographical_regions.append(sub_geographical_region)
+        self.sub_geographical_regions.append(sub_geographical_region)
         return self
 
+    @deprecated("Use obj.sub_geographical_regions.remove(sub_geographical_region) instead.")
     def remove_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
-        """
-        Disassociate `sub_geographical_region` from this `GeographicalRegion`
-        `sub_geographical_region` The `SubGeographicalRegion` to disassociate from this `GeographicalRegion`.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        Raises `ValueError` if `sub_geographical_region` was not associated with this `GeographicalRegion`.
-        """
-        self._sub_geographical_regions = safe_remove(self._sub_geographical_regions, sub_geographical_region)
+        self.sub_geographical_regions.remove(sub_geographical_region)
         return self
 
+    @deprecated("Use obj.sub_geographical_regions.clear() instead.")
     def clear_sub_geographical_regions(self) -> GeographicalRegion:
-        """
-        Clear all SubGeographicalRegions.
-        Returns A reference to this `GeographicalRegion` to allow fluent use.
-        """
-        self._sub_geographical_regions = None
+        self.sub_geographical_regions.clear()
         return self
+
+    # endregion sub_geographical_regions boilerplate
+
+    # endregion deprecated list boilerplate

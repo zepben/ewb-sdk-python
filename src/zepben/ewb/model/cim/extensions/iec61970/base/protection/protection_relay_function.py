@@ -8,20 +8,23 @@ from __future__ import annotations
 __all__ = ["ProtectionRelayFunction"]
 
 import sys
-import warnings
-from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING, Any
+from typing import Optional, List, Callable, TYPE_CHECKING, Any
 from abc import ABCMeta
+
+from zepben.ewb.boilerplate.collections.lazy_index_list import LazyIndexList
 if sys.version_info >= (3, 13):
     from warnings import deprecated
 else:
     from typing_extensions import deprecated
+from dataclasses import field
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.ewb.util import require, nlen, ngen, safe_remove, get_by_mrid
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
@@ -59,47 +62,16 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN
     """[ZBEX] The flow of the power direction used by this ProtectionRelayFunction."""
 
-    _sensors: Optional[List[Sensor]] = None
+    _sensors: Optional[List[Sensor]] = field(default=None)
 
-    _protected_switches: Optional[List[ProtectedSwitch]] = None
+    _protected_switches: Optional[List[ProtectedSwitch]] = field(default=None)
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    _schemes: Optional[List[ProtectionRelayScheme]] = field(default=None)
 
-    _time_limits: Optional[List[float]] = None
+    _time_limits: Optional[List[float]] = field(default=None)
 
-    _thresholds: Optional[List[RelaySetting]] = None
+    _thresholds: Optional[List[RelaySetting]] = field(default=None)
 
-    def __init__(
-        self,
-        *args,
-        sensors: Iterable[Sensor] = None,
-        protected_switches: Iterable[ProtectedSwitch] = None,
-        schemes: Iterable[ProtectionRelayScheme] = None,
-        time_limits: Iterable[float] = None,
-        thresholds: Iterable[RelaySetting] = None,
-        relay_info: RelayInfo | None = None,
-        **kwargs
-    ):
-        super(ProtectionRelayFunction, self).__init__(*args, **kwargs)
-
-        if sensors is not None:
-            for sensor in sensors:
-                self.add_sensor(sensor)
-        if protected_switches is not None:
-            for protected_switch in protected_switches:
-                self.add_protected_switch(protected_switch)
-        if schemes is not None:
-            for scheme in schemes:
-                self.add_scheme(scheme)
-        if time_limits is not None:
-            for time_limit in time_limits:
-                self.add_time_limit(time_limit)
-        if thresholds is not None:
-            for threshold in thresholds:
-                self.add_threshold(threshold)
-        if relay_info is not None:
-            warnings.warn("relay_info is deprecated, use asset_info instead.")
-            self.asset_info = relay_info
 
     @property
     @deprecated("use asset_info instead.")
@@ -112,355 +84,202 @@ class ProtectionRelayFunction(PowerSystemResource, metaclass=ABCMeta):
     def relay_info(self, relay_info: Optional[RelayInfo]):
         self.asset_info = relay_info
 
-    @property
-    def thresholds(self) -> Generator[RelaySetting, None, None]:
-        """
-        [ZBEX] Yields all the thresholds[:class:`RelaySettings<RelaySetting>`] for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
+    thresholds: LazyIndexList[RelaySetting] = LazyIndexList(
+        _thresholds,
+        "A RelaySetting"
+    )
 
-        :return: A generator that iterates over all thresholds[:class:`RelaySettings<RelaySetting>`] for this relay function.
-        """
-        return ngen(self._thresholds)
+    time_limits: LazyIndexList[float] = LazyIndexList(
+        _time_limits,
+        "A float"
+    )
 
-    @property
-    def time_limits(self) -> Generator[float, None, None]:
-        """
-        [ZBEX] Yields all the time limits (in seconds) for this relay function. Order of entries corresponds to the order of entries in thresholds.
+    sensors: MridCollection[Sensor] = LazyMridList(
+        _sensors,
+        "A Sensor",
+    )
 
-        :return: A generator that iterates over all time limits for this relay function.
-        """
-        return ngen(self._time_limits)
+    protected_switches: MridCollection[ProtectedSwitch] = LazyMridList(
+        _protected_switches,
+        "A ProtectedSwitch",
+    )
 
-    @property
-    def sensors(self) -> Generator[Sensor, None, None]:
-        """
-        [ZBEX] Yields all the :class:`Sensors<Sensor>` for this relay function.
+    schemes: MridCollection[ProtectionRelayScheme] = LazyMridList(
+        _schemes,
+        "A ProtectionRelayScheme",
+    )
 
-        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
-        """
-        return ngen(self._sensors)
 
-    @property
-    def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+    # region deprecated list boilerplate
 
-        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return ngen(self._protected_switches)
+    # region thresholds boilerplate
 
-    @property
-    def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
-        """
-        [ZBEX] Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-
-        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
-        """
-        return ngen(self._schemes)
-
+    @deprecated("Use thresholds.for_each_indexed(action)")
     def for_each_threshold(self, action: Callable[[int, RelaySetting], Any]):
-        """
-        Call the `action` on each :class:`RelaySetting` in the `thresholds` collection
+        self.thresholds.for_each_indexed(action)
 
-        :param action: An action to apply to each :class:`RelaySetting` in the `thresholds` collection, taking the index of the threshold, and the threshold itself.
-        """
-        for index, point in enumerate(self.thresholds):
-            action(index, point)
-
-    def add_threshold(self, threshold: RelaySetting, sequence_number: int = None) -> ProtectionRelayFunction:
-        """
-        Add a threshold[:class:`RelaySetting`] to this :class:`ProtectionRelayFunction`'s list of thresholds.
-
-        :param threshold: The threshold[:class:`RelaySetting`] to add to this :class:`ProtectionRelayFunction`.
-        :param sequence_number: The sequence number of the `threshold` being added.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if sequence_number is None:
-            sequence_number = self.num_thresholds()
-        require(0 <= sequence_number <= self.num_thresholds(),
-                lambda: f"Unable to add RelaySetting to {str(self)}. Sequence number {sequence_number} "
-                        f"is invalid. Expected a value between 0 and {self.num_thresholds()}. Make sure you are "
-                        f"adding the items in order and there are no gaps in the numbering.")
-        self._thresholds = list() if self._thresholds is None else self._thresholds
-        self._thresholds.insert(sequence_number, threshold)
+    @deprecated("Use thresholds.append(threshold)")
+    def add_threshold(
+        self,
+        threshold: RelaySetting,
+        sequence_number: int = None,
+    ) -> ProtectionRelayFunction:
+        if sequence_number is None: sequence_number = len(self.thresholds)
+        self.thresholds.insert(sequence_number, threshold)
         return self
 
+    @deprecated("Use len(thresholds) instead.")
     def num_thresholds(self) -> int:
-        """
-        Get the number of thresholds for this :class:`ProtectionRelayFunction`.
+        return len(self.thresholds)
 
-        :return: The number of thresholds for this `ProtectionRelayFunction`.
-        """
-        return nlen(self._thresholds)
-
+    @deprecated("Use thresholds[sequence_number] instead.")
     def get_threshold(self, sequence_number: int) -> RelaySetting:
-        """
-        Get the threshold[:class:`RelaySetting`] for this :class:`ProtectionRelayFunction` by its `sequence_number`.
+        return self.thresholds[sequence_number]
 
-        :param sequence_number: The sequence_number of the threshold :class:`RelaySetting` for this :class:`ProtectionRelayFunction`.
-        :returns: The threshold[:class:`RelaySetting`]  for this :class:`ProtectionRelayFunction` with sequence number `sequence_number`
-        :raises IndexError: if no :class:`RelaySetting` was found with sequence_number `sequence_number`.
-        """
-        if self._thresholds is not None:
-            return self._thresholds[sequence_number]
-        else:
-            raise IndexError(sequence_number)
-
-    def remove_threshold(self, threshold: RelaySetting) -> ProtectionRelayFunction:
-        """
-        Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
-
-        :param threshold: The threshold[:class:`RelaySetting`] to disassociate from this :class:`ProtectionRelayFunction`.
-        :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._thresholds = safe_remove(self._thresholds, threshold)
+    @deprecated("Use thresholds.remove(threshold) instead.")
+    def remove_threshold(
+        self,
+        threshold: RelaySetting,
+    ) -> ProtectionRelayFunction:
+        self.thresholds.remove(threshold)
         return self
 
-    def remove_threshold_at(self, sequence_number: int) -> RelaySetting:
-        """
-        Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
+    @deprecated("Use thresholds.pop(sequence_number) instead.")
+    def remove_threshold_at(
+        self,
+        sequence_number: int,
+    ) -> RelaySetting:
+        return self.thresholds.pop(sequence_number)
 
-        :param sequence_number: The sequence_number of the threshold[:class:`RelaySetting`] to disassociate from this :class:`ProtectionRelayFunction`.
-        :returns: A reference to removed threshold[:class:`RelaySetting`].
-        :raises IndexError: If `sequence_number` is out of range.
-        """
-        threshold = self.get_threshold(sequence_number)
-        self._thresholds = safe_remove(self._thresholds, threshold)
-        return threshold
-
+    @deprecated("Use thresholds.clear() instead.")
     def clear_thresholds(self) -> ProtectionRelayFunction:
-        """
-        Removes all thresholds from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._thresholds = None
+        self.thresholds.clear()
         return self
 
+    # endregion
+
+    # region time_limits boilerplate
+    @deprecated("Use time_limits.for_each_indexed(action)")
     def for_each_time_limit(self, action: Callable[[int, float], Any]):
-        """
-        Call the `action` on each time limit in the `time_limits` collection
+        self.time_limits.for_each_indexed(action)
 
-        :param action: An action to apply to each time limit in the `time_limits` collection, taking the index of the limit, and the limit itself.
-        """
-        for index, limit in enumerate(self.time_limits):
-            action(index, limit)
-
-    def add_time_limit(self, time_limit: float, index: int = None) -> ProtectionRelayFunction:
-        """
-        Add a time limit.
-
-        :param time_limit: The time limit in seconds to add to this :class:`ProtectionRelayFunction`.
-        :param index: The index into the list to add the time limit at. Defaults to the end of the list.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if index is None:
-            index = self.num_time_limits()
-        require(0 <= index <= self.num_time_limits(),
-                lambda: f"Unable to add float to {str(self)}. Sequence number {index} "
-                        f"is invalid. Expected a value between 0 and {self.num_time_limits()}. Make sure you are "
-                        f"adding the items in order and there are no gaps in the numbering.")
-        self._time_limits = list() if self._time_limits is None else self._time_limits
-        self._time_limits.insert(index, time_limit)
+    @deprecated(
+        "Use time_limits.append(time_limit)")
+    def add_time_limit(
+        self,
+        time_limit: float,
+        index: int = None,
+    ) -> ProtectionRelayFunction:
+        if index is None: index = len(self.time_limits)
+        self.time_limits.insert(index, time_limit)
         return self
 
+    @deprecated("Use len(time_limits) instead.")
     def num_time_limits(self) -> int:
-        return nlen(self._time_limits)
+        return len(self.time_limits)
 
-    def get_time_limit(self, index: int):
-        """
-        Get the time limit for this :class:`ProtectionRelayFunction` by its `index`.
+    @deprecated("Use time_limits[index] instead.")
+    def get_time_limit(self, index: int) -> float:
+        return self.time_limits[index]
 
-        :param index: The index of the desired time limit.
-        :returns: The time limit with the specified `index` if it exists.
-        :raises IndexError: if no time limit was found with provided index.
-        """
-        if self._time_limits is not None:
-            return self._time_limits[index]
-        else:
-            raise IndexError(index)
-
-    def remove_time_limit(self, time_limit: float) -> ProtectionRelayFunction:
-        """
-        Remove a time limit from the list.
-
-        :param time_limit: The time limit to remove.
-        :returns: A reference to this `ProtectionRelayFunction` to allow fluent use.
-        """
-        self._time_limits = safe_remove(self._time_limits, time_limit)
+    @deprecated("Use time_limits.remove(time_limit) instead.")
+    def remove_time_limit(
+        self,
+        time_limit: float,
+    ) -> ProtectionRelayFunction:
+        self.time_limits.remove(time_limit)
         return self
 
+    @deprecated("Use time_limits.pop(index) instead.")
     def remove_time_limit_at(self, index: int) -> float:
-        """
-        Remove a time limit from the list.
+        return self.time_limits.pop(index)
 
-        :param index: The time limit to remove.
-        :returns: The time limit that was removed, or `None` if no time limit was present at `index`.
-        :raises IndexError: If `sequence_number` is out of range.
-        """
-        if self._time_limits:
-            limit = self._time_limits.pop(index)
-            self._time_limits = self._time_limits if self._time_limits else None
-            return limit
-        raise IndexError(index)
-
+    @deprecated("Use time_limits.clear() instead.")
     def clear_time_limits(self) -> ProtectionRelayFunction:
-        """
-        Removes all time limits from this :class:`ProtectionRelayFunction`.
-
-        :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._time_limits = None
+        self.time_limits.clear()
         return self
 
+    # endregion
+
+    # region sensors boilerplate
+
+    @deprecated("Use len(obj.sensors) instead.")
     def num_sensors(self) -> int:
-        """
-        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
+        return len(self.sensors)
 
-        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._sensors)
-
+    @deprecated("Use obj.sensors.get_by_mrid(mrid) instead.")
     def get_sensor(self, mrid: str) -> Sensor:
-        """
-        Get a sensor :class:`Sensor` for this :class:`ProtectionRelayFunction` by its mrid.
+        return self.sensors.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the desired :class:`Sensor`.
-        :returns: The :class:`Sensor` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._sensors, mrid)
-
+    @deprecated("Use obj.sensors.append(sensor) instead.")
     def add_sensor(self, sensor: Sensor) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`Sensor`.
-
-        :param sensor: The :class:`Sensor` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(sensor, self.get_sensor, "A Sensor"):
-            return self
-        self._sensors = list() if self._sensors is None else self._sensors
-        self._sensors.append(sensor)
+        self.sensors.append(sensor)
         return self
 
+    @deprecated("Use obj.sensors.remove(sensor) instead.")
     def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`Sensor`.
-
-        :param sensor: The :class:`Sensor` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If sensor was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = safe_remove(self._sensors, sensor)
+        self.sensors.remove(sensor)
         return self
 
+    @deprecated("Use obj.sensors.clear() instead.")
     def clear_sensors(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`Sensors<Sensor>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = None
+        self.sensors.clear()
         return self
 
+    # endregion sensors boilerplate
+
+    # region protected_switches boilerplate
+
+    @deprecated("Use len(obj.protected_switches) instead.")
     def num_protected_switches(self) -> int:
-        """
-        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
+        return len(self.protected_switches)
 
-        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._protected_switches)
-
+    @deprecated("Use obj.protected_switches.get_by_mrid(mrid) instead.")
     def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
-        """
-        Get a :class:`ProtectedSwitch` operated by this :class:`ProtectionRelayFunction` by its mrid.
+        return self.protected_switches.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the desired :class:`ProtectedSwitch`.
-        :returns: The :class:`ProtectedSwitch` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._protected_switches, mrid)
-
+    @deprecated("Use obj.protected_switches.append(protected_switch) instead.")
     def add_protected_switch(self, protected_switch: ProtectedSwitch) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectedSwitch` it operates.
-
-        :param protected_switch: The :class:`ProtectedSwitch` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(protected_switch, self.get_protected_switch, "A ProtectedSwitch"):
-            return self
-        self._protected_switches = list() if self._protected_switches is None else self._protected_switches
-        self._protected_switches.append(protected_switch)
+        self.protected_switches.append(protected_switch)
         return self
 
+    @deprecated("Use obj.protected_switches.remove(protected_switch) instead.")
     def remove_protected_switch(self, protected_switch: Optional[ProtectedSwitch]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectedSwitch`.
-
-        :param protected_switch: The :class:`ProtectedSwitch` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If protected_switch was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._sensors = safe_remove(self._protected_switches, protected_switch)
+        self.protected_switches.remove(protected_switch)
         return self
 
+    @deprecated("Use obj.protected_switches.clear() instead.")
     def clear_protected_switches(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectedSwitches<ProtectedSwitch>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._protected_switches = None
+        self.protected_switches.clear()
         return self
 
+    # endregion protected_switches boilerplate
+
+    # region schemes boilerplate
+
+    @deprecated("Use len(obj.schemes) instead.")
     def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
+        return len(self.schemes)
 
-        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
-        """
-        return nlen(self._schemes)
-
+    @deprecated("Use obj.schemes.get_by_mrid(mrid) instead.")
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
-        """
-        Get a :class:`ProtectionRelayScheme` this :class:`ProtectionRelayFunction` operates under by its mRID.
+        return self.schemes.get_by_mrid(mrid)
 
-        :param mrid: The mRID of the desired :class:`ProtectionRelayScheme`.
-        :returns: The :class:`ProtectionRelayScheme` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._schemes, mrid)
-
+    @deprecated("Use obj.schemes.append(scheme) instead.")
     def add_scheme(self, scheme: ProtectionRelayScheme) -> ProtectionRelayFunction:
-        """
-        Associate this :class:`ProtectionRelayFunction` with a :class:`ProtectionRelayScheme` it operates under.
-
-        :param scheme: The :class:`ProtectionRelayScheme` to associate with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        if self._validate_reference(scheme, self.get_scheme, "A ProtectionRelayScheme"):
-            return self
-        self._schemes = list() if self._schemes is None else self._schemes
-        self._schemes.append(scheme)
+        self.schemes.append(scheme)
         return self
 
+    @deprecated("Use obj.schemes.remove(scheme) instead.")
     def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelayFunction:
-        """
-        Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectionRelayScheme`.
-
-        :param scheme: The :class:`ProtectionRelayScheme` to disassociate from this :class:`ProtectionRelayFunction`.
-        :raises ValueError: If scheme was not associated with this :class:`ProtectionRelayFunction`.
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = safe_remove(self._schemes, scheme)
+        self.schemes.remove(scheme)
         return self
 
+    @deprecated("Use obj.schemes.clear() instead.")
     def clear_schemes(self) -> ProtectionRelayFunction:
-        """
-        Disassociate all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` from this :class:`ProtectionRelayFunction`.
-
-        :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
-        """
-        self._schemes = None
+        self.schemes.clear()
         return self
+
+    # endregion schemes boilerplate
+
+    # endregion deprecated list boilerplate

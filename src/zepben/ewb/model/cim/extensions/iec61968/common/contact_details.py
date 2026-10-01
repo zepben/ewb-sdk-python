@@ -5,18 +5,20 @@
 
 __all__ = ["ContactDetails"]
 
-from typing import Generator, Any
+from dataclasses import field
+from typing import Any
 
 from typing_extensions import deprecated
 
 from zepben.ewb import zb_dataclass
+from zepben.ewb.boilerplate.collections.abstract_backed_list import AbstractBackedList
+from zepben.ewb.boilerplate.collections.lazy_list import LazyList
 from zepben.ewb.model.cim.extensions.iec61968.common.contact_method_type import ContactMethodType
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.common.electronic_address import ElectronicAddress
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61968.common.telephone_number import TelephoneNumber
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
-from zepben.ewb.util import ngen, nlen
 
 
 @zbex
@@ -63,41 +65,29 @@ class ContactDetails(Identifiable):
     business_name: str | None = None
     """[ZBEX] The business name of this contact."""
 
-    _phone_numbers: list[TelephoneNumber] | None = None
+    _phone_numbers: list[TelephoneNumber] | None = field(default=None)
 
-    _electronic_addresses: list[ElectronicAddress] | None = None
+    _electronic_addresses: list[ElectronicAddress] | None = field(default=None)
 
-    def __init__(self, id: str|None=None, *args, phone_numbers: list[TelephoneNumber] = None, electronic_addresses: list[ElectronicAddress] = None, **kwargs):
+    def __init__(self, id: str|None=None, *args, **kwargs):
         if id is not None:
             if "mrid" in kwargs:
                 raise TypeError("ContactDetails.id is an alias for mrid. Do not pass both to the constructor!")
             kwargs["mrid"] = id
         super(ContactDetails, self).__init__(*args, **kwargs)
 
-        for number in phone_numbers or []:
-            self.add_phone_number(number)
-
-        for email in electronic_addresses or []:
-            self.add_electronic_address(email)
-
     def __str__(self):
-        return f"ContactDetails({self.id})"
+        return f"ContactDetails({self.mrid})"
 
     def __hash__(self):
         # noinspection PyUnresolvedReferences
         return hash((type(self), *(getattr(self, s) for s in self.__slots__)))
 
-    @zbex
-    @property
-    def phone_numbers(self) -> Generator[TelephoneNumber, None, None]:
-        """[ZBEX] Phone numbers."""
-        return ngen(self._phone_numbers)
+    phone_numbers: AbstractBackedList[TelephoneNumber] = LazyList(_phone_numbers)
+    """[ZBEX] Phone numbers."""
 
-    @zbex
-    @property
-    def electronic_addresses(self) -> Generator[ElectronicAddress, None, None]:
-        """[ZBEX] Electronic addresses."""
-        return ngen(self._electronic_addresses)
+    electronic_addresses: AbstractBackedList[ElectronicAddress] = LazyList(_electronic_addresses)
+    """[ZBEX] Electronic addresses."""
 
     def __eq__(self, other: Any) -> bool:
         #
@@ -118,79 +108,65 @@ class ContactDetails(Identifiable):
             self._electronic_addresses == other._electronic_addresses,
         ))
 
+
+    # region deprecated list boilerplate
+
+    # region phone_numbers boilerplate
+
+    @deprecated("Use len(phone_numbers) instead.")
     def num_phone_numbers(self) -> int:
-        """Get the number of entries in the ``TelephoneNumber`` collection."""
-        return nlen(self._phone_numbers)
+        return len(self.phone_numbers)
 
-    def add_phone_number(self, phone_number: TelephoneNumber) -> "ContactDetails":
-        """
-        Add an ``TelephoneNumber`` to this ``ContactDetails``.
-
-        :param phone_number: The ``TelephoneNumber`` to add.
-        :return: This ``ContactDetails`` for fluent use.
-        """
-        if self._phone_numbers is None:
-            self._phone_numbers = []
-        self._phone_numbers.append(phone_number)
+    @deprecated("Use phone_numbers.append(phone_number) instead.")
+    def add_phone_number(
+        self,
+        phone_number: TelephoneNumber,
+    ) -> "ContactDetails":
+        self.phone_numbers.append(phone_number)
         return self
 
-    def remove_phone_number(self, phone_number: TelephoneNumber) -> bool:
-        """
-        Remove an ``TelephoneNumber`` from this ``ContactDetails``.
-
-        :param phone_number: The ``TelephoneNumber`` to remove.
-        :return: True if the ``TelephoneNumber`` was removed.
-        """
-        if not self._phone_numbers:
-            raise KeyError(phone_number)
-        self._phone_numbers.remove(phone_number)
-        if self.num_phone_numbers == 0:
-            self._phone_numbers = None
+    @deprecated("Use phone_numbers.remove(phone_number) instead.")
+    def remove_phone_number(
+        self,
+        phone_number: TelephoneNumber,
+    ) -> bool:
+        self.phone_numbers.remove(phone_number)
         return True
 
+    @deprecated("Use phone_numbers.clear() instead.")
     def clear_phone_numbers(self) -> "ContactDetails":
-        """
-        Clear all ``TelephoneNumber``'s from this ``ContactDetails``.
-        :return: this ``ContactDetails`` for fluent use.
-        """
-        self._phone_numbers = None
+        self.phone_numbers.clear()
         return self
 
+    # endregion
+
+    # region electronic_addresses boilerplate
+
+    @deprecated("Use len(electronic_addresses) instead.")
     def num_electronic_addresses(self) -> int:
-        """Get the number of entries in the [ElectronicAddress] collection."""
-        return nlen(self._electronic_addresses)
+        return len(self.electronic_addresses)
 
-    def add_electronic_address(self, electronic_address: ElectronicAddress) -> "ContactDetails":
-        """
-        Add an ``ElectronicAddress`` to this ``ContactDetails``.
-
-        :param electronic_address: The ``ElectronicAddress`` to add.
-        :return: this ``ContactDetails`` for fluent use.
-        """
-        if self._electronic_addresses is None:
-            self._electronic_addresses = []
-        self._electronic_addresses.append(electronic_address)
+    @deprecated("Use electronic_addresses.append(electronic_address) instead.")
+    def add_electronic_address(
+        self,
+        electronic_address: ElectronicAddress,
+    ) -> "ContactDetails":
+        self.electronic_addresses.append(electronic_address)
         return self
 
-    def remove_electronic_address(self, electronic_address: ElectronicAddress) -> bool:
-        """
-        Remove an ``ElectronicAddress`` from this ``ContactDetails``.
-
-        :param electronic_address: The ``ElectronicAddress`` to remove.
-        :return: True if the ``ElectronicAddress`` was removed.
-        """
-        if not self._electronic_addresses:
-            raise KeyError(electronic_address)
-        self._electronic_addresses.remove(electronic_address)
-        if self.num_electronic_addresses == 0:
-            self._electronic_addresses = None
+    @deprecated("Use electronic_addresses.remove(electronic_address) instead.")
+    def remove_electronic_address(
+        self,
+        electronic_address: ElectronicAddress,
+    ) -> bool:
+        self.electronic_addresses.remove(electronic_address)
         return True
 
+    @deprecated("Use electronic_addresses.clear() instead.")
     def clear_electronic_addresses(self) -> "ContactDetails":
-        """
-        Clear all ``ElectronicAddress``'s from this ``ContactDetails``.
-
-        :return: this ``ContactDetails`` for fluent use.
-        """
-        self._electronic_addresses = None
+        self.electronic_addresses.clear()
         return self
+
+    # endregion
+
+    # endregion

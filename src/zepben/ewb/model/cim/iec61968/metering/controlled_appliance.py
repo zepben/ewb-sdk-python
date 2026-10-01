@@ -9,7 +9,7 @@ __all__ = ["ControlledAppliance", "Appliance"]
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Union
+from typing import List
 
 from zepben.ewb import unique
 
@@ -69,7 +69,7 @@ class ControlledAppliance:
 
     _bitmask: int
 
-    def __init__(self, appliances: Union[int, Appliance, List[Appliance]]):
+    def __init__(self, appliances: int | Appliance | List[Appliance]):
         if isinstance(appliances, int):
             self._bitmask = appliances
         elif isinstance(appliances, Appliance):

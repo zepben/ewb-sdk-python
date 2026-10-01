@@ -7,14 +7,17 @@ from __future__ import annotations
 
 __all__ = ["EnergySource"]
 
-from typing import List, Optional, Generator, TYPE_CHECKING
+from dataclasses import field
+from typing import List, Optional
 
-from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
+from typing_extensions import deprecated
+
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-
-if TYPE_CHECKING:
-    from zepben.ewb.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
+from zepben.ewb.boilerplate.backfill import Backfill
+from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
+from zepben.ewb.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 
 
 @zb_dataclass
@@ -23,7 +26,7 @@ class EnergySource(EnergyConnection):
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
     """
 
-    _energy_source_phases: Optional[List[EnergySourcePhase]] = None
+    _energy_source_phases: Optional[List[EnergySourcePhase]] = field(default=None)
 
     active_power: Optional[float] = None
     """
@@ -113,69 +116,42 @@ class EnergySource(EnergyConnection):
     x0_max: Optional[float] = None
     """Maximum zero sequence Thevenin reactance."""
 
-    def __init__(self, *args, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
+    def __init__(self, *args, energy_source_phases=None, **kwargs):
         super(EnergySource, self).__init__(*args, **kwargs)
-        if energy_source_phases:
-            for phase in energy_source_phases:
-                self.add_phase(phase)
+        self.phases.extend(energy_source_phases)
 
-    @property
-    def phases(self) -> Generator[EnergySourcePhase, None, None]:
-        """
-        The `EnergySourcePhase`s for this `EnergySource`.
-        """
-        return ngen(self._energy_source_phases)
+    phases: MridCollection[EnergySourcePhase] = LazyMridList(
+        _energy_source_phases,
+        "An EnergySourcePhase",
+        backfill=Backfill(EnergySourcePhase.energy_source)
+    )
 
+    # region deprecated list boilerplate
+    # region phases boilerplate
+
+    @deprecated("Use len(obj.phases) instead.")
     def num_phases(self):
-        """Return the number of `EnergySourcePhase`s associated with this `EnergySource`"""
-        return nlen(self._energy_source_phases)
+        return len(self.phases)
 
+    @deprecated("Use obj.phases.get_by_mrid(mrid) instead.")
     def get_phase(self, mrid: str) -> EnergySourcePhase:
-        """
-        Get the `EnergySourcePhase` for this `EnergySource` identified by `mrid`
+        return self.phases.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `EnergySourcePhase`
-        Returns The `EnergySourcePhase` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._energy_source_phases, mrid)
-
+    @deprecated("Use obj.phases.append(phase) instead.")
     def add_phase(self, phase: EnergySourcePhase) -> EnergySource:
-        """
-        Associate an `EnergySourcePhase` with this `EnergySource`
-
-        `phase` the `EnergySourcePhase` to associate with this `EnergySource`.
-        Returns A reference to this `EnergySource` to allow fluent use.
-        Raises `ValueError` if another `EnergySourcePhase` with the same `mrid` already exists for this `EnergySource`, or if `phase.energy_source` is not
-        this `EnergySource`.
-        """
-        if self._validate_reference(phase, self.get_phase, "An EnergySourcePhase"):
-            return self
-
-        if phase.energy_source is None:
-            phase.energy_source = self
-
-        require(phase.energy_source is self, lambda: f"{phase} `energy_source` property references {phase.energy_source}, expected {self}.")
-
-        self._energy_source_phases = list() if self._energy_source_phases is None else self._energy_source_phases
-        self._energy_source_phases.append(phase)
+        self.phases.append(phase)
         return self
 
+    @deprecated("Use obj.phases.remove(phase) instead.")
     def remove_phase(self, phase: EnergySourcePhase) -> EnergySource:
-        """
-        Disassociate an `phase` from this `EnergySource`
-
-        `phase` the `EnergySourcePhase` to disassociate from this `EnergySource`.
-        Returns A reference to this `EnergySource` to allow fluent use.
-        Raises `ValueError` if `phase` was not associated with this `EnergySource`.
-        """
-        self._energy_source_phases = safe_remove(self._energy_source_phases, phase)
+        self.phases.remove(phase)
         return self
 
+    @deprecated("Use obj.phases.clear() instead.")
     def clear_phases(self) -> EnergySource:
-        """
-        Clear all phases.
-        Returns A reference to this `EnergySource` to allow fluent use.
-        """
-        self._energy_source_phases = None
+        self.phases.clear()
         return self
+
+    # endregion phases boilerplate
+
+    # endregion deprecated list boilerplate

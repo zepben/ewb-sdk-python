@@ -5,10 +5,12 @@
 
 __all__ = ["PowerElectronicsConnectionPhase"]
 
+from dataclasses import field
 from typing import Optional, TYPE_CHECKING
 
 from typing_extensions import deprecated
 
+from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
@@ -21,7 +23,8 @@ if TYPE_CHECKING:
 class PowerElectronicsConnectionPhase(PowerSystemResource):
     """A single phase of a power electronics connection."""
 
-    _power_electronics_connection: Optional['PowerElectronicsConnection'] = None
+    _power_electronics_connection: Optional['PowerElectronicsConnection'] = field(default=None)
+    """The power electronics connection to which the phase belongs."""
 
     p: Optional[float] = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
@@ -37,6 +40,7 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
     @property
+    @internal(_power_electronics_connection)
     def power_electronics_connection(self):
         """The power electronics connection to which the phase belongs."""
         return self._power_electronics_connection

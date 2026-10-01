@@ -7,10 +7,12 @@ from __future__ import annotations
 
 __all__ = ['AcLineSegmentPhase']
 
+from dataclasses import field
 from typing import TYPE_CHECKING
 
 from typing_extensions import deprecated
 
+from zepben.ewb.boilerplate.backfill import internal
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -35,14 +37,10 @@ class AcLineSegmentPhase(PowerSystemResource):
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     sequence_number: int | None = None
-    _ac_line_segment: AcLineSegment | None = None
-
-    def __init__(self, *args, ac_line_segment: AcLineSegment = None, **kwargs):
-        super(AcLineSegmentPhase, self).__init__(*args, **kwargs)
-        if ac_line_segment is not None:
-            self.ac_line_segment = ac_line_segment
+    _ac_line_segment: AcLineSegment | None = field(default=None)
 
     @property
+    @internal(_ac_line_segment)
     def ac_line_segment(self) -> 'AcLineSegment | None':
         return self._ac_line_segment
 
@@ -53,6 +51,5 @@ class AcLineSegmentPhase(PowerSystemResource):
             self._ac_line_segment = ac_line_segment
         else:
             raise ValueError(f"ac_line_segment has already been set to {self._ac_line_segment}. Cannot set this field again")
-
 
     asset_info: WireInfo | None = None

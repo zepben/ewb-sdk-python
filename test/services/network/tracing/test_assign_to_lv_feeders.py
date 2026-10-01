@@ -391,7 +391,7 @@ class TestAssignToLvFeeders:
             operators.associate_energizing_feeder(back_feed, lv_feeder)
 
             await Tracing.assign_equipment_to_lv_feeders().run(
-                next(b7.terminals),
+                next(iter(b7.terminals)),
                 network.lv_feeder_start_points,
                 terminal_to_aux_equipment = dict(),
                 lv_feeders_to_assign=[lv_feeder],
