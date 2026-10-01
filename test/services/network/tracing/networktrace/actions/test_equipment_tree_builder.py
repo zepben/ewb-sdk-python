@@ -10,8 +10,9 @@ import pytest
 
 from services.network.test_data.looping_network import create_looping_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.ewb import ConductingEquipment, Tracing, NetworkStateOperators, TestNetworkBuilder
+from zepben.ewb import ConductingEquipment, Tracing, NetworkStateOperators, TestNetworkBuilder, stop_at_open
 from zepben.ewb import downstream, NetworkTraceActionType
+from zepben.ewb.services.network.tracing.networktrace import tracing
 from zepben.ewb.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.ewb.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
@@ -51,6 +52,57 @@ async def test_equipment_tree_builder_leaves():
 
     for ce in (n['j5'], n['j13']):
         assert ce in {l.identified_object for l in tree_builder.leaves}
+
+
+@pytest.mark.asyncio
+async def test_both_sides_of_an_open_switch_are_added_as_leaves_without_adding_the_branching_equipment():
+    """
+                          j0
+                           |acls1
+                           |
+              j4--acls3----j2--acls13-j12
+              |                        |
+            acls5                    acls11
+              |                        |
+              j6--acls7---b8---acls9--j10
+    :return:
+    """
+
+    n = (
+        TestNetworkBuilder()
+        .from_junction(num_terminals=1)
+        .to_acls()
+        .to_junction(num_terminals=3)
+        .to_acls()
+        .to_junction()
+        .to_acls()
+        .to_junction()
+        .to_acls()
+        .to_breaker(is_open=True, is_normally_open=True)
+        .to_acls()
+        .to_junction()
+        .to_acls()
+        .to_junction()
+        .to_acls()
+        .connect('c13', 'j2', 2, 3)
+    ).network
+
+    head_junction = n.get('j0')
+
+    await Tracing.set_direction().run(head_junction)
+
+    builder = EquipmentTreeBuilder(calculate_leaves=True)
+
+    await (
+        Tracing.network_trace(action_step_type=NetworkTraceActionType.ALL_STEPS)
+        .add_condition(downstream())
+        .add_step_action(builder)
+        .add_condition(stop_at_open())
+    ).run(head_junction)
+
+    assert len(builder.leaves) == 2
+    assert {leaf.identified_object for leaf in builder.leaves} == {n.get('b8')}
+    assert n.get('j2') not in {leaf.identified_object for leaf in builder.leaves}
 
 
 @pytest.mark.asyncio

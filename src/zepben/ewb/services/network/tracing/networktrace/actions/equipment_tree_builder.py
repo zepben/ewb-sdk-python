@@ -92,9 +92,12 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             self._process_leaf(current_node)
 
     def _process_leaf(self, current_node: TreeNode[ConductingEquipment]):
-        self._leaves.add(current_node) # add this node to _leaves as it has no children
+        if current_node.children:
+            self._leaves.discard(current_node)
+        else:
+            self._leaves.add(current_node)
         if current_node.parent:
-            self._leaves.discard(current_node.parent) # this nodes parent now has a child, it's not a leaf anymore
+            self._leaves.discard(current_node.parent)  # this nodes parent now has a child, it's not a leaf anymore
 
     def clear(self):
         self.roots.clear()
