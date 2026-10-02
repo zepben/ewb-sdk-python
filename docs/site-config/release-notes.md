@@ -2,6 +2,7 @@
 
 | Version            | Released              |
 | ------------------ | --------------------- |
+|[1.3.2](#132)| `02 October 2026` |
 |[1.3.1](#131)| `21 April 2026` |
 |[1.3.0](#130)| `13 April 2026` |
 |[1.2.0](#120)| `03 March 2026` |
@@ -61,6 +62,26 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [1.3.2]
+
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* EquipmentTreeBuilder no longer overwrites existing leaves with children.
+* Fixed errors in handling phase energisation of `LinearShuntCompensator` instances with a `grounding_terminal`.
+
+### Notes
+* None.
 
 ---
 
