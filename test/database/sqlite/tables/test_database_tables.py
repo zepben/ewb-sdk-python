@@ -11,9 +11,11 @@ from pytest import raises
 
 from util import import_submodules, all_subclasses
 from zepben.ewb import CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
+from zepben.ewb.database.sqlite.changeset.change_set_database_tables import ChangeSetDatabaseTables
 from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.ewb.database.sqlite.tables.exceptions import MissingTableConfigException
 from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
+from zepben.ewb.database.sqlite.variant.tables.ewb_database_tables import EWBDatabaseTables
 
 
 def test_has_all_tables():
@@ -24,7 +26,8 @@ def test_has_all_tables():
     _ = import_submodules('zepben.ewb.database.sqlite.tables')
     all_final_tables = all_subclasses(SqliteTable, 'zepben.ewb.database.sqlite.tables')
 
-    table_collections = [CustomerDatabaseTables(), DiagramDatabaseTables(), NetworkDatabaseTables()]
+    table_collections = [CustomerDatabaseTables(), DiagramDatabaseTables(), NetworkDatabaseTables(),
+                         ChangeSetDatabaseTables(), EWBDatabaseTables()]
     used_tables = {type(it) for collection in table_collections for it in collection.tables}
 
     misplaced = used_tables.difference(all_final_tables)

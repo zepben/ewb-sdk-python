@@ -8,17 +8,23 @@ from __future__ import annotations
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
 from asyncio import get_event_loop
-from typing import Iterable, AsyncGenerator, List, Callable, Tuple
+from datetime import date, datetime, time
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple, Optional
 
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiablesRequest, GetCustomersForContainerRequest
+from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiablesRequest, GetCustomersForContainerRequest, GetChangeSetObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
+from zepben.protobuf.vc.vc_data_pb2 import VariantContents as PBVariantContents
 
-from zepben.ewb import CustomerService, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo
+from zepben.ewb import CustomerService, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo, datetime_to_timestamp
+from zepben.ewb.database.paths.database_type import VariantContents
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
+from zepben.ewb.services.common.enum_mapper import EnumMapper
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
+
+_map_variant_contents = EnumMapper(VariantContents, PBVariantContents)
 
 
 class CustomerConsumerClient(CimConsumerClient[CustomerService, CustomerConsumerStub]):
@@ -80,6 +86,30 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService, CustomerConsumer
         async for response in responses:
             for cio in response.identifiables:
                 yield self._extract_identifiable("customer", cio, _cio_type_to_cim)
+
+    async def get_change_set_objects(self, mrid: str, variant_contents: VariantContents,
+                                     base_model_version: Optional[date] = None) -> GrpcResult[CustomerService]:
+        """
+        Retrieve the customer contents of a :class:`ChangeSet` from the server.
+        This will return a new :class:`CustomerService` with just the customer related contents of the :class:`ChangeSet`.
+        Note this function does not populate `service` as merging a :class:`ChangeSet` with a :class:`CustomerService` should use `ChangeSetServices`.
+
+        :param mrid: The mRID of the :class:`ChangeSet` to retrieve contents for.
+        :param variant_contents: The contents to retrieve from the server.
+        :param base_model_version: The base model version to retrieve the change set contents against.
+        :return: A :class:`GrpcResult` of a :class:`CustomerService`.
+        """
+        async def rpc() -> CustomerService:
+            customer_service = CustomerService()
+            request = GetChangeSetObjectsRequest(changeSetMRID=mrid, variantContents=_map_variant_contents.to_pb(variant_contents))
+            if base_model_version is not None:
+                request.modelVersion = datetime_to_timestamp(datetime.combine(base_model_version, time.min))
+            responses = self._stub.getChangeSetObjects(request, timeout=self.timeout)
+            async for response in responses:
+                customer_service.add_from_pb(response.identifiableObject)
+            return customer_service
+
+        return await self.try_rpc(rpc)
 
 
 class SyncCustomerConsumerClient(CustomerConsumerClient):

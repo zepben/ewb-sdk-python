@@ -336,6 +336,7 @@ from zepben.ewb.streaming.get.consumer import *
 from zepben.ewb.streaming.get.customer_consumer import *
 from zepben.ewb.streaming.get.diagram_consumer import *
 from zepben.ewb.streaming.get.network_consumer import *
+from zepben.ewb.streaming.get.variant_consumer_client import *
 from zepben.ewb.streaming.grpc.auth_token_plugin import *
 from zepben.ewb.streaming.grpc.grpc import *
 from zepben.ewb.streaming.grpc.grpc_channel_builder import *

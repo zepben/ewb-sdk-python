@@ -16,6 +16,7 @@ from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRe
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, UpdateNetworkStateServiceStub
+from zepben.protobuf.vc.vc_pb2_grpc import VariantConsumerStub
 
 from zepben.ewb.streaming.exceptions import GrpcConnectionException
 from zepben.ewb.streaming.grpc.auth_token_plugin import AuthTokenPlugin
@@ -32,6 +33,7 @@ class GrpcChannelBuilder(ABC):
         "NetworkConsumerClient": NetworkConsumerStub,
         "DiagramConsumerClient": DiagramConsumerStub,
         "CustomerConsumerClient": CustomerConsumerStub,
+        "VariantConsumerClient": VariantConsumerStub,
         "QueryNetworkStateClient": QueryNetworkStateServiceStub,
         "UpdateNetworkStateClient": UpdateNetworkStateServiceStub
     }

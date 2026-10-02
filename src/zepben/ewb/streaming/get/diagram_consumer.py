@@ -8,19 +8,25 @@ from __future__ import annotations
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
 from asyncio import get_event_loop
-from typing import Iterable, AsyncGenerator, List, Callable, Tuple, Union
+from datetime import date, datetime, time
+from typing import Iterable, AsyncGenerator, List, Callable, Tuple, Union, Optional
 
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiablesRequest, GetDiagramObjectsRequest
+from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiablesRequest, GetDiagramObjectsRequest, GetChangeSetObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
+from zepben.protobuf.vc.vc_data_pb2 import VariantContents as PBVariantContents
 
-from zepben.ewb import DiagramService, ServiceInfo
+from zepben.ewb import DiagramService, ServiceInfo, datetime_to_timestamp
+from zepben.ewb.database.paths.database_type import VariantContents
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.services.common.enum_mapper import EnumMapper
 from zepben.ewb.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.ewb.streaming.grpc.grpc import GrpcResult
+
+_map_variant_contents = EnumMapper(VariantContents, PBVariantContents)
 
 
 class DiagramConsumerClient(CimConsumerClient[DiagramService, DiagramConsumerStub]):
@@ -82,6 +88,30 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService, DiagramConsumerStu
         async for response in responses:
             for dio in response.identifiables:
                 yield self._extract_identifiable("diagram", dio, _dio_type_to_cim)
+
+    async def get_change_set_objects(self, mrid: str, variant_contents: VariantContents,
+                                     base_model_version: Optional[date] = None) -> GrpcResult[DiagramService]:
+        """
+        Retrieve the diagram contents of a :class:`ChangeSet` from the server.
+        This will return a new :class:`DiagramService` with just the diagram related contents of the :class:`ChangeSet`.
+        Note this function does not populate `service` as merging a :class:`ChangeSet` with a :class:`DiagramService` should use `ChangeSetServices`.
+
+        :param mrid: The mRID of the :class:`ChangeSet` to retrieve contents for.
+        :param variant_contents: The contents to retrieve from the server.
+        :param base_model_version: The base model version to retrieve the change set contents against.
+        :return: A :class:`GrpcResult` of a :class:`DiagramService`.
+        """
+        async def rpc() -> DiagramService:
+            diagram_service = DiagramService()
+            request = GetChangeSetObjectsRequest(changeSetMRID=mrid, variantContents=_map_variant_contents.to_pb(variant_contents))
+            if base_model_version is not None:
+                request.modelVersion = datetime_to_timestamp(datetime.combine(base_model_version, time.min))
+            responses = self._stub.getChangeSetObjects(request, timeout=self.timeout)
+            async for response in responses:
+                diagram_service.add_from_pb(response.identifiableObject)
+            return diagram_service
+
+        return await self.try_rpc(rpc)
 
 
 class SyncDiagramConsumerClient(DiagramConsumerClient):

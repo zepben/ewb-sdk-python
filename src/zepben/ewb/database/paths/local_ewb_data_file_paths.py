@@ -7,7 +7,7 @@ __all__ = ['LocalEwbDataFilePaths']
 
 from datetime import date
 from pathlib import Path
-from typing import Callable, Generator, Union, Any
+from typing import Callable, Generator, Union, Any, Optional
 
 from zepben.ewb import require
 from zepben.ewb.database.paths.ewb_data_file_paths import EwbDataFilePaths
@@ -50,9 +50,21 @@ class LocalEwbDataFilePaths(EwbDataFilePaths):
 
         return date_path
 
-    def enumerate_descendants(self) -> Generator[Path, None, None]:
-        for it in self._list_files(self._base_dir):
-            yield it
+    def enumerate_descendants(self, prefix: Optional[str] = None) -> Generator[Path, None, None]:
+        """
+        Lists the child items of source location, optionally scoped under a sub `prefix` of the base directory.
+
+        :param prefix: An optional sub-directory (relative to the base directory) to enumerate under. When `None`, the whole
+          source location is enumerated. Returns an empty iterator if the prefix doesn't exist.
+        """
+        target = self._base_dir.joinpath(prefix) if prefix is not None else self._base_dir
+        if prefix is not None and not self._exists(target):
+            return
+        try:
+            for it in self._list_files(target):
+                yield it
+        except FileNotFoundError:
+            return
 
     def resolve_database(self, path: Path) -> Path:
         return self._base_dir.joinpath(path)
