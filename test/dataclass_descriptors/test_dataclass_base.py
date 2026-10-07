@@ -7,13 +7,10 @@ from typing import List
 
 import pytest
 
-from zepben.ewb import Cut
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass, DataclassBase
-from zepben.ewb.boilerplate.backed_descriptor import remove_descriptor_annotations
 
 
 @zb_dataclass
-@remove_descriptor_annotations
 class Root(DataclassBase):
     mrid: str
     y: int
@@ -26,15 +23,18 @@ class Root(DataclassBase):
         self.mrid = mrid
         super(Root, self).__init__(**kwargs)
 
-
 @zb_dataclass
-@remove_descriptor_annotations
 class Child(Root):
     x: float = 42.0
     z: str = "abc"
 
     dc_default: int = field(default=99)
-    dc_default_factory: List[int] = field(default_factory=lambda: [33])
+    dc_default_factory: List[int] = field(default_factory=lambda : [33])
+
+
+@zb_dataclass
+class InitFalseFields(DataclassBase):
+    with_default: int = field(default=42, init=False)
 
 
 def test_dataclass_base():
@@ -48,8 +48,8 @@ def test_dataclass_base():
     obj = Child(mrid, y=33, z="Hello there")
     # Memory layout correct
     # noinspection PyUnresolvedReferences
-    all_slots = set(obj.__slots__).union(set(Root.__slots__))  # Python 3.11+ stores parent slots only in parent
-    assert all_slots == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
+    all_slots = set(obj.__slots__).union(set(Root.__slots__)) # Python 3.11+ stores parent slots only in parent
+    assert all_slots  == {'mrid', 'y', 'x', 'z', 'dc_default', 'dc_default_factory'}
 
     # positional arg
     assert obj.mrid == mrid
@@ -79,12 +79,20 @@ def test_dataclass_base():
     assert obj.dc_default_factory == [33]
 
 
-def test_identifiable_mrid():
-    obj = Cut("it")
-    assert obj.mrid == "it"
+def test_init_false_field_uses_default():
+    obj = InitFalseFields()
 
-    obj = Cut(mrid="it")
-    assert obj.mrid == "it"
+    assert obj.with_default == 42
 
-    with pytest.raises(TypeError):
-        Cut("it", mrid="it")
+
+def test_init_false_field_cannot_be_passed_to_constructor():
+    with pytest.raises(
+        TypeError,
+        match="unexpected keyword argument 'with_default'",
+    ):
+        InitFalseFields(with_default=24)
+
+
+def test_unknown_constructor_value_is_rejected_by_slots():
+    with pytest.raises(AttributeError, match="unknown"):
+        Child("mrid", y=33, unknown=24)

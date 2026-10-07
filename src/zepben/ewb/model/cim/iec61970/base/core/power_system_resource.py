@@ -7,12 +7,16 @@ from __future__ import annotations
 
 __all__ = ['PowerSystemResource']
 
-from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
+from typing import Optional, TYPE_CHECKING, List
 from abc import ABCMeta
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
+from zepben.ewb.util import nlen
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assets.asset import Asset
@@ -38,13 +42,7 @@ class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
     num_controls: Optional[int] = None
     """Number of Control's known to associate with this [PowerSystemResource]"""
 
-    _assets: Optional[List[Asset]] = None
-
-    def __init__(self, *args, assets: Iterable[Asset] = None, **kwargs):
-        super(PowerSystemResource, self).__init__(*args, **kwargs)
-        if assets:
-            for asset in assets:
-                self.add_asset(asset)
+    _assets: Optional[List[Asset]] = field(default=None)
 
     @property
     def has_controls(self) -> bool:
@@ -53,57 +51,38 @@ class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
         """
         return nlen(self.num_controls) > 0
 
-    @property
-    def assets(self) -> Generator[Asset, None, None]:
-        """
-        The `Asset`s of this `PowerSystemResource`.
-        """
-        return ngen(self._assets)
+    assets: MridCollection[Asset] = LazyMridList(
+        _assets,
+        "An Asset",
+    )
 
+
+    # region deprecated list boilerplate
+    # region assets boilerplate
+
+    @deprecated("Use len(obj.assets) instead.")
     def num_assets(self) -> int:
-        """
-        Get the number of `Asset`s associated with this `PowerSystemResource`.
-        """
-        return nlen(self._assets)
+        return len(self.assets)
 
+    @deprecated("Use obj.assets.get_by_mrid(mrid) instead.")
     def get_asset(self, mrid: str) -> Asset:
-        """
-        Get the `Asset` associated with this `PowerSystemResource` identified by `mrid`.
+        return self.assets.get_by_mrid(mrid)
 
-        `mrid` the mRID of the required `Asset`
-        Returns The `Asset` with the specified `mrid`.
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._assets, mrid)
-
+    @deprecated("Use obj.assets.append(asset) instead.")
     def add_asset(self, asset: Asset) -> PowerSystemResource:
-        """
-        `asset` The `Asset` to associate with this `PowerSystemResource`.
-        Returns A reference to this `PowerSystemResource` to allow fluent use.
-        Raises `ValueError` if another `Asset` with the same `mrid` already exists in this `PowerSystemResource`
-        """
-        if self._validate_reference(asset, self.get_asset, "An Asset"):
-            return self
-
-        self._assets = list() if self._assets is None else self._assets
-        self._assets.append(asset)
+        self.assets.append(asset)
         return self
 
+    @deprecated("Use obj.assets.remove(asset) instead.")
     def remove_asset(self, asset: Asset) -> PowerSystemResource:
-        """
-        Disassociate an `Asset` from this `PowerSystemResource`.
-
-        `asset` the `Asset` to disassociate from this `PowerSystemResource`.
-        Raises `ValueError` if `asset` was not associated with this `PowerSystemResource`.
-        Returns A reference to this `PowerSystemResource` to allow fluent use.
-        """
-        self._assets = safe_remove(self._assets, asset)
+        self.assets.remove(asset)
         return self
 
+    @deprecated("Use obj.assets.clear() instead.")
     def clear_assets(self) -> PowerSystemResource:
-        """
-        Clear all assets.
-        Returns self
-        """
-        self._assets = None
+        self.assets.clear()
         return self
+
+    # endregion assets boilerplate
+
+    # endregion deprecated list boilerplate

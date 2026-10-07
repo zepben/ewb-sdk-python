@@ -7,17 +7,19 @@ from __future__ import annotations
 
 __all__ = ["Substation"]
 
-from typing import Optional, Generator, List, TYPE_CHECKING
-
+from typing import Optional, List, TYPE_CHECKING
+from dataclasses import field
 from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
+from zepben.ewb.boilerplate.backfill import Backfill, internal
 
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
-    from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
     from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
@@ -29,269 +31,161 @@ class Substation(EquipmentContainer):
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    _sub_geographical_region: Optional[SubGeographicalRegion] = None
+    _sub_geographical_region: Optional[SubGeographicalRegion] = field(default=None)
 
-    _normal_energized_feeders: Optional[List[Feeder]] = None
+    _normal_energized_feeders: Optional[List[Feeder]] = field(default=None)
 
-    _loops: Optional[List[Loop]] = None
+    _loops: Optional[List[Loop]] = field(default=None)
 
-    _energized_loops: Optional[List[Loop]] = None
+    _energized_loops: Optional[List[Loop]] = field(default=None)
 
-    _circuits: Optional[List[Circuit]] = None
+    _circuits: Optional[List[Circuit]] = field(default=None)
 
-    def __init__(self, *args, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None, circuits: List[Circuit] = None, **kwargs):
+    def __init__(self, *args, normal_energized_feeders=None, **kwargs):
         super(Substation, self).__init__(*args, **kwargs)
-        if normal_energized_feeders:
-            for feeder in normal_energized_feeders:
-                self.add_feeder(feeder)
-        if loops:
-            for loop in loops:
-                self.add_loop(loop)
-        if energized_loops:
-            for loop in energized_loops:
-                self.add_energized_loop(loop)
-        if circuits:
-            for circuit in circuits:
-                self.add_circuit(circuit)
-
+        self.feeders.extend(normal_energized_feeders)
 
     @property
+    @internal(_sub_geographical_region)
     def sub_geographical_region(self):
         """The SubGeographicalRegion containing the substation."""
         return self._sub_geographical_region
+
+
 
     @sub_geographical_region.setter
     @deprecated("sub_geographical_region should never be set directly - it is automatically set when adding it to the `substations` list")
     def sub_geographical_region(self, value):
         self._sub_geographical_region = value
 
-    @property
-    def circuits(self) -> Generator[Circuit, None, None]:
-        """
-        The `Circuit`s originating from this substation.
-        """
-        return ngen(self._circuits)
+    circuits: MridCollection[Circuit] = LazyMridList(
+        _circuits,
+        "A Circuit",
+    )
 
-    @property
-    def loops(self) -> Generator[Loop, None, None]:
-        """
-        The `Loop` originating from this substation.
-        """
-        return ngen(self._loops)
+    loops: MridCollection[Loop] = LazyMridList(
+        _loops,
+        "A Loop",
+    )
 
-    @property
-    def energized_loops(self) -> Generator[Loop, None, None]:
-        """
-        The `Loop`s originating from this substation that are energised.
-        """
-        return ngen(self._energized_loops)
+    energized_loops: MridCollection[Loop] = LazyMridList(
+        _energized_loops,
+        "A Loop",
+    )
 
-    @property
-    def feeders(self) -> Generator[Feeder, None, None]:
-        """
-        The normal energized feeders of the substation. Also used for naming purposes.
-        """
-        return ngen(self._normal_energized_feeders)
+    feeders: MridCollection[Feeder] = LazyMridList(
+        _normal_energized_feeders,
+        "A Feeder",
+        backfill=Backfill(Feeder.normal_energizing_substation)
+    )
 
+    # region deprecated list boilerplate
+    # region circuits boilerplate
+
+    @deprecated("Use len(obj.circuits) instead.")
     def num_circuits(self):
-        """
-        Returns The number of `Circuit`s associated with this `Substation`
-        """
-        return nlen(self._circuits)
+        return len(self.circuits)
 
+    @deprecated("Use obj.circuits.get_by_mrid(mrid) instead.")
     def get_circuit(self, mrid: str) -> Circuit:
-        """
-        Get the `Circuit` for this `Substation` identified by `mrid`
+        return self.circuits.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Circuit`
-        Returns The `Circuit` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._circuits, mrid)
-
+    @deprecated("Use obj.circuits.append(circuit) instead.")
     def add_circuit(self, circuit: Circuit) -> Substation:
-        """
-        Associate a `Circuit` with this `Substation`
-
-        `circuit` The `Circuit` to associate with this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
-        """
-        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
-            return self
-        self._circuits = list() if self._circuits is None else self._circuits
-        self._circuits.append(circuit)
+        self.circuits.append(circuit)
         return self
 
+    @deprecated("Use obj.circuits.remove(circuit) instead.")
     def remove_circuit(self, circuit: Circuit) -> Substation:
-        """
-        Disassociate `circuit` from this `Substation`
-
-        `circuit` The `Circuit` to disassociate from this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `circuit` was not associated with this `Substation`.
-        """
-        self._circuits = safe_remove(self._circuits, circuit)
+        self.circuits.remove(circuit)
         return self
 
+    @deprecated("Use obj.circuits.clear() instead.")
     def clear_circuits(self) -> Substation:
-        """
-        Clear all current `Circuit`s.
-        Returns A reference to this `Substation` to allow fluent use.
-        """
-        self._circuits = None
+        self.circuits.clear()
         return self
 
+    # endregion circuits boilerplate
+
+    # region loops boilerplate
+
+    @deprecated("Use len(obj.loops) instead.")
     def num_loops(self):
-        """
-        Returns The number of `Loop`s associated with this `Substation`
-        """
-        return nlen(self._loops)
+        return len(self.loops)
 
+    @deprecated("Use obj.loops.get_by_mrid(mrid) instead.")
     def get_loop(self, mrid: str) -> Loop:
-        """
-        Get the `Loop` for this `Substation` identified by `mrid`
+        return self.loops.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Loop`
-        Returns The `Loop` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._loops, mrid)
-
+    @deprecated("Use obj.loops.append(loop) instead.")
     def add_loop(self, loop: Loop) -> Substation:
-        """
-        Associate a `Loop` with this `Substation`
-
-        `loop` The `Loop` to associate with this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
-        """
-        if self._validate_reference(loop, self.get_loop, "A Loop"):
-            return self
-        self._loops = list() if self._loops is None else self._loops
-        self._loops.append(loop)
+        self.loops.append(loop)
         return self
 
+    @deprecated("Use obj.loops.remove(loop) instead.")
     def remove_loop(self, loop: Loop) -> Substation:
-        """
-        Disassociate `loop` from this `Substation`
-
-        `loop` The `Loop` to disassociate from this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `loop` was not associated with this `Substation`.
-        """
-        self._loops = safe_remove(self._loops, loop)
+        self.loops.remove(loop)
         return self
 
+    @deprecated("Use obj.loops.clear() instead.")
     def clear_loops(self) -> Substation:
-        """
-        Clear all current `Loop`s.
-        Returns A reference to this `Substation` to allow fluent use.
-        """
-        self._loops = None
+        self.loops.clear()
         return self
 
+    # endregion loops boilerplate
+
+    # region energized_loops boilerplate
+
+    @deprecated("Use len(obj.energized_loops) instead.")
     def num_energized_loops(self):
-        """
-        Returns The number of `Loop`s associated with this `Substation`
-        """
-        return nlen(self._energized_loops)
+        return len(self.energized_loops)
 
+    @deprecated("Use obj.energized_loops.get_by_mrid(mrid) instead.")
     def get_energized_loop(self, mrid: str) -> Loop:
-        """
-        Get the `Loop` for this `Substation` identified by `mrid`
+        return self.energized_loops.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Loop`
-        Returns The `Loop` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._energized_loops, mrid)
-
+    @deprecated("Use obj.energized_loops.append(loop) instead.")
     def add_energized_loop(self, loop: Loop) -> Substation:
-        """
-        Associate a `Loop` with this `Substation`
-
-        `loop` The `Loop` to associate with this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
-        """
-        if self._validate_reference(loop, self.get_energized_loop, "A Loop"):
-            return self
-        self._energized_loops = list() if self._energized_loops is None else self._energized_loops
-        self._energized_loops.append(loop)
+        self.energized_loops.append(loop)
         return self
 
+    @deprecated("Use obj.energized_loops.remove(loop) instead.")
     def remove_energized_loop(self, loop: Loop) -> Substation:
-        """
-        Disassociate `loop` from this `Substation`
-
-        `loop` The `Loop` to disassociate from this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `loop` was not associated with this `Substation`.
-        """
-        self._energized_loops = safe_remove(self._energized_loops, loop)
+        self.energized_loops.remove(loop)
         return self
 
+    @deprecated("Use obj.energized_loops.clear() instead.")
     def clear_energized_loops(self) -> Substation:
-        """
-        Clear all current `Loop`s.
-        Returns A reference to this `Substation` to allow fluent use.
-        """
-        self._energized_loops = None
+        self.energized_loops.clear()
         return self
 
+    # endregion energized_loops boilerplate
+
+    # region feeders boilerplate
+
+    @deprecated("Use len(obj.feeders) instead.")
     def num_feeders(self):
-        """
-        Returns The number of `Feeder`s associated with this `Substation`
-        """
-        return nlen(self._normal_energized_feeders)
+        return len(self.feeders)
 
+    @deprecated("Use obj.feeders.get_by_mrid(mrid) instead.")
     def get_feeder(self, mrid: str) -> Feeder:
-        """
-        Get the `Feeder` for this `Substation` identified by `mrid`
+        return self.feeders.get_by_mrid(mrid)
 
-        `mrid` The mRID of the required `Feeder`
-        Returns The `Feeder` with the specified `mrid` if it exists
-        Raises `KeyError` if `mrid` wasn't present.
-        """
-        return get_by_mrid(self._normal_energized_feeders, mrid)
-
+    @deprecated("Use obj.feeders.append(feeder) instead.")
     def add_feeder(self, feeder: Feeder) -> Substation:
-        """
-        Associate a `Feeder` with this `Substation`
-
-        `feeder` The `Feeder` to associate with this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`, or if
-        `feeder.normal_energizing_substation` is not this `Substation`.
-        """
-        if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
-            return self
-
-        if feeder.normal_energizing_substation is None:
-            feeder.normal_energizing_substation = self
-
-        require(feeder.normal_energizing_substation is self, lambda: f"{feeder} `normal_energizing_substation` property references {feeder.normal_energizing_substation}, expected {self}.")
-
-        self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
-        self._normal_energized_feeders.append(feeder)
+        self.feeders.append(feeder)
         return self
 
+    @deprecated("Use obj.feeders.remove(feeder) instead.")
     def remove_feeder(self, feeder: Feeder) -> Substation:
-        """
-        Disassociate `feeder` from this `Substation`
-
-        `feeder` The `Feeder` to disassociate from this `Substation`.
-        Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `feeder` was not associated with this `Substation`.
-        """
-        self._normal_energized_feeders = safe_remove(self._normal_energized_feeders, feeder)
+        self.feeders.remove(feeder)
         return self
 
+    @deprecated("Use obj.feeders.clear() instead.")
     def clear_feeders(self) -> Substation:
-        """
-        Clear all current `Feeder`s.
-        Returns A reference to this `Substation` to allow fluent use.
-        """
-        self._normal_energized_feeders = None
+        self.feeders.clear()
         return self
+
+    # endregion feeders boilerplate
+
+    # endregion deprecated list boilerplate

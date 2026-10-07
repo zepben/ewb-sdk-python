@@ -10,7 +10,6 @@ __all__ = ["Name"]
 from typing import TYPE_CHECKING, Optional
 
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
-from zepben.ewb.boilerplate.backed_descriptor import remove_descriptor_annotations
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 
 if TYPE_CHECKING:
@@ -19,7 +18,6 @@ if TYPE_CHECKING:
 
 
 @zb_dataclass
-@remove_descriptor_annotations
 class Name(Identifiable):
     """
     The Name class provides the means to define any number of human-readable names for an object. A name is **not** to be used for defining inter-object

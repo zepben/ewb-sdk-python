@@ -29,10 +29,6 @@ class RegulatingCondEq(EnergyConnection, metaclass=ABCMeta):
 
     _regulating_control: Optional[RegulatingControl] = None
 
-    def __init__(self, *args, regulating_control: Optional[RegulatingControl] = None, **kwargs):
-        super(RegulatingCondEq, self).__init__(*args, **kwargs)
-        if regulating_control:
-            self.regulating_control = regulating_control
 
     @property
     def regulating_control(self):

@@ -7,12 +7,15 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayScheme"]
 
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
+from dataclasses import field
+from typing_extensions import deprecated
 
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import ngen, get_by_mrid, nlen, safe_remove
 from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
+from zepben.ewb.boilerplate.collections.lazy_mrid_list import LazyMridList
+from zepben.ewb.boilerplate.collections.mrid_collection import MridCollection
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
@@ -30,70 +33,40 @@ class ProtectionRelayScheme(IdentifiedObject):
     system: Optional[ProtectionRelaySystem] = None
     """[ZBEX] The system this scheme belongs to."""
 
-    _functions: Optional[List[ProtectionRelayFunction]] = None
+    _functions: Optional[List[ProtectionRelayFunction]] = field(default=None)
 
-    def __init__(self, *args, functions: Optional[List[ProtectionRelayFunction]] = None, **kwargs):
-        super(ProtectionRelayScheme, self).__init__(*args, **kwargs)
-        if functions is not None:
-            for function in functions:
-                self.add_function(function)
+    functions: MridCollection[ProtectionRelayFunction] = LazyMridList(
+        _functions,
+        "A ProtectionRelayFunction",
+    )
 
-    @property
-    def functions(self) -> Generator[ProtectionRelayFunction, None, None]:
-        """
-        [ZBEX] 6Yields all the functions operated as part of this :class:`ProtectionRelayScheme`.
 
-        :return: A generator that iterates over all functions operated as part of this :class:`ProtectionRelayScheme`.
-        """
-        return ngen(self._functions)
+    # region deprecated list boilerplate
+    # region functions boilerplate
 
+    @deprecated("Use len(obj.functions) instead.")
     def num_functions(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
+        return len(self.functions)
 
-        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
-        """
-        return nlen(self._functions)
-
+    @deprecated("Use obj.functions.get_by_mrid(mrid) instead.")
     def get_function(self, mrid: str) -> ProtectionRelayFunction:
-        """
-        Get a :class:`ProtectionRelayFunction` operated as part of this :class:`ProtectionRelayScheme`.
+        return self.functions.get_by_mrid(mrid)
 
-        :param mrid: The mrid of the desired :class:`ProtectionRelayFunction`.
-        :returns: The :class:`ProtectionRelayFunction` with the specified mrid if it exists, otherwise None.
-        :raises KeyError: If `mrid` wasn't present.
-        """
-        return get_by_mrid(self._functions, mrid)
-
+    @deprecated("Use obj.functions.append(function) instead.")
     def add_function(self, function: ProtectionRelayFunction) -> ProtectionRelayScheme:
-        """
-        Associate a :class:`ProtectionRelayFunction` with this :class:`ProtectionRelayScheme`.
-
-        :param function: The :class:`ProtectionRelayFunction` to associate with this :class:`ProtectionRelayScheme`.
-        :return: A reference to this :class:`ProtectionRelayScheme` for fluent use.
-        """
-        if self._validate_reference(function, self.get_function, "A ProtectionRelayFunction"):
-            return self
-        self._functions = list() if self._functions is None else self._functions
-        self._functions.append(function)
+        self.functions.append(function)
         return self
 
+    @deprecated("Use obj.functions.remove(function) instead.")
     def remove_function(self, function: Optional[ProtectionRelayFunction]) -> ProtectionRelayScheme:
-        """
-        Disassociate this :class:`ProtectionRelayScheme` from a :class:`ProtectionRelayFunction`.
-
-        :param function: The :class:`ProtectionRelayFunction` to disassociate from this :class:`ProtectionRelayScheme`.
-        :raises ValueError: If function was not associated with this :class:`ProtectionRelayScheme`.
-        :return: A reference to this :class:`ProtectionRelayScheme` for fluent use.
-        """
-        self._functions = safe_remove(self._functions, function)
+        self.functions.remove(function)
         return self
 
+    @deprecated("Use obj.functions.clear() instead.")
     def clear_function(self) -> ProtectionRelayScheme:
-        """
-        Disassociate all :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` from this :class:`ProtectionRelayScheme`.
-
-        :return: A reference to this :class:`ProtectionRelayScheme` for fluent use.
-        """
-        self._functions = None
+        self.functions.clear()
         return self
+
+    # endregion functions boilerplate
+
+    # endregion deprecated list boilerplate
