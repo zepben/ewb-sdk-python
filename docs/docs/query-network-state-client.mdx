@@ -46,9 +46,11 @@ The current state of the network between two date/times can be retrieved using t
 
 ```python
 from datetime import datetime, timedelta
+from zepben.ewb import CurrentStateEventBatch
 
-async for events in client.get_current_states(1, datetime.now() - timedelta(days=1), datetime.now()):
-    # process the list of events here.
+async for batch in client.get_current_states(1, datetime.now() - timedelta(days=1), datetime.now()):
+    # process the CurrentStateEventBatch here: batch.batch_id, batch.events.
+    pass
 ```
 
 ### Sending current network state statuses
@@ -56,5 +58,7 @@ async for events in client.get_current_states(1, datetime.now() - timedelta(days
 When applying the current state of the network, you should send a status response to report how the update went.
 
 ```python
+from zepben.ewb import BatchSuccessful
+
 client.report_batch_status(BatchSuccessful(1))
 ```

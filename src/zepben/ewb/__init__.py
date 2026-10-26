@@ -258,6 +258,7 @@ from zepben.ewb.services.network.tracing.networktrace.network_trace_queue_next i
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_tracker import *
+from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing  # noqa: F401
 from zepben.ewb.services.network.tracing.connectivity.connectivity_result import *
 from zepben.ewb.services.network.tracing.connectivity.nominal_phase_path import *
 from zepben.ewb.services.network.tracing.connectivity.phase_paths import *

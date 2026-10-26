@@ -33,7 +33,7 @@ class EbbPhases:
 class RemovePhases(object):
     """
     Convenience class that provides methods for removing phases on a `NetworkService`
-    This class is backed by a `BranchRecursiveTraversal`.
+    This class is backed by a `NetworkTrace` created by `Tracing.network_trace`.
     """
 
     def __init__(self, debug_logger: Logger = None):

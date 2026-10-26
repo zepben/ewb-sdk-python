@@ -32,6 +32,7 @@ async def on_set_current_states(batches: AsyncGenerator[Tuple[int, Tuple[Current
     SetCurrentStatesStatus, None]:
     async for batch_id, events in batches:
         # process updating of events here and return a batch result response
+        pass
 ```
 
 ## Registering callbacks
@@ -83,6 +84,7 @@ class UpdateNetworkStateServiceImpl:
         SetCurrentStatesStatus, None]:
         async for batch_id, events in batches:
             # process updating of events here and return a batch result response
+            pass
 
 async def main():
     server = grpc.aio.server()
