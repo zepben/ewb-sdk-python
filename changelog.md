@@ -40,6 +40,9 @@
 * **F403**: Resolved star-import usage by adding per-file-ignores in `pyproject.toml` for modules that intentionally use `from module import *`.
 * **E402**: Added inline `noqa` comments for intentional module-level imports placed mid-file to avoid circular import issues.
 * EquipmentTreeBuilder no longer overwrites existing leaves with children.
+* Renamed `lv_substation_mrid` to `normal_energizing_lv_substation_mrid` for `TableLvFeeders`
+* Renamed `usage_point_contact_details` to `usage_points_contact_details` for `TableUsagePointsContactDetails`
+* Bumped `TableVersion.SUPPORTED_VERSION` to 65
 
 ### Notes
 * The lint environment requires `ruff` to be installed. Run `tox -e lint` to check code quality.

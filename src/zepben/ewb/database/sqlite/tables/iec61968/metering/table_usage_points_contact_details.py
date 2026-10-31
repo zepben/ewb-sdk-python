@@ -20,7 +20,7 @@ class TableUsagePointsContactDetails(TableContactDetails):
 
     @property
     def name(self) -> str:
-        return "usage_point_contact_details"
+        return "usage_points_contact_details"
 
     @property
     def non_unique_index_columns(self) -> Generator[List[Column], None, None]:

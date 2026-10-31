@@ -16,7 +16,7 @@ class TableLvFeeders(TableEquipmentContainers):
     def __init__(self):
         super().__init__()
         self.normal_head_terminal_mrid: Column = self._create_column("normal_head_terminal_mrid", "TEXT", Nullable.NULL)
-        self.lv_substation_mrid: Column = self._create_column("lv_substation_mrid", "TEXT", Nullable.NULL)
+        self.lv_substation_mrid: Column = self._create_column("normal_energizing_lv_substation_mrid", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:
