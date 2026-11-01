@@ -5,10 +5,10 @@
 
 __all__ = ["NetworkCimWriter"]
 
-from typing import Optional, Type, TypeVar
+from typing import Optional, TypeVar
 
-from zepben.ewb import Identifiable
 from zepben.ewb.database.sql.sql_table import SqlTable
+from zepben.ewb.database.sqlite.common import using_table
 from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.ewb.database.sqlite.network.network_database_tables import NetworkDatabaseTables
@@ -322,17 +322,6 @@ from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 TSqlTable = TypeVar('TSqlTable', bound=SqlTable)
 
 
-def db_wrapper(table: Type[TSqlTable]):
-    def wrapper(func):
-        def _inner(self, io: Identifiable, *args, **kwargs):
-            _table: TSqlTable = self._database_tables.get_table(table)
-            _insert = self._database_tables.get_insert(table)
-            return func(self, io, *args, table=_table, insert=_insert, **kwargs)
-
-        return _inner
-
-    return wrapper
-
 
 class NetworkCimWriter(BaseCimWriter):
     """
@@ -348,7 +337,7 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61968 Asset Info #
     #################################
 
-    @db_wrapper(TableRelayInfo)
+    @using_table(TableRelayInfo)
     def save_relay_info(self, relay_info: RelayInfo, table, insert) -> bool:
         """
         Save the :class:`RelayInfo` fields to :class:`TableRelayInfo`.
@@ -390,12 +379,12 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._try_execute_single_update(insert, description)
 
-    @db_wrapper(TableContactDetailsElectronicAddresses)
+    @using_table(TableContactDetailsElectronicAddresses)
     def _save_contact_details_electronic_address(self, contact_details: ContactDetails, electronic_address: ElectronicAddress, table, insert) -> bool:
         insert.add_value(table.contact_details_id.query_index, contact_details.id)
         return self._save_electronic_address(table, insert, electronic_address, f"electronic address for contact {contact_details.id}")
 
-    @db_wrapper(TableContactDetailsStreetAddresses)
+    @using_table(TableContactDetailsStreetAddresses)
     def _save_contact_details_street_address(self, contact_details: ContactDetails, street_address: StreetAddress | None, table, insert) -> bool:
         if street_address is None:
             return True
@@ -403,7 +392,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.contact_details_id.query_index, contact_details.id)
         return self._save_street_address(table, insert, street_address, f"street address for contact {contact_details.id}")
 
-    @db_wrapper(TableContactDetailsTelephoneNumbers)
+    @using_table(TableContactDetailsTelephoneNumbers)
     def _save_contact_details_telephone_number(self, contact_details: ContactDetails, phone_number: TelephoneNumber, table, insert) -> bool:
 
         insert.add_value(table.contact_details_id.query_index, contact_details.id)
@@ -414,7 +403,7 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61968 Metering #
     ###############################
 
-    @db_wrapper(TablePanDemandResponseFunctions)
+    @using_table(TablePanDemandResponseFunctions)
     def save_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction, table, insert) -> bool:
         """
         Save the :class:`PanDemandResponseFunction` fields to :class:`TablePanDemandResponseFunctions`.
@@ -433,7 +422,8 @@ class NetworkCimWriter(BaseCimWriter):
     # Extension IEC61970 Base Core #
     ################################
 
-    def save_hv_customer(self, hv_customer: HvCustomer) -> bool:
+    @using_table(TableHvCustomers)
+    def save_hv_customer(self, hv_customer: HvCustomer, table, insert) -> bool:
         """
         Save the :class:`HvCustomer` fields to :class:`TableHvCustomers`.
 
@@ -441,12 +431,10 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`HvCustomer` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableHvCustomers)
-        insert = self._database_tables.get_insert(TableHvCustomers)
-
         return self._save_equipment_container(table, insert, hv_customer, "hv customer")
 
-    def save_site(self, site: Site) -> bool:
+    @using_table(TableSites)
+    def save_site(self, site: Site, table, insert) -> bool:
         """
         Save the :class:`Site` fields to :class:`TableSites`.
 
@@ -454,16 +442,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Site` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSites)
-        insert = self._database_tables.get_insert(TableSites)
-
         return self._save_equipment_container(table, insert, site, "site")
 
     ##################################
     # Extension IEC61970 Base Feeder #
     ##################################
 
-    def save_loop(self, loop: Loop) -> bool:
+    @using_table(TableLoops)
+    def save_loop(self, loop: Loop, table, insert) -> bool:
         """
         Save the :class:`Loop` fields to :class:`TableLoops`.
 
@@ -471,9 +457,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Loop` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableLoops)
-        insert = self._database_tables.get_insert(TableLoops)
-
         status = True
         for it in loop.energizing_substations:
             status = status and self._save_loop_to_substation_association(loop, it, LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP)
@@ -482,7 +465,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._save_identified_object(table, insert, loop, "loop")
 
-    def save_lv_feeder(self, lv_feeder: LvFeeder) -> bool:
+    @using_table(TableLvFeeders)
+    def save_lv_feeder(self, lv_feeder: LvFeeder, table, insert) -> bool:
         """
         Save the :class:`LvFeeder` fields to :class:`TableLvFeeders`.
 
@@ -490,15 +474,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`LvFeeder` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableLvFeeders)
-        insert = self._database_tables.get_insert(TableLvFeeders)
-
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
         insert.add_value(table.lv_substation_mrid.query_index, self._mrid_or_none(lv_feeder.normal_energizing_lv_substation))
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv feeder")
 
-    def save_lv_substation(self, lv_substation: LvSubstation) -> bool:
+    @using_table(TableLvSubstations)
+    def save_lv_substation(self, lv_substation: LvSubstation, table, insert) -> bool:
         """
         Save the :class:`LvSubstation` fields to :class:`TableLvSubstations`.
 
@@ -506,16 +488,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`LvSubstation` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableLvSubstations)
-        insert = self._database_tables.get_insert(TableLvSubstations)
-
         return self._save_equipment_container(table, insert, lv_substation, "lv substation")
 
     #################################################
     # Extension IEC61970 Base Generation Production #
     #################################################
 
-    def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
+    @using_table(TableEvChargingUnits)
+    def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit, table, insert) -> bool:
         """
         Save the :class:`EvChargingUnit` fields to :class:`TableEvChargingUnits`.
 
@@ -523,16 +503,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EvChargingUnit` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEvChargingUnits)
-        insert = self._database_tables.get_insert(TableEvChargingUnits)
-
         return self._save_power_electronics_unit(table, insert, ev_charging_unit, "ev charging unit")
 
     ######################################
     # Extension IEC61970 Base Protection #
     ######################################
 
-    @db_wrapper(TableDirectionalCurrentRelays)
+    @using_table(TableDirectionalCurrentRelays)
     def save_directional_current_relay(self, directional_current_relay: DirectionalCurrentRelay, table, insert) -> bool:
         """
         Write the :class:`DirectionalCurrentRelay` fields to :class:`TableDirectionalCurrentRelays`.
@@ -553,7 +530,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_protection_relay_function(table, insert, directional_current_relay, "directional current relay")
 
-    def save_distance_relay(self, distance_relay: DistanceRelay) -> bool:
+    @using_table(TableDistanceRelays)
+    def save_distance_relay(self, distance_relay: DistanceRelay, table, insert) -> bool:
         """
         Save the :class:`DistanceRelay` fields to :class:`TableDistanceRelays`.
 
@@ -561,9 +539,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`DistanceRelay` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableDistanceRelays)
-        insert = self._database_tables.get_insert(TableDistanceRelays)
-
         insert.add_value(table.backward_blind.query_index, distance_relay.backward_blind)
         insert.add_value(table.backward_reach.query_index, distance_relay.backward_reach)
         insert.add_value(table.backward_reactance.query_index, distance_relay.backward_reactance)
@@ -630,7 +605,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._try_execute_single_update(insert, "protection relay function time limit")
 
-    def save_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme) -> bool:
+    @using_table(TableProtectionRelaySchemes)
+    def save_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme, table, insert) -> bool:
         """
         Save the :class:`ProtectionRelayScheme` fields to :class:`TableProtectionRelaySchemes`.
 
@@ -638,9 +614,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ProtectionRelayScheme` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableProtectionRelaySchemes)
-        insert = self._database_tables.get_insert(TableProtectionRelaySchemes)
-
         insert.add_value(table.system_mrid.query_index, self._mrid_or_none(protection_relay_scheme.system))
 
         status = True
@@ -649,7 +622,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._save_identified_object(table, insert, protection_relay_scheme, "protection relay scheme")
 
-    def save_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem) -> bool:
+    @using_table(TableProtectionRelaySystems)
+    def save_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem, table, insert) -> bool:
         """
         Save the :class:`ProtectionRelaySystem` fields to :class:`TableProtectionRelaySystems`.
 
@@ -657,14 +631,12 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ProtectionRelaySystem` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableProtectionRelaySystems)
-        insert = self._database_tables.get_insert(TableProtectionRelaySystems)
-
         insert.add_value(table.protection_kind.query_index, protection_relay_system.protection_kind.short_name)
 
         return self._save_equipment(table, insert, protection_relay_system, "protection relay system")
 
-    def save_voltage_relay(self, voltage_relay: VoltageRelay) -> bool:
+    @using_table(TableVoltageRelays)
+    def save_voltage_relay(self, voltage_relay: VoltageRelay, table, insert) -> bool:
         """
         Save the :class:`VoltageRelay` fields to :class:`TableVoltageRelays`.
 
@@ -672,16 +644,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`VoltageRelay` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableVoltageRelays)
-        insert = self._database_tables.get_insert(TableVoltageRelays)
-
         return self._save_protection_relay_function(table, insert, voltage_relay, "voltage relay")
 
     #################################
     # Extension IEC61970 Base Wires #
     #################################
 
-    def save_battery_control(self, battery_control: BatteryControl) -> bool:
+    @using_table(TableBatteryControls)
+    def save_battery_control(self, battery_control: BatteryControl, table, insert) -> bool:
         """
         Save the :class:`BatteryControl` fields to :class:`TableBatteryControls`.
 
@@ -689,8 +659,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`BatteryControl` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableBatteryControls)
-        insert = self._database_tables.get_insert(TableBatteryControls)
 
         insert.add_value(table.charging_rate.query_index, battery_control.charging_rate)
         insert.add_value(table.discharging_rate.query_index, battery_control.discharging_rate)
@@ -703,7 +671,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61968 Asset Info #
     #######################
 
-    def save_cable_info(self, cable_info: CableInfo) -> bool:
+    @using_table(TableCableInfo)
+    def save_cable_info(self, cable_info: CableInfo, table, insert) -> bool:
         """
         Save the :class:`CableInfo` fields to :class:`TableCableInfo`.
 
@@ -711,12 +680,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`CableInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCableInfo)
-        insert = self._database_tables.get_insert(TableCableInfo)
 
         return self._save_wire_info(table, insert, cable_info, "cable info")
 
-    def save_no_load_test(self, no_load_test: NoLoadTest) -> bool:
+    @using_table(TableNoLoadTests)
+    def save_no_load_test(self, no_load_test: NoLoadTest, table, insert) -> bool:
         """
         Save the :class:`NoLoadTest` fields to :class:`TableNoLoadTests`.
 
@@ -724,8 +692,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`NoLoadTest` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableNoLoadTests)
-        insert = self._database_tables.get_insert(TableNoLoadTests)
 
         insert.add_value(table.energised_end_voltage.query_index, no_load_test.energised_end_voltage)
         insert.add_value(table.exciting_current.query_index, no_load_test.exciting_current)
@@ -735,7 +701,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_transformer_test(table, insert, no_load_test, "no load test")
 
-    def save_open_circuit_test(self, open_circuit_test: OpenCircuitTest) -> bool:
+    @using_table(TableOpenCircuitTests)
+    def save_open_circuit_test(self, open_circuit_test: OpenCircuitTest, table, insert) -> bool:
         """
         Save the :class:`OpenCircuitTest` fields to :class:`TableOpenCircuitTests`.
 
@@ -743,8 +710,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`OpenCircuitTest` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableOpenCircuitTests)
-        insert = self._database_tables.get_insert(TableOpenCircuitTests)
 
         insert.add_value(table.energised_end_step.query_index, open_circuit_test.energised_end_step)
         insert.add_value(table.energised_end_voltage.query_index, open_circuit_test.energised_end_voltage)
@@ -754,7 +719,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_transformer_test(table, insert, open_circuit_test, "open circuit test")
 
-    def save_overhead_wire_info(self, overhead_wire_info: OverheadWireInfo) -> bool:
+    @using_table(TableOverheadWireInfo)
+    def save_overhead_wire_info(self, overhead_wire_info: OverheadWireInfo, table, insert) -> bool:
         """
         Save the :class:`OverheadWireInfo` fields to :class:`TableOverheadWireInfo`.
 
@@ -762,12 +728,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`OverheadWireInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableOverheadWireInfo)
-        insert = self._database_tables.get_insert(TableOverheadWireInfo)
 
         return self._save_wire_info(table, insert, overhead_wire_info, "overhead wire info")
 
-    def save_power_transformer_info(self, power_transformer_info: PowerTransformerInfo) -> bool:
+    @using_table(TablePowerTransformerInfo)
+    def save_power_transformer_info(self, power_transformer_info: PowerTransformerInfo, table, insert) -> bool:
         """
         Save the :class:`PowerTransformerInfo` fields to :class:`TablePowerTransformerInfo`.
 
@@ -775,12 +740,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PowerTransformerInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePowerTransformerInfo)
-        insert = self._database_tables.get_insert(TablePowerTransformerInfo)
 
         return self._save_asset_info(table, insert, power_transformer_info, "power transformer info")
 
-    def save_short_circuit_test(self, short_circuit_test: ShortCircuitTest) -> bool:
+    @using_table(TableShortCircuitTests)
+    def save_short_circuit_test(self, short_circuit_test: ShortCircuitTest, table, insert) -> bool:
         """
         Save the :class:`ShortCircuitTest` fields to :class:`TableShortCircuitTests`.
 
@@ -788,8 +752,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ShortCircuitTest` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableShortCircuitTests)
-        insert = self._database_tables.get_insert(TableShortCircuitTests)
 
         insert.add_value(table.current.query_index, short_circuit_test.current)
         insert.add_value(table.energised_end_step.query_index, short_circuit_test.energised_end_step)
@@ -804,7 +766,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_transformer_test(table, insert, short_circuit_test, "short circuit test")
 
-    def save_shunt_compensator_info(self, shunt_compensator_info: ShuntCompensatorInfo) -> bool:
+    @using_table(TableShuntCompensatorInfo)
+    def save_shunt_compensator_info(self, shunt_compensator_info: ShuntCompensatorInfo, table, insert) -> bool:
         """
         Save the :class:`ShuntCompensatorInfo` fields to :class:`TableShuntCompensatorInfo`.
 
@@ -812,8 +775,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ShuntCompensatorInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableShuntCompensatorInfo)
-        insert = self._database_tables.get_insert(TableShuntCompensatorInfo)
 
         insert.add_value(table.max_power_loss.query_index, shunt_compensator_info.max_power_loss)
         insert.add_value(table.rated_current.query_index, shunt_compensator_info.rated_current)
@@ -822,7 +783,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_info(table, insert, shunt_compensator_info, "shunt compensator info")
 
-    def save_switch_info(self, switch_info: SwitchInfo) -> bool:
+    @using_table(TableSwitchInfo)
+    def save_switch_info(self, switch_info: SwitchInfo, table, insert) -> bool:
         """
         Save the :class:`SwitchInfo` fields to :class:`TableSwitchInfo`.
 
@@ -830,14 +792,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`SwitchInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSwitchInfo)
-        insert = self._database_tables.get_insert(TableSwitchInfo)
 
         insert.add_value(table.rated_interrupting_time.query_index, switch_info.rated_interrupting_time)
 
         return self._save_asset_info(table, insert, switch_info, "switch info")
 
-    def save_transformer_end_info(self, transformer_end_info: TransformerEndInfo) -> bool:
+    @using_table(TableTransformerEndInfo)
+    def save_transformer_end_info(self, transformer_end_info: TransformerEndInfo, table, insert) -> bool:
         """
         Save the :class:`TransformerEndInfo` fields to :class:`TableTransformerEndInfo`.
 
@@ -845,8 +806,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`TransformerEndInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTransformerEndInfo)
-        insert = self._database_tables.get_insert(TableTransformerEndInfo)
 
         insert.add_value(table.connection_kind.query_index, transformer_end_info.connection_kind.short_name)
         insert.add_value(table.emergency_s.query_index, transformer_end_info.emergency_s)
@@ -866,7 +825,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_info(table, insert, transformer_end_info, "transformer end info")
 
-    def save_transformer_tank_info(self, transformer_tank_info: TransformerTankInfo) -> bool:
+    @using_table(TableTransformerTankInfo)
+    def save_transformer_tank_info(self, transformer_tank_info: TransformerTankInfo, table, insert) -> bool:
         """
         Save the :class:`TransformerTankInfo` fields to :class:`TableTransformerTankInfo`.
 
@@ -874,8 +834,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`TransformerTankInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTransformerTankInfo)
-        insert = self._database_tables.get_insert(TableTransformerTankInfo)
 
         insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(transformer_tank_info.power_transformer_info))
 
@@ -932,7 +890,8 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_organisation_role(table, insert, asset_organisation_role, description)
 
-    def save_asset_owner(self, asset_owner: AssetOwner) -> bool:
+    @using_table(TableAssetOwners)
+    def save_asset_owner(self, asset_owner: AssetOwner, table, insert) -> bool:
         """
         Save the :class:`AssetOwner` fields to :class:`TableAssetOwners`.
 
@@ -940,12 +899,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`AssetOwner` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableAssetOwners)
-        insert = self._database_tables.get_insert(TableAssetOwners)
 
         return self._save_asset_organisation_role(table, insert, asset_owner, "asset owner")
 
-    def save_streetlight(self, streetlight: Streetlight) -> bool:
+    @using_table(TableStreetlights)
+    def save_streetlight(self, streetlight: Streetlight, table, insert) -> bool:
         """
         Save the :class:`Streetlight` fields to :class:`TableStreetlights`.
 
@@ -953,8 +911,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Streetlight` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableStreetlights)
-        insert = self._database_tables.get_insert(TableStreetlights)
 
         insert.add_value(table.pole_mrid.query_index, self._mrid_or_none(streetlight.pole))
         insert.add_value(table.light_rating.query_index, streetlight.light_rating)
@@ -1078,7 +1034,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
-    def save_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo) -> bool:
+    @using_table(TableCurrentTransformerInfo)
+    def save_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo, table, insert) -> bool:
         """
         Save the :class:`CurrentTransformerInfo` fields to :class:`TableCurrentTransformerInfo`.
 
@@ -1086,8 +1043,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`CurrentTransformerInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCurrentTransformerInfo)
-        insert = self._database_tables.get_insert(TableCurrentTransformerInfo)
 
         insert.add_value(table.accuracy_class.query_index, current_transformer_info.accuracy_class)
         insert.add_value(table.accuracy_limit.query_index, current_transformer_info.accuracy_limit)
@@ -1104,7 +1059,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_info(table, insert, current_transformer_info, "current transformer info")
 
-    def save_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo) -> bool:
+    @using_table(TablePotentialTransformerInfo)
+    def save_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo, table, insert) -> bool:
         """
         Save the :class:`PotentialTransformerInfo` fields to :class:`TablePotentialTransformerInfo`.
 
@@ -1112,8 +1068,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PotentialTransformerInfo` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePotentialTransformerInfo)
-        insert = self._database_tables.get_insert(TablePotentialTransformerInfo)
 
         insert.add_value(table.accuracy_class.query_index, potential_transformer_info.accuracy_class)
         insert.add_ratio(table.nominal_ratio_numerator.query_index, table.nominal_ratio_denominator.query_index, potential_transformer_info.nominal_ratio)
@@ -1128,7 +1082,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61968 InfIEC61968 InfAssets #
     ##################################
 
-    def save_pole(self, pole: Pole) -> bool:
+    @using_table(TablePoles)
+    def save_pole(self, pole: Pole, table, insert) -> bool:
         """
         Save the :class:`Pole` fields to :class:`TablePoles`.
 
@@ -1136,8 +1091,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Pole` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePoles)
-        insert = self._database_tables.get_insert(TablePoles)
 
         insert.add_value(table.classification.query_index, pole.classification)
 
@@ -1170,7 +1123,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_function(table, insert, end_device_function, description)
 
-    def save_meter(self, meter: Meter) -> bool:
+    @using_table(TableMeters)
+    def save_meter(self, meter: Meter, table, insert) -> bool:
         """
         Save the :class:`Meter` fields to :class:`TableMeters`.
 
@@ -1178,12 +1132,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Meter` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableMeters)
-        insert = self._database_tables.get_insert(TableMeters)
 
         return self._save_end_device(table, insert, meter, "meter")
 
-    def save_usage_point(self, usage_point: UsagePoint) -> bool:
+    @using_table(TableUsagePoints)
+    def save_usage_point(self, usage_point: UsagePoint, table, insert) -> bool:
         """
         Save the :class:`UsagePoint` fields to :class:`TableUsagePoints`.
 
@@ -1191,8 +1144,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`UsagePoint` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableUsagePoints)
-        insert = self._database_tables.get_insert(TableUsagePoints)
 
         insert.add_value(table.location_mrid.query_index, self._mrid_or_none(usage_point.usage_point_location))
         insert.add_value(table.is_virtual.query_index, usage_point.is_virtual)
@@ -1207,7 +1158,7 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._save_identified_object(table, insert, usage_point, "usage point")
 
-    @db_wrapper(TableUsagePointsContactDetails)
+    @using_table(TableUsagePointsContactDetails)
     def _save_usage_point_contact_details(self, usage_point: UsagePoint, contact_details: ContactDetails, table, insert) -> bool:
         insert.add_value(table.usage_point_mrid.query_index, usage_point.mrid)
 
@@ -1217,7 +1168,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61968 Operations #
     #######################
 
-    def save_operational_restriction(self, operational_restriction: OperationalRestriction) -> bool:
+    @using_table(TableOperationalRestrictions)
+    def save_operational_restriction(self, operational_restriction: OperationalRestriction, table, insert) -> bool:
         """
         Save the :class:`OperationalRestriction` fields to :class:`TableOperationalRestrictions`.
 
@@ -1225,8 +1177,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`OperationalRestriction` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableOperationalRestrictions)
-        insert = self._database_tables.get_insert(TableOperationalRestrictions)
 
         status = True
         for it in operational_restriction.equipment:
@@ -1249,7 +1199,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_equipment(table, insert, auxiliary_equipment, description)
 
-    def save_current_transformer(self, current_transformer: CurrentTransformer) -> bool:
+    @using_table(TableCurrentTransformers)
+    def save_current_transformer(self, current_transformer: CurrentTransformer, table, insert) -> bool:
         """
         Save the :class:`CurrentTransformer` fields to :class:`TableCurrentTransformers`.
 
@@ -1257,15 +1208,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`CurrentTransformer` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCurrentTransformers)
-        insert = self._database_tables.get_insert(TableCurrentTransformers)
 
         insert.add_value(table.current_transformer_info_mrid.query_index, self._mrid_or_none(current_transformer.asset_info))
         insert.add_value(table.core_burden.query_index, current_transformer.core_burden)
 
         return self._save_sensor(table, insert, current_transformer, "current transformer")
 
-    def save_fault_indicator(self, fault_indicator: FaultIndicator) -> bool:
+    @using_table(TableFaultIndicators)
+    def save_fault_indicator(self, fault_indicator: FaultIndicator, table, insert) -> bool:
         """
         Save the :class:`FaultIndicator` fields to :class:`TableFaultIndicators`.
 
@@ -1273,12 +1223,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`FaultIndicator` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableFaultIndicators)
-        insert = self._database_tables.get_insert(TableFaultIndicators)
 
         return self._save_auxiliary_equipment(table, insert, fault_indicator, "fault indicator")
 
-    def save_potential_transformer(self, potential_transformer: PotentialTransformer) -> bool:
+    @using_table(TablePotentialTransformers)
+    def save_potential_transformer(self, potential_transformer: PotentialTransformer, table, insert) -> bool:
         """
         Save the :class:`PotentialTransformer` fields to :class:`TablePotentialTransformers`.
 
@@ -1286,8 +1235,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PotentialTransformer` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePotentialTransformers)
-        insert = self._database_tables.get_insert(TablePotentialTransformers)
 
         insert.add_value(table.potential_transformer_info_mrid.query_index, self._mrid_or_none(potential_transformer.asset_info))
         insert.add_value(table.type.query_index, potential_transformer.type.short_name)
@@ -1304,7 +1251,8 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_ac_dc_terminal(self, table: TableAcDcTerminals, insert: PreparedStatement, ac_dc_terminal: AcDcTerminal, description: str) -> bool:
         return self._save_identified_object(table, insert, ac_dc_terminal, description)
 
-    def save_base_voltage(self, base_voltage: BaseVoltage) -> bool:
+    @using_table(TableBaseVoltages)
+    def save_base_voltage(self, base_voltage: BaseVoltage, table, insert) -> bool:
         """
         Save the :class:`BaseVoltage` fields to :class:`TableBaseVoltages`.
 
@@ -1312,8 +1260,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`BaseVoltage` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableBaseVoltages)
-        insert = self._database_tables.get_insert(TableBaseVoltages)
 
         insert.add_value(table.nominal_voltage.query_index, base_voltage.nominal_voltage)
 
@@ -1330,7 +1276,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_equipment(table, insert, conducting_equipment, description)
 
-    def save_connectivity_node(self, connectivity_node: ConnectivityNode) -> bool:
+    @using_table(TableConnectivityNodes)
+    def save_connectivity_node(self, connectivity_node: ConnectivityNode, table, insert) -> bool:
         """
         Save the :class:`ConnectivityNode` fields to :class:`TableConnectivityNodes`.
 
@@ -1338,8 +1285,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ConnectivityNode` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableConnectivityNodes)
-        insert = self._database_tables.get_insert(TableConnectivityNodes)
 
         return self._save_identified_object(table, insert, connectivity_node, "connectivity node")
 
@@ -1392,7 +1337,8 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_connectivity_node_container(table, insert, equipment_container, description)
 
-    def save_feeder(self, feeder: Feeder) -> bool:
+    @using_table(TableFeeders)
+    def save_feeder(self, feeder: Feeder, table, insert) -> bool:
         """
         Save the :class:`Feeder` fields to :class:`TableFeeders`.
 
@@ -1400,8 +1346,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Feeder` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableFeeders)
-        insert = self._database_tables.get_insert(TableFeeders)
 
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(feeder.normal_head_terminal))
         insert.add_value(
@@ -1411,7 +1355,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_equipment_container(table, insert, feeder, "feeder")
 
-    def save_geographical_region(self, geographical_region: GeographicalRegion) -> bool:
+    @using_table(TableGeographicalRegions)
+    def save_geographical_region(self, geographical_region: GeographicalRegion, table, insert) -> bool:
         """
         Save the :class:`GeographicalRegion` fields to :class:`TableGeographicalRegions`.
 
@@ -1419,8 +1364,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`GeographicalRegion` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableGeographicalRegions)
-        insert = self._database_tables.get_insert(TableGeographicalRegions)
 
         return self._save_identified_object(table, insert, geographical_region, "geographical region")
 
@@ -1436,7 +1379,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_identified_object(table, insert, power_system_resource, description)
 
-    def save_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> bool:
+    @using_table(TableSubGeographicalRegions)
+    def save_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion, table, insert) -> bool:
         """
         Save the :class:`SubGeographicalRegion` fields to :class:`TableSubGeographicalRegions`.
 
@@ -1444,8 +1388,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`SubGeographicalRegion` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSubGeographicalRegions)
-        insert = self._database_tables.get_insert(TableSubGeographicalRegions)
 
         insert.add_value(
             table.geographical_region_mrid.query_index,
@@ -1454,7 +1396,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_identified_object(table, insert, sub_geographical_region, "sub-geographical region")
 
-    def save_substation(self, substation: Substation) -> bool:
+    @using_table(TableSubstations)
+    def save_substation(self, substation: Substation, table, insert) -> bool:
         """
         Save the :class:`Substation` fields to :class:`TableSubstations`.
 
@@ -1462,14 +1405,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Substation` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSubstations)
-        insert = self._database_tables.get_insert(TableSubstations)
 
         insert.add_value(table.sub_geographical_region_mrid.query_index, self._mrid_or_none(substation.sub_geographical_region))
 
         return self._save_equipment_container(table, insert, substation, "substation")
 
-    def save_terminal(self, terminal: Terminal) -> bool:
+    @using_table(TableTerminals)
+    def save_terminal(self, terminal: Terminal, table, insert) -> bool:
         """
         Save the :class:`Terminal` fields to :class:`TableTerminals`.
 
@@ -1477,13 +1419,12 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Terminal` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTerminals)
-        insert = self._database_tables.get_insert(TableTerminals)
 
         insert.add_value(table.conducting_equipment_mrid.query_index, self._mrid_or_none(terminal.conducting_equipment))
         insert.add_value(table.sequence_number.query_index, terminal.sequence_number)
         insert.add_value(table.connectivity_node_mrid.query_index, terminal.connectivity_node_id)
         insert.add_value(table.phases.query_index, terminal.phases.short_name)
+        insert.add_value(table.normal_feeder_direction.query_index, terminal.normal_feeder_direction.name)
 
         return self._save_ac_dc_terminal(table, insert, terminal, "terminal")
 
@@ -1491,7 +1432,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Equivalents #
     #############################
 
-    def save_equivalent_branch(self, equivalent_branch: EquivalentBranch) -> bool:
+    @using_table(TableEquivalentBranches)
+    def save_equivalent_branch(self, equivalent_branch: EquivalentBranch, table, insert) -> bool:
         """
         Save the :class:`EquivalentBranch` fields to :class:`TableEquivalentBranches`.
 
@@ -1499,8 +1441,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EquivalentBranch` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEquivalentBranches)
-        insert = self._database_tables.get_insert(TableEquivalentBranches)
 
         insert.add_value(table.negative_r12.query_index, equivalent_branch.negative_r12)
         insert.add_value(table.negative_r21.query_index, equivalent_branch.negative_r21)
@@ -1534,7 +1474,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Generation Production #
     #######################################
 
-    def save_battery_unit(self, battery_unit: BatteryUnit) -> bool:
+    @using_table(TableBatteryUnits)
+    def save_battery_unit(self, battery_unit: BatteryUnit, table, insert) -> bool:
         """
         Save the :class:`BatteryUnit` fields to :class:`TableBatteryUnits`.
 
@@ -1542,8 +1483,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`BatteryUnit` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableBatteryUnits)
-        insert = self._database_tables.get_insert(TableBatteryUnits)
 
         insert.add_value(table.battery_state.query_index, battery_unit.battery_state.short_name)
         insert.add_value(table.rated_e.query_index, battery_unit.rated_e)
@@ -1554,7 +1493,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return status and self._save_power_electronics_unit(table, insert, battery_unit, "battery unit")
 
-    def save_photo_voltaic_unit(self, photo_voltaic_unit: PhotoVoltaicUnit) -> bool:
+    @using_table(TablePhotoVoltaicUnits)
+    def save_photo_voltaic_unit(self, photo_voltaic_unit: PhotoVoltaicUnit, table, insert) -> bool:
         """
         Save the :class:`PhotoVoltaicUnit` fields to :class:`TablePhotoVoltaicUnits`.
 
@@ -1562,8 +1502,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PhotoVoltaicUnit` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePhotoVoltaicUnits)
-        insert = self._database_tables.get_insert(TablePhotoVoltaicUnits)
 
         return self._save_power_electronics_unit(table, insert, photo_voltaic_unit, "photo voltaic unit")
 
@@ -1580,7 +1518,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_equipment(table, insert, power_electronics_unit, description)
 
-    def save_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit) -> bool:
+    @using_table(TablePowerElectronicsWindUnits)
+    def save_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit, table, insert) -> bool:
         """
         Save the :class:`PowerElectronicsWindUnit` fields to :class:`TablePowerElectronicsWindUnits`.
 
@@ -1588,8 +1527,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PowerElectronicsWindUnit` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePowerElectronicsWindUnits)
-        insert = self._database_tables.get_insert(TablePowerElectronicsWindUnits)
 
         return self._save_power_electronics_unit(table, insert, power_electronics_wind_unit, "power electronics wind unit")
 
@@ -1597,7 +1534,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Meas #
     ######################
 
-    def save_accumulator(self, accumulator: Accumulator) -> bool:
+    @using_table(TableAccumulators)
+    def save_accumulator(self, accumulator: Accumulator, table, insert) -> bool:
         """
         Save the :class:`Accumulator` fields to :class:`TableAccumulators`.
 
@@ -1605,12 +1543,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Accumulator` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableAccumulators)
-        insert = self._database_tables.get_insert(TableAccumulators)
 
         return self._save_measurement(table, insert, accumulator, "accumulator")
 
-    def save_analog(self, analog: Analog) -> bool:
+    @using_table(TableAnalogs)
+    def save_analog(self, analog: Analog, table, insert) -> bool:
         """
         Save the :class:`Analog` fields to :class:`TableAnalogs`.
 
@@ -1618,14 +1555,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Analog` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableAnalogs)
-        insert = self._database_tables.get_insert(TableAnalogs)
 
         insert.add_value(table.positive_flow_in.query_index, analog.positive_flow_in)
 
         return self._save_measurement(table, insert, analog, "analog")
 
-    def save_discrete(self, discrete: Discrete) -> bool:
+    @using_table(TableDiscretes)
+    def save_discrete(self, discrete: Discrete, table, insert) -> bool:
         """
         Save the :class:`Discrete` fields to :class:`TableDiscretes`.
 
@@ -1633,12 +1569,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Discrete` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableDiscretes)
-        insert = self._database_tables.get_insert(TableDiscretes)
 
         return self._save_measurement(table, insert, discrete, "discrete")
 
-    def save_control(self, control: Control) -> bool:
+    @using_table(TableControls)
+    def save_control(self, control: Control, table, insert) -> bool:
         """
         Save the :class:`Control` fields to :class:`TableControls`.
 
@@ -1646,8 +1581,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Control` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableControls)
-        insert = self._database_tables.get_insert(TableControls)
 
         insert.add_value(table.power_system_resource_mrid.query_index, control.power_system_resource_mrid)
 
@@ -1675,7 +1608,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Protection #
     ############################
 
-    def save_current_relay(self, current_relay: CurrentRelay) -> bool:
+    @using_table(TableCurrentRelays)
+    def save_current_relay(self, current_relay: CurrentRelay, table, insert) -> bool:
         """
         Save the :class:`CurrentRelay` fields to :class:`TableCurrentRelays`.
 
@@ -1683,8 +1617,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`CurrentRelay` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCurrentRelays)
-        insert = self._database_tables.get_insert(TableCurrentRelays)
 
         insert.add_value(table.current_limit_1.query_index, current_relay.current_limit_1)
         insert.add_value(table.inverse_time_flag.query_index, current_relay.inverse_time_flag)
@@ -1696,7 +1628,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Scada #
     #######################
 
-    def save_remote_control(self, remote_control: RemoteControl) -> bool:
+    @using_table(TableRemoteControls)
+    def save_remote_control(self, remote_control: RemoteControl, table, insert) -> bool:
         """
         Save the :class:`RemoteControl` fields to :class:`TableRemoteControls`.
 
@@ -1704,8 +1637,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`RemoteControl` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableRemoteControls)
-        insert = self._database_tables.get_insert(TableRemoteControls)
 
         insert.add_value(table.control_mrid.query_index, self._mrid_or_none(remote_control.control))
 
@@ -1714,7 +1645,8 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
         return self._save_identified_object(table, insert, remote_point, description)
 
-    def save_remote_source(self, remote_source: RemoteSource) -> bool:
+    @using_table(TableRemoteSources)
+    def save_remote_source(self, remote_source: RemoteSource, table, insert) -> bool:
         """
         Save the :class:`RemoteSource` fields to :class:`TableRemoteSources`.
 
@@ -1722,8 +1654,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`RemoteSource` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableRemoteSources)
-        insert = self._database_tables.get_insert(TableRemoteSources)
 
         insert.add_value(table.measurement_mrid.query_index, self._mrid_or_none(remote_source.measurement))
 
@@ -1733,7 +1663,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 Base Wires #
     #######################
 
-    def save_ac_line_segment(self, ac_line_segment: AcLineSegment) -> bool:
+    @using_table(TableAcLineSegments)
+    def save_ac_line_segment(self, ac_line_segment: AcLineSegment, table, insert) -> bool:
         """
         Save the :class:`AcLineSegment` fields to :class:`TableAcLineSegments`.
 
@@ -1741,14 +1672,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`AcLineSegment` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableAcLineSegments)
-        insert = self._database_tables.get_insert(TableAcLineSegments)
 
         insert.add_value(table.per_length_impedance_mrid.query_index, self._mrid_or_none(ac_line_segment.per_length_impedance))
 
         return self._save_conductor(table, insert, ac_line_segment, "AC line segment")
 
-    def save_ac_line_segment_phase(self, ac_line_segment_phase: AcLineSegmentPhase) -> bool:
+    @using_table(TableAcLineSegmentPhases)
+    def save_ac_line_segment_phase(self, ac_line_segment_phase: AcLineSegmentPhase, table, insert) -> bool:
         """
         Save the :class:`AcLineSegmentPhase` fields to :class:`TableAcLineSegmentPhases`.
 
@@ -1756,8 +1686,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`AcLineSegmentPhase` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableAcLineSegmentPhases)
-        insert = self._database_tables.get_insert(TableAcLineSegmentPhases)
 
         insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(ac_line_segment_phase.ac_line_segment))
         insert.add_value(table.phase.query_index, ac_line_segment_phase.phase.name)
@@ -1766,7 +1694,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_power_system_resource(table, insert, ac_line_segment_phase, "AC line segment phase")
 
-    def save_breaker(self, breaker: Breaker) -> bool:
+    @using_table(TableBreakers)
+    def save_breaker(self, breaker: Breaker, table, insert) -> bool:
         """
         Save the :class:`Breaker` fields to :class:`TableBreakers`.
 
@@ -1774,14 +1703,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Breaker` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableBreakers)
-        insert = self._database_tables.get_insert(TableBreakers)
 
         insert.add_value(table.in_transit_time.query_index, breaker.in_transit_time)
 
         return self._save_protected_switch(table, insert, breaker, "breaker")
 
-    def save_busbar_section(self, busbar_section: BusbarSection) -> bool:
+    @using_table(TableBusbarSections)
+    def save_busbar_section(self, busbar_section: BusbarSection, table, insert) -> bool:
         """
         Save the :class:`BusbarSection` fields to :class:`TableBusbarSections`.
 
@@ -1789,12 +1717,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`BusbarSection` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableBusbarSections)
-        insert = self._database_tables.get_insert(TableBusbarSections)
 
         return self._save_connector(table, insert, busbar_section, "busbar section")
 
-    def save_clamp(self, clamp: Clamp) -> bool:
+    @using_table(TableClamps)
+    def save_clamp(self, clamp: Clamp, table, insert) -> bool:
         """
         Save the :class:`Clamp` fields to :class:`TableClamps`.
 
@@ -1802,8 +1729,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Clamp` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableClamps)
-        insert = self._database_tables.get_insert(TableClamps)
 
         insert.add_value(table.length_from_terminal_1.query_index, clamp.length_from_terminal_1)
         insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(clamp.ac_line_segment))
@@ -1821,7 +1746,8 @@ class NetworkCimWriter(BaseCimWriter):
     def _save_connector(self, table: TableConnectors, insert: PreparedStatement, connector: Connector, description: str) -> bool:
         return self._save_conducting_equipment(table, insert, connector, description)
 
-    def save_cut(self, cut: Cut) -> bool:
+    @using_table(TableCuts)
+    def save_cut(self, cut: Cut, table, insert) -> bool:
         """
         Save the :class:`Cut` fields to :class:`TableCuts`.
 
@@ -1829,15 +1755,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Cut` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCuts)
-        insert = self._database_tables.get_insert(TableCuts)
 
         insert.add_value(table.length_from_terminal_1.query_index, cut.length_from_terminal_1)
         insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(cut.ac_line_segment))
 
         return self._save_switch(table, insert, cut, "cut")
 
-    def save_disconnector(self, disconnector: Disconnector) -> bool:
+    @using_table(TableDisconnectors)
+    def save_disconnector(self, disconnector: Disconnector, table, insert) -> bool:
         """
         Save the :class:`Disconnector` fields to :class:`TableDisconnectors`.
 
@@ -1845,8 +1770,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Disconnector` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableDisconnectors)
-        insert = self._database_tables.get_insert(TableDisconnectors)
 
         return self._save_switch(table, insert, disconnector, "disconnector")
 
@@ -1870,7 +1793,8 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_conducting_equipment(table, insert, energy_connection, description)
 
-    def save_energy_consumer(self, energy_consumer: EnergyConsumer) -> bool:
+    @using_table(TableEnergyConsumers)
+    def save_energy_consumer(self, energy_consumer: EnergyConsumer, table, insert) -> bool:
         """
         Save the :class:`EnergyConsumer` fields to :class:`TableEnergyConsumers`.
 
@@ -1878,8 +1802,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EnergyConsumer` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEnergyConsumers)
-        insert = self._database_tables.get_insert(TableEnergyConsumers)
 
         insert.add_value(table.customer_count.query_index, energy_consumer.customer_count)
         insert.add_value(table.grounded.query_index, energy_consumer.grounded)
@@ -1891,7 +1813,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_energy_connection(table, insert, energy_consumer, "energy consumer")
 
-    def save_energy_consumer_phase(self, energy_consumer_phase: EnergyConsumerPhase) -> bool:
+    @using_table(TableEnergyConsumerPhases)
+    def save_energy_consumer_phase(self, energy_consumer_phase: EnergyConsumerPhase, table, insert) -> bool:
         """
         Save the :class:`EnergyConsumerPhase` fields to :class:`TableEnergyConsumerPhases`.
 
@@ -1899,8 +1822,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EnergyConsumerPhase` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEnergyConsumerPhases)
-        insert = self._database_tables.get_insert(TableEnergyConsumerPhases)
 
         insert.add_value(table.energy_consumer_mrid.query_index, self._mrid_or_none(energy_consumer_phase.energy_consumer))
         insert.add_value(table.phase.query_index, energy_consumer_phase.phase.short_name)
@@ -1911,7 +1832,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_power_system_resource(table, insert, energy_consumer_phase, "energy consumer phase")
 
-    def save_energy_source(self, energy_source: EnergySource) -> bool:
+    @using_table(TableEnergySources)
+    def save_energy_source(self, energy_source: EnergySource, table, insert) -> bool:
         """
         Save the :class:`EnergySource` fields to :class:`TableEnergySources`.
 
@@ -1919,8 +1841,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EnergySource` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEnergySources)
-        insert = self._database_tables.get_insert(TableEnergySources)
 
         insert.add_value(table.active_power.query_index, energy_source.active_power)
         insert.add_value(table.reactive_power.query_index, energy_source.reactive_power)
@@ -1950,7 +1870,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_energy_connection(table, insert, energy_source, "energy source")
 
-    def save_energy_source_phase(self, energy_source_phase: EnergySourcePhase) -> bool:
+    @using_table(TableEnergySourcePhases)
+    def save_energy_source_phase(self, energy_source_phase: EnergySourcePhase, table, insert) -> bool:
         """
         Save the :class:`EnergySourcePhase` fields to :class:`TableEnergySourcePhases`.
 
@@ -1958,15 +1879,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`EnergySourcePhase` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableEnergySourcePhases)
-        insert = self._database_tables.get_insert(TableEnergySourcePhases)
 
         insert.add_value(table.energy_source_mrid.query_index, self._mrid_or_none(energy_source_phase.energy_source))
         insert.add_value(table.phase.query_index, energy_source_phase.phase.short_name)
 
         return self._save_power_system_resource(table, insert, energy_source_phase, "energy source phase")
 
-    def save_fuse(self, fuse: Fuse) -> bool:
+    @using_table(TableFuses)
+    def save_fuse(self, fuse: Fuse, table, insert) -> bool:
         """
         Save the :class:`Fuse` fields to :class:`TableFuses`.
 
@@ -1974,14 +1894,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Fuse` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableFuses)
-        insert = self._database_tables.get_insert(TableFuses)
 
         insert.add_value(table.function_mrid.query_index, self._mrid_or_none(fuse.function))
 
         return self._save_switch(table, insert, fuse, "fuse")
 
-    def save_ground(self, ground: Ground) -> bool:
+    @using_table(TableGrounds)
+    def save_ground(self, ground: Ground, table, insert) -> bool:
         """
         Save the :class:`Ground` fields to :class:`TableGrounds`.
 
@@ -1989,12 +1908,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Ground` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableGrounds)
-        insert = self._database_tables.get_insert(TableGrounds)
 
         return self._save_conducting_equipment(table, insert, ground, "ground")
 
-    def save_ground_disconnector(self, ground_disconnector: GroundDisconnector) -> bool:
+    @using_table(TableGroundDisconnectors)
+    def save_ground_disconnector(self, ground_disconnector: GroundDisconnector, table, insert) -> bool:
         """
         Save the :class:`GroundDisconnector` fields to :class:`TableGroundDisconnectors`.
 
@@ -2002,12 +1920,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`GroundDisconnector` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableGroundDisconnectors)
-        insert = self._database_tables.get_insert(TableGroundDisconnectors)
 
         return self._save_switch(table, insert, ground_disconnector, "ground disconnector")
 
-    def save_grounding_impedance(self, grounding_impedance: GroundingImpedance) -> bool:
+    @using_table(TableGroundingImpedances)
+    def save_grounding_impedance(self, grounding_impedance: GroundingImpedance, table, insert) -> bool:
         """
         Save the :class:`GroundingImpedance` fields to :class:`TableGroundingImpedances`.
 
@@ -2016,14 +1933,13 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`GroundingImpedance` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableGroundingImpedances)
-        insert = self._database_tables.get_insert(TableGroundingImpedances)
 
         insert.add_value(table.x.query_index, grounding_impedance.x)
 
         return self._save_earth_fault_compensator(table, insert, grounding_impedance, "ground disconnector")
 
-    def save_jumper(self, jumper: Jumper) -> bool:
+    @using_table(TableJumpers)
+    def save_jumper(self, jumper: Jumper, table, insert) -> bool:
         """
         Save the :class:`Jumper` fields to :class:`TableJumpers`.
 
@@ -2031,12 +1947,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Jumper` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableJumpers)
-        insert = self._database_tables.get_insert(TableJumpers)
 
         return self._save_switch(table, insert, jumper, "jumper")
 
-    def save_junction(self, junction: Junction) -> bool:
+    @using_table(TableJunctions)
+    def save_junction(self, junction: Junction, table, insert) -> bool:
         """
         Save the :class:`Junction` fields to :class:`TableJunctions`.
 
@@ -2044,15 +1959,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Junction` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableJunctions)
-        insert = self._database_tables.get_insert(TableJunctions)
 
         return self._save_connector(table, insert, junction, "junction")
 
     def _save_line(self, table: TableLines, insert: PreparedStatement, line: Line, description: str) -> bool:
         return self._save_equipment_container(table, insert, line, description)
 
-    def save_linear_shunt_compensator(self, linear_shunt_compensator: LinearShuntCompensator) -> bool:
+    @using_table(TableLinearShuntCompensators)
+    def save_linear_shunt_compensator(self, linear_shunt_compensator: LinearShuntCompensator, table, insert) -> bool:
         """
         Save the :class:`LinearShuntCompensator` fields to :class:`TableLinearShuntCompensators`.
 
@@ -2060,8 +1974,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`LinearShuntCompensator` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableLinearShuntCompensators)
-        insert = self._database_tables.get_insert(TableLinearShuntCompensators)
 
         insert.add_value(table.b0_per_section.query_index, linear_shunt_compensator.b0_per_section)
         insert.add_value(table.b_per_section.query_index, linear_shunt_compensator.b_per_section)
@@ -2070,7 +1982,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_shunt_compensator(table, insert, linear_shunt_compensator, "linear shunt compensator")
 
-    def save_load_break_switch(self, load_break_switch: LoadBreakSwitch) -> bool:
+    @using_table(TableLoadBreakSwitches)
+    def save_load_break_switch(self, load_break_switch: LoadBreakSwitch, table, insert) -> bool:
         """
         Save the :class:`LoadBreakSwitch` fields to :class:`TableLoadBreakSwitches`.
 
@@ -2078,8 +1991,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`LoadBreakSwitch` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableLoadBreakSwitches)
-        insert = self._database_tables.get_insert(TableLoadBreakSwitches)
 
         return self._save_protected_switch(table, insert, load_break_switch, "load break switch")
 
@@ -2101,7 +2012,8 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
-    def save_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance) -> bool:
+    @using_table(TablePerLengthPhaseImpedances)
+    def save_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance, table, insert) -> bool:
         """
         Save the :class:`PerLengthPhaseImpedance` fields to :class:`TablePerLengthPhaseImpedances`.
 
@@ -2109,8 +2021,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PerLengthPhaseImpedance` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePerLengthPhaseImpedances)
-        insert = self._database_tables.get_insert(TablePerLengthPhaseImpedances)
 
         status = True
 
@@ -2119,7 +2029,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_per_length_impedance(table, insert, per_length_phase_impedance, "per length phase impedance")
 
-    def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
+    @using_table(TablePerLengthSequenceImpedances)
+    def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance, table, insert) -> bool:
         """
         Save the :class:`PerLengthSequenceImpedance` fields to :class:`TablePerLengthSequenceImpedances`.
 
@@ -2127,8 +2038,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PerLengthSequenceImpedance` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePerLengthSequenceImpedances)
-        insert = self._database_tables.get_insert(TablePerLengthSequenceImpedances)
 
         insert.add_value(table.r.query_index, per_length_sequence_impedance.r)
         insert.add_value(table.x.query_index, per_length_sequence_impedance.x)
@@ -2141,7 +2050,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_per_length_impedance(table, insert, per_length_sequence_impedance, "per length sequence impedance")
 
-    def save_petersen_coil(self, petersen_coil: PetersenCoil) -> bool:
+    @using_table(TablePetersenCoils)
+    def save_petersen_coil(self, petersen_coil: PetersenCoil, table, insert) -> bool:
         """
         Save the :class:`PetersenCoil` fields to :class:`TablePetersenCoils`.
 
@@ -2150,8 +2060,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PetersenCoil` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePetersenCoils)
-        insert = self._database_tables.get_insert(TablePetersenCoils)
 
         insert.add_value(table.x_ground_nominal.query_index, petersen_coil.x_ground_nominal)
 
@@ -2171,7 +2079,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._try_execute_single_update(insert, "phase impedance data")
 
-    def save_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection) -> bool:
+    @using_table(TablePowerElectronicsConnections)
+    def save_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection, table, insert) -> bool:
         """
         Save the :class:`PowerElectronicsConnection` fields to :class:`TablePowerElectronicsConnections`.
 
@@ -2179,8 +2088,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PowerElectronicsConnection` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePowerElectronicsConnections)
-        insert = self._database_tables.get_insert(TablePowerElectronicsConnections)
 
         insert.add_value(table.max_i_fault.query_index, power_electronics_connection.max_i_fault)
         insert.add_value(table.max_q.query_index, power_electronics_connection.max_q)
@@ -2216,7 +2123,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_regulating_cond_eq(table, insert, power_electronics_connection, "power electronics connection")
 
-    def save_power_electronics_connection_phase(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase) -> bool:
+    @using_table(TablePowerElectronicsConnectionPhases)
+    def save_power_electronics_connection_phase(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase, table, insert) -> bool:
         """
         Save the :class:`PowerElectronicsConnectionPhase` fields to :class:`TablePowerElectronicsConnectionPhases`.
 
@@ -2224,8 +2132,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PowerElectronicsConnectionPhase` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePowerElectronicsConnectionPhases)
-        insert = self._database_tables.get_insert(TablePowerElectronicsConnectionPhases)
 
         insert.add_value(
             table.power_electronics_connection_mrid.query_index,
@@ -2237,7 +2143,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_power_system_resource(table, insert, power_electronics_connection_phase, "power electronics connection phase")
 
-    def save_power_transformer(self, power_transformer: PowerTransformer) -> bool:
+    @using_table(TablePowerTransformers)
+    def save_power_transformer(self, power_transformer: PowerTransformer, table, insert) -> bool:
         """
         Save the :class:`PowerTransformer` fields to :class:`TablePowerTransformers`.
 
@@ -2245,8 +2152,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`PowerTransformer` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TablePowerTransformers)
-        insert = self._database_tables.get_insert(TablePowerTransformers)
 
         insert.add_value(table.vector_group.query_index, power_transformer.vector_group.short_name)
         insert.add_value(table.transformer_utilisation.query_index, power_transformer.transformer_utilisation)
@@ -2295,7 +2200,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_switch(table, insert, protected_switch, description)
 
-    def save_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger) -> bool:
+    @using_table(TableRatioTapChangers)
+    def save_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger, table, insert) -> bool:
         """
         Save the :class:`RatioTapChanger` fields to :class:`TableRatioTapChangers`.
 
@@ -2303,15 +2209,14 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`RatioTapChanger` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableRatioTapChangers)
-        insert = self._database_tables.get_insert(TableRatioTapChangers)
 
         insert.add_value(table.transformer_end_mrid.query_index, self._mrid_or_none(ratio_tap_changer.transformer_end))
         insert.add_value(table.step_voltage_increment.query_index, ratio_tap_changer.step_voltage_increment)
 
         return self._save_tap_changer(table, insert, ratio_tap_changer, "ratio tap changer")
 
-    def save_reactive_capability_curve(self, reactive_capability_curve: ReactiveCapabilityCurve) -> bool:
+    @using_table(TableReactiveCapabilityCurves)
+    def save_reactive_capability_curve(self, reactive_capability_curve: ReactiveCapabilityCurve, table, insert) -> bool:
         """
         Save the :class:`ReactiveCapabilityCurve` fields to :class:`TableReactiveCapabilityCurves`.
 
@@ -2320,12 +2225,11 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`ReactiveCapabilityCurve` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableReactiveCapabilityCurves)
-        insert = self._database_tables.get_insert(TableReactiveCapabilityCurves)
 
         return self._save_curve(table, insert, reactive_capability_curve, "reactive capability curve")
 
-    def save_recloser(self, recloser: Recloser) -> bool:
+    @using_table(TableReclosers)
+    def save_recloser(self, recloser: Recloser, table, insert) -> bool:
         """
         Save the :class:`Recloser` fields to :class:`TableReclosers`.
 
@@ -2333,8 +2237,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Recloser` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableReclosers)
-        insert = self._database_tables.get_insert(TableReclosers)
 
         return self._save_protected_switch(table, insert, recloser, "recloser")
 
@@ -2387,7 +2289,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_regulating_cond_eq(table, insert, rotating_machine, description)
 
-    def save_series_compensator(self, series_compensator: SeriesCompensator) -> bool:
+    @using_table(TableSeriesCompensators)
+    def save_series_compensator(self, series_compensator: SeriesCompensator, table, insert) -> bool:
         """
         Save the :class:`SeriesCompensator` fields to :class:`TableSeriesCompensators`.
 
@@ -2395,8 +2298,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`SeriesCompensator` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSeriesCompensators)
-        insert = self._database_tables.get_insert(TableSeriesCompensators)
 
         insert.add_value(table.r.query_index, series_compensator.r)
         insert.add_value(table.r0.query_index, series_compensator.r0)
@@ -2423,7 +2324,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_regulating_cond_eq(table, insert, shunt_compensator, description)
 
-    def save_static_var_compensator(self, static_var_compensator: StaticVarCompensator) -> bool:
+    @using_table(TableStaticVarCompensators)
+    def save_static_var_compensator(self, static_var_compensator: StaticVarCompensator, table, insert) -> bool:
         """
         Save the :class:`StaticVarCompensator` fields to :class:`TableStaticVarCompensators`.
 
@@ -2432,8 +2334,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`StaticVarCompensator` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableStaticVarCompensators)
-        insert = self._database_tables.get_insert(TableStaticVarCompensators)
 
         insert.add_value(table.capacitive_rating.query_index, static_var_compensator.capacitive_rating)
         insert.add_value(table.inductive_rating.query_index, static_var_compensator.inductive_rating)
@@ -2453,7 +2353,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_conducting_equipment(table, insert, switch, description)
 
-    def save_synchronous_machine(self, synchronous_machine: SynchronousMachine) -> bool:
+    @using_table(TableSynchronousMachines)
+    def save_synchronous_machine(self, synchronous_machine: SynchronousMachine, table, insert) -> bool:
         """
         Save the :class:`SynchronousMachine` fields to :class:`TableSynchronousMachines`.
 
@@ -2462,8 +2363,6 @@ class NetworkCimWriter(BaseCimWriter):
         @return true if the :class:`SynchronousMachine` was successfully written to the database, otherwise false.
         @throws SQLException For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableSynchronousMachines)
-        insert = self._database_tables.get_insert(TableSynchronousMachines)
 
         insert.add_value(table.base_q.query_index, synchronous_machine.base_q)
         insert.add_value(table.condenser_p.query_index, synchronous_machine.condenser_p)
@@ -2505,7 +2404,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_power_system_resource(table, insert, tap_changer, description)
 
-    def save_tap_changer_control(self, tap_changer_control: TapChangerControl) -> bool:
+    @using_table(TableTapChangerControls)
+    def save_tap_changer_control(self, tap_changer_control: TapChangerControl, table, insert) -> bool:
         """
         Save the :class:`TapChangerControl` fields to :class:`TableTapChangerControls`.
 
@@ -2513,8 +2413,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`TapChangerControl` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTapChangerControls)
-        insert = self._database_tables.get_insert(TableTapChangerControls)
 
         insert.add_value(table.limit_voltage.query_index, tap_changer_control.limit_voltage)
         insert.add_value(table.line_drop_compensation.query_index, tap_changer_control.line_drop_compensation)
@@ -2545,7 +2443,8 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_identified_object(table, insert, transformer_end, description)
 
-    def save_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance) -> bool:
+    @using_table(TableTransformerStarImpedances)
+    def save_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance, table, insert) -> bool:
         """
         Save the :class:`TransformerStarImpedance` fields to :class:`TableTransformerStarImpedances`.
 
@@ -2553,8 +2452,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`TransformerStarImpedance` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableTransformerStarImpedances)
-        insert = self._database_tables.get_insert(TableTransformerStarImpedances)
 
         insert.add_value(table.r.query_index, transformer_star_impedance.r)
         insert.add_value(table.r0.query_index, transformer_star_impedance.r0)
@@ -2568,7 +2465,8 @@ class NetworkCimWriter(BaseCimWriter):
     # IEC61970 InfIEC61970 Feeder #
     ###############################
 
-    def save_circuit(self, circuit: Circuit) -> bool:
+    @using_table(TableCircuits)
+    def save_circuit(self, circuit: Circuit, table, insert) -> bool:
         """
         Save the :class:`Circuit` fields to :class:`TableCircuits`.
 
@@ -2576,8 +2474,6 @@ class NetworkCimWriter(BaseCimWriter):
         :return: True if the :class:`Circuit` was successfully written to the database, otherwise False.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableCircuits)
-        insert = self._database_tables.get_insert(TableCircuits)
 
         insert.add_value(table.loop_mrid.query_index, self._mrid_or_none(circuit.loop))
 

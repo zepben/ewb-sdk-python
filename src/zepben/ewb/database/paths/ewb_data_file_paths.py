@@ -8,10 +8,11 @@ __all__ = ['EwbDataFilePaths']
 from abc import ABC, abstractmethod
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, overload
 
 from zepben.ewb import require
-from zepben.ewb.database.paths.database_type import DatabaseType
+from zepben.ewb.database.paths.database_type import DatabaseType, VariantContents
+from zepben.ewb.database.paths.dated_variant_path_components import DatedVariantPathComponents
 
 
 class EwbDataFilePaths(ABC):
@@ -22,7 +23,41 @@ class EwbDataFilePaths(ABC):
     The folder containing the variants. Will be placed under the dated folder alongside the network model database.
     """
 
-    def resolve(self, database_type: DatabaseType, database_date: Optional[date] = None, variant: Optional[str] = None) -> Path:
+    @overload
+    def resolve(self, database_type: DatabaseType, database_date: date | None = None) -> Path: ...
+    """
+    Resolves the `Path` to the database file for the specified `DatabaseType` that has 
+    `DatabaseType.per_date` set to true and the specified `date`.
+    """
+
+    @overload
+    def resolve(self, database_type: DatabaseType) -> Path: ...
+
+    @overload
+    def resolve(
+        self,
+        database_type: DatabaseType,
+        database_date: date | None = None,
+        variant: str | None = None,
+        variant_contents: VariantContents | None = None
+    ) -> Path: ...
+    """
+    Resolves the `Path` to the database file for the specified `DatabaseType` that has 
+    `DatabaseType.per_date` set to true and the specified `date`, within the `variant`, for the specified `variant_contents.
+    
+    `ChangeSet` content is split into two separate databases for each supported `DatabaseType`, with targets of ObjectCreations and ObjectModifications going
+    to one database, and targets of ObjectDeletions and ObjectReverseModifications going to another. This is to avoid conflicting IDs between the two
+    databases.
+    The ChangeSet and it's associated ObjectCreation, ObjectDeletion and ObjectModifications will be in a single `DatabaseType.VARIANT` database.
+    """
+
+    def resolve(
+        self,
+        database_type: DatabaseType,
+        database_date: date | None = None,
+        variant: str | None = None,
+        variant_contents: VariantContents | None = None
+    ) -> Path:
         """
         Resolves the :class:`Path` to the database file for the specified :class:`DatabaseType`, within the specified `database_date`
         and optional `variant` when `DatabaseType.per_date` is set to true.
@@ -30,13 +65,17 @@ class EwbDataFilePaths(ABC):
         :param database_type: The :class:`DatabaseType` to use for the database :class:`Path`.
         :param database_date: The :class:`date` to use for the database :class:`Path`. Required when `database_type.per_date` is true, otherwise must be `None`.
         :param variant: The optional name of the variant containing the database.
+        :param variant_contents: The relevant content for the desired `database_type`, when resolving a variant database. Defaults to `VariantContents.CHANGESET` when a variant is supplied.
 
         :return: The :class:`Path` to the :class:`DatabaseType` database file.
         """
         if database_date is not None:
             require(database_type.per_date, lambda: "database_type must have its per_date set to True to use this method with a database_date.")
             if variant is not None:
-                return self.resolve_database(self._to_dated_variant_path(database_type, database_date, variant))
+                contents = variant_contents if variant_contents is not None else VariantContents.CHANGESET
+                require(contents.types.__contains__(database_type),
+                        lambda: f"database_type must be compatible with variant_contents. Compatible options for {contents.name}: {', '.join([t.short_name for t in contents.types])}")
+                return self.resolve_database(self._to_dated_variant_path(database_type, database_date, variant, contents))
             else:
                 return self.resolve_database(self._to_dated_path(database_type, database_date))
         else:
@@ -59,7 +98,7 @@ class EwbDataFilePaths(ABC):
         max_days_to_search: int = 999999,
         target_date: date = date.today(),
         search_forwards: bool = False
-    ) -> Optional[date]:
+    ) -> date | None:
         """
         Find the closest date with a usable database of the specified type.
 
@@ -133,22 +172,121 @@ class EwbDataFilePaths(ABC):
 
         :return: list of variant names that exist in the data path for the specified `target_date`.
         """
-        to_return = list()
+        to_return = set()
 
         for it in self.enumerate_descendants():
             try:
-                if (str(it.parent.name).lower() == self.VARIANTS_PATH) and (str(it.parent.parent.name) == str(target_date)):
-                    to_return.append(str(it.name))
+                # GIS extractor doesn't have a variant service file at the 2 parents level.
+                if (str(it.parent.parent.name) == self.VARIANTS_PATH) and (str(it.parent.parent.parent.name) == str(target_date)):
+                    to_return.add(str(it.parent.name))
+                elif (str(it.parent.name) == self.VARIANTS_PATH) and (str(it.parent.parent.name) == str(target_date)):
+                    to_return.add(str(it.name))
             except ValueError:
                 pass
 
         return sorted(to_return)
 
-    @abstractmethod
-    def enumerate_descendants(self) -> Generator[Path, None, None]:
+    def exists(
+        self,
+        database_type: DatabaseType,
+        database_date: date,
+        variant: str,
+        variant_contents: VariantContents
+    ) -> bool:
         """
-        Lists the child items of source location.
+        A helper to check if variant files exist before attempting to access them. This can be used to prevent
+        excess errors being logged when files that aren't required are missing.
 
+        :param database_type: The :class:`DatabaseType` to use for the database :class:`Path`.
+        :param database_date: The :class:`date` to use for the database :class:`Path`.
+        :param variant: The name of the variant containing the database.
+        :param variant_contents: The relevant content for the desired `database_type`.
+
+        :return: `True` if the :class:`Path` to the :class:`DatabaseType` database file for the `variant` exists in the current descendants.
+        """
+        require(database_type.per_date, lambda: "database_type must have its per_date set to True to use this method.")
+        require(variant_contents.types.__contains__(database_type),
+                lambda: f"database_type must be compatible with variant_contents. Compatible options for {variant_contents.name}: "
+                        f"{', '.join([t.short_name for t in variant_contents.types])}")
+
+        target = self._to_dated_variant_path(database_type, database_date, variant, variant_contents)
+        return any(it == target for it in self.enumerate_descendants(f"{database_date}/{self.VARIANTS_PATH}"))
+
+    def get_dated_path(self, database_type: DatabaseType, database_date: date) -> Path:
+        """
+        Generate a file path for a given date and type.
+
+        :param database_type: The :class:`DatabaseType` to use for the database :class:`Path`.
+        :param database_date: The :class:`date` to use for the database :class:`Path`.
+        """
+        return self._to_dated_path(database_type, database_date)
+
+    def get_dated_variant_path(
+        self,
+        database_type: DatabaseType,
+        database_date: date,
+        variant: str,
+        variant_contents: VariantContents
+    ) -> Path:
+        """
+        Generate a file path for a given date, variant, and the contents of that variant.
+
+        :param database_type: The :class:`DatabaseType` to use for the database :class:`Path`.
+        :param database_date: The :class:`date` to use for the database :class:`Path`.
+        :param variant: The name of the variant containing the database.
+        :param variant_contents: The relevant content for the desired `database_type`.
+
+        :return: The :class:`Path` to the :class:`DatabaseType` database file for the `variant`.
+        """
+        return self._to_dated_variant_path(database_type, database_date, variant, variant_contents)
+
+    def parse_dated_variant_path(self, path: Path) -> DatedVariantPathComponents:
+        """
+        Parses a dated variant `path` into its constituent components.
+
+        This is the inverse of :meth:`get_dated_variant_path`.
+
+        Expected path formats:
+        - `{date}/variants/{variant}/{subDirectory}/{date}-{databaseName}` (when `variant_contents.sub_directory` is non-empty)
+        - `{date}/variants/{variant}/{date}-{databaseName}` (when `variant_contents.sub_directory` is empty)
+
+        :param path: The path to parse.
+
+        :return: A :class:`DatedVariantPathComponents` containing the extracted :class:`DatabaseType`, :class:`date`, variant name, and :class:`VariantContents`.
+        :raises ValueError: If the path does not match the expected format.
+        """
+        path_components = [str(it) for it in path.parts]
+
+        if len(path_components) == 4:
+            variant_contents = VariantContents.CHANGESET
+        elif len(path_components) == 5:
+            sub_dir = path_components[3]
+            variant_contents = next((it for it in VariantContents if it.sub_directory == sub_dir), None)
+            if variant_contents is None:
+                raise ValueError(f"Invalid path. There is no `VariantContent` for the sub directory `{sub_dir}`.")
+        else:
+            raise ValueError("Invalid path. Make sure the path is correct by using `get_dated_variant_path`.")
+
+        file_name = path.with_suffix("").name
+        date_str = path_components[0]
+        database_type = next((it for it in variant_contents.types if file_name == f"{date_str}-{it.file_descriptor}"), None)
+        if database_type is None:
+            raise ValueError(f"Invalid path. There is no `DatabaseType` for the file name `{file_name}`.")
+
+        return DatedVariantPathComponents(
+            type=database_type,
+            date=date.fromisoformat(date_str),
+            variant=path_components[2],
+            variant_contents=variant_contents,
+        )
+
+    @abstractmethod
+    def enumerate_descendants(self, prefix: str | None = None) -> Generator[Path, None, None]:
+        """
+        Lists the child items of source location, optionally scoped under a sub `prefix` of the base directory.
+
+        :param prefix: An optional sub-directory (relative to the base directory) to enumerate under. When `None`, the whole
+          source location is enumerated.
         :return: generator of child items.
         """
         raise NotImplementedError
@@ -183,9 +321,20 @@ class EwbDataFilePaths(ABC):
         date_str = str(database_date)
         return Path(date_str).joinpath(f"{date_str}-{self._database_name(database_type)}")
 
-    def _to_dated_variant_path(self, database_type: DatabaseType, database_date: date, variant: str) -> Path:
+    def _to_dated_variant_path(
+        self,
+        database_type: DatabaseType,
+        database_date: date,
+        variant: str,
+        variant_contents: VariantContents = VariantContents.CHANGESET
+    ) -> Path:
         date_str = str(database_date)
-        return Path(date_str).joinpath(self.VARIANTS_PATH, variant, f"{date_str}-{self._database_name(database_type)}")
+        return (Path(date_str).joinpath(
+            self.VARIANTS_PATH,
+            variant,
+            variant_contents.sub_directory,
+            f"{date_str}-{self._database_name(database_type)}"
+        ))
 
     @staticmethod
     def _database_name(database_type: DatabaseType) -> str:

@@ -9,6 +9,7 @@ __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 
 import warnings
 from asyncio import get_event_loop
+from datetime import date, datetime, time
 from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, TypeVar, Awaitable, cast, overload, Generic
 from dataclasses import dataclass, field
@@ -18,7 +19,8 @@ from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiablesRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, \
-    IncludedEnergizedContainers as PBIncludedEnergizedContainers, NetworkState as PBNetworkState
+    IncludedEnergizedContainers as PBIncludedEnergizedContainers, NetworkState as PBNetworkState, GetChangeSetObjectsRequest
+from zepben.protobuf.vc.vc_data_pb2 import VariantContents as PBVariantContents
 
 from zepben.ewb import NetworkService, Organisation, Location, OperationalRestriction, BaseVoltage, ConnectivityNode, Substation, Terminal, \
     AcLineSegment, Breaker, Disconnector, EnergyConsumer, \
@@ -61,6 +63,8 @@ from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import Power
 from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 # noinspection PyProtectedMember
 from zepben.ewb.services.common.enum_mapper import EnumMapper
+from zepben.ewb.database.paths.database_type import VariantContents
+from zepben.ewb import datetime_to_timestamp
 from zepben.ewb.services.network.network_state import NetworkState
 from zepben.ewb.streaming.get.included_energized_containers import IncludedEnergizedContainers
 from zepben.ewb.streaming.get.included_energizing_containers import IncludedEnergizingContainers
@@ -102,6 +106,7 @@ class GetNetworkHierarchyConfig:
 _map_include_energizing_containers = EnumMapper(IncludedEnergizingContainers, PBIncludedEnergizingContainers)
 _map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIncludedEnergizedContainers)
 _map_network_state = EnumMapper(NetworkState, PBNetworkState)
+_map_variant_contents = EnumMapper(VariantContents, PBVariantContents)
 
 
 class NetworkConsumerClient(CimConsumerClient[NetworkService, NetworkConsumerStub]):
@@ -542,6 +547,30 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService, NetworkConsumerStu
         async for response in responses:
             for nio in response.identifiables:
                 yield self._extract_identifiable("network", nio, _nio_type_to_cim)
+
+    async def get_change_set_objects(self, mrid: str, variant_contents: VariantContents,
+                                     base_model_version: Optional[date] = None) -> GrpcResult[NetworkService]:
+        """
+        Retrieve the network contents of a :class:`ChangeSet` from the server.
+        This will return a new :class:`NetworkService` with just the network related contents of the :class:`ChangeSet`.
+        Note this function does not populate `service` as merging a :class:`ChangeSet` with a :class:`NetworkService` should use `ChangeSetServices`.
+
+        :param mrid: The mRID of the :class:`ChangeSet` to retrieve contents for.
+        :param variant_contents: The contents to retrieve from the server.
+        :param base_model_version: The base model version to retrieve the change set contents against.
+        :return: A :class:`GrpcResult` of a :class:`NetworkService`.
+        """
+        async def rpc() -> NetworkService:
+            network_service = NetworkService()
+            request = GetChangeSetObjectsRequest(changeSetMRID=mrid, variantContents=_map_variant_contents.to_pb(variant_contents))
+            if base_model_version is not None:
+                request.modelVersion = datetime_to_timestamp(datetime.combine(base_model_version, time.min))
+            responses = self._stub.getChangeSetObjects(request, timeout=self.timeout)
+            async for response in responses:
+                network_service.add_from_pb(response.identifiableObject)
+            return network_service
+
+        return await self.try_rpc(rpc)
 
     async def _handle_network_hierarchy(self, config: GetNetworkHierarchyConfig):
         response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest(**config.generate_config()), timeout=self.timeout)

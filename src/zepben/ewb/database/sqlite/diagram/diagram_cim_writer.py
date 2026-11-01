@@ -5,6 +5,7 @@
 
 __all__ = ["DiagramCimWriter"]
 
+from zepben.ewb.database.sqlite.common import using_table
 from zepben.ewb.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.ewb.database.sqlite.diagram.diagram_database_tables import DiagramDatabaseTables
 from zepben.ewb.database.sqlite.tables.iec61970.base.diagramlayout.table_diagram_object_points import TableDiagramObjectPoints
@@ -29,7 +30,8 @@ class DiagramCimWriter(BaseCimWriter):
     # IEC61970 Base Diagram Layout #
     ################################
 
-    def save_diagram(self, diagram: Diagram) -> bool:
+    @using_table(TableDiagrams)
+    def save_diagram(self, diagram: Diagram, table, insert) -> bool:
         """
         Save the `Diagram` fields to `TableDiagrams`.
 
@@ -38,15 +40,14 @@ class DiagramCimWriter(BaseCimWriter):
         :return: True if the `Diagram` was successfully written to the database, otherwise false.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableDiagrams)
-        insert = self._database_tables.get_insert(TableDiagrams)
 
         insert.add_value(table.diagram_style.query_index, diagram.diagram_style.name)
         insert.add_value(table.orientation_kind.query_index, diagram.orientation_kind.name)
 
         return self._save_identified_object(table, insert, diagram, "diagram")
 
-    def save_diagram_object(self, diagram_object: DiagramObject) -> bool:
+    @using_table(TableDiagramObjects)
+    def save_diagram_object(self, diagram_object: DiagramObject, table, insert) -> bool:
         """
         Save the `DiagramObject` fields to `TableDiagramObjects`.
 
@@ -55,8 +56,6 @@ class DiagramCimWriter(BaseCimWriter):
         :return: True if the `DiagramObject` was successfully written to the database, otherwise false.
         :raises SqlException: For any errors encountered writing to the database.
         """
-        table = self._database_tables.get_table(TableDiagramObjects)
-        insert = self._database_tables.get_insert(TableDiagramObjects)
 
         status = True
         for sequence, point in enumerate(diagram_object.points):

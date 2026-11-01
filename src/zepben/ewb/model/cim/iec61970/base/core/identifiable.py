@@ -49,6 +49,31 @@ class Identifiable(DataclassBase, metaclass=ABCMeta):
     def __eq__(self, other):
         return self is other
 
+    def _get_name(self) -> str | None:
+        """
+        The `name` attribute of this object, if it has one. Subclasses that carry a
+        human-readable name should override this.
+        """
+        return getattr(self, 'name', None)
+
+    def type_name_and_mrid(self) -> str:
+        """
+        Printable version of the object including the type, name and mRID.
+        """
+        name = self._get_name()
+        if name is None or not name.strip():
+            return f'{self.__class__.__name__} {self.mrid}'
+        return f'{self.__class__.__name__} {name} [{self.mrid}]'
+
+    def name_and_mrid(self) -> str:
+        """
+        Printable version of the object including its name and mRID.
+        """
+        name = self._get_name()
+        if name is None or not name.strip():
+            return self.mrid
+        return f"'{name}' [{self.mrid}]"
+
     @overload
     def _validate_reference(self, other: 'Identifiable', getter: Callable[[str], 'Identifiable | None'], type_description: str) -> bool: ...
 

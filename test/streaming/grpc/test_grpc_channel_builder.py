@@ -328,6 +328,15 @@ def test_test_connection_continues_following_unavailable(mock_checkConnection):
                 StatusCode.RESOURCE_EXHAUSTED,
                 "details4",
             ),
+        ),
+        _InactiveRpcError(
+            _RPCState(
+                [OperationType.send_message],
+                None,
+                None,
+                StatusCode.RESOURCE_EXHAUSTED,
+                "details5",
+            ),
         )
     ],
 )
@@ -341,10 +350,11 @@ def test_test_connection_raises_connection_exception(mock_checkConnection):
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+            call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)
         ],
     )
-    assert mock_checkConnection.call_count == 5
+    assert mock_checkConnection.call_count == 6
 
 
 @mock.patch(
@@ -394,6 +404,15 @@ def test_test_connection_raises_connection_exception(mock_checkConnection):
                 StatusCode.RESOURCE_EXHAUSTED,
                 "details5",
             ),
+        ),
+        _InactiveRpcError(
+            _RPCState(
+                [OperationType.send_message],
+                None,
+                None,
+                StatusCode.RESOURCE_EXHAUSTED,
+                "details6",
+            ),
         )
     ],
 )
@@ -408,10 +427,12 @@ def test_test_connection_raises_connection_exception_with_debug(mock_checkConnec
               '\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = "details2"\n\tdebug_error_string = "None"\n>\n'
               'Received the following exception with CustomerConsumerClient:\n<_InactiveRpcError of RPC that terminated with:\n'
               '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details3"\n\tdebug_error_string = "None"\n>\n'
-              'Received the following exception with QueryNetworkStateClient:\n<_InactiveRpcError of RPC that terminated with:\n'
+              'Received the following exception with VariantConsumerClient:\n<_InactiveRpcError of RPC that terminated with:\n'
               '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details4"\n\tdebug_error_string = "None"\n>\n'
+              'Received the following exception with QueryNetworkStateClient:\n<_InactiveRpcError of RPC that terminated with:\n'
+              '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details5"\n\tdebug_error_string = "None"\n>\n'
               'Received the following exception with UpdateNetworkStateClient:\n<_InactiveRpcError of RPC that terminated with:\n'
-              '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details5"\n\tdebug_error_string = "None"\n>\n',
+              '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details6"\n\tdebug_error_string = "None"\n>\n',
     ):
         GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True, timeout_seconds=5)
     mock_checkConnection.assert_has_calls(
@@ -420,10 +441,11 @@ def test_test_connection_raises_connection_exception_with_debug(mock_checkConnec
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+            call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
             call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)
         ],
     )
-    assert mock_checkConnection.call_count == 5
+    assert mock_checkConnection.call_count == 6
 
 
 def test_count_grpc_stubs():
