@@ -119,9 +119,9 @@ def connect_with_token(
     **kwargs
 ) -> grpc.aio.Channel:
     """
-    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and a personal access token generated from Evolve App Server or Evolve Web Client.
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and a personal access token generated from the Evolve App Server.
 
-    :param access_token: The token string of the client generated using Evolve App
+    :param access_token: The token string of the client generated using the Evolve App Server.
     :param host: The hostname where the gRPC service is hosted
     :param rpc_port: The port of the gRPC service
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional

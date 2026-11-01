@@ -42,7 +42,7 @@
     ]
 
 [project.urls]
-    Repository = "https://github.com/zepben/evolve-sdk-python"
+    Repository = "https://github.com/zepben/ewb-sdk-python"
     Homepage = "https://zepben.com"
 
 [project.optional-dependencies]

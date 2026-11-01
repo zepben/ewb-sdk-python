@@ -32,7 +32,7 @@ class AssignToLvFeeders:
     """
     Convenience class that provides methods for assigning LV feeders on a `NetworkService`.
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
-    This class is backed by a `BasicTraversal`.
+    This class is backed by a `NetworkTrace` created by `Tracing.network_trace`.
     """
 
     def __init__(self, debug_logger: Logger = None):

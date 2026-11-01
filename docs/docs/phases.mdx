@@ -5,11 +5,11 @@ title: Phases and Feeder Directions
 
 There are three different types of phases stored/calculated by the SDK:
 
-| Phase Type | SDK Field                 | Field Type  | Description                                                                                                                                                                                                                |
-|------------|---------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Nominal    | `Terminal.phases`         | `PhaseCode` | The nominal phases of the network indicate how the network is connected. The nominal phases can include the "unknown" phases `X` and `Y`. <br/><br/>This is the phase field that you are most likely to be interested in.  |
-| Normal     | `Terminal.normal_phases`  | `Traced`    | The normal phases indicate the energised phases of the network in its normal state. There will not be any unknown phases in the normal phases, however; any de-energised areas of the network will not have normal phases. |
-| Current    | `Terminal.current_phases` | `Traced`    | The current phases indicate the energised phases of the network in the current state. It has the same caveats as the normal phases.                                                                                        |
+| Phase Type | SDK Field                 | Field Type    | Description                                                                                                                                                                                                                |
+|------------|---------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Nominal    | `Terminal.phases`         | `PhaseCode`   | The nominal phases of the network indicate how the network is connected. The nominal phases can include the "unknown" phases `X` and `Y`. <br/><br/>This is the phase field that you are most likely to be interested in.  |
+| Normal     | `Terminal.normal_phases`  | `PhaseStatus` | The normal phases indicate the energised phases of the network in its normal state. There will not be any unknown phases in the normal phases, however; any de-energised areas of the network will not have normal phases. |
+| Current    | `Terminal.current_phases` | `PhaseStatus` | The current phases indicate the energised phases of the network in the current state. It has the same caveats as the normal phases.                                                                                        |
 
 There are two different feeder directions calculated by the SDK:
 
@@ -25,10 +25,12 @@ otherwise you should make use of the `SetPhases` class. If you are implementing 
 class if required.
 
 There are two methods for accessing the traced phases:
-1. As a `PhaseCode`. If the traced phases do not form a valid phase code this will return `null`.
-2. Per nominal phase.
+1. As a `PhaseCode`, using `as_phase_code()`. If the traced phases do not form a valid phase code this will return `None`.
+2. Per nominal phase, by indexing the `PhaseStatus` with one of the `SinglePhaseKind` values in `terminal.phases`.
 
 ```python
+from zepben.ewb import Terminal
+
 class PhaseLogger:
     @staticmethod
     def log_phases(terminal: Terminal):
@@ -37,25 +39,28 @@ class PhaseLogger:
             print(f"Found phases for {terminal}. nominal: {terminal.phases}, normal: {phase_code}")
         else:
             print(f"Found partial phases {terminal}:")
-            for nominalPhase in terminal.phases:
-                print(f"   nominal: {nominalPhase}, normal: {terminal.normal_phases[nominalPhase]}")
+            for nominal_phase in terminal.phases:
+                print(f"   nominal: {nominal_phase}, normal: {terminal.normal_phases[nominal_phase]}")
 ```
 
 ## Feeder Direction
 
-Feeder direction can be set to one of the following values:
+Feeder direction is calculated for each state of the network, and can be one of the following values:
 
-| Value        | Description                                                                                                               |
-|--------------|---------------------------------------------------------------------------------------------------------------------------|
-| `UPSTREAM`   | Traversing from this terminal will lead you towards the feeder head.                                                      |
-| `DOWNSTREAM` | Traversing from this terminal will lead you away from the feeder head.                                                    |
-| `BOTH`       | This terminal is part of a loop and traversing from this terminal can both lead you towards or away from the feeder head. |
-| `NONE`       | This terminal is not on a feeder. e.g. De-energised sections or EHV.                                                      |
+| Value        | Description                                                                                                                                                                                                                                        |
+|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `UPSTREAM`   | Traversing from this terminal will lead you towards the feeder head.                                                                                                                                                                                 |
+| `DOWNSTREAM` | Traversing from this terminal will lead you away from the feeder head.                                                                                                                                                                               |
+| `BOTH`       | This terminal is part of a loop and traversing from this terminal can both lead you towards or away from the feeder head.                                                                                                                            |
+| `CONNECTOR`  | This terminal belongs to a `Connector` that is modelled with a single terminal. Like `BOTH` it matches `UPSTREAM`, `DOWNSTREAM` and `BOTH` when checking directions, and exists to differentiate a single terminal connector from the loops in `BOTH`. |
+| `NONE`       | This terminal is not on a feeder. e.g. De-energised sections or EHV.                                                                                                                                                                                 |
 
 _**NOTE**_: A terminal only has a single feeder direction for each state of the network, so if there is unganged switching, not all nominal phases may
 trace in the direction specified. A direction of `BOTH` can be formed from some phases tracing `UPSTREAM`, with others tracing `DOWNSTREAM`.
 
 ```python
+from zepben.ewb import Terminal
+
 class DirectionLogger:
     @staticmethod
     def log_direction(terminal: Terminal):
@@ -67,7 +72,9 @@ class DirectionLogger:
 Previously, traced phases and feeder directions were stored together and could only be accessed per nominal phase. Below are some examples of converting from
 the old format to the current:
 
-```Python
+```python
+from zepben.ewb import Terminal
+
 # Old
 class PhaseAndDirectionLoggerOld:
     @staticmethod
@@ -80,10 +87,14 @@ class PhaseAndDirectionLoggerOld:
             print(f"   {phase}: n:{nps.phase()}:{nps.direction()}, c:{cps.phase()}:{cps.direction()}")
 
 # Becomes
-class PhaseAndDirectionLoggerOld:
+class PhaseAndDirectionLogger:
     @staticmethod
     def log(terminal: Terminal):
         print(f"{terminal}: dn:{terminal.normal_feeder_direction}, dc:{terminal.current_feeder_direction}")
         for phase in terminal.phases:
             print(f"   {phase}: n:{terminal.normal_phases[phase]}, c:{terminal.current_phases[phase]}")
 ```
+
+The "Old" class above is only shown for context: the helpers it calls no longer exist. Today the per state traced phases
+are `PhaseStatus` objects exposed as `terminal.normal_phases` and `terminal.current_phases`, and the direction is stored
+separately as `terminal.normal_feeder_direction` and `terminal.current_feeder_direction`.

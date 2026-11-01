@@ -37,25 +37,29 @@ client = UpdateNetworkStateClient(channel)
 
 ## Using your client to update the network state
 
-Now that you have a client, you can use it to update the state of the network on the connected server.
+Now that you have a client, you can use it to update the state of the network on the connected server. All requests made through this client are asynchronous, so the
+examples below wrap their calls in an `async def main()`, and `await` the response.
 
 ### Updating current network state
 
-The current state of the network can be updated using the `set_current_states` function on the `UpdateNetworkStateClient`. All events passed in the same list will
-be executed as a batch.
+The current state of the network can be updated using the `set_current_states` function on the `UpdateNetworkStateClient`. All events passed in the same batch will
+be executed as a batch. The batch may be any iterable of events; when passing a single event as a tuple, note the trailing comma: `(event1,)` is a one element
+tuple, whereas `(event1)` is just the event itself.
 
 #### Updating current switch state
 
-The current state of switches can be updating by passing a `SwitchStateEvent` to the `set_current_states` function.
+The current state of switches can be updated by passing a `SwitchStateEvent` to the `set_current_states` function.
 
 ```python
 from datetime import datetime
 
 from zepben.ewb import SwitchStateEvent, SwitchAction
 
-event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.OPEN)
-event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
-response = client.set_current_states(1, (event1, event2))
+
+async def main():
+    event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.OPEN)
+    event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
+    response = await client.set_current_states(1, (event1, event2))
 ```
 
 #### Adding cuts
@@ -67,8 +71,10 @@ from datetime import datetime
 
 from zepben.ewb import AddCutEvent
 
-event1 = AddCutEvent("event1", datetime.now(), "cut_id", "acls_id")
-response = client.set_current_states(1, (event1))
+
+async def main():
+    event1 = AddCutEvent("event1", datetime.now(), "cut_id", "acls_id")
+    response = await client.set_current_states(1, (event1,))
 ```
 
 #### Removing cuts
@@ -80,21 +86,32 @@ from datetime import datetime
 
 from zepben.ewb import RemoveCutEvent
 
-event1 = RemoveCutEvent("event1", datetime.now(), "cut_id")
-response = client.set_current_states(1, (event1))
+
+async def main():
+    event1 = RemoveCutEvent("event1", datetime.now(), "cut_id")
+    response = await client.set_current_states(1, (event1,))
 ```
 
 #### Adding jumpers
 
 You can add a jumper between two other pieces of equipment in the current state of the network by passing an `AddJumperEvent` to the `set_current_states` function.
+Each end of the jumper is described by its own `JumperConnection`, which is the mRID of the equipment (or terminal) that end connects to.
 
 ```python
 from datetime import datetime
 
 from zepben.ewb import AddJumperEvent, JumperConnection
 
-event1 = AddJumperEvent("event1", datetime.now(), "jumper_id", JumperConnection("from_id", JumperConnection("to_id")))
-response = client.set_current_states(1, (event1))
+
+async def main():
+    event1 = AddJumperEvent(
+        "event1",
+        datetime.now(),
+        "jumper_id",
+        JumperConnection("from_connected_mrid"),
+        JumperConnection("to_connected_mrid"),
+    )
+    response = await client.set_current_states(1, (event1,))
 ```
 
 #### Removing jumpers
@@ -106,28 +123,35 @@ from datetime import datetime
 
 from zepben.ewb import RemoveJumperEvent
 
-event1 = RemoveJumperEvent("event1", datetime.now(), "jumper_id")
-response = client.set_current_states(1, (event1))
+
+async def main():
+    event1 = RemoveJumperEvent("event1", datetime.now(), "jumper_id")
+    response = await client.set_current_states(1, (event1,))
 ```
 
 #### Multiple Requests
 
-If you have multiple batches to send, you can use `set_current_states_in_batches` rather than calling `set_current_states` multiple times
+If you have multiple batches to send, you can use `set_current_states_in_batches` rather than calling `set_current_states` multiple times. Each batch is streamed to
+the server as a `CurrentStateEventBatch`.
 
 ```python
 from datetime import datetime
 
-from zepben.ewb import SwitchStateEvent, SwitchAction
+from zepben.ewb import CurrentStateEventBatch, SwitchStateEvent, SwitchAction
 
 event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.OPEN)
 event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
 
-async def events_in_batches():
-    yield UpdateNetworkStateClient.SetCurrentStatesRequest(1, (event1,))
-    yield UpdateNetworkStateClient.SetCurrentStatesRequest(2, (event2,))
 
-async for response in client.set_current_states_in_batches(events_in_batches()):
-    # Process your responses here. You will get a response per batch.
+async def events_in_batches():
+    yield CurrentStateEventBatch(1, (event1,))
+    yield CurrentStateEventBatch(2, (event2,))
+
+
+async def main():
+    async for response in client.set_current_states_in_batches(events_in_batches()):
+        # Process your responses here. You will get a response per batch.
+        ...
 ```
 
 ### Batch result responses
@@ -135,8 +159,8 @@ async for response in client.set_current_states_in_batches(events_in_batches()):
 Each batch will receive its own response, which will be one of the following:
 * `BatchSuccessful` - Indicates that all events in the batch were processed successfully. Events that are ignored because they set the state to one that is
   already present, or are skipped due to a later event applying the opposite action, will be marked as successful.
-* `ProcessingPaused` - Indicates the entire batch was ignore as current state processing in teh server is currently paused. The response will include the time
-  the server was paused.
+* `BatchNotProcessed` - Indicates all items in the batch were ignored because their batch ID was prior to the last batch processed by the server. This is expected
+  when starting the service if the same batch is sent to the current state processing queue and is also included in the backlog processing response.
 * `BatchFailure` - Indicates at least one event in the batch could not be applied. Each event that failed will indicate why it failed, some of which will have
   more impact than others.
   * `StateEventUnknownMrid` - The `mRID` of the event could not be found in the network hosted by this server.
@@ -145,14 +169,20 @@ Each batch will receive its own response, which will be one of the following:
     `mRID` that belongs to a `Cut`.
   * `StateEventUnsupportedPhasing` - You tried to specify phases that do not make sense to the item being updated. When using the default phasing of `NONE` you
     will never receive this error. Until un-ganged switching is supported, this error will be returned for all events that specify phases.
+  * `StateEventUnsupportedMrid` - The `mRID` being addressed is of the correct type, but can't be used to perform the given action, e.g. opening or closing a
+    switch in a voltage level that hasn't been implemented in the server.
 
 You can check the type of response or failure by checking against the types above.
 ```python
-from zepben.ewb import BatchFailure, StateEventUnknownMrid
+from zepben.ewb import BatchFailure, BatchNotProcessed, StateEventUnknownMrid
 
 if isinstance(response, BatchFailure):
-    response.partial_failure # Will be true if all event failed, otherwise false.
+    response.partial_failure # Will be true if only some events in the batch failed, and false if the whole batch failed.
     for failure in response.failures:
         if isinstance(failure, StateEventUnknownMrid):
             # Process failure
+            ...
+elif isinstance(response, BatchNotProcessed):
+    # The batch was ignored as it was prior to the last batch the server processed.
+    ...
 ```

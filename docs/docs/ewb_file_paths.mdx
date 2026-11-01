@@ -7,12 +7,12 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 The Energy Workbench Server(EWB) uses a defined directory structure and naming convention for locating the various databases it is requested to load data from within its "data path".
-`EwbDataFilePaths` is a class for working with the file locations used by EWB.
-
+`EwbDataFilePaths` is an abstract base class for working with these file locations, so you generally won't instantiate it directly. Use its local file system implementation,
+`LocalEwbDataFilePaths`, instead, and only deal with `EwbDataFilePaths` itself when implementing support for a different kind of storage.
 
 The basic structure for date based database files is `<base_dir>/<model_date>/<model_date>-<database_type>.sqlite`:
 ```
-/sample/ewb/ewb_data/4444-05-06/4444-05-06-customer.sqlite
+/sample/ewb/ewb_data/4444-05-06/4444-05-06-customers.sqlite
 ```
 
 The basic structure for static database files is `<base_dir>/<database_type>.sqlite`:
@@ -20,62 +20,93 @@ The basic structure for static database files is `<base_dir>/<database_type>.sql
 /sample/ewb/ewb_data/load-aggregator-mbd.sqlite
 ```
 
-### Initializing `EwbDataFilePaths`
+In each case `<database_type>` is the file descriptor of a `DatabaseType` value, e.g. `DatabaseType.CUSTOMER` gives `customers` and `DatabaseType.WEATHER_READING` gives
+`weather-readings`. Databases whose `DatabaseType` has `per_date` set to `True` are date based, all others are static.
 
-An instance of `EwbDataFilePaths` represents a single EWB "data path". This data path is provided to the constructor via `base_dir`. If the directory provided via `base_dir`
-does not exist, `EwbDataFilePaths` can create it if `create_path` is set to `True` (Default: `False`).
+### Initializing `LocalEwbDataFilePaths`
+
+An instance of `LocalEwbDataFilePaths` represents a single EWB "data path". This data path is provided to the constructor via `base_dir`. If the directory provided via `base_dir`
+does not exist, `LocalEwbDataFilePaths` can create it if `create_path` is set to `True` (Default: `False`), otherwise the path must already be an existing directory.
 
 ```python
-from zepben.ewb import EwbDataFilePaths
+from zepben.ewb import LocalEwbDataFilePaths
 from pathlib import Path
 
 data_path = Path("/path/to/ewb_data/")
-database_location = EwbDataFilePaths(data_path, create_path=False)
+database_location = LocalEwbDataFilePaths(data_path, create_path=False)
 
 data_path = Path("/path/to/second_set/")
-database_location = EwbDataFilePaths(data_path, create_path=True)
+database_location = LocalEwbDataFilePaths(data_path, create_path=True)
 ```
 
 ### Retrieving Database File Paths
 
-EwbDataFilePaths provides methods to generate file paths for each type of database used by EWB. Date based databases require a `Date` to be provided.
-Note: `EwbDataFilePaths` will return the expected path for the provided `database_type` and `date` regardless of whether it exists or not.
+`LocalEwbDataFilePaths` provides the `resolve` method to generate file paths for each type of database used by EWB. Date based databases require a `datetime.date` to be
+provided, while static databases must be resolved without a date.
+Note: `resolve` will return the expected path for the provided `database_type` and `date` regardless of whether it exists or not.
 
 ```python
-from zepben.ewb import EwbDataFilePaths
+from zepben.ewb import DatabaseType, LocalEwbDataFilePaths
 from pathlib import Path
 from datetime import date
 
 data_path = Path("/path/to/ewb_data/")
-ewb_data = EwbDataFilePaths(data_path)
+ewb_data = LocalEwbDataFilePaths(data_path)
 
-new_date = Date(2024, 8, 3)
-expected_path_to_network_database = ewb_data.network_model(new_date)
-expected_path_to_diagram_database = ewb_data.diagram(new_date)
+new_date = date(2024, 8, 3)
+expected_path_to_network_database = ewb_data.resolve(DatabaseType.NETWORK_MODEL, new_date)
+expected_path_to_diagram_database = ewb_data.resolve(DatabaseType.DIAGRAM, new_date)
 
-expected_path_to_weather_reading_db = ewb_data.weather_reading()
+# The weather readings database is static, so no date is used for it.
+expected_path_to_weather_reading_db = ewb_data.resolve(DatabaseType.WEATHER_READING)
 
-second_date = Date(2024, 11, 12)
-second_network_database_path = ewb_data.network_model(second_date)
-
+second_date = date(2024, 11, 12)
+second_network_database_path = ewb_data.resolve(DatabaseType.NETWORK_MODEL, second_date)
 ```
 
 ### Searching for Databases
 
-`EwbDataFilePaths` contains search functionality to locate existing databases on disk.
+`LocalEwbDataFilePaths` contains search functionality to locate existing databases on disk.
 
 ```python
-from zepben.ewb import EwbDataFilePaths
+from zepben.ewb import DatabaseType, LocalEwbDataFilePaths
 from pathlib import Path
 from datetime import date
 
 data_path = Path("/path/to/ewb_data/")
-ewb_data = EwbDataFilePaths(data_path)
+ewb_data = LocalEwbDataFilePaths(data_path)
 
 # List all the dates for which exist network databases in the data path
-list_of_available_dates = ewb_data.get_network_model_databases()
+list_of_available_dates = ewb_data.get_available_dates_for(DatabaseType.NETWORK_MODEL)
 
 # Find the first date for which exists a customer database before 2011-09-10
-closest_date_before = ewb_data.find_closest(Database.CUSTOMER, target_date=Date(2011, 9, 10))
+closest_date_before = ewb_data.find_closest(DatabaseType.CUSTOMER, target_date=date(2011, 9, 10))
 
+# Find the closest customer database, searching in both directions from 2011-09-10
+closest_date_either = ewb_data.find_closest(DatabaseType.CUSTOMER, target_date=date(2011, 9, 10), search_forwards=True)
+```
+
+### Variants
+
+Since 1.1.0, a data path can contain *variants*, alternative copies of the date based databases stored under a `variants` folder within the dated folder. The basic structure
+for a variant database file is `<base_dir>/<model_date>/variants/<variant>/<model_date>-<database_type>.sqlite`:
+```
+/sample/ewb/ewb_data/4444-05-06/variants/base_case/4444-05-06-network-model.sqlite
+```
+
+Pass the `variant` name to `resolve` to generate the path to a variant database, and use `get_available_variants_for` to list the variants that exist for a given date.
+
+```python
+from zepben.ewb import DatabaseType, LocalEwbDataFilePaths
+from pathlib import Path
+from datetime import date
+
+data_path = Path("/path/to/ewb_data/")
+ewb_data = LocalEwbDataFilePaths(data_path)
+new_date = date(2024, 8, 3)
+
+expected_path_to_variant_database = ewb_data.resolve(DatabaseType.NETWORK_MODEL, new_date, variant="base_case")
+
+# List all the variants which exist for new_date in the data path
+list_of_available_variants = ewb_data.get_available_variants_for(new_date)
 ```

@@ -9,152 +9,369 @@ import TabItem from '@theme/TabItem';
 Once you have a connected network model you can start following the connectivity to do some interesting analyses, from
 simple tasks such as adding up cable lengths along a line to advanced functions like a full load flow analysis.
 
-The Evolve SDK provides an API to make following connectivity (what we will call tracing) less cumbersome and more
-productive. It provides a variety of use-case specific traces out of the box, but also a generic mechanism to write
-your own traces in an easy to use manner. The
-[Tracing](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/tracing/tracing.py)
-package is a great place to get an overview of the kind of tools we provide as part of the SDK.
+The EWB SDK provides an API to make following connectivity (what we will call tracing) less cumbersome and more
+productive. The [Tracing](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L18)
+class is the primary entry point: its static factory methods return ready-made, state-aware traces for common jobs.
+Under the covers those traces are [NetworkTrace](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace.py#L39)
+instances driven by [NetworkStateOperators](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/network_state_operators.py#L32)
+and stop/queue conditions, which you can also assemble yourself for advanced use cases. The
+[tracing package](https://github.com/zepben/ewb-sdk-python/tree/main/src/zepben/ewb/services/network/tracing)
+is a great place to get an overview of the tools we provide as part of the SDK.
 
-## Basic Connectivity 
+## Basic Connectivity
 
 So, let's start at the absolute basic use case. "What is directly connected to this piece of equipment?".
-Obviously we provide a function to let you to find out. Let's see it in code:
+Obviously we provide functions to let you find out:
 
 ```python
-from zepben.ewb import Junction, ConnectivityResult, connected_equipment
+from zepben.ewb import Breaker, ConnectivityResult, PhaseCode, connected_equipment
 
-switch: Breaker = network.get("aSwitch")
-connectivity: List<ConnectivityResult> = switch.connected_equipment(PhaseCode.ABCN)
-# or:
-connectivity: List<ConnectivityResult> = connected_equipment(switch, PhaseCode.ABCN)
+a_switch = network.get("aSwitch", Breaker)
+connectivity: list[ConnectivityResult] = connected_equipment(a_switch, PhaseCode.ABCN)  # network.get: base_service.py#L164
 for cr in connectivity:
-    print(f"{cr.from_equip()} is connected to {it.to_equip()} via terminals {cr.from_terminal()} -> {it.to_terminal()} ",
-          'through phases {map(cr.nominal_phase_paths(), lambda path: f"{path.from_phase()}:{path.to_phase()}" })')
-
+    print(f"{cr.from_equip} is connected to {cr.to_equip} via terminals {cr.from_terminal} -> {cr.to_terminal}")
+    for phase_path in cr.nominal_phase_paths:
+        print(f"  phase {phase_path.from_phase} is wired to phase {phase_path.to_phase}")
 ```
 
-Sometimes you want to be a bit more specific about your connectivity, such as "what is connected only to one side of the
-equipment?". You can do this by using specific terminals:
+`connected_equipment` (defined in
+[network_service.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/network_service.py#L65))
+is a module-level function and is exported directly from `zepben.ewb`, as are the equipment, terminal, node and
+phase types used above. `network.get("aSwitch", Breaker)` is
+[BaseService.get](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/common/base_service.py#L164).
+Each `ConnectivityResult` links two terminals:
+`from_equip` and `to_equip` are
+[properties](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/connectivity/connectivity_result.py#L88)
+that look up the owning `ConductingEquipment`, and `nominal_phase_paths` is a
+[tuple attribute](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/connectivity/connectivity_result.py#L48)
+of [NominalPhasePath](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/connectivity/nominal_phase_path.py#L14)
+items, not a method.
+
+Sometimes you want to be a bit more specific about your connectivity, such as "what is connected only to one side of
+the equipment?". You can do this by asking about a specific terminal:
 
 ```python
-from zepben.ewb import Breaker, ConnectivityResult, connected_terminals
+from zepben.ewb import Breaker, PhaseCode, connected_terminals
 
-switch: Breaker = network.get("aSwitch")
-connectivity: List<ConnectivityResult> = switch.connected_terminals(PhaseCode.ABCN)
-# or
-connectivity: List<ConnectivityResult> = connected_terminals(switch, PhaseCode.ABCN)
+a_switch = network.get("aSwitch", Breaker)
+connectivity = connected_terminals(a_switch.get_terminal_by_sn(1), PhaseCode.ABCN)
 ```
 
-This will produce a subset of the result above, with just the equipment connected to the given terminal. The 
-connectivity result instances in the subset will be exactly the same as the previous example.
+`connected_terminals` also lives in `zepben.ewb.services.network.network_service`
+([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/network_service.py#L50))
+and takes a `Terminal` (found with
+[ConductingEquipment.get_terminal_by_sn](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/model/cim/iec61970/base/core/conducting_equipment.py#L143)),
+not the equipment itself. This produces a subset of the first example's results: the same kind of
+`ConnectivityResult` instances, but only for connections made through the given terminal.
 
-Sometimes you do not care about the phase connectivity at all, and are just interested in terminals that share a connectivity node:
+Sometimes you do not care about the phase connectivity at all, and are just interested in terminals that share a
+connectivity node:
 
 ```python
-switch: Breaker = network.get("aSwitch")
-for it in switch.get_terminal_by_sn(1).connected_terminals():
-    print(it)
+for terminal in a_switch.get_terminal_by_sn(1).connected_terminals():
+    print(terminal)
 ```
 
-This will return a `Generator` of all the terminals that share the same `ConnectivityNode`, regardless of any phase connectivity.
+This uses [Terminal.connected_terminals](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/model/cim/iec61970/base/core/terminal.py#L141)
+and returns a `Generator` of all the terminals that share the same `ConnectivityNode`, regardless of any phase
+connectivity.
 
 ## Tracing
 
 ### Feeder Direction
 
-`UPSTREAM` and `DOWNSTREAM` are concepts that only apply to equipment on feeders (HV or LV). These directions are purely for finding the feeder head, and have
-not been calculated with any power flow analysis. There is also a concept of `BOTH` if the feeder head can be found in either direction. e.g. in a loop or dual
-feed situation
+`UPSTREAM` and `DOWNSTREAM` are concepts that only apply to equipment on feeders (HV or LV). These directions are
+purely for finding the feeder head, and have not been calculated with any power flow analysis. The
+[FeederDirection](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/feeder/feeder_direction.py#L11)
+enum also defines `BOTH` when the feeder head can be reached in either direction (e.g. in a loop or dual-feed
+situation), `CONNECTOR` for single-terminal `Connector` equipment, and `NONE` for terminals that are not on a feeder.
 
-### Basic Traversal
+Terminals start out with no direction: it must be computed first, by `Tracing.set_direction()` or
+`Tracing.assign_equipment_to_feeders()` (see
+[Setting Feeder Direction](#setting-feeder-direction)). Until you do, a `downstream()` or `upstream()` trace
+condition (see [Stop and Queue Conditions](#stop-and-queue-conditions)) will queue nothing.
 
-To trace a network, we obviously need to repeat the above process for each piece of equipment in the connectivity result
-list. In computer science, stepping between nodes in a data structure like this is known as a traversal. Conveniently, 
-the SDK provides a [Traversal](#) interface with a number of implementations also provided for different use cases.
+### Network Traces
 
-The most common type you will use is the [BasicTraversal](#).
-In a nutshell, this class lets you easily specify how to step to connected objects, add custom actions to perform at
-each step to an object, and conditions on which the tracing should stop. It has some more advanced features, such as 
-allowing you to specify how to queue steps (for breadth, or depth or priority traversals) as well as custom tracking
-of objects. See the code docs for more details.
+To trace a network, we need to repeat the above process for each piece of equipment in the connectivity result list.
+In computer science, stepping between nodes in a data structure like this is known as a traversal. Conveniently, the
+SDK provides a [Traversal](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/traversal.py)
+interface with a number of implementations for different use cases. The one you will use most is
+`NetworkTrace`, created through the `Tracing` factory methods:
 
-There are a number of traces which we have identified as being frequently required. So, the SDK provides a number of 
-preconfigured BasicTraversal creators for these common use cases. These can be found in the tracing [package](#).
+- [Tracing.network_trace()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L20)
+  — a trace that steps between connected terminals, backed by a depth-first queue and defaulting to the normal state
+  of the network (see [State-Aware Tracing](#state-aware-tracing-normal-vs-current)).
+- [Tracing.network_trace_branching()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L54)
+  — the same, except a new 'branch' is created each time a step can move to two or more terminals, so loops can be
+  traced both ways around.
 
-To get started, lets take a look at the `tracing.connected_equipment_trace()`. This returns a `BasicTraversal` that is
-preconfigured to continuously step to equipment that is connected in any way. Under the covers it uses the
-`Tracing.connected_equipment` function we looked at above to continuously step to connected objects. Now, say we wanted to
-identify the nearest circuit breakers to a piece of equipment, capturing all equipment between those breakers. We can do
-that with the following:
+Each step the trace takes is a
+[NetworkTraceStep](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace_step.py#L25),
+which carries the `path` just walked (its `from_terminal`, `to_terminal` and any
+`traversed_ac_line_segment`), access to the equipment stepped onto via
+`step.path.to_equipment`, and `data` for the step. During a run the trace calls your
+[add_step_action](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/traversal.py#L316)
+actions and checks your
+[add_stop_condition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/traversal.py#L229)
+conditions at each step, and running a trace is async, so you `await` it. Now, say we wanted to identify the nearest
+circuit breakers to a piece of equipment, capturing all equipment between those breakers. We can do that with the
+following:
 
 ```python
-from zepben.ewb import NetworkService, AcLineSegment, Breaker, ConductingEquipment, connected_equipment_trace
+from zepben.ewb import AcLineSegment, Breaker, NetworkService, Tracing
+
 network = NetworkService()
 
 # Populate network service with your network
 
 acls = network.get("my conductor", AcLineSegment)
-if acls:
-    breakers = []
-    equipment_between_breakers = []
-    trace = connected_equipment_trace()
-    trace.add_stop_condition(lambda equip: isinstance(equip, Breaker))
-    trace.add_step_action(lambda equipment, stopping: breakers.append(equipment) if isinstance(equipment, Breaker) elif not stopping equipment_between_breakers.append(equipment))
-    await trace.run(acls)
+breakers = []
+equipment_between_breakers = []
+
+def capture_step(step, context):
+    equipment = step.path.to_equipment
+    if isinstance(equipment, Breaker):
+        breakers.append(equipment)
+    elif not context.is_stopping:
+        equipment_between_breakers.append(equipment)
+
+trace = Tracing.network_trace()
+trace.add_stop_condition(lambda step, context: isinstance(step.path.to_equipment, Breaker))
+trace.add_step_action(capture_step)
+await trace.run(acls)
 
 print(f"The closest circuit breakers are: {breakers}")
 print(f"The equipment between the above breakers: {equipment_between_breakers}")
 ```
 
 Let's break down what is happening with the trace:
-- `add_stop_condition` is returning true if the equipment at the current step is a `Breaker`. This will make the trace
-  stop at the current step if the equipment is a breaker. Note that this will not terminate the trace, it simply stops
-  any more traversing from the current step. That is, no more equipment will be queued to be stepped to from the equipment
-  at this step. If there are other paths / branches in the trace in the queue, they will still be stepped to.
-- `add_step_action` is capturing the equipment as a breaker if it is a breaker, otherwise it captures the equipment as
-   between breakers equipment if it is not stopping (as stopping happens on the breaker).
 
-As you can see this provides an extremely simple but powerful way to perform useful traces over your network. 
+- `add_stop_condition` is returning true if the equipment at the current step
+  (`step.path.to_equipment`) is a `Breaker`. This will make the trace stop at the current step if the equipment is a
+  breaker. Note that this will not terminate the trace, it simply stops any more traversing from the current step.
+  That is, no more equipment will be queued to be stepped to from the equipment at this step. If there are other
+  paths / branches in the queue, they will still be stepped to
+  ([traversal.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/traversal.py#L542)).
+- `add_step_action` is called with the step and its
+  [StepContext](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/step_context.py#L13).
+  `context.is_stopping` ([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/step_context.py#L35))
+  says whether the trace is stopping at this step, so the action captures breakers as breakers, and otherwise
+  captures "between breakers" equipment if it is not stopping (as stopping happens on the breaker).
 
-### Useful Traces
+As you can see this provides an extremely simple but powerful way to perform useful traces over your network.
 
-There are a number of traces that will be common between all networks. We have identified numerous of these and 
-provide an easy way to instantiate them.
+### Step Data
 
-#### Set Phases Trace
+Every `NetworkTraceStep` can carry arbitrary data for that step. Pass a callback as the `compute_data` argument of a
+`Tracing` factory, and the trace calls it with `(current_step, context, next_path)` when queueing each next step
+([ComputeData.compute_next](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/compute_data.py#L24));
+whatever it returns becomes the next step's `step.data`. This is how you can add up cable lengths along a line:
 
-`traces.set_phases()` returns a `zepben.ewb.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
-on a network's energy sources and the nominal phase connectivity within the network.
+```python
+from zepben.ewb import Tracing
 
-#### Phase Traces
+def add_segment_length(current_step, context, next_path):
+    segment = next_path.traversed_ac_line_segment
+    length = segment.length if segment else None
+    return current_step.data + (length or 0)
 
-The following traces all use phase based connectivity. This means that equipment that share connectivity nodes, but not phases, will not be considered
-connected, and when a phase is dropped, it will no longer be considered for future connectivity. Each of these traces will use different aspects of the network
-to limit the scope of the trace:
-- `traces.phase_trace()` will trace based on nominal phase connectivity, ignoring open switches or in service flags.
-- `traces.normal_phase_trace()` will trace based on nominal phase connectivity, stopping at normally open switches or
-  equipment flagged as not normally in service. 
-- `traces.current_phase_trace()` will trace based on nominal phase connectivity, stopping at currently open switches or
-  equipment flagged as not currently in service. 
-- `traces.normal_downstream_trace()` will trace downstream of the start equipment based on the normal state of the network.
-- `traces.current_downstream_trace()` will trace downstream of the start equipment based on the current state of the network.
-- `traces.normal_upstream_trace()` will trace upstream of the start equipment based on the normal state of the network.
-- `traces.current_upstream_trace()` will trace upstream of the start equipment based on the current state of the network.
+trace = Tracing.network_trace(compute_data=add_segment_length)
+trace.add_step_action(lambda step, context: print(f"{step.data}m of cable traced so far at {step.path.to_equipment}"))
+await trace.run(acls, 0)
+```
 
-#### Equipment Connectivity Traces
+`AcLineSegment.length` is optional ([conductor.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/model/cim/iec61970/base/wires/conductor.py#L34)),
+hence the `length or 0` guard, and the second positional argument to `run` is the data attached to the start step
+(`0` here, as the starting cable length).
 
-The following work on `ConductingEquipment`, and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`:
-- `traces.normal_downstream_equipment_trace()` will trace in the downstream direction, stopping at normally open switches, or equipment flagged as not normally
-  in service.
-- `traces.current_downstream_equipment_trace()` will trace in the downstream direction, stopping at currently open switches, or equipment flagged as not
-  normally in service.
-- `traces.normal_upstream_equipment_trace()` will trace in the upstream direction, stopping at normally open switches, or equipment flagged as not normally in
-  service.
-- `traces.current_upstream_equipment_trace()` will trace in the upstream direction, stopping at currently open switches, or equipment flagged as not normally in
-  service.
+### State-Aware Tracing: Normal vs Current
 
-#### Other Traces
+Network objects in an EWB model have two states: the *normal* state (how the network is designed to run) and the
+*current* state (how it is running right now). Switches have both a normally-open and a currently-open state,
+equipment has a normally-in-service and a currently-in-service flag, and terminals have normal and current feeder
+directions. Rather than duplicating trace code for each state, every trace is made state-aware with a
+[NetworkStateOperators](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/network_state_operators.py#L32)
+instance: [NetworkStateOperators.NORMAL](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/network_state_operators.py#L56)
+for the normal state and [NetworkStateOperators.CURRENT](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/network_state_operators.py#L60)
+for the current state. The same trace definition, conditions and actions work in either state; you just pick the
+operators when you create the trace:
 
-There are other useful but less common traces available. See the 
-[code](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/tracing/tracing.py)
-for all the available traces.
+```python
+from zepben.ewb import Tracing, NetworkStateOperators, stop_at_open, downstream
+
+# Directions must have been computed for the same state you are tracing (see below).
+await Tracing.assign_equipment_to_feeders().run(network, NetworkStateOperators.CURRENT)
+await Tracing.set_direction().run(network, NetworkStateOperators.CURRENT)
+
+# Trace downstream of `acls` in the current state, stopping at currently open switches.
+current_downstream = (
+    Tracing.network_trace(NetworkStateOperators.CURRENT)
+    .add_condition(stop_at_open())
+    .add_condition(downstream())
+)
+await current_downstream.run(acls)
+```
+
+Because this trace uses `CURRENT`, `stop_at_open()` checks each switch's
+[current open state](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/open_state_operators.py#L96)
+and `downstream()` follows each terminal's
+[current feeder direction](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/feeder_direction_state_operations.py#L148).
+The exact same object created with `NetworkStateOperators.NORMAL` instead would check the
+[normally-open](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/open_state_operators.py#L81)
+and
+[normal direction](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/feeder_direction_state_operations.py#L114)
+instead. One behaviour applies to every trace, in both states: equipment that is not in service is never stepped
+onto, because the trace's next-path provider asks the state operators `is_in_service` for every candidate step
+([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace_step_path_provider.py#L58)).
+
+### Stop and Queue Conditions
+
+There are two kinds of conditions a trace checks. A *stop* condition answers `(item, context) -> bool` for the step
+the trace is currently on ([ShouldStop](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/stop_condition.py#L18)),
+and a true answer stops further stepping from that item. A *queue* condition answers
+`(next_item, next_context, current_item, current_context) -> bool` for each candidate next step
+([ShouldQueue](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/traversal/queue_condition.py#L19)),
+and all queue conditions must answer true for the next step to be queued.
+
+The SDK ships several ready-made conditions in
+[conditions.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py),
+all exported from `zepben.ewb`:
+
+- [stop_at_open()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L73)
+  does not queue a step that walks through an open switch. It is a queue condition checked on the *internal* step
+  through the switch ([OpenCondition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/open_condition.py#L26)),
+  because stepping through a switch is internal to the switch itself. It also checks the switch in whichever state
+  the trace is running.
+- [upstream()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L29),
+  [downstream()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L39)
+  and [with_direction(direction)](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L49)
+  only queue steps whose terminal feeder direction matches, using the trace's state operators
+  ([DirectionCondition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/direction_condition.py#L26)).
+- [limit_equipment_steps(limit, equipment_type=None)](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L59)
+  stops a path after the given number of equipment steps, optionally counting only one equipment type.
+- [stop_on_shunt_compensator_ground()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/conditions/conditions.py#L76)
+  stops a path trying to traverse a `ShuntCompensator` through its ground terminal.
+
+These factories are DSL: call them with no arguments and `NetworkTrace.add_condition` binds the returned condition to
+the trace's own `NetworkStateOperators`
+([network_trace.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace.py#L317)).
+You can also call the operator forms directly, e.g. `NetworkStateOperators.NORMAL.downstream()`
+([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/operators/feeder_direction_state_operations.py#L92)).
+Queue-shaped conditions (including `stop_at_open()`, which is a queue condition) go through
+[add_condition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace.py#L300)
+or
+[add_queue_condition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace.py#L336);
+stop-shaped conditions such as `limit_equipment_steps(...)` or a 2-argument lambda go through
+[add_stop_condition](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace.py#L361):
+
+```python
+from zepben.ewb import AcLineSegment, Breaker, Tracing, limit_equipment_steps, stop_at_open, upstream
+
+trace = Tracing.network_trace()
+trace.add_condition(stop_at_open())
+trace.add_condition(upstream())  # requires feeder directions to have been computed first
+trace.add_stop_condition(limit_equipment_steps(10, AcLineSegment))
+trace.add_stop_condition(lambda step, context: isinstance(step.path.to_equipment, Breaker))
+await trace.run(acls)
+```
+
+By default a `NetworkTrace` actions each piece of equipment only once per trace
+(`FIRST_STEP_ON_EQUIPMENT`, [here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace_action_type.py#L37));
+pass `action_step_type=NetworkTraceActionType.ALL_STEPS`
+([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/network_trace_action_type.py#L32))
+to a `Tracing` factory if you want every terminal step, internal and external, actioned.
+
+### Phasing
+
+[Tracing.set_phases()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L115)
+returns a [SetPhases](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/phases/set_phases.py#L36)
+instance. This provides a way to dynamically set phases at runtime based on a network's energy sources and the
+nominal phase connectivity within the network:
+
+```python
+from zepben.ewb import PhaseCode, Tracing, NetworkStateOperators
+
+# Flow phases through the whole network from all of its EnergySources, in the normal state.
+await Tracing.set_phases().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+
+# Or flow phases from a single terminal. The number of phases applied must match the number
+# of nominal phases on that terminal, so `PhaseCode.ABC` on an ABC terminal:
+await Tracing.set_phases().run(acls.get_terminal_by_sn(1), phases=PhaseCode.ABC)
+```
+
+To apply phases against the current state of the network, pass `network_state_operators=NetworkStateOperators.CURRENT`;
+note that applying a phase set whose size differs from the start terminal's nominal phases raises a
+`TracingException`
+([set_phases.py](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/phases/set_phases.py#L124)).
+There are also [Tracing.remove_phases()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L120)
+and [Tracing.phase_inferrer()](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/tracing.py#L125)
+for, respectively, removing phases and inferring what phases equipment should have.
+
+### Setting Feeder Direction
+
+The direction conditions need computed feeder directions, and the same `Tracing` class provides the tools to compute
+them. Assign equipment to its (LV) feeder first, then apply directions from the feeder heads:
+
+```python
+from zepben.ewb import AcLineSegment, NetworkService, Tracing
+
+network = NetworkService()
+
+# Populate network service with your network, including Feeder objects with head terminals
+
+acls = network.get("my conductor", AcLineSegment)
+await Tracing.assign_equipment_to_feeders().run(network)      # tracing.py line 105
+await Tracing.assign_equipment_to_lv_feeders().run(network)   # tracing.py line 110
+await Tracing.set_direction().run(network)                    # tracing.py line 95
+
+# To re-apply directions after a state change, clear them from a terminal and re-run from the
+# feeder heads that clearing encountered:
+head_terminals = await Tracing.clear_direction().run(acls.get_terminal_by_sn(1))  # tracing.py line 100
+for head_terminal in head_terminals:
+    await Tracing.set_direction().run(head_terminal)
+```
+
+`Tracing.set_direction()` returns a [SetDirection](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/feeder/set_direction.py#L33)
+whose `run` applies `DOWNSTREAM` direction from its start item, or from every feeder head in the network when passed
+a `NetworkService`; `Tracing.clear_direction()`
+([ClearDirection](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/feeder/clear_direction.py#L26))
+clears directions starting from a `Terminal` and returns the feeder head terminals it encountered. All four feeder
+factories accept `network_state_operators` so you can set directions for either network state.
+
+### Building an Equipment Tree
+
+A branching trace plus the
+[EquipmentTreeBuilder](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/actions/equipment_tree_builder.py#L20)
+step action gives you the tree/equipment-branch view of a network: the builder records the path taken through the
+network as a tree of
+[TreeNode](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/actions/tree_node.py#L13)
+objects, one node per piece of equipment (`identified_object`, `parent`, `children`):
+
+```python
+from zepben.ewb import AcLineSegment, EquipmentTreeBuilder, NetworkService, Tracing, downstream, stop_at_open
+
+network = NetworkService()
+
+# Populate network service with your network and compute directions (see above)
+
+acls = network.get("my conductor", AcLineSegment)
+builder = EquipmentTreeBuilder(calculate_leaves=True)
+trace = (
+    Tracing.network_trace_branching()
+    .add_condition(downstream())
+    .add_condition(stop_at_open())
+    .add_step_action(builder)
+)
+await trace.run(acls)
+
+for root in builder.roots.values():
+    print(f"Tree from {root.identified_object} has {len(root.children)} children")
+for leaf in builder.leaves:
+    print(f"A branch ended at {leaf.identified_object}")
+```
+
+`builder.roots` maps each start item's equipment to its root
+[TreeNode](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/actions/equipment_tree_builder.py#L40);
+reading `builder.leaves` requires `calculate_leaves=True` on the builder
+([here](https://github.com/zepben/ewb-sdk-python/blob/main/src/zepben/ewb/services/network/tracing/networktrace/actions/equipment_tree_builder.py#L58)).
