@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_equipment import verify_equipment_constructor_default, \
-    verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
-from zepben.ewb import AuxiliaryEquipment, Terminal, generate_id
-
-auxiliary_equipment_args = [*equipment_args, Terminal(mrid=generate_id())]
+    verify_equipment_constructor_kwargs
+from zepben.ewb import AuxiliaryEquipment
 
 
 def verify_auxiliary_equipment_constructor_default(ae: AuxiliaryEquipment):
@@ -18,10 +16,3 @@ def verify_auxiliary_equipment_constructor_default(ae: AuxiliaryEquipment):
 def verify_auxiliary_equipment_constructor_kwargs(ae: AuxiliaryEquipment, terminal, **kwargs):
     verify_equipment_constructor_kwargs(ae, **kwargs)
     assert ae.terminal == terminal
-
-
-def verify_auxiliary_equipment_constructor_args(ae: AuxiliaryEquipment):
-    verify_equipment_constructor_args(ae)
-    assert auxiliary_equipment_args[-1:] == [
-        ae.terminal
-    ]

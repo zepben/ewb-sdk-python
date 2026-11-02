@@ -13,6 +13,8 @@ from __future__ import annotations
 from zepben.ewb.auth.client.zepben_token_fetcher import *
 from zepben.ewb.auth.common.auth_exception import *
 from zepben.ewb.auth.common.auth_method import *
+from zepben.ewb.boilerplate.dataclass_base import *
+from zepben.ewb.boilerplate.backed_descriptor import *
 from zepben.ewb.util import *
 
 #############
@@ -256,6 +258,7 @@ from zepben.ewb.services.network.tracing.networktrace.network_trace_queue_next i
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_step_path_provider import *
 from zepben.ewb.services.network.tracing.networktrace.network_trace_tracker import *
+from zepben.ewb.services.network.tracing.networktrace.tracing import Tracing  # noqa: F401
 from zepben.ewb.services.network.tracing.connectivity.connectivity_result import *
 from zepben.ewb.services.network.tracing.connectivity.nominal_phase_path import *
 from zepben.ewb.services.network.tracing.connectivity.phase_paths import *

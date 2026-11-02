@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+    verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import EnergyConnection
-
-energy_connection_args = conducting_equipment_args
 
 
 def verify_energy_connection_constructor_default(ec: EnergyConnection):
@@ -16,7 +14,3 @@ def verify_energy_connection_constructor_default(ec: EnergyConnection):
 
 def verify_energy_connection_constructor_kwargs(ec: EnergyConnection, **kwargs):
     verify_conducting_equipment_constructor_kwargs(ec, **kwargs)
-
-
-def verify_energy_connection_constructor_args(ec: EnergyConnection):
-    verify_conducting_equipment_constructor_args(ec)

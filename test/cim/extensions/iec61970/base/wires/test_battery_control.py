@@ -5,11 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import battery_control_kwargs
-from cim.iec61970.base.wires.test_regulating_control import regulating_control_args, verify_regulating_control_constructor_default, \
-    verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
+from cim.iec61970.base.wires.test_regulating_control import verify_regulating_control_constructor_default, \
+    verify_regulating_control_constructor_kwargs
 from zepben.ewb import BatteryControl, BatteryControlMode, generate_id
-
-battery_control_args = [*regulating_control_args, 1.1, 2.2, 3.3, BatteryControlMode.time]
 
 
 def test_battery_control_constructor_default():
@@ -30,7 +28,7 @@ def test_battery_control_constructor_kwargs(charging_rate, discharging_rate, res
         discharging_rate=discharging_rate,
         reserve_percent=reserve_percent,
         control_mode=control_mode,
-        **kwargs
+        **kwargs,
     )
 
     verify_regulating_control_constructor_kwargs(bc, **kwargs)
@@ -38,15 +36,3 @@ def test_battery_control_constructor_kwargs(charging_rate, discharging_rate, res
     assert bc.discharging_rate == discharging_rate
     assert bc.reserve_percent == reserve_percent
     assert bc.control_mode == control_mode
-
-
-def test_battery_control_constructor_args():
-    bc = BatteryControl(*battery_control_args)
-
-    verify_regulating_control_constructor_args(bc)
-    assert battery_control_args[-4:] == [
-        bc.charging_rate,
-        bc.discharging_rate,
-        bc.reserve_percent,
-        bc.control_mode
-    ]

@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import power_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
-    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+    verify_asset_info_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import PowerTransformerInfo, TransformerTankInfo, generate_id
-
-power_transformer_info_args = [*asset_info_args, [TransformerTankInfo(mrid=generate_id()), TransformerTankInfo(mrid=generate_id())]]
 
 
 def test_power_transformer_info_constructor_default():
@@ -28,15 +26,6 @@ def test_power_transformer_info_constructor_kwargs(transformer_tank_infos, **kwa
     assert list(pti.transformer_tank_infos) == transformer_tank_infos
 
 
-def test_power_transformer_info_constructor_args():
-    pti = PowerTransformerInfo(*power_transformer_info_args)
-
-    verify_asset_info_constructor_args(pti)
-    assert power_transformer_info_args[-1:] == [
-        list(pti.transformer_tank_infos)
-    ]
-
-
 def test_transformer_tank_info_collection():
     validate_unordered(
         PowerTransformerInfo,
@@ -46,5 +35,5 @@ def test_transformer_tank_info_collection():
         PowerTransformerInfo.get_transformer_tank_info,
         PowerTransformerInfo.add_transformer_tank_info,
         PowerTransformerInfo.remove_transformer_tank_info,
-        PowerTransformerInfo.clear_transformer_tank_infos
+        PowerTransformerInfo.clear_transformer_tank_infos,
     )

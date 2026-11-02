@@ -11,12 +11,14 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.customer import Customer
     from zepben.ewb.model.cim.iec61968.customers.pricing_structure import PricingStructure
 
 
+@zb_dataclass
 class CustomerAgreement(Agreement):
     """
     Agreement between the customer and the service supplier to pay for service at a specific service location. It
@@ -29,8 +31,8 @@ class CustomerAgreement(Agreement):
 
     _pricing_structures: Optional[List[PricingStructure]] = None
 
-    def __init__(self, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
-        super(CustomerAgreement, self).__init__(**kwargs)
+    def __init__(self, *args, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
+        super(CustomerAgreement, self).__init__(*args, **kwargs)
         if customer:
             self.customer = customer
         if pricing_structures:
@@ -49,18 +51,18 @@ class CustomerAgreement(Agreement):
         else:
             raise ValueError(f"customer for {str(self)} has already been set to {self._customer}, cannot reset this field to {cust}")
 
-    def num_pricing_structures(self):
-        """
-        The number of `PricingStructure`s associated with this `CustomerAgreement`
-        """
-        return nlen(self._pricing_structures)
-
     @property
     def pricing_structures(self) -> Generator[PricingStructure, None, None]:
         """
         The `PricingStructure`s of this `CustomerAgreement`.
         """
         return ngen(self._pricing_structures)
+
+    def num_pricing_structures(self):
+        """
+        The number of `PricingStructure`s associated with this `CustomerAgreement`
+        """
+        return nlen(self._pricing_structures)
 
     def get_pricing_structure(self, mrid: str) -> PricingStructure:
         """

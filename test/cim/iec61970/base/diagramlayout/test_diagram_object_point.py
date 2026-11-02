@@ -8,8 +8,6 @@ from pytest import raises
 from cim.fill_fields import diagram_object_point_kwargs
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 
-diagram_object_point_args = [1.1, 2.2]
-
 
 # noinspection PyArgumentList
 def test_diagram_object_point_constructor_default():
@@ -34,12 +32,3 @@ def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwarg
 
     assert dop.x_position == x_position
     assert dop.y_position == y_position
-
-
-def test_diagram_object_point_constructor_args():
-    dop = DiagramObjectPoint(*diagram_object_point_args)
-
-    assert diagram_object_point_args[-2:] == [
-        dop.x_position,
-        dop.y_position
-    ]

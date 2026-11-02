@@ -11,11 +11,13 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.customers.tariff import Tariff
 
 
+@zb_dataclass
 class PricingStructure(Document):
     """
     Grouping of pricing components and prices used in the creation of customer charges and the eligibility
@@ -31,17 +33,11 @@ class PricingStructure(Document):
 
     code: str | None = None
 
-    def __init__(self, tariffs: List[Tariff] = None, **kwargs):
-        super(PricingStructure, self).__init__(**kwargs)
+    def __init__(self, *args, tariffs: List[Tariff] = None, **kwargs):
+        super(PricingStructure, self).__init__(*args, **kwargs)
         if tariffs:
             for tariff in tariffs:
                 self.add_tariff(tariff)
-
-    def num_tariffs(self):
-        """
-        Returns The number of `Tariff`s associated with this `PricingStructure`
-        """
-        return nlen(self._tariffs)
 
     @property
     def tariffs(self) -> Generator[Tariff, None, None]:
@@ -49,6 +45,12 @@ class PricingStructure(Document):
         The `Tariff`s of this `PricingStructure`.
         """
         return ngen(self._tariffs)
+
+    def num_tariffs(self):
+        """
+        Returns The number of `Tariff`s associated with this `PricingStructure`
+        """
+        return nlen(self._tariffs)
 
     def get_tariff(self, mrid: str) -> Tariff:
         """

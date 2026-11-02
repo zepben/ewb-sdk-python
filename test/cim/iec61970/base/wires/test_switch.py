@@ -3,10 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+    verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import Switch, SinglePhaseKind, generate_id
-
-switch_args = [*conducting_equipment_args, 1.1, 2, 3]
 
 
 # noinspection PyProtectedMember
@@ -23,16 +21,6 @@ def verify_switch_constructor_kwargs(s: Switch, rated_current, _open, _normally_
     assert s.rated_current == rated_current
     assert s._open == _open
     assert s._normally_open == _normally_open
-
-
-# noinspection PyProtectedMember
-def verify_switch_constructor_args(s: Switch):
-    verify_conducting_equipment_constructor_args(s)
-    assert switch_args[-3:] == [
-        s.rated_current,
-        s._open,
-        s._normally_open
-    ]
 
 
 def test_open_states():

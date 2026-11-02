@@ -8,9 +8,11 @@ from __future__ import annotations
 __all__ = ["EndDevice"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.common.location import Location
@@ -18,7 +20,8 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
 
 
-class EndDevice(AssetContainer):
+@zb_dataclass
+class EndDevice(AssetContainer, metaclass=ABCMeta):
     """
     Asset container that performs one or more end device functions. One type of end device is a meter which can perform
     metering, load management, connect/disconnect, accounting functions, etc. Some end devices, such as ones monitoring
@@ -43,8 +46,8 @@ class EndDevice(AssetContainer):
 
     _functions: Optional[List[EndDeviceFunction]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
-        super(EndDevice, self).__init__(**kwargs)
+    def __init__(self, *args, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
+        super(EndDevice, self).__init__(*args, **kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)
@@ -52,18 +55,25 @@ class EndDevice(AssetContainer):
             for edf in functions:
                 self.add_function(edf)
 
-    def num_usage_points(self):
-        """
-        Returns The number of `UsagePoint`s associated with this `EndDevice`
-        """
-        return nlen(self._usage_points)
-
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
         """
         The `UsagePoint`s associated with this `EndDevice`
         """
         return ngen(self._usage_points)
+
+    @property
+    def functions(self) -> Generator[EndDeviceFunction, None, None]:
+        """
+        The `EndDeviceFunction`s associated with this `EndDevice`
+        """
+        return ngen(self._functions)
+
+    def num_usage_points(self):
+        """
+        Returns The number of `UsagePoint`s associated with this `EndDevice`
+        """
+        return nlen(self._usage_points)
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
@@ -113,13 +123,6 @@ class EndDevice(AssetContainer):
         Returns The number of `EndDeviceFunction`s associated with this `EndDevice`
         """
         return nlen(self._functions)
-
-    @property
-    def functions(self) -> Generator[EndDeviceFunction, None, None]:
-        """
-        The `EndDeviceFunction`s associated with this `EndDevice`
-        """
-        return ngen(self._functions)
 
     def get_function(self, mrid: str) -> EndDeviceFunction:
         """

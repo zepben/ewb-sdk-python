@@ -5,11 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import tap_changer_control_kwargs
-from cim.iec61970.base.wires.test_regulating_control import regulating_control_args, verify_regulating_control_constructor_default, \
-    verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
+from cim.iec61970.base.wires.test_regulating_control import verify_regulating_control_constructor_default, \
+    verify_regulating_control_constructor_kwargs
 from zepben.ewb import TapChangerControl, generate_id
-
-tap_changer_control_args = [*regulating_control_args, 1, False, 2.2, 3.3, 4.4, 5.5, True, 6.6, False]
 
 
 def test_tap_changer_control_constructor_default():
@@ -39,7 +37,8 @@ def test_tap_changer_control_constructor_kwargs(
     forward_ldc_blocking,
     time_delay,
     co_generation_enabled,
-    **kwargs):
+    **kwargs,
+):
     tcc = TapChangerControl(
         limit_voltage=limit_voltage,
         line_drop_compensation=line_drop_compensation,
@@ -50,7 +49,7 @@ def test_tap_changer_control_constructor_kwargs(
         forward_ldc_blocking=forward_ldc_blocking,
         time_delay=time_delay,
         co_generation_enabled=co_generation_enabled,
-        **kwargs
+        **kwargs,
     )
 
     verify_regulating_control_constructor_kwargs(tcc, **kwargs)
@@ -63,20 +62,3 @@ def test_tap_changer_control_constructor_kwargs(
     assert tcc.forward_ldc_blocking == forward_ldc_blocking
     assert tcc.time_delay == time_delay
     assert tcc.co_generation_enabled == co_generation_enabled
-
-
-def test_tap_changer_control_constructor_args():
-    tcc = TapChangerControl(*tap_changer_control_args)
-
-    verify_regulating_control_constructor_args(tcc)
-    assert tap_changer_control_args[-9:] == [
-        tcc.limit_voltage,
-        tcc.line_drop_compensation,
-        tcc.line_drop_r,
-        tcc.line_drop_x,
-        tcc.reverse_line_drop_r,
-        tcc.reverse_line_drop_x,
-        tcc.forward_ldc_blocking,
-        tcc.time_delay,
-        tcc.co_generation_enabled
-    ]

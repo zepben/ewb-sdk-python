@@ -5,14 +5,11 @@
 
 from hypothesis import given
 
-from zepben.ewb import generate_id, PhaseCode
-from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
-
 from cim.fill_fields import linear_shunt_compensator_kwargs
 from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
-    verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_args
-
-linear_shunt_compensator_args = [*shunt_compensator_args, 1.1, 2.2, 3.3, 4.4]
+    verify_shunt_compensator_constructor_kwargs
+from zepben.ewb import generate_id, PhaseCode
+from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 
 
 def test_linear_shunt_compensator_constructor_default():
@@ -42,7 +39,7 @@ def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_secti
         b_per_section=b_per_section,
         g0_per_section=g0_per_section,
         g_per_section=g_per_section,
-        **kwargs
+        **kwargs,
     )
 
     verify_shunt_compensator_constructor_kwargs(lsc, **kwargs)
@@ -50,15 +47,3 @@ def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_secti
     assert lsc.b_per_section == b_per_section
     assert lsc.g0_per_section == g0_per_section
     assert lsc.g_per_section == g_per_section
-
-
-def test_linear_shunt_compensator_constructor_args():
-    lsc = LinearShuntCompensator(*linear_shunt_compensator_args)
-
-    verify_shunt_compensator_constructor_args(lsc)
-    assert linear_shunt_compensator_args[-4:] == [
-        lsc.b0_per_section,
-        lsc.b_per_section,
-        lsc.g0_per_section,
-        lsc.g_per_section
-    ]

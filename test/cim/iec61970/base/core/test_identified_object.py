@@ -7,9 +7,10 @@ from typing import Tuple
 
 import pytest
 
-from zepben.ewb import IdentifiedObject, generate_id
-from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
+from zepben.ewb import IdentifiedObject, generate_id, Name
+from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
 from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+
 
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -19,11 +20,6 @@ from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 # There is a lot of overlap here, but calling both maximises the constructor combinations we check and should catch any breaking changes to
 # constructors.
 #
-
-# noinspection PyArgumentList
-identified_object_args = [
-    "test_mrid", "test_name", "test_description", [Name(name="1", type=NameType(name="nt1"), identified_object=Junction(mrid=generate_id()))]
-]
 
 
 def verify_identified_object_constructor_default(io: IdentifiedObject):
@@ -39,23 +35,12 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
     assert io.mrid == mrid
     assert io.name == name
     assert io.description == description
-    # Assign identified object to the names we are checking against due to no identified object requirement on Name creation
-    # Note: this is due to automatic two-way association introduced in the name rejig rework
+    # Recreate expected names with the object linked, which matches IdentifiedObject constructor behaviour
     if names is not None:
-        for name in names:
-            name.identified_object = io
+        names = [Name(name=name.name, type=name.type, identified_object=io) for name in names]
         assert list(io.names) == names
     else:
         assert not list(io.names)
-
-
-def verify_identified_object_constructor_args(io: IdentifiedObject):
-    assert identified_object_args == [
-        io.mrid,
-        io.name,
-        io.description,
-        list(io.names)
-    ]
 
 
 def test_user_can_add_names_to_identified_object():

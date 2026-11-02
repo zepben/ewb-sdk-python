@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import analog_value_kwargs
 from cim.iec61970.base.meas.test_measurement_value import verify_measurement_value_constructor_default, \
-    verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
+    verify_measurement_value_constructor_kwargs
 from zepben.ewb.model.cim.iec61970.base.meas.analog_value import AnalogValue
-
-analog_value_args = [*measurement_value_args, 1.1, "a"]
 
 
 def test_analog_value_constructor_default():
@@ -26,20 +24,9 @@ def test_analog_value_constructor_kwargs(value, analog_mrid, **kwargs):
     av = AnalogValue(
         value=value,
         analog_mrid=analog_mrid,
-        **kwargs
+        **kwargs,
     )
 
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
     assert av.analog_mrid == analog_mrid
-
-
-def test_analog_value_constructor_args():
-    # noinspection PyArgumentList
-    av = AnalogValue(*analog_value_args)
-
-    verify_measurement_value_constructor_args(av)
-    assert analog_value_args[-2:] == [
-        av.value,
-        av.analog_mrid
-    ]

@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import short_circuit_test_kwargs
 from cim.iec61968.assetinfo.test_transformer_test import verify_transformer_test_constructor_default, \
-    verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
+    verify_transformer_test_constructor_kwargs
 from zepben.ewb import ShortCircuitTest, generate_id
-
-short_circuit_test_args = [*transformer_test_args, 1.1, 2, 3, 4.4, 5.5, 6, 7, 8, 9.9, 10.01]
 
 
 def test_short_circuit_test_constructor_default():
@@ -29,19 +27,23 @@ def test_short_circuit_test_constructor_default():
 
 
 @given(**short_circuit_test_kwargs())
-def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grounded_end_step, leakage_impedance, leakage_impedance_zero, loss, loss_zero,
-                                               power, voltage, voltage_ohmic_part, **kwargs):
-    sct = ShortCircuitTest(current=current,
-                           energised_end_step=energised_end_step,
-                           grounded_end_step=grounded_end_step,
-                           leakage_impedance=leakage_impedance,
-                           leakage_impedance_zero=leakage_impedance_zero,
-                           loss=loss,
-                           loss_zero=loss_zero,
-                           power=power,
-                           voltage=voltage,
-                           voltage_ohmic_part=voltage_ohmic_part,
-                           **kwargs)
+def test_short_circuit_test_constructor_kwargs(
+    current, energised_end_step, grounded_end_step, leakage_impedance, leakage_impedance_zero, loss, loss_zero,
+    power, voltage, voltage_ohmic_part, **kwargs,
+):
+    sct = ShortCircuitTest(
+        current=current,
+        energised_end_step=energised_end_step,
+        grounded_end_step=grounded_end_step,
+        leakage_impedance=leakage_impedance,
+        leakage_impedance_zero=leakage_impedance_zero,
+        loss=loss,
+        loss_zero=loss_zero,
+        power=power,
+        voltage=voltage,
+        voltage_ohmic_part=voltage_ohmic_part,
+        **kwargs,
+    )
 
     verify_transformer_test_constructor_kwargs(sct, **kwargs)
     assert sct.current == current
@@ -54,21 +56,3 @@ def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grou
     assert sct.power == power
     assert sct.voltage == voltage
     assert sct.voltage_ohmic_part == voltage_ohmic_part
-
-
-def test_short_circuit_test_constructor_args():
-    sct = ShortCircuitTest(*short_circuit_test_args)
-
-    verify_transformer_test_constructor_args(sct)
-    assert short_circuit_test_args[-10:] == [
-        sct.current,
-        sct.energised_end_step,
-        sct.grounded_end_step,
-        sct.leakage_impedance,
-        sct.leakage_impedance_zero,
-        sct.loss,
-        sct.loss_zero,
-        sct.power,
-        sct.voltage,
-        sct.voltage_ohmic_part
-    ]

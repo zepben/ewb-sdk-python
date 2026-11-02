@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
-    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+    verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import EquivalentEquipment
-
-equivalent_equipment_args = conducting_equipment_args
 
 
 def verify_equivalent_equipment_constructor_default(ee: EquivalentEquipment):
@@ -16,7 +14,3 @@ def verify_equivalent_equipment_constructor_default(ee: EquivalentEquipment):
 
 def verify_equivalent_equipment_constructor_kwargs(ee: EquivalentEquipment, **kwargs):
     verify_conducting_equipment_constructor_kwargs(ee, **kwargs)
-
-
-def verify_equivalent_equipment_constructor_args(ee: EquivalentEquipment):
-    verify_conducting_equipment_constructor_args(ee)

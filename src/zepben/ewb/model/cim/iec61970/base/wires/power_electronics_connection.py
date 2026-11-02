@@ -9,6 +9,7 @@ __all__ = ["PowerElectronicsConnection"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.ewb.util import ngen, nlen, get_by_mrid, safe_remove, require
 
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 
+@zb_dataclass
 class PowerElectronicsConnection(RegulatingCondEq):
     """
     A connection to the AC network for energy production or consumption that uses power electronics rather than rotating machines.
@@ -140,26 +142,30 @@ class PowerElectronicsConnection(RegulatingCondEq):
     _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
     """The individual units models for the power electronics connection."""
 
-    def __init__(self, power_electronics_units: List[PowerElectronicsUnit] = None,
-                 power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
-                 inv_watt_resp_v1=None,
-                 inv_watt_resp_v2=None,
-                 inv_watt_resp_v3=None,
-                 inv_watt_resp_v4=None,
-                 inv_watt_resp_p_at_v1=None,
-                 inv_watt_resp_p_at_v2=None,
-                 inv_watt_resp_p_at_v3=None,
-                 inv_watt_resp_p_at_v4=None,
-                 inv_var_resp_v1=None,
-                 inv_var_resp_v2=None,
-                 inv_var_resp_v3=None,
-                 inv_var_resp_v4=None,
-                 inv_var_resp_q_at_v1=None,
-                 inv_var_resp_q_at_v2=None,
-                 inv_var_resp_q_at_v3=None,
-                 inv_var_resp_q_at_v4=None,
-                 **kwargs):
-        super(PowerElectronicsConnection, self).__init__(**kwargs)
+    def __init__(
+        self,
+        *args,
+        power_electronics_units: List[PowerElectronicsUnit] = None,
+        power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None,
+        inv_watt_resp_v1=None,
+        inv_watt_resp_v2=None,
+        inv_watt_resp_v3=None,
+        inv_watt_resp_v4=None,
+        inv_watt_resp_p_at_v1=None,
+        inv_watt_resp_p_at_v2=None,
+        inv_watt_resp_p_at_v3=None,
+        inv_watt_resp_p_at_v4=None,
+        inv_var_resp_v1=None,
+        inv_var_resp_v2=None,
+        inv_var_resp_v3=None,
+        inv_var_resp_v4=None,
+        inv_var_resp_q_at_v1=None,
+        inv_var_resp_q_at_v2=None,
+        inv_var_resp_q_at_v3=None,
+        inv_var_resp_q_at_v4=None,
+        **kwargs,
+    ):
+        super(PowerElectronicsConnection, self).__init__(*args, **kwargs)
         if power_electronics_units:
             for unit in power_electronics_units:
                 self.add_unit(unit)
@@ -496,10 +502,17 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
         `phase` the `PowerElectronicsConnectionPhase` to associate with this `PowerElectronicsConnection`.
         Returns A reference to this `PowerElectronicsConnection` to allow fluent use.
-        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`.
+        Raises `ValueError` if another `PowerElectronicsConnectionPhase` with the same `mrid` already exists for this `PowerElectronicsConnection`, or if
+        `phase.power_electronics_connection` is not this `PowerElectronicsConnection`.
         """
         if self._validate_reference(phase, self.get_phase, "A PowerElectronicsConnectionPhase"):
             return self
+
+        if phase.power_electronics_connection is None:
+            phase.power_electronics_connection = self
+
+        require(phase.power_electronics_connection is self, lambda: f"{phase} `power_electronics_connection` property references {phase.power_electronics_connection}, expected {self}.")
+
         self._power_electronics_connection_phases = list() if self._power_electronics_connection_phases is None else self._power_electronics_connection_phases
         self._power_electronics_connection_phases.append(phase)
         return self

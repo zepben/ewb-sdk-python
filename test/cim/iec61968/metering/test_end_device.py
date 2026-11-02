@@ -4,15 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61968.assets.test_asset_container import verify_asset_container_constructor_default, \
-    verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
+    verify_asset_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from util import assert_or_empty
-from zepben.ewb import Location, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
 from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
-
-end_device_args = [*asset_container_args, "a", Location(mrid=generate_id()), [UsagePoint(mrid=generate_id())]]
 
 
 def verify_end_device_constructor_default(ed: EndDevice):
@@ -30,15 +27,6 @@ def verify_end_device_constructor_kwargs(ed: EndDevice, customer_mrid, service_l
     assert_or_empty(ed.functions, functions)
 
 
-def verify_end_device_constructor_args(ed: EndDevice):
-    verify_asset_container_constructor_args(ed)
-    assert end_device_args[-3:] == [
-        ed.customer_mrid,
-        ed.service_location,
-        list(ed.usage_points)
-    ]
-
-
 def test_usage_points_collection():
     validate_unordered(
         EndDevice,
@@ -48,7 +36,7 @@ def test_usage_points_collection():
         EndDevice.get_usage_point,
         EndDevice.add_usage_point,
         EndDevice.remove_usage_point,
-        EndDevice.clear_usage_points
+        EndDevice.clear_usage_points,
     )
 
 
@@ -61,5 +49,5 @@ def test_end_device_function_collection():
         EndDevice.get_function,
         EndDevice.add_function,
         EndDevice.remove_function,
-        EndDevice.clear_functions
+        EndDevice.clear_functions,
     )

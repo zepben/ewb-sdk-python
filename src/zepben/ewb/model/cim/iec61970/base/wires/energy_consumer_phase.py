@@ -7,13 +7,17 @@ __all__ = ["EnergyConsumerPhase"]
 
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 
 
+@zb_dataclass
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
@@ -38,8 +42,8 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer: 'EnergyConsumer' = None, **kwargs):
-        super(EnergyConsumerPhase, self).__init__(**kwargs)
+    def __init__(self, *args, energy_consumer: 'EnergyConsumer' = None, **kwargs):
+        super(EnergyConsumerPhase, self).__init__(*args, **kwargs)
         if energy_consumer:
             self.energy_consumer = energy_consumer
 
@@ -49,6 +53,7 @@ class EnergyConsumerPhase(PowerSystemResource):
         return self._energy_consumer
 
     @energy_consumer.setter
+    @deprecated("energy_consumer should never be set directly - it is automatically set when adding it to the `phases` list")
     def energy_consumer(self, ec):
         if self._energy_consumer is None or self._energy_consumer is ec:
             self._energy_consumer = ec

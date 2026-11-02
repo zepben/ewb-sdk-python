@@ -7,10 +7,11 @@ __all__ = ["DataSource"]
 
 from dataclasses import dataclass
 from datetime import datetime
+from dataclasses import field
 
 
 @dataclass(frozen=True)
 class DataSource(object):
     source: str
     version: str
-    timestamp: datetime = datetime.now()
+    timestamp: datetime = field(default_factory=datetime.now)

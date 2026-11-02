@@ -7,30 +7,8 @@ from unittest.mock import patch
 from hypothesis import given
 
 from cim.fill_fields import transformer_end_info_kwargs
-from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
-    verify_asset_info_constructor_args, asset_info_args
-from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
-    ShortCircuitTest, OpenCircuitTest, generate_id
-
-transformer_end_info_args = [
-    *asset_info_args,
-    WindingConnection.UNKNOWN,
-    1,
-    2,
-    3,
-    4,
-    5.0,
-    6,
-    7,
-    8,
-    TransformerTankInfo(mrid=generate_id()),
-    TransformerStarImpedance(mrid=generate_id()),
-    NoLoadTest(mrid=generate_id()),
-    ShortCircuitTest(mrid=generate_id()),
-    ShortCircuitTest(mrid=generate_id()),
-    OpenCircuitTest(mrid=generate_id()),
-    OpenCircuitTest(mrid=generate_id()),
-]
+from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs
+from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, ResistanceReactance, ShortCircuitTest, generate_id
 
 
 def test_transformer_end_info_constructor_default():
@@ -56,10 +34,12 @@ def test_transformer_end_info_constructor_default():
 
 
 @given(**transformer_end_info_kwargs())
-def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
-                                                 transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
-                                                 energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,
-                                                 energised_end_open_circuit_tests, **kwargs):
+def test_transformer_end_info_constructor_kwargs(
+    connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
+    transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
+    energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,
+    energised_end_open_circuit_tests, **kwargs,
+):
     tei = TransformerEndInfo(
         connection_kind=connection_kind,
         emergency_s=emergency_s,
@@ -77,7 +57,7 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
         grounded_end_short_circuit_tests=grounded_end_short_circuit_tests,
         open_end_open_circuit_tests=open_end_open_circuit_tests,
         energised_end_open_circuit_tests=energised_end_open_circuit_tests,
-        **kwargs
+        **kwargs,
     )
 
     verify_asset_info_constructor_kwargs(tei, **kwargs)
@@ -97,30 +77,6 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
     assert tei.grounded_end_short_circuit_tests is grounded_end_short_circuit_tests
     assert tei.open_end_open_circuit_tests is open_end_open_circuit_tests
     assert tei.energised_end_open_circuit_tests is energised_end_open_circuit_tests
-
-
-def test_transformer_end_info_constructor_args():
-    tei = TransformerEndInfo(*transformer_end_info_args)
-
-    verify_asset_info_constructor_args(tei)
-    assert transformer_end_info_args[-16:] == [
-        tei.connection_kind,
-        tei.emergency_s,
-        tei.end_number,
-        tei.insulation_u,
-        tei.phase_angle_clock,
-        tei.r,
-        tei.rated_s,
-        tei.rated_u,
-        tei.short_term_s,
-        tei.transformer_tank_info,
-        tei.transformer_star_impedance,
-        tei.energised_end_no_load_tests,
-        tei.energised_end_short_circuit_tests,
-        tei.grounded_end_short_circuit_tests,
-        tei.open_end_open_circuit_tests,
-        tei.energised_end_open_circuit_tests
-    ]
 
 
 def test_populates_resistance_reactance_off_end_star_impedance_if_available():
@@ -143,7 +99,7 @@ def test_merges_resistance_reactance_if_required():
         method.return_value = ResistanceReactance(None, 2.2, None, None)
         info = TransformerEndInfo(
             mrid=generate_id(),
-            transformer_star_impedance=TransformerStarImpedance(mrid=generate_id(), r=1.1, x=None, r0=None, x0=None)
+            transformer_star_impedance=TransformerStarImpedance(mrid=generate_id(), r=1.1, x=None, r0=None, x0=None),
         )
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
         method.assert_called_once()
@@ -182,7 +138,7 @@ def validate_resistance_reactance_from_test(rated_u, rated_s, energised_test, gr
         rated_u=rated_u,
         rated_s=rated_s,
         grounded_end_short_circuit_tests=grounded_test,
-        energised_end_short_circuit_tests=energised_test
+        energised_end_short_circuit_tests=energised_test,
     )
 
     if expected_rr is not None:

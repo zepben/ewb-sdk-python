@@ -13,8 +13,10 @@ from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import require, nlen, ngen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class Location(IdentifiedObject):
     """
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.
@@ -25,20 +27,14 @@ class Location(IdentifiedObject):
 
     _position_points: Optional[List[PositionPoint]] = None
 
-    def __init__(self, position_points: List[PositionPoint] = None, **kwargs):
+    def __init__(self, *args, position_points: List[PositionPoint] = None, **kwargs):
         """
         `position_points` A list of `PositionPoint`s to associate with this `Location`.
         """
-        super(Location, self).__init__(**kwargs)
+        super(Location, self).__init__(*args, **kwargs)
         if position_points:
             for point in position_points:
                 self.add_point(point)
-
-    def num_points(self):
-        """
-        Returns The number of `PositionPoint`s in this `Location`
-        """
-        return nlen(self._position_points)
 
     @property
     def points(self) -> Generator[PositionPoint, None, None]:
@@ -47,6 +43,21 @@ class Location(IdentifiedObject):
         """
         for point in ngen(self._position_points):
             yield point
+
+    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
+        """
+        Call the `action` on each :class:`PositionPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
+
+    def num_points(self):
+        """
+        Returns The number of `PositionPoint`s in this `Location`
+        """
+        return nlen(self._position_points)
 
     def get_point(self, sequence_number: int) -> PositionPoint:
         """
@@ -60,15 +71,6 @@ class Location(IdentifiedObject):
 
     def __getitem__(self, item):
         return self.get_point(item)
-
-    def for_each_point(self, action: Callable[[int, PositionPoint], Any]):
-        """
-        Call the `action` on each :class:`PositionPoint` in the `points` collection
-
-        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
-        """
-        for index, point in enumerate(self.points):
-            action(index, point)
 
     def add_point(self, point: PositionPoint) -> Location:
         """

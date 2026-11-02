@@ -9,10 +9,13 @@ __all__ = ["Feeder"]
 
 from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb import get_by_mrid
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.ewb.util import ngen, nlen, safe_remove_by_id
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
@@ -22,6 +25,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.terminal import Terminal
 
 
+@zb_dataclass
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.
@@ -31,8 +35,7 @@ class Feeder(EquipmentContainer):
     _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Substation | None = None
-    """The substation that normally energizes the feeder. Also used for naming purposes."""
+    _normal_energizing_substation: Substation | None = None
 
     _current_equipment: Dict[str, Equipment] | None = None
     """The equipment contained in this feeder in the current state of the network."""
@@ -48,6 +51,7 @@ class Feeder(EquipmentContainer):
 
     def __init__(
         self,
+        *args,
         normal_head_terminal: Terminal = None,
         normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
@@ -55,9 +59,9 @@ class Feeder(EquipmentContainer):
         current_energized_lv_feeders: List[LvFeeder] = None,
         normal_energized_lv_substations: List[LvSubstation] = None,
         current_energized_lv_substations: List[LvSubstation] = None,
-        **kwargs
+        **kwargs,
     ):
-        super(Feeder, self).__init__(**kwargs)
+        super(Feeder, self).__init__(*args, **kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
         if normal_energizing_substation:
@@ -91,11 +95,46 @@ class Feeder(EquipmentContainer):
             raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
 
     @property
+    def normal_energizing_substation(self):
+        """The substation that normally energizes the feeder. Also used for naming purposes."""
+        return self._normal_energizing_substation
+
+    @normal_energizing_substation.setter
+    @deprecated("normal_energizing_substation should never be set directly - it is automatically set when adding it to the `feeders` list")
+    def normal_energizing_substation(self, value):
+        self._normal_energizing_substation = value
+
+    @property
     def current_equipment(self) -> Generator[Equipment, None, None]:
         """
         Contained `Equipment` using the current state of the network.
         """
         return ngen(self._current_equipment)
+
+    @property
+    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The LV feeders that are normally energized by this feeder.
+        """
+        return ngen(self._normal_energized_lv_feeders)
+
+    @zbex
+    @property
+    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The LV feeders that are currently energized by this feeder.
+        """
+        return ngen(self._current_energized_lv_feeders)
+
+    @zbex
+    @property
+    def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
+        return ngen(self._normal_energized_lv_substations)
+
+    @zbex
+    @property
+    def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
+        return ngen(self._current_energized_lv_substations)
 
     def num_current_equipment(self):
         """
@@ -146,13 +185,6 @@ class Feeder(EquipmentContainer):
         self._current_equipment = None
         return self
 
-    @property
-    def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are normally energized by this feeder.
-        """
-        return ngen(self._normal_energized_lv_feeders)
-
     def num_normal_energized_lv_feeders(self) -> int:
         """
         Get the number of LV feeders that are normally energized by this feeder.
@@ -201,14 +233,6 @@ class Feeder(EquipmentContainer):
         """
         self._normal_energized_lv_feeders = None
         return self
-
-    @zbex
-    @property
-    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The LV feeders that are currently energized by this feeder.
-        """
-        return ngen(self._current_energized_lv_feeders)
 
     def num_current_energized_lv_feeders(self) -> int:
         """
@@ -259,11 +283,6 @@ class Feeder(EquipmentContainer):
         self._current_energized_lv_feeders = None
         return self
 
-    @zbex
-    @property
-    def normal_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._normal_energized_lv_substations)
-
     def num_normal_energized_lv_substations(self) -> int:
         """
         Get the number of entries in the normal [LvSubstation] collection.
@@ -311,11 +330,6 @@ class Feeder(EquipmentContainer):
         """
         self._normal_energized_lv_substations = None
         return self
-
-    @zbex
-    @property
-    def current_energized_lv_substations(self) -> Generator['LvSubstation', None, None]:
-        return ngen(self._current_energized_lv_substations)
 
     def num_current_energized_lv_substations(self) -> int:
         """

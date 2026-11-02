@@ -13,16 +13,18 @@ from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment_phase import AcLin
 from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
+    from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
     from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
     from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
-    from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
     from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
+@zb_dataclass
 class AcLineSegment(Conductor):
     """
     A wire or combination of wires, with consistent electrical characteristics, building a single electrical system,
@@ -82,6 +84,72 @@ class AcLineSegment(Conductor):
         """The `Cut`s for this `AcLineSegment`."""
         return ngen(self._cuts)
 
+    @property
+    def clamps(self) -> Generator['Clamp', None, None]:
+        """The `Clamp`s for this `AcLineSegment`."""
+        return ngen(self._clamps)
+
+    def _validate_cut(self, cut: 'Cut') -> bool:
+        """
+        Validate a cut against this `AcLineSegment`'s `Cut`s.
+
+        :param cut: The `Cut` to validate.
+        :return: True if `cut` is already associated with this `AcLineSegment`, otherwise False.
+        :raise ValueError: If `cut.ac_line_segment` is not this `AcLineSegment`, or if this `AcLineSegment` has a different `Cut` with the same mRID.
+        """
+        if self._validate_reference(cut, self.get_cut, "A Cut"):
+            return True
+
+        if not cut.ac_line_segment:
+            cut.ac_line_segment = self
+
+        require(
+            cut.ac_line_segment is self,
+            lambda: f"{cut} `ac_line_segment` property references {cut.ac_line_segment}, expected {str(self)}.",
+        )
+        return False
+
+    def _validate_clamp(self, clamp: 'Clamp') -> bool:
+        """
+        Validate a clamp against this `AcLineSegment`'s `Clamp`s.
+
+        :param clamp: The `Clamp` to validate.
+        :return: True if `clamp` is already associated with this `AcLineSegment`, otherwise False.
+        :raise ValueError: If `clamp.ac_line_segment` is not this `AcLineSegment`, or if this `AcLineSegment` has a different `Clamp` with the same mRID.
+        """
+        if self._validate_reference(clamp, self.get_clamp, "A Clamp"):
+            return True
+
+        if not clamp.ac_line_segment:
+            clamp.ac_line_segment = self
+
+        require(
+            clamp.ac_line_segment is self,
+            lambda: f"{clamp} `ac_line_segment` property references {clamp.ac_line_segment}, expected {str(self)}.",
+        )
+        return False
+
+    @property
+    def phases(self) -> Generator['AcLineSegmentPhase', None, None]:
+        """
+        The individual phase models for this AcLineSegment. The returned collection is read only.
+        """
+        return ngen(self._phases)
+
+    def wire_info_for_phase(self, phase: SinglePhaseKind) -> 'WireInfo | None':
+        """
+        Retrieve the WireInfo associated with the requested [phase]. If no specific [WireInfo] is available for the given [phase], [AcLineSegment.assetInfo] will be returned.
+
+        :param phase: the phase to retrieve [WireInfo] for.
+        """
+        if self._phases:
+            for it in self._phases:
+                if it.phase == phase:
+                    return it.asset_info
+            return self.asset_info
+        else:
+            return self.asset_info
+
     def num_cuts(self):
         """
         Get the number of `Cut`s for this `AcLineSegment`.
@@ -129,11 +197,6 @@ class AcLineSegment(Conductor):
         """
         self._cuts.clear()
         return self
-
-    @property
-    def clamps(self) -> Generator['Clamp', None, None]:
-        """The `Clamp`s for this `AcLineSegment`."""
-        return ngen(self._clamps)
 
     def num_clamps(self):
         """
@@ -183,53 +246,6 @@ class AcLineSegment(Conductor):
         self._clamps.clear()
         return self
 
-    def _validate_cut(self, cut: 'Cut') -> bool:
-        """
-        Validate a cut against this `AcLineSegment`'s `Cut`s.
-
-        :param cut: The `Cut` to validate.
-        :return: True if `cut` is already associated with this `AcLineSegment`, otherwise False.
-        :raise ValueError: If `cut.ac_line_segment` is not this `AcLineSegment`, or if this `AcLineSegment` has a different `Cut` with the same mRID.
-        """
-        if self._validate_reference(cut, self.get_cut, "A Cut"):
-            return True
-
-        if not cut.ac_line_segment:
-            cut.ac_line_segment = self
-
-        require(
-            cut.ac_line_segment is self,
-            lambda: f"Cut {cut} references another AcLineSegment {cut.ac_line_segment}, expected {str(self)}.",
-        )
-        return False
-
-    def _validate_clamp(self, clamp: 'Clamp') -> bool:
-        """
-        Validate a clamp against this `AcLineSegment`'s `Clamp`s.
-
-        :param clamp: The `Clamp` to validate.
-        :return: True if `clamp` is already associated with this `AcLineSegment`, otherwise False.
-        :raise ValueError: If `clamp.ac_line_segment` is not this `AcLineSegment`, or if this `AcLineSegment` has a different `Clamp` with the same mRID.
-        """
-        if self._validate_reference(clamp, self.get_clamp, "A Clamp"):
-            return True
-
-        if not clamp.ac_line_segment:
-            clamp.ac_line_segment = self
-
-        require(
-            clamp.ac_line_segment is self,
-            lambda: f"Clamp {clamp} references another AcLineSegment {clamp.ac_line_segment}, expected {str(self)}.",
-        )
-        return False
-
-    @property
-    def phases(self) -> Generator['AcLineSegmentPhase', None, None]:
-        """
-        The individual phase models for this AcLineSegment. The returned collection is read only.
-        """
-        return ngen(self._phases)
-
     def num_phases(self) -> int:
         """
         Get the number of entries in the [AcLineSegmentPhase] collection.
@@ -267,7 +283,7 @@ class AcLineSegment(Conductor):
         if phase.ac_line_segment is None:
             phase.ac_line_segment = self
 
-        require(phase.ac_line_segment is self, lambda: f"${phase} `ac_line_segment` property references ${phase.ac_line_segment}, expected ${self}.")
+        require(phase.ac_line_segment is self, lambda: f"{phase} `ac_line_segment` property references {phase.ac_line_segment}, expected {self}.")
 
         if self._phases is None:
             self._phases = list()
@@ -293,17 +309,3 @@ class AcLineSegment(Conductor):
         """
         self._phases = None
         return self
-
-    def wire_info_for_phase(self, phase: SinglePhaseKind) -> 'WireInfo | None':
-        """
-        Retrieve the WireInfo associated with the requested [phase]. If no specific [WireInfo] is available for the given [phase], [AcLineSegment.assetInfo] will be returned.
-
-        :param phase: the phase to retrieve [WireInfo] for.
-        """
-        if self._phases:
-            for it in self._phases:
-                if it.phase == phase:
-                    return it.asset_info
-            return self.asset_info
-        else:
-            return self.asset_info

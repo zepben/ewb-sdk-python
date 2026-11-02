@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import control_kwargs
 from cim.iec61970.base.meas.test_io_point import verify_io_point_constructor_default, \
-    verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
-from zepben.ewb import Control, RemoteControl, generate_id
-
-control_args = [*io_point_args, "a", RemoteControl(mrid=generate_id())]
+    verify_io_point_constructor_kwargs
+from zepben.ewb import Control, generate_id
 
 
 def test_control_constructor_default():
@@ -27,13 +25,3 @@ def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, 
     verify_io_point_constructor_kwargs(c, **kwargs)
     assert c.power_system_resource_mrid == power_system_resource_mrid
     assert c.remote_control == remote_control
-
-
-def test_control_constructor_args():
-    c = Control(*control_args)
-
-    verify_io_point_constructor_args(c)
-    assert control_args[-2:] == [
-        c.power_system_resource_mrid,
-        c.remote_control
-    ]

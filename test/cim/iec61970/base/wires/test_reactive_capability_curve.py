@@ -5,11 +5,8 @@
 from hypothesis import given
 
 from cim.fill_fields import reactive_capability_curve_kwargs
-from cim.iec61970.base.core.test_curve import curve_args, verify_curve_constructor_default, verify_curve_constructor_kwargs, \
-    verify_curve_constructor_args
+from cim.iec61970.base.core.test_curve import verify_curve_constructor_default, verify_curve_constructor_kwargs
 from zepben.ewb import ReactiveCapabilityCurve
-
-reactive_capability_curve_args = curve_args
 
 
 def verify_reactive_capability_curve_constructor_default():
@@ -19,7 +16,3 @@ def verify_reactive_capability_curve_constructor_default():
 @given(**reactive_capability_curve_kwargs())
 def verify_reactive_capability_curve_constructor_kwargs(**kwargs):
     verify_curve_constructor_kwargs(ReactiveCapabilityCurve(**kwargs), **kwargs)
-
-
-def verify_reactive_capability_curve_constructor_args():
-    verify_curve_constructor_args(ReactiveCapabilityCurve(*reactive_capability_curve_args))

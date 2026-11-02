@@ -8,8 +8,8 @@ from __future__ import annotations
 __all__ = ["ServiceInfo"]
 
 from typing import TYPE_CHECKING, List
+from dataclasses import dataclass
 
-from zepben.ewb.dataclassy import dataclass
 if TYPE_CHECKING:
     from zepben.ewb import DataSource
 

@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
-    verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
-from zepben.ewb import RegulatingCondEq, RegulatingControl, generate_id
-
-regulating_cond_eq_args = [*energy_connection_args, False, RegulatingControl(mrid=generate_id())]
+    verify_energy_connection_constructor_kwargs
+from zepben.ewb import RegulatingCondEq
 
 
 def verify_regulating_cond_eq_constructor_default(rce: RegulatingCondEq):
@@ -20,11 +18,3 @@ def verify_regulating_cond_eq_constructor_kwargs(rce: RegulatingCondEq, control_
     verify_energy_connection_constructor_kwargs(rce, **kwargs)
     assert rce.control_enabled == control_enabled
     assert rce.regulating_control == regulating_control
-
-
-def verify_regulating_cond_eq_constructor_args(rce: RegulatingCondEq):
-    verify_energy_connection_constructor_args(rce)
-    assert regulating_cond_eq_args[-2:] == [
-        rce.control_enabled,
-        rce.regulating_control
-    ]

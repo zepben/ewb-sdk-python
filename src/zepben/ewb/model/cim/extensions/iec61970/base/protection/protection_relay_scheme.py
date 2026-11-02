@@ -12,12 +12,14 @@ from typing import Optional, List, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.util import ngen, get_by_mrid, nlen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
+@zb_dataclass
 @zbex
 class ProtectionRelayScheme(IdentifiedObject):
     """
@@ -30,8 +32,8 @@ class ProtectionRelayScheme(IdentifiedObject):
 
     _functions: Optional[List[ProtectionRelayFunction]] = None
 
-    def __init__(self, functions: Optional[List[ProtectionRelayFunction]] = None, **kwargs):
-        super(ProtectionRelayScheme, self).__init__(**kwargs)
+    def __init__(self, *args, functions: Optional[List[ProtectionRelayFunction]] = None, **kwargs):
+        super(ProtectionRelayScheme, self).__init__(*args, **kwargs)
         if functions is not None:
             for function in functions:
                 self.add_function(function)
@@ -44,6 +46,14 @@ class ProtectionRelayScheme(IdentifiedObject):
         :return: A generator that iterates over all functions operated as part of this :class:`ProtectionRelayScheme`.
         """
         return ngen(self._functions)
+
+    def num_functions(self) -> int:
+        """
+        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
+
+        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
+        """
+        return nlen(self._functions)
 
     def get_function(self, mrid: str) -> ProtectionRelayFunction:
         """
@@ -67,14 +77,6 @@ class ProtectionRelayScheme(IdentifiedObject):
         self._functions = list() if self._functions is None else self._functions
         self._functions.append(function)
         return self
-
-    def num_functions(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
-
-        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
-        """
-        return nlen(self._functions)
 
     def remove_function(self, function: Optional[ProtectionRelayFunction]) -> ProtectionRelayScheme:
         """

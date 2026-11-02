@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.ewb import Measurement, RemoteSource, PhaseCode, UnitSymbol, generate_id
-
-measurement_args = [*identified_object_args, "a", RemoteSource(mrid=generate_id()), "b", PhaseCode.XYN, UnitSymbol.A]
+    verify_identified_object_constructor_kwargs
+from zepben.ewb import Measurement, PhaseCode, UnitSymbol
 
 
 def verify_measurement_constructor_default(m: Measurement):
@@ -26,14 +24,3 @@ def verify_measurement_constructor_kwargs(m: Measurement, power_system_resource_
     assert m.terminal_mrid == terminal_mrid
     assert m.phases == phases
     assert m.unit_symbol == unit_symbol
-
-
-def verify_measurement_constructor_args(m: Measurement):
-    verify_identified_object_constructor_args(m)
-    assert measurement_args[-5:] == [
-        m.power_system_resource_mrid,
-        m.remote_source,
-        m.terminal_mrid,
-        m.phases,
-        m.unit_symbol
-    ]

@@ -7,20 +7,11 @@ from pytest import raises
 
 from cim.fill_fields import feeder_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
-    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+    verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from util import assert_or_empty
-from zepben.ewb import Terminal, Substation, Equipment, LvFeeder, Switch, generate_id, LvSubstation
+from zepben.ewb import Terminal, Equipment, LvFeeder, Switch, generate_id, LvSubstation
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-feeder_args = [
-    *equipment_container_args,
-    Terminal(mrid=generate_id()),
-    Substation(mrid=generate_id()),
-    {"lvf": LvFeeder(mrid=generate_id())},
-    {"ce": Equipment(mrid=generate_id())},
-    {"celvf": Equipment(mrid=generate_id())}
-]
 
 
 def test_feeder_constructor_default():
@@ -43,16 +34,18 @@ def test_feeder_constructor_kwargs(
     current_energized_lv_feeders,
     normal_energized_lv_substations,
     current_energized_lv_substations,
-    **kwargs
+    **kwargs,
 ):
-    f = Feeder(normal_head_terminal=normal_head_terminal,
-               normal_energizing_substation=normal_energizing_substation,
-               normal_energized_lv_feeders=normal_energized_lv_feeders,
-               current_equipment=current_equipment,
-               current_energized_lv_feeders=current_energized_lv_feeders,
-               normal_energized_lv_substations=normal_energized_lv_substations,
-               current_energized_lv_substations=current_energized_lv_substations,
-               **kwargs)
+    f = Feeder(
+        normal_head_terminal=normal_head_terminal,
+        normal_energizing_substation=normal_energizing_substation,
+        normal_energized_lv_feeders=normal_energized_lv_feeders,
+        current_equipment=current_equipment,
+        current_energized_lv_feeders=current_energized_lv_feeders,
+        normal_energized_lv_substations=normal_energized_lv_substations,
+        current_energized_lv_substations=current_energized_lv_substations,
+        **kwargs,
+    )
 
     verify_equipment_container_constructor_kwargs(f, **kwargs)
     assert f.normal_head_terminal == normal_head_terminal
@@ -64,22 +57,6 @@ def test_feeder_constructor_kwargs(
     assert_or_empty(f.current_energized_lv_substations, current_energized_lv_substations)
 
 
-def test_feeder_constructor_args():
-    f = Feeder(*feeder_args)
-
-    verify_equipment_container_constructor_args(f)
-
-    assert feeder_args[-5:-3] == [
-        f.normal_head_terminal,
-        f.normal_energizing_substation
-    ]
-    # We use a different style of matching here as the passed in args for current_equipment and normal_energized_lv_feeders
-    # are maps and the stored collections are lists.
-    assert list(f.current_equipment) == list(feeder_args[-3].values())
-    assert list(f.normal_energized_lv_feeders) == list(feeder_args[-2].values())
-    assert list(f.current_energized_lv_feeders) == list(feeder_args[-1].values())
-
-
 def test_current_equipment_collection():
     validate_unordered(
         Feeder,
@@ -89,7 +66,7 @@ def test_current_equipment_collection():
         Feeder.get_current_equipment,
         Feeder.add_current_equipment,
         Feeder.remove_current_equipment,
-        Feeder.clear_current_equipment
+        Feeder.clear_current_equipment,
     )
 
 
@@ -102,7 +79,7 @@ def test_normal_energized_lv_feeder_collection():
         Feeder.get_normal_energized_lv_feeder,
         Feeder.add_normal_energized_lv_feeder,
         Feeder.remove_normal_energized_lv_feeder,
-        Feeder.clear_normal_energized_lv_feeders
+        Feeder.clear_normal_energized_lv_feeders,
     )
 
 
@@ -115,7 +92,7 @@ def test_current_energized_lv_feeder_collection():
         Feeder.get_current_energized_lv_feeder,
         Feeder.add_current_energized_lv_feeder,
         Feeder.remove_current_energized_lv_feeder,
-        Feeder.clear_current_energized_lv_feeders
+        Feeder.clear_current_energized_lv_feeders,
     )
 
 
@@ -128,7 +105,7 @@ def test_normal_energized_lv_substations_collection():
         Feeder.get_normal_energized_lv_substation,
         Feeder.add_normal_energized_lv_substation,
         Feeder.remove_normal_energized_lv_substation,
-        Feeder.clear_normal_energized_lv_substations
+        Feeder.clear_normal_energized_lv_substations,
     )
 
 
@@ -141,7 +118,7 @@ def test_current_energized_lv_substations_collection():
         Feeder.get_current_energized_lv_substation,
         Feeder.add_current_energized_lv_substation,
         Feeder.remove_current_energized_lv_substation,
-        Feeder.clear_current_energized_lv_substations
+        Feeder.clear_current_energized_lv_substations,
     )
 
 

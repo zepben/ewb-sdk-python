@@ -9,14 +9,18 @@ __all__ = ['AcLineSegmentPhase']
 
 from typing import TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.ewb.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.ewb.model.cim.iec61968.assetinfo.wire_info import WireInfo
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@zb_dataclass
 class AcLineSegmentPhase(PowerSystemResource):
     """
     Represents a single wire of an alternating current line segment.
@@ -33,8 +37,8 @@ class AcLineSegmentPhase(PowerSystemResource):
     sequence_number: int | None = None
     _ac_line_segment: AcLineSegment | None = None
 
-    def __init__(self, ac_line_segment: AcLineSegment = None, **kwargs):
-        super(AcLineSegmentPhase, self).__init__(**kwargs)
+    def __init__(self, *args, ac_line_segment: AcLineSegment = None, **kwargs):
+        super(AcLineSegmentPhase, self).__init__(*args, **kwargs)
         if ac_line_segment is not None:
             self.ac_line_segment = ac_line_segment
 
@@ -43,11 +47,12 @@ class AcLineSegmentPhase(PowerSystemResource):
         return self._ac_line_segment
 
     @ac_line_segment.setter
+    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `phases` list")
     def ac_line_segment(self, ac_line_segment: 'AcLineSegment') -> None:
         if self._ac_line_segment is None or self._ac_line_segment is ac_line_segment:
             self._ac_line_segment = ac_line_segment
         else:
-            raise ValueError(f"ac_line_segment has already been set to ${self._ac_line_segment}. Cannot set this field again")
+            raise ValueError(f"ac_line_segment has already been set to {self._ac_line_segment}. Cannot set this field again")
 
 
     asset_info: WireInfo | None = None

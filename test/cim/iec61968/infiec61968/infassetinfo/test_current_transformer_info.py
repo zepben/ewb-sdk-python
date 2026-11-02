@@ -7,11 +7,8 @@ from hypothesis import given
 
 from cim.fill_fields import current_transformer_info_kwargs
 from cim.iec61968.assets.test_asset_info import verify_asset_info_constructor_default, \
-    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from zepben.ewb import CurrentTransformerInfo, Ratio, generate_id
-
-# noinspection PyArgumentList
-current_transformer_info_args = [*asset_info_args, "a", 1.1, 2, "b", 3, Ratio(4.4, 5.5), Ratio(6.6, 7.7), 8.8, 9, 10, 11.11, "c"]
+    verify_asset_info_constructor_kwargs
+from zepben.ewb import CurrentTransformerInfo, generate_id
 
 
 def test_current_transformer_info_constructor_default():
@@ -33,8 +30,10 @@ def test_current_transformer_info_constructor_default():
 
 
 @given(**current_transformer_info_kwargs())
-def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_limit, core_count, ct_class, knee_point_voltage, max_ratio, nominal_ratio,
-                                                     primary_ratio, rated_current, secondary_fls_rating, secondary_ratio, usage, **kwargs):
+def test_current_transformer_info_constructor_kwargs(
+    accuracy_class, accuracy_limit, core_count, ct_class, knee_point_voltage, max_ratio, nominal_ratio,
+    primary_ratio, rated_current, secondary_fls_rating, secondary_ratio, usage, **kwargs,
+):
     cti = CurrentTransformerInfo(
         accuracy_class=accuracy_class,
         accuracy_limit=accuracy_limit,
@@ -48,7 +47,7 @@ def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_li
         secondary_fls_rating=secondary_fls_rating,
         secondary_ratio=secondary_ratio,
         usage=usage,
-        **kwargs
+        **kwargs,
     )
 
     verify_asset_info_constructor_kwargs(cti, **kwargs)
@@ -64,23 +63,3 @@ def test_current_transformer_info_constructor_kwargs(accuracy_class, accuracy_li
     assert cti.secondary_fls_rating == secondary_fls_rating
     assert cti.secondary_ratio == secondary_ratio
     assert cti.usage == usage
-
-
-def test_current_transformer_info_constructor_args():
-    cti = CurrentTransformerInfo(*current_transformer_info_args)
-
-    verify_asset_info_constructor_args(cti)
-    assert [
-               cti.accuracy_class,
-               cti.accuracy_limit,
-               cti.core_count,
-               cti.ct_class,
-               cti.knee_point_voltage,
-               cti.max_ratio,
-               cti.nominal_ratio,
-               cti.primary_ratio,
-               cti.rated_current,
-               cti.secondary_fls_rating,
-               cti.secondary_ratio,
-               cti.usage
-           ] == current_transformer_info_args[-12:]

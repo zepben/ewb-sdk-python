@@ -14,6 +14,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.ewb.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
+@zb_dataclass
 class PowerTransformer(ConductingEquipment):
     """
     An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing
@@ -50,7 +52,7 @@ class PowerTransformer(ConductingEquipment):
     """
     Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
     determined from the constituent winding connections and phase angle displacements.
-                                                                                                                            
+
     The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid
     voltage winding connection(for three winding transformers), phase displacement clock number from 0 to 11,  low voltage
     winding connection phase displacement clock number from 0 to 11.   The winding connections are D(delta), Y(wye),
@@ -59,7 +61,7 @@ class PowerTransformer(ConductingEquipment):
     string.  Some examples: YNy0(two winding wye to wye with no phase displacement), YNd11(two winding wye to delta with
     330 degrees phase displacement), YNyn0d5(three winding transformer wye with neutral high voltage, wye with neutral mid
     voltage and no phase displacement, delta low voltage with 150 degrees displacement).
-                                                                                                                            
+
     Phase displacement is defined as the angular difference between the phasors representing the voltages between the
     neutral point(real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system
     being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in
@@ -84,19 +86,13 @@ class PowerTransformer(ConductingEquipment):
     The function of this transformer.
     """
 
-    def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
-        super(PowerTransformer, self).__init__(**kwargs)
+    def __init__(self, *args, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
+        super(PowerTransformer, self).__init__(*args, **kwargs)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 if end.power_transformer is None:
                     end.power_transformer = self
                 self.add_end(end)
-
-    def num_ends(self):
-        """
-        Get the number of `PowerTransformerEnd`s for this `PowerTransformer`.
-        """
-        return nlen(self._power_transformer_ends)
 
     @property
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
@@ -126,6 +122,36 @@ class PowerTransformer(ConductingEquipment):
                 return end.base_voltage
         else:
             return None
+
+    def _validate_end(self, end: PowerTransformerEnd) -> bool:
+        """
+        Validate an end against this `PowerTransformer`'s `PowerTransformerEnd`s.
+
+        `end` The `PowerTransformerEnd` to validate.
+        Returns True if `end` is already associated with this `PowerTransformer`, otherwise False.
+        Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
+        with the same mRID.
+        """
+        if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
+            return True
+
+        if self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number"):
+            return True
+
+        if not end.power_transformer:
+            end.power_transformer = self
+
+        require(
+            end.power_transformer is self,
+            lambda: f"{end} `power_transformer` property references {end.power_transformer}, expected {str(self)}.",
+        )
+        return False
+
+    def num_ends(self):
+        """
+        Get the number of `PowerTransformerEnd`s for this `PowerTransformer`.
+        """
+        return nlen(self._power_transformer_ends)
 
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
         """
@@ -201,27 +227,3 @@ class PowerTransformer(ConductingEquipment):
         """
         self._power_transformer_ends.clear()
         return self
-
-    def _validate_end(self, end: PowerTransformerEnd) -> bool:
-        """
-        Validate an end against this `PowerTransformer`'s `PowerTransformerEnd`s.
-
-        `end` The `PowerTransformerEnd` to validate.
-        Returns True if `end` is already associated with this `PowerTransformer`, otherwise False.
-        Raises `ValueError` if `end.power_transformer` is not this `PowerTransformer`, or if this `PowerTransformer` has a different `PowerTransformerEnd`
-        with the same mRID.
-        """
-        if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
-            return True
-
-        if self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number"):
-            return True
-
-        if not end.power_transformer:
-            end.power_transformer = self
-
-        require(
-            end.power_transformer is self,
-            lambda: f"PowerTransformerEnd {end} references another PowerTransformer {end.power_transformer}, expected {str(self)}.",
-        )
-        return False

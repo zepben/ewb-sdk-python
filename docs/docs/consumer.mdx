@@ -7,8 +7,8 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 The SDK provides a client to request models to a remote data server via [gRPC](https://grpc.io/). The service and proto 
-definitions for this API can be found [here](https://github.com/zepben/evolve-grpc). An implementation of the consumer 
-server is provided with the Evolve platform data services.
+definitions for this API can be found [here](https://github.com/zepben/ewb-grpc). An implementation of the consumer 
+server is provided with the EWB platform data services.
 
 When working with models, it is often impractical to load a whole model to a client due to the size of the data. This 
 is generally not a problem however, as most use cases only operate on a small subsection of the model at a time. So, the 
@@ -25,7 +25,7 @@ This will typically be one of the following:
 1. `connect_insecure()`, for unauthenticated, insecure connections. Cannot be used against a secured (HTTPS) EWB.
 1. `connect_tls()`, for unauthenticated, but https connections. Can only be used if EWB is configured without auth.
 1. `connect_with_password()`, for authenticating with a username, password, and client ID.
-1. `connect_with_secret()`, for authenticating with a client ID and secret, typically used for machine-to-machine services.1
+1. `connect_with_secret()`, for authenticating with a client ID and secret, typically used for machine-to-machine services.
 1. `connect_with_identity()`, for authenticating with an Azure managed identity.
 1. `connect_with_token()`, for authenticating with a personal access token and TLS.
 
@@ -65,32 +65,30 @@ result = client.get_equipment_container("xxx", Feeder)
 client.service.get('...')
 ```
 
-To specify a CA bundle pass the ca parameter:
+To specify a CA bundle pass the `ca_filename` parameter:
 ```python
-from zepben.ewb import connect_tls, SyncNetworkConsumerClient, Feeder
-from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
+from zepben.ewb import connect_tls, SyncNetworkConsumerClient, Feeder, IncludedEnergizedContainers
 
 channel = connect_tls(host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle")
 client = SyncNetworkConsumerClient(channel)
 
 result = client.get_equipment_container("xxx", Feeder)
 # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+result = client.get_equipment_container("xxx", Feeder, include_energized_containers=IncludedEnergizedContainers.LV_FEEDERS)
 
 client.service.get('...')
 ```
 
-If a personal access token is generated from the Evolve App Server or Evolve Web Client the `connect_with_token` function can be used:
+If a personal access token is generated from the Energy Workbench app server or web client the `connect_with_token` function can be used:
 ```python
-from zepben.ewb import connect_with_token, SyncNetworkConsumerClient, Feeder
-from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
+from zepben.ewb import connect_with_token, SyncNetworkConsumerClient, Feeder, IncludedEnergizedContainers
 
 channel = connect_with_token(access_token="your_personal_access_token", host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle")
 client = SyncNetworkConsumerClient(channel)
 
 result = client.get_equipment_container("xxx", Feeder)
 # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+result = client.get_equipment_container("xxx", Feeder, include_energized_containers=IncludedEnergizedContainers.LV_FEEDERS)
 
 client.service.get('...')
 ```
@@ -98,7 +96,6 @@ client.service.get('...')
 If client authentication is required by the server, use the underlying `GrpcChannelBuilder` class instead:
 ```python
 from zepben.ewb import GrpcChannelBuilder, SyncNetworkConsumerClient, Feeder
-from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
 channel = (
     GrpcChannelBuilder()
@@ -160,7 +157,7 @@ def print_network_hierarchy(client: SyncNetworkConsumerClient):
         for sub_region in region.sub_geographical_regions:
             print(f"  |- {sub_region.name} [{sub_region.mrid}]")
             for substation in sub_region.substations:
-                print(f"    |- {sub_region.name} [{sub_region.mrid}]")
+                print(f"    |- {substation.name} [{substation.mrid}]")
                 for feeder in substation.feeders:
                     print(f"      |- {feeder.name} [{feeder.mrid}]")
 ```
@@ -186,10 +183,12 @@ functions on the service provided when requesting identified objects.
 ```python
 from zepben.ewb import NetworkService, SyncNetworkConsumerClient, resolver
 
+
 def get_with_base_voltage(service: NetworkService, client: SyncNetworkConsumerClient, mrid: str):
-    equipment = client.get_identifiable(mrid).result
-    if not equipment:
+    result = client.get_identifiable(mrid)
+    if not result.was_successful:
         return
+    equipment = result.value
 
     # Get all base voltage relationships
     mrids = list(service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment)))
@@ -202,28 +201,28 @@ You can also query the services UnresolvedReferences in the following ways:
 ```python
 # To get unresolved references pointing from `equipment` to other objects:
 for ref in service.get_unresolved_references_from(equipment.mrid):
-    await client.get_identifiable(service, ref.to_mrid)
+    client.get_identifiable(ref.to_mrid)
 
 # To get unresolved references pointing to `equipment`:
 for ref in service.get_unresolved_references_to(equipment.mrid):
-    await client.get_identifiable(service, ref.from_ref.mrid)
+    client.get_identifiable(ref.from_ref.mrid)
 
 # Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
 for ref in service.unresolved_references():
-    await client.get_identifiable(service, ref.to_mrid)
+    client.get_identifiable(ref.to_mrid)
 ```
 
 ## Service metadata
 
-Metadata about the servers title, version, and data sources can be retrieved via the `getMetadata()` call.
+Metadata about the servers title, version, and data sources can be retrieved via the `get_metadata()` call.
 
 ```python
-service_info = client.get_metadata()
+service_info = client.get_metadata().throw_on_error().value
 print(service_info.title)
 
 print("Data sources:")
 for ds in service_info.data_sources:
-    print(f"  {ds.title}")
+    print(f"  {ds.source}")
     print(f"  {ds.version}")
     print(f"  {ds.timestamp}")
 ```

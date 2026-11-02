@@ -6,12 +6,9 @@
 from hypothesis import given
 
 from cim.fill_fields import operational_restriction_kwargs
-from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs, \
-    verify_document_constructor_args, document_args
+from cim.iec61968.common.test_document import verify_document_constructor_default, verify_document_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import OperationalRestriction, Equipment, generate_id
-
-operational_restriction_args = [*document_args, [Equipment(mrid=generate_id())]]
 
 
 def test_operational_restriction_constructor_default():
@@ -25,20 +22,11 @@ def test_operational_restriction_constructor_default():
 def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
     or_ = OperationalRestriction(
         equipment=equipment,
-        **kwargs
+        **kwargs,
     )
 
     verify_document_constructor_kwargs(or_, **kwargs)
     assert list(or_.equipment) == equipment
-
-
-def test_operational_restriction_constructor_args():
-    or_ = OperationalRestriction(*operational_restriction_args)
-
-    verify_document_constructor_args(or_)
-    assert operational_restriction_args[-1:] == [
-        list(or_.equipment)
-    ]
 
 
 def test_equipment_collection():
@@ -50,5 +38,5 @@ def test_equipment_collection():
         OperationalRestriction.get_equipment,
         OperationalRestriction.add_equipment,
         OperationalRestriction.remove_equipment,
-        OperationalRestriction.clear_equipment
+        OperationalRestriction.clear_equipment,
     )

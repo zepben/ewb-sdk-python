@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import per_length_sequence_impedance_kwargs
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
-    verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_args
+    verify_per_length_impedance_constructor_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-
-per_length_sequence_impedance_args = [*per_length_impedance_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
 
 
 def test_per_length_sequence_impedance_constructor_default():
@@ -41,20 +39,3 @@ def test_per_length_sequence_impedance_constructor_kwargs(r, x, bch, gch, r0, x0
     assert plsi.x0 == x0
     assert plsi.b0ch == b0ch
     assert plsi.g0ch == g0ch
-
-
-def test_per_length_sequence_impedance_constructor_args():
-    # noinspection PyArgumentList
-    plsi = PerLengthSequenceImpedance(*per_length_sequence_impedance_args)
-
-    verify_per_length_impedance_constructor_args(plsi)
-    assert per_length_sequence_impedance_args[-8:] == [
-        plsi.r,
-        plsi.x,
-        plsi.bch,
-        plsi.gch,
-        plsi.r0,
-        plsi.x0,
-        plsi.b0ch,
-        plsi.g0ch
-    ]

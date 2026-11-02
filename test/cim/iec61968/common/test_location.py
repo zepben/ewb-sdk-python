@@ -6,13 +6,10 @@ from hypothesis import given
 
 from cim.fill_fields import location_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_ordered_other
 from zepben.ewb import Location, generate_id
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
-from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
-
-location_args = [*identified_object_args, StreetAddress(), [PositionPoint(1.1, 2.2)]]
 
 
 def test_location_constructor_default():
@@ -32,16 +29,6 @@ def test_location_constructor_kwargs(main_address, position_points, **kwargs):
     assert list(loc.points) == position_points
 
 
-def test_location_constructor_args():
-    loc = Location(*location_args)
-
-    verify_identified_object_constructor_args(loc)
-    assert location_args[-2:] == [
-        loc.main_address,
-        list(loc.points)
-    ]
-
-
 def test_points_collection():
     validate_ordered_other(
         Location,
@@ -54,5 +41,5 @@ def test_points_collection():
         Location.insert_point,
         Location.remove_point,
         Location.remove_point_by_sequence_number,
-        Location.clear_points
+        Location.clear_points,
     )

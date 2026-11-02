@@ -10,15 +10,11 @@ from pytest import raises
 
 from cim.fill_fields import power_transformer_end_kwargs
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
-    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_args
+    verify_transformer_end_constructor_kwargs
 from cim.private_collection_validator import validate_unordered_other
 from util import assert_or_empty
-from zepben.ewb import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerCoolingType, generate_id
+from zepben.ewb import PowerTransformerEnd, WindingConnection, TransformerCoolingType, generate_id
 from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
-
-power_transformer_end_args = [
-    *transformer_end_args, PowerTransformer(mrid=generate_id()), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11
-]
 
 
 def test_power_transformer_end_constructor_default():
@@ -56,7 +52,7 @@ def test_power_transformer_end_constructor_kwargs(
     b0,
     connection_kind,
     phase_angle_clock,
-    **kwargs
+    **kwargs,
 ):
     pte = PowerTransformerEnd(
         power_transformer=power_transformer,
@@ -72,7 +68,7 @@ def test_power_transformer_end_constructor_kwargs(
         b0=b0,
         connection_kind=connection_kind,
         phase_angle_clock=phase_angle_clock,
-        **kwargs
+        **kwargs,
     )
 
     verify_transformer_end_constructor_kwargs(pte, **kwargs)
@@ -95,31 +91,6 @@ def test_power_transformer_end_constructor_kwargs(
     assert pte.phase_angle_clock == phase_angle_clock
 
 
-def test_power_transformer_end_constructor_args():
-    pte = PowerTransformerEnd(*power_transformer_end_args)
-
-    verify_transformer_end_constructor_args(pte)
-    assert power_transformer_end_args[-13:-11] == [
-        pte.power_transformer,
-        pte.rated_s
-    ]
-    # We use a different style of matching here as the passed in arg for rated_s is translated to a TransformerEndRatedS.
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, power_transformer_end_args[-12])]
-    assert power_transformer_end_args[-11:] == [
-        pte.rated_u,
-        pte.r,
-        pte.x,
-        pte.r0,
-        pte.x0,
-        pte.g,
-        pte.g0,
-        pte.b,
-        pte.b0,
-        pte.connection_kind,
-        pte.phase_angle_clock
-    ]
-
-
 def test_power_transformer_end_s_ratings():
     validate_unordered_other(
         PowerTransformerEnd,
@@ -131,7 +102,7 @@ def test_power_transformer_end_s_ratings():
         PowerTransformerEnd.remove_rating,
         PowerTransformerEnd.clear_ratings,
         lambda rs: rs.cooling_type,
-        lambda ct: ct.name
+        lambda ct: ct.name,
     )
 
 

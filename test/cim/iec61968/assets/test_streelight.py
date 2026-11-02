@@ -5,12 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import streetlight_kwargs
-from cim.iec61968.assets.test_asset import verify_asset_constructor_default, \
-    verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
-from zepben.ewb import Streetlight, Pole, generate_id
+from cim.iec61968.assets.test_asset import verify_asset_constructor_default, verify_asset_constructor_kwargs
+from zepben.ewb import Streetlight, generate_id
 from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
-
-streetlight_args = [*asset_args, Pole(mrid=generate_id()), 1, StreetlightLampKind.HIGH_PRESSURE_SODIUM]
 
 
 def test_streetlight_constructor_default():
@@ -24,23 +21,14 @@ def test_streetlight_constructor_default():
 
 @given(**streetlight_kwargs())
 def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs):
-    p = Streetlight(pole=pole,
-                    light_rating=light_rating,
-                    lamp_kind=lamp_kind,
-                    **kwargs)
+    p = Streetlight(
+        pole=pole,
+        light_rating=light_rating,
+        lamp_kind=lamp_kind,
+        **kwargs,
+    )
 
     verify_asset_constructor_kwargs(p, **kwargs)
     assert p.pole == pole
     assert p.light_rating == light_rating
     assert p.lamp_kind == lamp_kind
-
-
-def test_streetlight_constructor_args():
-    p = Streetlight(*streetlight_args)
-
-    verify_asset_constructor_args(p)
-    assert streetlight_args[-3:] == [
-        p.pole,
-        p.light_rating,
-        p.lamp_kind
-    ]

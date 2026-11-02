@@ -8,8 +8,10 @@ __all__ = ["Analog"]
 from typing import Optional
 
 from zepben.ewb.model.cim.iec61970.base.meas.measurement import Measurement
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 class Analog(Measurement):
     """Analog represents an analog Measurement."""
 

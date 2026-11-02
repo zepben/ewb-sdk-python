@@ -6,12 +6,9 @@
 from hypothesis import given
 
 from cim.fill_fields import customer_agreement_kwargs
-from cim.iec61968.common.test_agreement import verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
-    verify_agreement_constructor_args, agreement_args
+from cim.iec61968.common.test_agreement import verify_agreement_constructor_default, verify_agreement_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import CustomerAgreement, Customer, PricingStructure, generate_id
-
-customer_agreement_args = [*agreement_args, Customer(mrid=generate_id()), [PricingStructure(mrid=generate_id())]]
+from zepben.ewb import CustomerAgreement, PricingStructure, generate_id
 
 
 def test_customer_agreement_constructor_default():
@@ -27,22 +24,12 @@ def test_customer_agreement_constructor_kwargs(customer, pricing_structures, **k
     ca = CustomerAgreement(
         customer=customer,
         pricing_structures=pricing_structures,
-        **kwargs
+        **kwargs,
     )
 
     verify_agreement_constructor_kwargs(ca, **kwargs)
     assert ca.customer == customer
     assert list(ca.pricing_structures) == pricing_structures
-
-
-def test_customer_agreement_constructor_args():
-    ca = CustomerAgreement(*customer_agreement_args)
-
-    verify_agreement_constructor_args(ca)
-    assert [
-               ca.customer,
-               list(ca.pricing_structures)
-           ] == customer_agreement_args[-2:]
 
 
 def test_pricing_structures_collection():
@@ -54,5 +41,5 @@ def test_pricing_structures_collection():
         CustomerAgreement.get_pricing_structure,
         CustomerAgreement.add_pricing_structure,
         CustomerAgreement.remove_pricing_structure,
-        CustomerAgreement.clear_pricing_structures
+        CustomerAgreement.clear_pricing_structures,
     )

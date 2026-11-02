@@ -9,35 +9,43 @@ __all__ = ["SubGeographicalRegion"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
     from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 
 
+@zb_dataclass
 class SubGeographicalRegion(IdentifiedObject):
     """
     A subset of a geographical region of a power system network model.
     """
 
-    geographical_region: Optional[GeographicalRegion] = None
-    """The geographical region to which this sub-geographical region is within."""
+    _geographical_region: Optional[GeographicalRegion] = None
 
     _substations: Optional[List[Substation]] = None
 
-    def __init__(self, substations: List[Substation] = None, **kwargs):
-        super(SubGeographicalRegion, self).__init__(**kwargs)
+    def __init__(self, *args, substations: List[Substation] = None, **kwargs):
+        super(SubGeographicalRegion, self).__init__(*args, **kwargs)
         if substations:
             for sub in substations:
                 self.add_substation(sub)
 
-    def num_substations(self) -> int:
-        """
-        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
-        """
-        return nlen(self._substations)
+
+    @property
+    def geographical_region(self):
+        """The geographical region to which this sub-geographical region is within."""
+        return self._geographical_region
+
+    @geographical_region.setter
+    @deprecated("geographical_region should never be set directly - it is automatically set when adding it to the `sub_geographical_regions` list")
+    def geographical_region(self, value):
+        self._geographical_region = value
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
@@ -45,6 +53,12 @@ class SubGeographicalRegion(IdentifiedObject):
         All substations belonging to this sub geographical region.
         """
         return ngen(self._substations)
+
+    def num_substations(self) -> int:
+        """
+        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
+        """
+        return nlen(self._substations)
 
     def get_substation(self, mrid: str) -> Substation:
         """
@@ -64,11 +78,17 @@ class SubGeographicalRegion(IdentifiedObject):
 
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
 
-        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this
-        `GeographicalRegion`.
+        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `SubGeographicalRegion`, or if
+        `substation.sub_geographical_region` is not this `SubGeographicalRegion`.
         """
         if self._validate_reference(substation, self.get_substation, "A Substation"):
             return self
+
+        if substation.sub_geographical_region is None:
+            substation.sub_geographical_region = self
+
+        require(substation.sub_geographical_region is self, lambda: f"{substation} `sub_geographical_region` property references {substation.sub_geographical_region}, expected {self}.")
+
         self._substations = list() if self._substations is None else self._substations
         self._substations.append(substation)
         return self

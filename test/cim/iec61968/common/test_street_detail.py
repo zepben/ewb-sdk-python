@@ -8,8 +8,6 @@ from hypothesis import given
 from cim.fill_fields import street_detail_kwargs
 from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
 
-street_detail_args = ["a", "b", "c", "d", "e", "f", "g"]
-
 
 def test_street_detail_constructor_default():
     sd = StreetDetail()
@@ -46,20 +44,6 @@ def test_street_detail_constructor_kwargs(building_number, building_name, floor_
     assert sd.type == type
     assert sd.display_address == display_address
     assert sd.building_number == building_number
-
-
-def test_street_detail_constructor_args():
-    sd = StreetDetail(*street_detail_args)
-
-    assert street_detail_args[-7:] == [
-        sd.building_name,
-        sd.floor_identification,
-        sd.name,
-        sd.number,
-        sd.suite_number,
-        sd.type,
-        sd.display_address
-    ]
 
 
 def test_all_fields_empty():

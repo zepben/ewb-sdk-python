@@ -11,18 +11,22 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.ewb.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.ewb.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.ewb.services.network.tracing.phases.phase_status import PhaseStatus
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
     from zepben.ewb.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 
 
+@zb_dataclass
 class Terminal(AcDcTerminal):
     """
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
@@ -54,8 +58,8 @@ class Terminal(AcDcTerminal):
     _normal_phases: PhaseStatus = None
     _current_phases: PhaseStatus = None
 
-    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
-        super(Terminal, self).__init__(**kwargs)
+    def __init__(self, *args, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
+        super(Terminal, self).__init__(*args, **kwargs)
 
         self._normal_phases = PhaseStatus(self)
 
@@ -89,6 +93,7 @@ class Terminal(AcDcTerminal):
         return self._conducting_equipment
 
     @conducting_equipment.setter
+    @deprecated("conducting_equipment should never be set directly - it is automatically set when adding it to the `terminals` list")
     def conducting_equipment(self, ce):
         if self._conducting_equipment is None or self._conducting_equipment is ce:
             self._conducting_equipment = ce

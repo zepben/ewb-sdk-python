@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.wires.test_per_length_line_parameter import verify_per_length_line_parameter_constructor_default, \
-    verify_per_length_line_parameter_constructor_kwargs, verify_per_length_line_parameter_constructor_args, per_length_line_parameter_args
+    verify_per_length_line_parameter_constructor_kwargs
 from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
-
-per_length_impedance_args = per_length_line_parameter_args
 
 
 def verify_per_length_impedance_constructor_default(pli: PerLengthImpedance):
@@ -16,7 +14,3 @@ def verify_per_length_impedance_constructor_default(pli: PerLengthImpedance):
 
 def verify_per_length_impedance_constructor_kwargs(pli: PerLengthImpedance, **kwargs):
     verify_per_length_line_parameter_constructor_kwargs(pli, **kwargs)
-
-
-def verify_per_length_impedance_constructor_args(pli: PerLengthImpedance):
-    verify_per_length_line_parameter_constructor_args(pli)

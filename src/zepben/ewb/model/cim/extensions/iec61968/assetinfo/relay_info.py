@@ -12,8 +12,10 @@ from typing import Optional, List, Generator, Callable, Any
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.util import ngen, nlen, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 
+@zb_dataclass
 @zbex
 class RelayInfo(AssetInfo):
     """Relay Datasheet Information."""
@@ -26,8 +28,8 @@ class RelayInfo(AssetInfo):
 
     _reclose_delays: Optional[List[float]] = None
 
-    def __init__(self, reclose_delays: Optional[List[float]] = None, **kwargs):
-        super(RelayInfo, self).__init__(**kwargs)
+    def __init__(self, *args, reclose_delays: Optional[List[float]] = None, **kwargs):
+        super(RelayInfo, self).__init__(*args, **kwargs)
         if reclose_delays:
             for index, delay in enumerate(reclose_delays):
                 self.add_delay(delay, index)
@@ -38,6 +40,16 @@ class RelayInfo(AssetInfo):
         The reclose delays for this curve and relay type. The index of the list is the reclose step, and the value is the overall delay time.
         """
         return ngen(self._reclose_delays)
+
+    def set_delays(self, delays: List[float]) -> RelayInfo:
+        """
+        Set the reclose delays for this :class:`RelayInfo`.
+
+        :param delays: The delays to set. The provided list will be copied.
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
+        """
+        self._reclose_delays = delays.copy()
+        return self
 
     def num_delays(self) -> int:
         """
@@ -82,16 +94,6 @@ class RelayInfo(AssetInfo):
                         f"adding the items in order and there are no gaps in the numbering.")
         self._reclose_delays = list() if self._reclose_delays is None else self._reclose_delays
         self._reclose_delays.insert(index, delay)
-        return self
-
-    def set_delays(self, delays: List[float]) -> RelayInfo:
-        """
-        Set the reclose delays for this :class:`RelayInfo`.
-
-        :param delays: The delays to set. The provided list will be copied.
-        :return: A reference to this :class:`RelayInfo` to allow fluent use.
-        """
-        self._reclose_delays = delays.copy()
         return self
 
     def remove_delay(self, delay: float) -> RelayInfo:

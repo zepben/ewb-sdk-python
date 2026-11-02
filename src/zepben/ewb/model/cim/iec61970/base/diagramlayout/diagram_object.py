@@ -9,13 +9,17 @@ __all__ = ["DiagramObject"]
 
 from typing import Optional, List, Generator, Callable, TYPE_CHECKING, Any
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.ewb.util import nlen, ngen, require, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
+@zb_dataclass
 class DiagramObject(IdentifiedObject):
     """
     An object that defines one or more points in a given space. This object can be associated with anything
@@ -24,7 +28,6 @@ class DiagramObject(IdentifiedObject):
     """
 
     _diagram: Optional[Diagram] = None
-    """A diagram object is part of a diagram."""
 
     identified_object_mrid: Optional[str] = None
     """The domain object to which this diagram object is associated."""
@@ -37,8 +40,8 @@ class DiagramObject(IdentifiedObject):
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
 
-    def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
-        super(DiagramObject, self).__init__(**kwargs)
+    def __init__(self, *args, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
+        super(DiagramObject, self).__init__(*args, **kwargs)
         if diagram:
             self.diagram = diagram
         if diagram_object_points:
@@ -47,20 +50,16 @@ class DiagramObject(IdentifiedObject):
 
     @property
     def diagram(self):
+        """A diagram object is part of a diagram."""
         return self._diagram
 
     @diagram.setter
+    @deprecated("diagram should never be set directly - it is automatically set when adding it to the `diagram_objects` list")
     def diagram(self, diag):
         if self._diagram is None or self._diagram is diag:
             self._diagram = diag
         else:
             raise ValueError(f"diagram for {str(self)} has already been set to {self._diagram}, cannot reset this field to {diag}")
-
-    def num_points(self):
-        """
-        Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
-        """
-        return nlen(self._diagram_object_points)
 
     @property
     def points(self) -> Generator[DiagramObjectPoint, None, None]:
@@ -68,6 +67,21 @@ class DiagramObject(IdentifiedObject):
         The `DiagramObjectPoint`s for this `DiagramObject`.
         """
         return ngen(self._diagram_object_points)
+
+    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], Any]):
+        """
+        Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`DiagramObjectPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
+
+    def num_points(self):
+        """
+        Returns the number of `DiagramObjectPoint`s associated with this `DiagramObject`
+        """
+        return nlen(self._diagram_object_points)
 
     def get_point(self, sequence_number: int) -> DiagramObjectPoint:
         """
@@ -86,15 +100,6 @@ class DiagramObject(IdentifiedObject):
 
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
-
-    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], Any]):
-        """
-        Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
-
-        :param action: An action to apply to each :class:`DiagramObjectPoint` in the `points` collection, taking the index of the point, and the point itself.
-        """
-        for index, point in enumerate(self.points):
-            action(index, point)
 
     def add_point(self, point: DiagramObjectPoint) -> DiagramObject:
         """

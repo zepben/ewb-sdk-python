@@ -11,16 +11,18 @@ from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control_mode im
 from zepben.ewb.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
 from zepben.ewb.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 
+@zb_dataclass
 class BatteryUnit(PowerElectronicsUnit):
     """An electrochemical energy storage device."""
 
-    def __init__(self, controls: List['BatteryControl'] = None, **kwargs):
-        super(BatteryUnit, self).__init__(**kwargs)
+    def __init__(self, *args, controls: List['BatteryControl'] = None, **kwargs):
+        super(BatteryUnit, self).__init__(*args, **kwargs)
         if controls:
             for bc in controls:
                 self.add_control(bc)
@@ -37,18 +39,18 @@ class BatteryUnit(PowerElectronicsUnit):
     _controls: Optional[List['BatteryControl']] = None
 
     # NOTE: This is called `num_battery_controls` because `num_controls` is already used by `PowerSystemResource`.
-    def num_battery_controls(self):
-        """
-        Returns The number of `BatteryControl`s associated with this `BatteryUnit`
-        """
-        return nlen(self._controls)
-
     @property
     def controls(self) -> Generator['BatteryControl', None, None]:
         """
         [ZBEX] The `BatteryControl`s associated with this `BatteryUnit`
         """
         return ngen(self._controls)
+
+    def num_battery_controls(self):
+        """
+        Returns The number of `BatteryControl`s associated with this `BatteryUnit`
+        """
+        return nlen(self._controls)
 
     def get_control(self, mrid: str) -> 'BatteryControl':
         """

@@ -6,12 +6,9 @@
 from hypothesis import given
 
 from cim.fill_fields import circuit_kwargs
-from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, \
-    line_args
+from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import Circuit, Loop, Terminal, Substation, generate_id
-
-circuit_args = [*line_args, Loop(mrid=generate_id()), [Terminal(mrid=generate_id())], [Substation(mrid=generate_id())]]
+from zepben.ewb import Circuit, Terminal, Substation, generate_id
 
 
 def test_circuit_constructor_default():
@@ -33,17 +30,6 @@ def test_circuit_constructor_kwargs(loop, end_terminals, end_substations, **kwar
     assert list(c.end_substations) == end_substations
 
 
-def test_circuit_constructor_args():
-    c = Circuit(*circuit_args)
-
-    verify_line_constructor_args(c)
-    assert circuit_args[-3:] == [
-        c.loop,
-        list(c.end_terminals),
-        list(c.end_substations)
-    ]
-
-
 def test_end_terminals_collection():
     validate_unordered(
         Circuit,
@@ -53,7 +39,7 @@ def test_end_terminals_collection():
         Circuit.get_end_terminal,
         Circuit.add_end_terminal,
         Circuit.remove_end_terminal,
-        Circuit.clear_end_terminals
+        Circuit.clear_end_terminals,
     )
 
 
@@ -66,5 +52,5 @@ def test_end_substations_collection():
         Circuit.get_end_substation,
         Circuit.add_end_substation,
         Circuit.remove_end_substation,
-        Circuit.clear_end_substations
+        Circuit.clear_end_substations,
     )

@@ -5,20 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import directional_current_relay_kwargs
-from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_args, \
-    verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_args, verify_protection_relay_function_constructor_kwargs
+from cim.iec61970.base.protection.test_protection_relay_function import verify_protection_relay_function_constructor_default, \
+    verify_protection_relay_function_constructor_kwargs
 from zepben.ewb import PolarizingQuantityType, PhaseCode, generate_id, DirectionalCurrentRelay
-
-directional_current_relay_args = [
-    *protection_relay_function_args,
-    1.1,
-    PolarizingQuantityType.NEGATIVE_SEQUENCE_VOLTAGE,
-    PhaseCode.ABCN,
-    2.2,
-    3.3,
-    False,
-    4.4,
-]
 
 
 def test_directional_current_relay_constructor_default():
@@ -43,7 +32,7 @@ def test_directional_current_relay_constructor_kwargs(
     current_limit_1,
     inverse_time_flag,
     time_delay_1,
-    **kwargs
+    **kwargs,
 ):
     dcr = DirectionalCurrentRelay(
         directional_characteristic_angle=directional_characteristic_angle,
@@ -53,7 +42,7 @@ def test_directional_current_relay_constructor_kwargs(
         current_limit_1=current_limit_1,
         inverse_time_flag=inverse_time_flag,
         time_delay_1=time_delay_1,
-        **kwargs
+        **kwargs,
     )
 
     verify_protection_relay_function_constructor_kwargs(dcr, **kwargs)
@@ -64,16 +53,3 @@ def test_directional_current_relay_constructor_kwargs(
     assert dcr.current_limit_1 == current_limit_1
     assert dcr.inverse_time_flag == inverse_time_flag
     assert dcr.time_delay_1 == time_delay_1
-
-
-def test_directional_current_relay_constructor_args():
-    dcr = DirectionalCurrentRelay(*directional_current_relay_args)
-
-    verify_protection_relay_function_constructor_args(dcr)
-    assert dcr.directional_characteristic_angle == directional_current_relay_args[-7]
-    assert dcr.polarizing_quantity_type == directional_current_relay_args[-6]
-    assert dcr.relay_element_phase == directional_current_relay_args[-5]
-    assert dcr.minimum_pickup_current == directional_current_relay_args[-4]
-    assert dcr.current_limit_1 == directional_current_relay_args[-3]
-    assert dcr.inverse_time_flag == directional_current_relay_args[-2]
-    assert dcr.time_delay_1 == directional_current_relay_args[-1]

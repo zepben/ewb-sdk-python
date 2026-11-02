@@ -9,6 +9,7 @@ __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
 from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, AsyncGenerator, Type, Generator, cast
+from dataclasses import dataclass, field
 
 from typing_extensions import deprecated
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
@@ -17,7 +18,6 @@ from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.ewb import BaseService, UnsupportedOperationException, ServiceInfo
 from zepben.ewb.model.cim.iec61970.base.core.identifiable import Identifiable
 from zepben.ewb.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.ewb.streaming.grpc.grpc import GrpcClient, GrpcResult
 
@@ -27,8 +27,8 @@ TStub = TypeVar('TStub')
 
 @dataclass()
 class MultiObjectResult(Generic[T]):
-    objects: Dict[str, T] = dict()
-    failed: Set[str] = set()
+    objects: Dict[str, T] = field(default_factory=dict)
+    failed: Set[str] = field(default_factory=set)
 
 
 ServiceType = TypeVar('ServiceType', bound=BaseService)

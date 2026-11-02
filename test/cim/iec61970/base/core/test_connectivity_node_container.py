@@ -4,10 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
+    verify_power_system_resource_constructor_kwargs
 from zepben.ewb import ConnectivityNodeContainer
-
-connectivity_node_container_args = power_system_resource_args
 
 
 def verify_connectivity_node_container_constructor_default(cnc: ConnectivityNodeContainer):
@@ -16,7 +14,3 @@ def verify_connectivity_node_container_constructor_default(cnc: ConnectivityNode
 
 def verify_connectivity_node_container_constructor_kwargs(cnc: ConnectivityNodeContainer, **kwargs):
     verify_power_system_resource_constructor_kwargs(cnc, **kwargs)
-
-
-def verify_connectivity_node_container_constructor_args(cnc: ConnectivityNodeContainer):
-    verify_power_system_resource_constructor_args(cnc)

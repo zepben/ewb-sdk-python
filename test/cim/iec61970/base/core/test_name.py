@@ -6,13 +6,7 @@
 from hypothesis import given
 
 from cim.fill_fields import name_kwargs
-from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.core.name import Name
-from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
-from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
-
-# noinspection PyArgumentList
-name_args = ["1", NameType(name="nt1"), Junction(mrid=generate_id())]
 
 
 #

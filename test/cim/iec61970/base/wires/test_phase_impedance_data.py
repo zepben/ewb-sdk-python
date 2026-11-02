@@ -9,8 +9,6 @@ from cim.fill_fields import phase_impedance_data_kwargs
 from zepben.ewb import SinglePhaseKind
 from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 
-phase_impedance_data_args = [SinglePhaseKind.B, SinglePhaseKind.C, 1.1, 2.2, 3.3, 4.4]
-
 
 # noinspection PyArgumentList
 def test_data_constructor_default():
@@ -46,16 +44,3 @@ def test_phase_impedance_data_constructor_kwargs(from_phase, to_phase, b, g, r, 
     assert phase_impedance_data.g == g
     assert phase_impedance_data.r == r
     assert phase_impedance_data.x == x
-
-
-def test_phase_impedance_data_constructor_args():
-    phase_impedance_data = PhaseImpedanceData(*phase_impedance_data_args)
-
-    assert phase_impedance_data_args[-6:] == [
-        phase_impedance_data.from_phase,
-        phase_impedance_data.to_phase,
-        phase_impedance_data.b,
-        phase_impedance_data.g,
-        phase_impedance_data.r,
-        phase_impedance_data.x
-    ]

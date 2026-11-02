@@ -4,25 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
+    verify_power_system_resource_constructor_kwargs
 from cim.private_collection_validator import validate_unordered, validate_ordered_other
 from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, Sensor, \
-    UnitSymbol, unit_symbol_from_id, generate_id
-
-protection_relay_function_args = [
-    *power_system_resource_args,
-    "model_string",
-    False,
-    1.1,
-    ProtectionKind.JG,
-    True,
-    PowerDirectionKind.FORWARD,
-    [Sensor(mrid=generate_id())],
-    [ProtectedSwitch(mrid=generate_id())],
-    [ProtectionRelayScheme(mrid=generate_id())],
-    [2.2, 3.3],
-    [RelaySetting(unit_symbol=UnitSymbol.METRES, value=1.1, name="rs1"), RelaySetting(unit_symbol=UnitSymbol.GYPERS, value=2.2, name="rs2")]
-]
+    unit_symbol_from_id
 
 
 def verify_protection_relay_function_constructor_default(prf: ProtectionRelayFunction):
@@ -52,7 +37,7 @@ def verify_protection_relay_function_constructor_kwargs(
     schemes,
     time_limits,
     thresholds,
-    **kwargs
+    **kwargs,
 ):
     verify_power_system_resource_constructor_kwargs(prf, **kwargs)
     assert prf.model == model
@@ -68,23 +53,6 @@ def verify_protection_relay_function_constructor_kwargs(
     assert list(prf.thresholds) == thresholds
 
 
-def verify_protection_relay_function_constructor_args(prf: ProtectionRelayFunction):
-    verify_power_system_resource_constructor_args(prf)
-    assert protection_relay_function_args[-11:] == [
-        prf.model,
-        prf.reclosing,
-        prf.relay_delay_time,
-        prf.protection_kind,
-        prf.directable,
-        prf.power_direction,
-        list(prf.sensors),
-        list(prf.protected_switches),
-        list(prf.schemes),
-        list(prf.time_limits),
-        list(prf.thresholds)
-    ]
-
-
 def test_sensors_collection():
     validate_unordered(
         ProtectionRelayFunction,
@@ -94,7 +62,7 @@ def test_sensors_collection():
         ProtectionRelayFunction.get_sensor,
         ProtectionRelayFunction.add_sensor,
         ProtectionRelayFunction.remove_sensor,
-        ProtectionRelayFunction.clear_sensors
+        ProtectionRelayFunction.clear_sensors,
     )
 
 
@@ -107,7 +75,7 @@ def test_protected_switches_collection():
         ProtectionRelayFunction.get_protected_switch,
         ProtectionRelayFunction.add_protected_switch,
         ProtectionRelayFunction.remove_protected_switch,
-        ProtectionRelayFunction.clear_protected_switches
+        ProtectionRelayFunction.clear_protected_switches,
     )
 
 
@@ -120,7 +88,7 @@ def test_scheme_collection():
         ProtectionRelayFunction.get_scheme,
         ProtectionRelayFunction.add_scheme,
         ProtectionRelayFunction.remove_scheme,
-        ProtectionRelayFunction.clear_schemes
+        ProtectionRelayFunction.clear_schemes,
     )
 
 
@@ -136,7 +104,7 @@ def test_time_limits_collection():
         ProtectionRelayFunction.add_time_limit,
         ProtectionRelayFunction.remove_time_limit,
         ProtectionRelayFunction.remove_time_limit_at,
-        ProtectionRelayFunction.clear_time_limits
+        ProtectionRelayFunction.clear_time_limits,
     )
 
 
@@ -152,5 +120,5 @@ def test_thresholds_collection():
         ProtectionRelayFunction.add_threshold,
         ProtectionRelayFunction.remove_threshold,
         ProtectionRelayFunction.remove_threshold_at,
-        ProtectionRelayFunction.clear_thresholds
+        ProtectionRelayFunction.clear_thresholds,
     )

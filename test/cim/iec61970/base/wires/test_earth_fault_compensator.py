@@ -2,11 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_args, \
-    verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args
+from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, verify_conducting_equipment_constructor_kwargs
 from zepben.ewb import EarthFaultCompensator
-
-earth_fault_compensator_args = [*conducting_equipment_args, 1.0]
 
 
 def verify_earth_fault_compensator_constructor_default(efc: EarthFaultCompensator):
@@ -17,10 +14,3 @@ def verify_earth_fault_compensator_constructor_default(efc: EarthFaultCompensato
 def verify_earth_fault_compensator_constructor_kwargs(efc: EarthFaultCompensator, r, **kwargs):
     verify_conducting_equipment_constructor_kwargs(efc, **kwargs)
     assert efc.r == r
-
-
-def verify_earth_fault_compensator_constructor_args(efc: EarthFaultCompensator):
-    verify_conducting_equipment_constructor_args(efc)
-    assert earth_fault_compensator_args[-1:] == [
-        efc.r
-    ]

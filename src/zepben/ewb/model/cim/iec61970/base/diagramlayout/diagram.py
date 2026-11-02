@@ -13,11 +13,13 @@ from zepben.ewb.model.cim.iec61970.base.core.identified_object import Identified
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 from zepben.ewb.util import nlen, ngen, require, safe_remove_by_id
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
+@zb_dataclass
 class Diagram(IdentifiedObject):
     """
     The diagram being exchanged. The coordinate system is a standard Cartesian coordinate system and the orientation
@@ -32,17 +34,11 @@ class Diagram(IdentifiedObject):
 
     _diagram_objects: Optional[Dict[str, DiagramObject]] = None
 
-    def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
-        super(Diagram, self).__init__(**kwargs)
+    def __init__(self, *args, diagram_objects: List[DiagramObject] = None, **kwargs):
+        super(Diagram, self).__init__(*args, **kwargs)
         if diagram_objects:
             for obj in diagram_objects:
                 self.add_diagram_object(obj)
-
-    def num_diagram_objects(self):
-        """
-        Returns The number of `DiagramObject`s associated with this `Diagram`
-        """
-        return nlen(self._diagram_objects)
 
     @property
     def diagram_objects(self) -> Generator[DiagramObject, None, None]:
@@ -50,6 +46,12 @@ class Diagram(IdentifiedObject):
         The diagram objects belonging to this diagram.
         """
         return ngen(self._diagram_objects)
+
+    def num_diagram_objects(self):
+        """
+        Returns The number of `DiagramObject`s associated with this `Diagram`
+        """
+        return nlen(self._diagram_objects)
 
     def get_diagram_object(self, mrid: str) -> DiagramObject:
         """
@@ -78,7 +80,7 @@ class Diagram(IdentifiedObject):
         """
         if not diagram_object.diagram:
             diagram_object.diagram = self
-        require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} references another Diagram "
+        require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} `diagram` property references "
                                                         f"{str(diagram_object.diagram)}, expected {str(self)}.")
 
         if self._validate_reference(diagram_object, self.get_diagram_object, "A DiagramObject"):

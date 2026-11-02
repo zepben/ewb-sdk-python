@@ -3,12 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, \
-    verify_switch_constructor_args, switch_args
+from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import ProtectionRelayFunction, ProtectedSwitch, generate_id
-
-protected_switch_args = [*switch_args, 1, [ProtectionRelayFunction(mrid=generate_id())]]
+from zepben.ewb import ProtectionRelayFunction, ProtectedSwitch
 
 
 def verify_protected_switch_constructor_default(ps: ProtectedSwitch):
@@ -25,15 +22,6 @@ def verify_protected_switch_constructor_kwargs(ps: ProtectedSwitch, breaking_cap
     assert list(ps.relay_functions) == relay_functions
 
 
-def verify_protected_switch_constructor_args(ps: ProtectedSwitch):
-    verify_switch_constructor_args(ps)
-
-    assert protected_switch_args[-2:] == [
-        ps.breaking_capacity,
-        list(ps.relay_functions)
-    ]
-
-
 def test_relay_function_collection():
     validate_unordered(
         ProtectedSwitch,
@@ -43,5 +31,5 @@ def test_relay_function_collection():
         ProtectedSwitch.get_relay_function,
         ProtectedSwitch.add_relay_function,
         ProtectedSwitch.remove_relay_function,
-        ProtectedSwitch.clear_relay_functions
+        ProtectedSwitch.clear_relay_functions,
     )

@@ -6,20 +6,10 @@ from hypothesis import given
 
 from cim.fill_fields import lv_feeder_kwargs
 from cim.iec61970.base.core.test_equipment_container import verify_equipment_container_constructor_default, \
-    verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+    verify_equipment_container_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
-from zepben.ewb import Terminal, Equipment, LvFeeder, generate_id
-from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
+from zepben.ewb import Equipment, LvFeeder, generate_id
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
-
-lv_feeder_args = [
-    *equipment_container_args,
-    Terminal(mrid=generate_id()),
-    {"f": Feeder(mrid=generate_id())},
-    {"ce": Equipment(mrid=generate_id())},
-    {"cef": Feeder(mrid=generate_id())},
-    LvSubstation(mrid=generate_id()),
-]
 
 
 def test_lv_feeder_constructor_default():
@@ -40,7 +30,7 @@ def test_lv_feeder_constructor_kwargs(
     current_equipment,
     current_energizing_feeders,
     normal_energizing_lv_substation,
-    **kwargs
+    **kwargs,
 ):
     lvf = LvFeeder(
         normal_head_terminal=normal_head_terminal,
@@ -48,7 +38,7 @@ def test_lv_feeder_constructor_kwargs(
         current_equipment=current_equipment,
         current_energizing_feeders=current_energizing_feeders,
         normal_energizing_lv_substation=normal_energizing_lv_substation,
-        **kwargs
+        **kwargs,
     )
 
     verify_equipment_container_constructor_kwargs(lvf, **kwargs)
@@ -57,21 +47,6 @@ def test_lv_feeder_constructor_kwargs(
     assert list(lvf.current_equipment) == current_equipment
     assert list(lvf.current_energizing_feeders) == current_energizing_feeders
     assert lvf.normal_energizing_lv_substation == normal_energizing_lv_substation
-
-
-def test_lv_feeder_constructor_args():
-    lvf = LvFeeder(*lv_feeder_args)
-
-    verify_equipment_container_constructor_args(lvf)
-    assert lv_feeder_args[-5:-4] == [
-        lvf.normal_head_terminal
-    ]
-    # We use a different style of matching here as the passed in args for normal_energizing_feeders and current_equipment
-    # are maps and the stored collections are lists.
-    assert list(lvf.normal_energizing_feeders) == list(lv_feeder_args[-4].values())
-    assert list(lvf.current_equipment) == list(lv_feeder_args[-3].values())
-    assert list(lvf.current_energizing_feeders) == list(lv_feeder_args[-2].values())
-    assert lvf.normal_energizing_lv_substation == lv_feeder_args[-1]
 
 
 def test_current_equipment_collection():
@@ -83,7 +58,7 @@ def test_current_equipment_collection():
         LvFeeder.get_current_equipment,
         LvFeeder.add_current_equipment,
         LvFeeder.remove_current_equipment,
-        LvFeeder.clear_current_equipment
+        LvFeeder.clear_current_equipment,
     )
 
 
@@ -96,7 +71,7 @@ def test_normal_energizing_feeder_collection():
         LvFeeder.get_normal_energizing_feeder,
         LvFeeder.add_normal_energizing_feeder,
         LvFeeder.remove_normal_energizing_feeder,
-        LvFeeder.clear_normal_energizing_feeders
+        LvFeeder.clear_normal_energizing_feeders,
     )
 
 
@@ -109,5 +84,5 @@ def test_current_energizing_feeder_collection():
         LvFeeder.get_current_energizing_feeder,
         LvFeeder.add_current_energizing_feeder,
         LvFeeder.remove_current_energizing_feeder,
-        LvFeeder.clear_current_energizing_feeders
+        LvFeeder.clear_current_energizing_feeders,
     )

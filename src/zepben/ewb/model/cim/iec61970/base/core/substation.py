@@ -9,8 +9,11 @@ __all__ = ["Substation"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
@@ -19,14 +22,14 @@ if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
+@zb_dataclass
 class Substation(EquipmentContainer):
     """
     A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    sub_geographical_region: Optional[SubGeographicalRegion] = None
-    """The SubGeographicalRegion containing the substation."""
+    _sub_geographical_region: Optional[SubGeographicalRegion] = None
 
     _normal_energized_feeders: Optional[List[Feeder]] = None
 
@@ -36,9 +39,8 @@ class Substation(EquipmentContainer):
 
     _circuits: Optional[List[Circuit]] = None
 
-    def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
-                 circuits: List[Circuit] = None, **kwargs):
-        super(Substation, self).__init__(**kwargs)
+    def __init__(self, *args, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None, circuits: List[Circuit] = None, **kwargs):
+        super(Substation, self).__init__(*args, **kwargs)
         if normal_energized_feeders:
             for feeder in normal_energized_feeders:
                 self.add_feeder(feeder)
@@ -51,6 +53,17 @@ class Substation(EquipmentContainer):
         if circuits:
             for circuit in circuits:
                 self.add_circuit(circuit)
+
+
+    @property
+    def sub_geographical_region(self):
+        """The SubGeographicalRegion containing the substation."""
+        return self._sub_geographical_region
+
+    @sub_geographical_region.setter
+    @deprecated("sub_geographical_region should never be set directly - it is automatically set when adding it to the `substations` list")
+    def sub_geographical_region(self, value):
+        self._sub_geographical_region = value
 
     @property
     def circuits(self) -> Generator[Circuit, None, None]:
@@ -80,53 +93,53 @@ class Substation(EquipmentContainer):
         """
         return ngen(self._normal_energized_feeders)
 
-    def num_feeders(self):
+    def num_circuits(self):
         """
-        Returns The number of `Feeder`s associated with this `Substation`
+        Returns The number of `Circuit`s associated with this `Substation`
         """
-        return nlen(self._normal_energized_feeders)
+        return nlen(self._circuits)
 
-    def get_feeder(self, mrid: str) -> Feeder:
+    def get_circuit(self, mrid: str) -> Circuit:
         """
-        Get the `Feeder` for this `Substation` identified by `mrid`
+        Get the `Circuit` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `Feeder`
-        Returns The `Feeder` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Circuit`
+        Returns The `Circuit` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._normal_energized_feeders, mrid)
+        return get_by_mrid(self._circuits, mrid)
 
-    def add_feeder(self, feeder: Feeder) -> Substation:
+    def add_circuit(self, circuit: Circuit) -> Substation:
         """
-        Associate a `Feeder` with this `Substation`
+        Associate a `Circuit` with this `Substation`
 
-        `feeder` The `Feeder` to associate with this `Substation`.
+        `circuit` The `Circuit` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`.
+        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
         """
-        if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
+        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
             return self
-        self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
-        self._normal_energized_feeders.append(feeder)
+        self._circuits = list() if self._circuits is None else self._circuits
+        self._circuits.append(circuit)
         return self
 
-    def remove_feeder(self, feeder: Feeder) -> Substation:
+    def remove_circuit(self, circuit: Circuit) -> Substation:
         """
-        Disassociate `feeder` from this `Substation`
+        Disassociate `circuit` from this `Substation`
 
-        `feeder` The `Feeder` to disassociate from this `Substation`.
+        `circuit` The `Circuit` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `feeder` was not associated with this `Substation`.
+        Raises `ValueError` if `circuit` was not associated with this `Substation`.
         """
-        self._normal_energized_feeders = safe_remove(self._normal_energized_feeders, feeder)
+        self._circuits = safe_remove(self._circuits, circuit)
         return self
 
-    def clear_feeders(self) -> Substation:
+    def clear_circuits(self) -> Substation:
         """
-        Clear all current `Feeder`s.
+        Clear all current `Circuit`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._normal_energized_feeders = None
+        self._circuits = None
         return self
 
     def num_loops(self):
@@ -227,51 +240,58 @@ class Substation(EquipmentContainer):
         self._energized_loops = None
         return self
 
-    def num_circuits(self):
+    def num_feeders(self):
         """
-        Returns The number of `Circuit`s associated with this `Substation`
+        Returns The number of `Feeder`s associated with this `Substation`
         """
-        return nlen(self._circuits)
+        return nlen(self._normal_energized_feeders)
 
-    def get_circuit(self, mrid: str) -> Circuit:
+    def get_feeder(self, mrid: str) -> Feeder:
         """
-        Get the `Circuit` for this `Substation` identified by `mrid`
+        Get the `Feeder` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `Circuit`
-        Returns The `Circuit` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Feeder`
+        Returns The `Feeder` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._circuits, mrid)
+        return get_by_mrid(self._normal_energized_feeders, mrid)
 
-    def add_circuit(self, circuit: Circuit) -> Substation:
+    def add_feeder(self, feeder: Feeder) -> Substation:
         """
-        Associate a `Circuit` with this `Substation`
+        Associate a `Feeder` with this `Substation`
 
-        `circuit` The `Circuit` to associate with this `Substation`.
+        `feeder` The `Feeder` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
+        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`, or if
+        `feeder.normal_energizing_substation` is not this `Substation`.
         """
-        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
+        if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
             return self
-        self._circuits = list() if self._circuits is None else self._circuits
-        self._circuits.append(circuit)
+
+        if feeder.normal_energizing_substation is None:
+            feeder.normal_energizing_substation = self
+
+        require(feeder.normal_energizing_substation is self, lambda: f"{feeder} `normal_energizing_substation` property references {feeder.normal_energizing_substation}, expected {self}.")
+
+        self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
+        self._normal_energized_feeders.append(feeder)
         return self
 
-    def remove_circuit(self, circuit: Circuit) -> Substation:
+    def remove_feeder(self, feeder: Feeder) -> Substation:
         """
-        Disassociate `circuit` from this `Substation`
+        Disassociate `feeder` from this `Substation`
 
-        `circuit` The `Circuit` to disassociate from this `Substation`.
+        `feeder` The `Feeder` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
-        Raises `ValueError` if `circuit` was not associated with this `Substation`.
+        Raises `ValueError` if `feeder` was not associated with this `Substation`.
         """
-        self._circuits = safe_remove(self._circuits, circuit)
+        self._normal_energized_feeders = safe_remove(self._normal_energized_feeders, feeder)
         return self
 
-    def clear_circuits(self) -> Substation:
+    def clear_feeders(self) -> Substation:
         """
-        Clear all current `Circuit`s.
+        Clear all current `Feeder`s.
         Returns A reference to this `Substation` to allow fluent use.
         """
-        self._circuits = None
+        self._normal_energized_feeders = None
         return self

@@ -13,11 +13,13 @@ from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_kind im
 from zepben.ewb.model.cim.extensions.zbex import zbex
 from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.ewb.util import ngen, get_by_mrid, nlen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 
 
+@zb_dataclass
 @zbex
 class ProtectionRelaySystem(Equipment):
     """
@@ -30,8 +32,8 @@ class ProtectionRelaySystem(Equipment):
 
     _schemes: Optional[List[ProtectionRelayScheme]] = None
 
-    def __init__(self, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
-        super(ProtectionRelaySystem, self).__init__(**kwargs)
+    def __init__(self, *args, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
+        super(ProtectionRelaySystem, self).__init__(*args, **kwargs)
         if schemes is not None:
             for scheme in schemes:
                 self.add_scheme(scheme)
@@ -44,6 +46,14 @@ class ProtectionRelaySystem(Equipment):
         :return: A generator that iterates over all the schemes implemented by this :class:`ProtectionRelaySystem`.
         """
         return ngen(self._schemes)
+
+    def num_schemes(self) -> int:
+        """
+        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
+
+        :return: The number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
+        """
+        return nlen(self._schemes)
 
     def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """
@@ -67,14 +77,6 @@ class ProtectionRelaySystem(Equipment):
         self._schemes = list() if self._schemes is None else self._schemes
         self._schemes.append(scheme)
         return self
-
-    def num_schemes(self) -> int:
-        """
-        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
-
-        :return: The number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
-        """
-        return nlen(self._schemes)
 
     def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelaySystem:
         """

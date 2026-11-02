@@ -19,43 +19,53 @@ Each supported message in `QueryNetworkStateService` requires a callback, which 
 
 ### on_get_current_states
 
-The `on_get_current_states` callback is triggered for each request for the current states between two date/times, and should return an async iterator of the
-current state events that occurred between those date/times (inclusive)
+The `on_get_current_states` callback is triggered for each request for the current states between two date/times, and should yield the batches of current
+state events that occurred between those date/times (inclusive)
 
 ```python
 from datetime import datetime
-from typing import AsyncGenerator, Iterable
+from typing import AsyncGenerator
 
 from zepben.ewb import CurrentStateEventBatch
 
 
 async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
+    batch_id = 1
     events = []
-    # build the batch of events
-    yield events
+    # build the list of events for this batch
+    yield CurrentStateEventBatch(batch_id, events)
 ```
 
-### onCurrentStatesStatus
+Each `CurrentStateEventBatch` you yield must carry the `batch_id` that will be sent to the client, as that is the ID the
+client will report its status against.
 
-The `onCurrentStatesStatus` callback is triggered for each status response sent by the client. You should expect to receive one of these for every batch
-returned from `onGetCurrentStates`.
+### on_current_states_status
+
+The `on_current_states_status` callback is triggered for each status response sent by the client. You should expect to receive one of these for every batch
+returned from `on_get_current_states`.
 
 ```python
 from zepben.ewb import SetCurrentStatesStatus
 
 
 def on_current_states_status(event_status: SetCurrentStatesStatus):
-    # Do something with the `eventStatus`.
+    # event_status.batch_id is the ID of the batch returned from on_get_current_states.
+    print(f"Client handled batch {event_status.batch_id}: {type(event_status).__name__}")
 ```
 
-### onProcessingError
+### on_processing_error
 
-The `onProcessingError` callback is triggered for any errors in your `onCurrentStatesStatus` callback, or if any [SetCurrentStatesResponse] is for an unknown
-event status.
+The `on_processing_error` callback is triggered for any error raised in your `on_current_states_status` callback, or if a `SetCurrentStatesResponse`
+received from the client is for an unknown event status. It is always called with a message describing the problem, and the exception that caused it -
+which will be `None` when the client sent an unknown status rather than your callback raising.
 
 ```python
-def on_processing_error(error: Exception):
-    # Do something with the `error`.
+from typing import Optional
+
+
+def on_processing_error(message: str, exception: Optional[Exception]):
+    # Log the message and the exception, which may be None.
+    print(f"{message}: {exception}")
 ```
 
 ## Registering callbacks
@@ -75,14 +85,16 @@ each request sent from a gRPC client.
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_QueryNetworkStateServiceServicer_to_server
 
+from zepben.ewb import QueryNetworkStateService
 
-server = grpc.aio.server()
-host = 'localhost:50051'
-server.add_insecure_port(host)
 
-add_QueryNetworkStateServiceServicer_to_server(service, server)
+async def start_server(service: QueryNetworkStateService, host: str = 'localhost:50051'):
+    server = grpc.aio.server()
+    server.add_insecure_port(host)
 
-await server.start()
+    add_QueryNetworkStateServiceServicer_to_server(service, server)
+
+    await server.start()
 ```
 
 ## Putting it all together
@@ -91,7 +103,7 @@ Putting each of the steps above together, you can build the scaffold of a workin
 
 ```python
 from datetime import datetime
-from typing import AsyncGenerator, Iterable
+from typing import AsyncGenerator, Optional
 
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_QueryNetworkStateServiceServicer_to_server
@@ -104,15 +116,16 @@ class QueryNetworkStateServiceImpl:
         self.service = QueryNetworkStateService(self.on_get_current_states, self.on_current_states_status, self.on_processing_error)
 
     async def on_get_current_states(self, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
+        batch_id = 1
         events = []
-        # build the batch of events
-        yield events
+        # build the list of events for this batch
+        yield CurrentStateEventBatch(batch_id, events)
 
-    def on_current_states_status(event_status: SetCurrentStatesStatus):
-        # Do something with the `eventStatus`.
+    def on_current_states_status(self, event_status: SetCurrentStatesStatus):
+        print(f"Client handled batch {event_status.batch_id}: {type(event_status).__name__}")
 
-    def on_processing_error(error: Exception):
-        # Do something with the `error`.
+    def on_processing_error(self, message: str, exception: Optional[Exception]):
+        print(f"{message}: {exception}")
 
 async def main():
     server = grpc.aio.server()

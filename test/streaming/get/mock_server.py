@@ -15,8 +15,10 @@ from streaming.get.catching_thread import CatchingThread
 GrpcRequest = TypeVar('GrpcRequest')
 GrpcResponse = TypeVar('GrpcResponse')
 
+
 class GrpcInteration:
     pass
+
 
 @dataclass
 class StreamGrpc(GrpcInteration):
@@ -53,7 +55,7 @@ class StreamUnaryGrpc(GrpcInteration):
     request_validators: List[Callable[[GrpcRequest], Any]]
     """
     Stream of requests.
-    
+
     Requires one per request sent via the same stream. For multiple requests on different streams use multiple StreamUnaryGrpc instances.
     """
     response: GrpcResponse

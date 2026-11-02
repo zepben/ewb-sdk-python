@@ -6,15 +6,11 @@ from hypothesis import given
 
 from cim.fill_fields import diagram_object_kwargs
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, \
-    verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+    verify_identified_object_constructor_kwargs
 from cim.private_collection_validator import validate_ordered_other
 from zepben.ewb import generate_id
-from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-
-# noinspection PyArgumentList
-diagram_object_args = [*identified_object_args, Diagram(mrid=generate_id()), "a", "CB", 1.1, [DiagramObjectPoint(1.1, 2.2)]]
 
 
 def test_diagram_object_constructor_default():
@@ -30,12 +26,14 @@ def test_diagram_object_constructor_default():
 
 @given(**diagram_object_kwargs())
 def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, style, rotation, diagram_object_points, **kwargs):
-    do = DiagramObject(diagram=diagram,
-                       identified_object_mrid=identified_object_mrid,
-                       style=style,
-                       rotation=rotation,
-                       diagram_object_points=diagram_object_points,
-                       **kwargs)
+    do = DiagramObject(
+        diagram=diagram,
+        identified_object_mrid=identified_object_mrid,
+        style=style,
+        rotation=rotation,
+        diagram_object_points=diagram_object_points,
+        **kwargs,
+    )
 
     verify_identified_object_constructor_kwargs(do, **kwargs)
     assert do.diagram == diagram
@@ -43,19 +41,6 @@ def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, styl
     assert do.style == style
     assert do.rotation == rotation
     assert list(do.points) == diagram_object_points
-
-
-def test_diagram_object_constructor_args():
-    do = DiagramObject(*diagram_object_args)
-
-    verify_identified_object_constructor_args(do)
-    assert diagram_object_args[-5:] == [
-        do.diagram,
-        do.identified_object_mrid,
-        do.style,
-        do.rotation,
-        list(do.points)
-    ]
 
 
 def test_points_collection():
@@ -71,5 +56,5 @@ def test_points_collection():
         DiagramObject.insert_point,
         DiagramObject.remove_point,
         DiagramObject.remove_point_by_sequence_number,
-        DiagramObject.clear_points
+        DiagramObject.clear_points,
     )

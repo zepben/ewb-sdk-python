@@ -9,6 +9,7 @@ __all__ = ['Equipment']
 
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
+from abc import ABCMeta
 
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_substation import LvSubstation
@@ -17,6 +18,7 @@ from zepben.ewb.model.cim.iec61970.base.core.power_system_resource import PowerS
 from zepben.ewb.model.cim.iec61970.base.core.substation import Substation
 from zepben.ewb.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
@@ -26,7 +28,8 @@ if TYPE_CHECKING:
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 
-class Equipment(PowerSystemResource):
+@zb_dataclass
+class Equipment(PowerSystemResource, metaclass=ABCMeta):
     """
     Abstract class, should only be used through subclasses.
     Any part of a power system that is a physical device, electronic or mechanical.
@@ -44,9 +47,8 @@ class Equipment(PowerSystemResource):
     _operational_restrictions: Optional[List[OperationalRestriction]] = None
     _current_containers: Optional[List[EquipmentContainer]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
-        super(Equipment, self).__init__(**kwargs)
+    def __init__(self, *args, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
+        super(Equipment, self).__init__(*args, **kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)
@@ -134,6 +136,33 @@ class Equipment(PowerSystemResource):
         """
         return ngen(self._equipment_containers)
 
+    def num_sites(self) -> int:
+        """
+        Returns The number of `Site`s associated with this `Equipment`
+        """
+        return len(list(self.sites))
+
+    @property
+    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
+        """
+        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
+        """
+        return ngen(self._current_containers)
+
+    @property
+    def usage_points(self) -> Generator[UsagePoint, None, None]:
+        """
+        The `UsagePoint`s for this equipment.
+        """
+        return ngen(self._usage_points)
+
+    @property
+    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
+        """
+        The `OperationalRestriction`s that this equipment is associated with.
+        """
+        return ngen(self._operational_restrictions)
+
     def num_containers(self) -> int:
         """
         Returns The number of `EquipmentContainer`s associated with this `Equipment`
@@ -146,35 +175,11 @@ class Equipment(PowerSystemResource):
         """
         return len(list(_of_type(self._equipment_containers, Substation)))
 
-    def num_sites(self) -> int:
-        """
-        Returns The number of `Site`s associated with this `Equipment`
-        """
-        return len(list(self.sites))
-
     def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `Feeder`s associated with this `Equipment`
         """
         return len(list(_of_type(self._equipment_containers, Feeder)))
-
-    def num_usage_points(self) -> int:
-        """
-        Returns The number of `UsagePoint`s associated with this `Equipment`
-        """
-        return nlen(self._usage_points)
-
-    def num_current_containers(self) -> int:
-        """
-        Returns The number of `EquipmentContainer`s associated with this `Equipment`
-        """
-        return nlen(self._current_containers)
-
-    def num_operational_restrictions(self) -> int:
-        """
-        Returns The number of `OperationalRestriction`s associated with this `Equipment`
-        """
-        return nlen(self._operational_restrictions)
 
     def get_container(self, mrid: str) -> EquipmentContainer:
         """
@@ -219,12 +224,11 @@ class Equipment(PowerSystemResource):
         self._equipment_containers = None
         return self
 
-    @property
-    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
+    def num_current_containers(self) -> int:
         """
-        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
+        Returns The number of `EquipmentContainer`s associated with this `Equipment`
         """
-        return ngen(self._current_containers)
+        return nlen(self._current_containers)
 
     def get_current_container(self, mrid: str) -> EquipmentContainer:
         """
@@ -269,12 +273,11 @@ class Equipment(PowerSystemResource):
         self._current_containers = None
         return self
 
-    @property
-    def usage_points(self) -> Generator[UsagePoint, None, None]:
+    def num_usage_points(self) -> int:
         """
-        The `UsagePoint`s for this equipment.
+        Returns The number of `UsagePoint`s associated with this `Equipment`
         """
-        return ngen(self._usage_points)
+        return nlen(self._usage_points)
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
@@ -319,12 +322,11 @@ class Equipment(PowerSystemResource):
         self._usage_points = None
         return self
 
-    @property
-    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
+    def num_operational_restrictions(self) -> int:
         """
-        The `OperationalRestriction`s that this equipment is associated with.
+        Returns The number of `OperationalRestriction`s associated with this `Equipment`
         """
-        return ngen(self._operational_restrictions)
+        return nlen(self._operational_restrictions)
 
     def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
         """

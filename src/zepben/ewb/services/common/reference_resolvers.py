@@ -31,8 +31,8 @@ __all__ = [
     "lvs_to_cef_resolver", "feeder_to_nelvs_resolver", "feeder_to_celvs_resolver", ]
 
 from typing import Callable, Optional
+from dataclasses import dataclass
 
-from zepben.ewb.dataclassy import dataclass
 from zepben.ewb.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.loop import Loop
 from zepben.ewb.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder

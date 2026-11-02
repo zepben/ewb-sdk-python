@@ -8,8 +8,6 @@ from hypothesis import given
 from cim.fill_fields import town_detail_kwargs
 from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
-town_detail_args = ["a", "b", "c"]
-
 
 def test_town_detail_constructor_default():
     td = TownDetail()
@@ -28,16 +26,6 @@ def test_town_detail_constructor_kwargs(name, state_or_province, country, **kwar
     assert td.name == name
     assert td.state_or_province == state_or_province
     assert td.country == country
-
-
-def test_town_detail_constructor_args():
-    td = TownDetail(*town_detail_args)
-
-    assert town_detail_args[-3:] == [
-        td.name,
-        td.state_or_province,
-        td.country
-    ]
 
 
 def test_all_fields_empty():

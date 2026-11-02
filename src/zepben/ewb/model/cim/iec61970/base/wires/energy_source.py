@@ -10,12 +10,14 @@ __all__ = ["EnergySource"]
 from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 
 
+@zb_dataclass
 class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
@@ -111,8 +113,8 @@ class EnergySource(EnergyConnection):
     x0_max: Optional[float] = None
     """Maximum zero sequence Thevenin reactance."""
 
-    def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
-        super(EnergySource, self).__init__(**kwargs)
+    def __init__(self, *args, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
+        super(EnergySource, self).__init__(*args, **kwargs)
         if energy_source_phases:
             for phase in energy_source_phases:
                 self.add_phase(phase)
@@ -144,10 +146,17 @@ class EnergySource(EnergyConnection):
 
         `phase` the `EnergySourcePhase` to associate with this `EnergySource`.
         Returns A reference to this `EnergySource` to allow fluent use.
-        Raises `ValueError` if another `EnergySourcePhase` with the same `mrid` already exists for this `EnergySource`.
+        Raises `ValueError` if another `EnergySourcePhase` with the same `mrid` already exists for this `EnergySource`, or if `phase.energy_source` is not
+        this `EnergySource`.
         """
         if self._validate_reference(phase, self.get_phase, "An EnergySourcePhase"):
             return self
+
+        if phase.energy_source is None:
+            phase.energy_source = self
+
+        require(phase.energy_source is self, lambda: f"{phase} `energy_source` property references {phase.energy_source}, expected {self}.")
+
         self._energy_source_phases = list() if self._energy_source_phases is None else self._energy_source_phases
         self._energy_source_phases.append(phase)
         return self

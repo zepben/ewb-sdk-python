@@ -5,14 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import synchronous_machine_kwargs
-from cim.iec61970.base.wires.test_rotating_machine import rotating_machine_args, \
-    verify_rotating_machine_constructor_default, verify_rotating_machine_constructor_kwargs, verify_rotating_machine_constructor_args
+from cim.iec61970.base.wires.test_rotating_machine import verify_rotating_machine_constructor_default, verify_rotating_machine_constructor_kwargs
 from cim.private_collection_validator import validate_unordered
 from zepben.ewb import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
-
-synchronous_machine_args = [*rotating_machine_args, [ReactiveCapabilityCurve(mrid="rcc1"), ReactiveCapabilityCurve(mrid="rcc2")], 1.1, 2, True, 3.3, 4.4, 5.5,
-                            6.6, 7, 8.8, 9, 10.10, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16, 17.17, 18.18, SynchronousMachineKind.generatorOrMotor,
-                            SynchronousMachineKind.generator]
 
 
 def verify_synchronous_machine_constructor_default():
@@ -68,7 +63,7 @@ def verify_synchronous_machine_constructor_kwargs(
     x2,
     type,
     operating_mode,
-    **kwargs
+    **kwargs,
 ):
     sm = SynchronousMachine(
         curves=curves,
@@ -93,7 +88,7 @@ def verify_synchronous_machine_constructor_kwargs(
         x2=x2,
         type=type,
         operating_mode=operating_mode,
-        **kwargs
+        **kwargs,
     )
 
     verify_rotating_machine_constructor_kwargs(sm, **kwargs)
@@ -121,36 +116,6 @@ def verify_synchronous_machine_constructor_kwargs(
     assert sm.operating_mode == operating_mode
 
 
-def verify_synchronous_machine_constructor_args():
-    sm = SynchronousMachine(*synchronous_machine_args)
-
-    verify_rotating_machine_constructor_args(sm)
-    assert synchronous_machine_args[-22:] == [
-        list(sm.curves),
-        sm.base_q,
-        sm.condenser_p,
-        sm.earthing,
-        sm.earthing_star_point_r,
-        sm.earthing_star_point_x,
-        sm.ikk,
-        sm.max_q,
-        sm.max_u,
-        sm.min_q,
-        sm.min_u,
-        sm.mu,
-        sm.r,
-        sm.r0,
-        sm.r2,
-        sm.sat_direct_subtrans_x,
-        sm.sat_direct_sync_x,
-        sm.sat_direct_trans_x,
-        sm.x0,
-        sm.x2,
-        sm.type,
-        sm.operating_mode
-    ]
-
-
 def test_curves_collection():
     validate_unordered(
         SynchronousMachine,
@@ -160,5 +125,5 @@ def test_curves_collection():
         SynchronousMachine.get_curve,
         SynchronousMachine.add_curve,
         SynchronousMachine.remove_curve,
-        SynchronousMachine.clear_curves
+        SynchronousMachine.clear_curves,
     )

@@ -5,11 +5,8 @@
 from hypothesis import given
 
 from cim.fill_fields import jumper_kwargs
-from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
-    switch_args
+from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs
 from zepben.ewb import Jumper, generate_id
-
-jumper_args = switch_args
 
 
 def test_jumper_constructor_default():
@@ -19,7 +16,3 @@ def test_jumper_constructor_default():
 @given(**jumper_kwargs())
 def test_jumper_constructor_kwargs(**kwargs):
     verify_switch_constructor_kwargs(Jumper(**kwargs), **kwargs)
-
-
-def test_jumper_constructor_args():
-    verify_switch_constructor_args(Jumper(*jumper_args))

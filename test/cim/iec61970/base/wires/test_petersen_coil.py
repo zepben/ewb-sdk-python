@@ -5,11 +5,9 @@
 from hypothesis import given
 
 from cim.fill_fields import petersen_coil_kwargs
-from cim.iec61970.base.wires.test_earth_fault_compensator import earth_fault_compensator_args, \
-    verify_earth_fault_compensator_constructor_default, verify_earth_fault_compensator_constructor_kwargs, verify_earth_fault_compensator_constructor_args
+from cim.iec61970.base.wires.test_earth_fault_compensator import verify_earth_fault_compensator_constructor_default, \
+    verify_earth_fault_compensator_constructor_kwargs
 from zepben.ewb import PetersenCoil
-
-petersen_coil_args = [*earth_fault_compensator_args, 1.0]
 
 
 def verify_petersen_coil_constructor_default():
@@ -25,12 +23,3 @@ def verify_petersen_coil_constructor_kwargs(x_ground_nominal, **kwargs):
 
     verify_earth_fault_compensator_constructor_kwargs(pc, **kwargs)
     assert pc.x_ground_nominal == x_ground_nominal
-
-
-def verify_petersen_coil_constructor_args():
-    pc = PetersenCoil(*petersen_coil_args)
-
-    verify_earth_fault_compensator_constructor_args(pc)
-    assert petersen_coil_args[-1:] == [
-        pc.x_ground_nominal
-    ]

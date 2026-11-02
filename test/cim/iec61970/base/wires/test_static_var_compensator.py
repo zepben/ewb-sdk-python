@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import static_var_compensator_kwargs
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
-    verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
+    verify_regulating_cond_eq_constructor_kwargs
 from zepben.ewb import SVCControlMode, StaticVarCompensator, generate_id
-
-static_var_compensator_args = [*regulating_cond_eq_args, 1.0, -1.0, 2.0, SVCControlMode.voltage, 3]
 
 
 def test_static_var_compensator_constructor_default():
@@ -30,7 +28,7 @@ def test_static_var_compensator_constructor_kwargs(capacitive_rating, inductive_
         q=q,
         svc_control_mode=svc_control_mode,
         voltage_set_point=voltage_set_point,
-        **kwargs
+        **kwargs,
     )
     verify_regulating_cond_eq_constructor_kwargs(svc, **kwargs)
     assert svc.capacitive_rating == capacitive_rating
@@ -38,16 +36,3 @@ def test_static_var_compensator_constructor_kwargs(capacitive_rating, inductive_
     assert svc.q == q
     assert svc.svc_control_mode == svc_control_mode
     assert svc.voltage_set_point == voltage_set_point
-
-
-def test_shunt_compensator_constructor_args():
-    svc = StaticVarCompensator(*static_var_compensator_args)
-
-    verify_regulating_cond_eq_constructor_args(svc)
-    assert static_var_compensator_args[-5:] == [
-        svc.capacitive_rating,
-        svc.inductive_rating,
-        svc.q,
-        svc.svc_control_mode,
-        svc.voltage_set_point,
-    ]

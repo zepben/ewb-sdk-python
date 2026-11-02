@@ -7,8 +7,6 @@ from hypothesis import given
 from cim.fill_fields import electronic_address_kwargs
 from zepben.ewb import ElectronicAddress
 
-electronic_address_args = ['email1', False, 'descript']
-
 
 def test_electronic_address_constructor_default():
     e = ElectronicAddress()
@@ -25,11 +23,3 @@ def test_electronic_address_constructor_kwargs(is_primary, description, email1):
     assert e.is_primary == is_primary
     assert e.description == description
     assert e.email1 == email1
-
-
-def test_electronic_address_constructor_args():
-    e = ElectronicAddress(*electronic_address_args)
-
-    assert e.email1 == electronic_address_args[-3]
-    assert e.is_primary == electronic_address_args[-2]
-    assert e.description == electronic_address_args[-1]

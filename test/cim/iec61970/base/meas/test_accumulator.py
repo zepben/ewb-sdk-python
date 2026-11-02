@@ -6,11 +6,9 @@ from hypothesis import given
 
 from cim.fill_fields import accumulator_kwargs
 from cim.iec61970.base.meas.test_measurement import verify_measurement_constructor_default, \
-    verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
+    verify_measurement_constructor_kwargs
 from zepben.ewb import generate_id
 from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
-
-accumulator_args = measurement_args
 
 
 def test_accumulator_constructor_default():
@@ -20,7 +18,3 @@ def test_accumulator_constructor_default():
 @given(**accumulator_kwargs())
 def test_accumulator_constructor_kwargs(**kwargs):
     verify_measurement_constructor_kwargs(Accumulator(**kwargs), **kwargs)
-
-
-def test_accumulator_constructor_args():
-    verify_measurement_constructor_args(Accumulator(*accumulator_args))

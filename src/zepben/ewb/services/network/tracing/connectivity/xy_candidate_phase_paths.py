@@ -8,9 +8,9 @@ __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is
 from collections import Counter
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
+from dataclasses import dataclass, field
 
 from zepben.ewb import SinglePhaseKind, PhaseCode
-from zepben.ewb.dataclassy import dataclass
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """
@@ -57,12 +57,12 @@ class XyCandidatePhasePaths:
     Used to track the candidate and know paths for XY phase connectivity.
     """
 
-    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = {}
+    _known_tracking: Dict[SinglePhaseKind, SinglePhaseKind] = field(default_factory=dict)
     """
     Map of nominal phase to known phase.
     """
 
-    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = {}
+    _candidate_tracking: Dict[SinglePhaseKind, List[SinglePhaseKind]] = field(default_factory=dict)
     """
     Map of nominal phase to list of candidate phases.
     """

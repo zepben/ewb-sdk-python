@@ -6,10 +6,8 @@ from hypothesis import given
 
 from cim.fill_fields import recloser_kwargs
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
-    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_args
+    verify_protected_switch_constructor_kwargs
 from zepben.ewb import Recloser, generate_id
-
-recloser_args = protected_switch_args
 
 
 def test_recloser_constructor_default():
@@ -19,7 +17,3 @@ def test_recloser_constructor_default():
 @given(**recloser_kwargs())
 def test_recloser_constructor_kwargs(**kwargs):
     verify_protected_switch_constructor_kwargs(Recloser(**kwargs), **kwargs)
-
-
-def test_recloser_constructor_args():
-    verify_protected_switch_constructor_args(Recloser(*recloser_args))

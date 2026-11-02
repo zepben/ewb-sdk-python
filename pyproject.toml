@@ -7,23 +7,24 @@
     requires = [
         "setuptools",
         "wheel",
-        "build>=1.2.0"
+        "build>=1.2.0",
+        "cython"
     ]
     build-backend = "setuptools.build_meta"
 
 [project]
     name = "zepben.ewb"
-    version = "1.4.0b3"
+    version = "1.4.0b16"
     description = "Python SDK for interacting with the Energy Workbench platform"
     readme = {file = "README.md", content-type = "text/markdown"}
     license = "MPL-2.0"
-    requires-python = '>=3.10,<3.13'
+    requires-python = '>=3.10,<3.15'
     authors = [
         {name = "Kurt Greaves", email = "kurt.greaves@zepben.com"},
         {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
     ]
     dependencies = [
-        "zepben.protobuf==1.4.0",
+        "zepben.protobuf==1.8.0b3",
         "typing_extensions==4.15.0",
         "requests==2.32.5",
         "urllib3==2.5.0",
@@ -35,11 +36,13 @@
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Operating System :: OS Independent"
     ]
 
 [project.urls]
-    Repository = "https://github.com/zepben/evolve-sdk-python"
+    Repository = "https://github.com/zepben/ewb-sdk-python"
     Homepage = "https://zepben.com"
 
 [project.optional-dependencies]
@@ -50,7 +53,7 @@
         "pytest-timeout==2.4.0",
         "pytest-subtests==0.14.2",
         "hypothesis==6.140.3",
-        "grpcio-testing==1.61.3",
+        "grpcio-testing==1.81.1",
         "pylint==2.14.5",
         "six==1.16.0",
         "tox"
@@ -60,6 +63,9 @@
 line-length = 120
 
 [tool.ruff.lint]
+extend-select = [
+    "W292"  # Newline at EOF
+]
 ignore = [
     "F405",  # undefined-local-with-import-star-usage
     "E731",  # lambda-assignment

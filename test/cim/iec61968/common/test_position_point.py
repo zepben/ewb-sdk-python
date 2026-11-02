@@ -8,8 +8,6 @@ from pytest import raises
 from cim.fill_fields import position_point_kwargs
 from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
-position_point_args = [1.1, 2.2]
-
 
 # noinspection PyArgumentList
 def test_position_point_constructor_default():
@@ -34,15 +32,6 @@ def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
 
     assert pp.x_position == x_position
     assert pp.y_position == y_position
-
-
-def test_position_point_constructor_args():
-    pp = PositionPoint(*position_point_args)
-
-    assert position_point_args[-2:] == [
-        pp.x_position,
-        pp.y_position
-    ]
 
 
 def test_position_point_constructor_validates():

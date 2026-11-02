@@ -16,32 +16,42 @@ following services
 * NetworkService
 * CustomerService
 * DiagramService
+* MeasurementService
 
-Each of these services manage a specific subset of identified objects. This subset will hopefully be somewhat obvious
-based on the name of each service. If you would like to know why there a multiple services for different object types
-you can read more about it [here](#why-multiple-services).
+Each of the first three services manage a specific subset of identified objects. This subset will hopefully be somewhat
+obvious based on the name of each service. `MeasurementService` is the odd one out: it stores `MeasurementValue`
+objects, which are the values reported against `Measurement` definitions, rather than `IdentifiedObject`s. If you
+would like to know why there are multiple services for different object types you can read more about it
+[here](#why-multiple-services).
 
 ## Common Service functionality
 
 Because services work with [identified objects](https://zepben.github.io/evolve/docs/cim/cim100/TC57CIM/IEC61970/Base/Core/IdentifiedObject)
 they can provide some common level of functionality. This functionality can be found in the base class `BaseService`.
+`MeasurementService` is the exception: it does not extend `BaseService` because it stores `MeasurementValue`s rather
+than identified objects, so the methods described in this section do not apply to it.
 
 ### Adding and Removing Objects
 
-The `BaseService.add` method can be used to add objects to the service. For each service type there is a set of supported classes,
-and thus `add` will only work for these types. Note that in some cases where objects are indexed differently other `add` style methods
-will be present, which should be utilised to allow efficient querying of the types they support. (e.g add_diagram_object in DiagramService)
+The `BaseService.add` method can be used to add objects to the service. For each service type there is a set of
+supported classes, and you should only add objects of those types to the service. Objects are disassociated again with
+`BaseService.remove`, which will also drop any indexing the specialised service has built up for that object. Note that
+in some cases where objects are indexed differently other `add` style methods will be present, which should be utilised
+to allow efficient querying of the types they support (e.g `add_diagram_object` in `DiagramService`, or
+`add_measurement` in `NetworkService`).
 
 ```python
-from zepben.ewb import NetworkService, Breaker, Junction, IdentifiedObject
+from zepben.ewb import NetworkService, Diagram, Breaker
+
 service = NetworkService()
 
 breaker = Breaker(mrid="breaker")
 service.add(breaker)
 
-# Note you can only add types that are intended for the corresponding service, for example, the following will fail on add:
+# Note that you should only add types intended for the corresponding service. A Diagram is managed by the DiagramService
+# (see below), so adding it to the NetworkService is incorrect even though add will accept it:
 diagram = Diagram(mrid="diagram")
-service.add(diagram)  # throws exception.
+service.add(diagram)  # Wrong service.
 ```
 
 ### Object Retrieval
@@ -75,28 +85,28 @@ service.add(Junction(mrid="junction"))
 
 # service.objects() can be used to get a generator over the objects in the service, and supports selecting by type.
 for obj in service.objects():  # generator over all objects in service
-    # do stuff with obj
+    pass  # do stuff with obj
 
 for obj in service.objects(ConductingEquipment):  # generator over all objects in service subclassing ConductingEquipment
-    # do stuff with obj
+    pass  # do stuff with obj
 
 for obj in service.objects(Breaker):  # generator over all objects in service of type Breaker (in this case the one Breaker we added)
     obj.set_open(True)
 
+print(f"{service.len_of()} objects, {service.len_of(Breaker)} of which are Breakers")
 ```
 
 ## Network Service
 
 The network service works with objects related to the physical asset model. That means all
-[PowerSystemResource](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/PowerSystemResource) types, but also
-data related types such as [AssetInfo](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Assets/AssetInfo) and
-[Location](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/Location).
+[PowerSystemResource](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/Core/PowerSystemResource) types, but also
+data related types such as [AssetInfo](https://zepben.github.io/evolve/docs/cim/ewb/IEC61968/Assets/AssetInfo) and
+[Location](https://zepben.github.io/evolve/docs/cim/ewb/IEC61968/Common/Location).
 
-The network service also generates an index between power system resources and terminals and their corresponding
-measurements. When you add a [Measurement](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Meas/Measurement)
-to the service, it indexes it against the `power_system_resource_mrid` or the `terminal_mrid` associated with the measurement.
-You can then get all measurements associated with a power system resource or a terminal via its mRID via the lookup on
-the service:
+The network service also keeps an index of the measurements it holds. A
+[Measurement](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/Meas/Measurement) is indexed when you add it
+with `add_measurement`, which records it under the measurement's own mRID; a plain `add` stores the measurement without
+indexing it. `get_measurements` then returns the measurements recorded under an mRID, filtered by the type you pass:
 
 ```python
 from zepben.ewb import NetworkService, Analog, Accumulator, Measurement
@@ -106,20 +116,27 @@ service = NetworkService()
 amps = Analog(mrid="amps", power_system_resource_mrid="ASWITCH")
 count = Accumulator(mrid="count", power_system_resource_mrid="ASWITCH")
 
-service.add(amps)
-service.add(count)
+# add_measurement stores the measurement and records it under its own mRID.
+service.add_measurement(amps)
+service.add_measurement(count)
 
-# Gets both the analog and the accumulator
-service.get_measurements("ASWITCH", Measurement)
+# [Analog{amps}]
+service.get_measurements("amps", Measurement)
 
-# Will get just the analog
-service.get_measurements("ASWITCH", Analog)
+# [Accumulator{count}]
+service.get_measurements("count", Measurement)
+
+# [Analog{amps}], asking for a narrower type only narrows the result
+service.get_measurements("amps", Analog)
+
+# []
+service.get_measurements("amps", Accumulator)
 ```
 
-Note if you change the `power_system_resource_mrid` or `terminal_mrid` set on the measurement after it has been added to the
-service, it is not re-indexed automatically. Currently you need to to remove the measurement and re-add it to the service.
-However this should rarely be an issue as a measurement is unlikely to ever change the device it is measuring, so as long
-as the association is set before adding to the service it is unlikely to be a problem.
+The index key is the measurement's own mRID, so `power_system_resource_mrid` and `terminal_mrid` are not lookup keys,
+and changing them after the measurement has been added does not move the entry. `get_measurements` raises `KeyError`
+when nothing is recorded under the mRID you ask for, so `get_measurements("ASWITCH", Measurement)` only works when a
+measurement is itself named `ASWITCH`.
 
 ## Customer Service
 
@@ -129,10 +146,10 @@ network. At this point in time it provides no further specialised functionality.
 ## Diagram Service
 
 The diagram service works with objects related to diagrams associated with identified objects.
-It also provides a lookup to be able to get the [DiagramObjects](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/DiagramObject) associated with any
-identified object. Specifically:
+It also provides a lookup to be able to get the [DiagramObjects](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/DiagramLayout/DiagramObject) associated with any
+identified object. The lookup is meant to work like this; the note after the example says what works today:
 - If the mRID is a diagram object, a list with just the diagram object is returned.
-- If the mRID is a [Diagram](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/Diagram) all diagram
+- If the mRID is a [Diagram](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/DiagramLayout/Diagram) all diagram
   objects belonging to that diagram are returned.
 - If the mRID is any other identified object, the diagram objects for that identified object are returned.
 
@@ -143,31 +160,59 @@ service = DiagramService()
 
 a_diagram = Diagram(mrid="diagram")
 
-do1 = DiagramObject(mrid="do1", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
+# The diagram keyword argument sets the diagram reference on each diagram object. The diagram's own diagram_objects
+# collection is only updated if you also call add_diagram_object on the diagram itself (see Diagram.add_diagram_object).
+do1 = DiagramObject(mrid="do1", diagram=a_diagram, identified_object_mrid="aSwitch")
+do2 = DiagramObject(mrid="do2", diagram=a_diagram, identified_object_mrid="aSwitch")
 
-do2 = DiagramObject(mrid="do2", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
+# add_diagram_object adds the object to the service and records it against its diagram and its identified object.
+service.add_diagram_object(do1)
+service.add_diagram_object(do2)
 
-do3 = DiagramObject(mrid="do3", diagram=a_diagram, identified_object_mrid="aSwitch", a_diagram.add_diagram_object(this))
-
-service.add(do1)
-service.add(do2)
-service.add(do3)
-
-# Contains [do1]
+# Contains [DiagramObject{do1}]
 objs = service.get_diagram_objects(do1.mrid)
-
-# Contains [do1, do2, do3]
-objs = service.get_diagram_objects(a_diagram.mrid)
-
-# Contains [do1, do2]
-objs = service.get_diagram_objects("aSwitch")
 ```
 
-This works by indexing the `identified_object_mrid` when the diagram object is added to the service. Note however,
-that setting the `identified_object_mrid` after the diagram object is added will not cause it to be re-indexed automatically.
-Currently you need to to remove the diagram object and re-add it to the service.
-This should rarely be an issue however, as a diagram object is unlikely to ever change the identified object it is
-representing, so as long as it is set before adding it to the service it is unlikely to be a problem.
+Only the lookup by the diagram object's own mRID returns results today; a lookup by the diagram's mRID or by the
+represented object's mRID returns an empty list, or raises `TypeError` if the `Diagram` itself is in the service.
+
+`add_diagram_object` records the diagram object against its `Diagram` and its `identified_object_mrid` when it is
+added, so set both before adding. `identified_object_mrid` can still be changed afterwards, but that does not update
+what was recorded, and a later `remove` then raises `KeyError` because it looks up the value currently set on the
+object. As a diagram object is unlikely to change the identified object it represents, setting it before adding
+avoids the problem.
+
+## Measurement Service
+
+The measurement service works with `MeasurementValue`s - the values reported against `Measurement` definitions such as
+`Analog`, `Accumulator` and `Discrete`. The `Measurement` definitions themselves are managed by the network service
+(see [Network Service](#network-service)), so keeping the values in their own service keeps the high volume, high
+churn value data separate from the asset model.
+
+`MeasurementService` is the only service that does not extend `BaseService`, so it provides no lookup by mRID and no
+deferred reference handling. It provides `add`, `remove`, `len_of` and `objects`:
+
+```python
+from datetime import datetime, timedelta
+
+from zepben.ewb import MeasurementService, AnalogValue, AccumulatorValue
+
+service = MeasurementService()
+
+amps = AnalogValue(analog_mrid="amps", value=123.4, time_stamp=datetime.now() - timedelta(days=1))
+count = AccumulatorValue(accumulator_mrid="count", value=42, time_stamp=datetime.now())
+
+service.add(amps)
+service.add(count)
+
+# Generator over every measurement value in the service.
+for value in service.objects():
+    print(f"{value.time_stamp}: {value}")
+
+# len_of can count all values, or only values of a specific type.
+print(service.len_of())             # 2
+print(service.len_of(AnalogValue))  # 1
+```
 
 ## Deferred References
 
@@ -175,14 +220,14 @@ When creating an object to include in the model, you will often not have all ref
 all the information to construct a reference immediately, or not have a reference handy to use. However, you will 
 generally have the mRID of any referenced objects. To deal with this, the services provide a `resolve_or_defer_reference`
 function. This function will:
-- Resolve a reference immediately (in both direcitons if applicable) if the reference mRID object is already added to the service. 
+- Resolve a reference immediately (in both directions if applicable) if the reference mRID object is already added to the service. 
 - If the reference mRID is not added to the service, the request to resolve the reference is cached. When an object 
   with the referenced mRID is eventually added to the service, the reference is resolved at this time. 
 
 Unresolved references can also be queried back out of the service. Let's see it all with a simple example:
 
 ```python
-from zepben.ewb import NetworkService, Feeder, Breaker, resolver
+from zepben.ewb import NetworkService, Feeder, Breaker, Junction, resolver
 
 service = NetworkService()
 
@@ -194,23 +239,23 @@ service.add(switch)
 
 # As the switch is already added to the service, this will be resolved immediately.
 service.resolve_or_defer_reference(resolver.ec_equipment(feeder), switch.mrid)
-print(feeder.equipment.contains(switch)) # true
+print(switch in list(feeder.equipment)) # True
 
 # Now if we try and resolve something not added it will be deferred
 junction = Junction(mrid="j1")
 service.resolve_or_defer_reference(resolver.ec_equipment(feeder), junction.mrid)
-print(feeder.equipment.contains(junction)) # false
+print(junction in list(feeder.equipment)) # False
 
 # We can query the unresolved reference MRIDs back out of the service using a specific resolver
-print(service.get_unresolved_reference_mrids_by_resolver(resolver.ec_equipment(feeder))) # ["j1"]
-# Or using the mrid of the destination object
-print(service.get_unresolved_references_to(feeder.mrid)) # [junction]
-# Or using the mrid of the source object
-print(service.get_unresolved_references_from(junction.mrid)) # [feeder]
+print(list(service.get_unresolved_reference_mrids_by_resolver(resolver.ec_equipment(feeder)))) # ["j1"]
+# Or the full unresolved references, using the mRID of the destination object
+print([ur.from_ref.mrid for ur in service.get_unresolved_references_to(junction.mrid)]) # ["f"]
+# Or using the mRID of the source object
+print([ur.to_mrid for ur in service.get_unresolved_references_from(feeder.mrid)]) # ["j1"]
 
 # When the object with the deferred mRID is added, the reference gets resolved
 service.add(junction)
-print(feeder.equipment.contains(junction)) # true
+print(junction in list(feeder.equipment)) # True
 ```
 
 ---
@@ -224,12 +269,14 @@ data model into separate concerns, at what we feel are sensible boundary points.
 
 * The network service deals with models of the physical electricity network.
 * The customer service deals with customers and their agreements with electricity providers
-(e.g their [Tariff](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Customers/Tariff)).
+(e.g their [Tariff](https://zepben.github.io/evolve/docs/cim/ewb/IEC61968/Customers/Tariff)).
 * The diagram service deals with things related to representing networks as diagrams
-(see [Diagram](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/Diagram) and
- [DiagramObject](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/DiagramObject)).
-* Once the platform supports measurement values, these values will be retrieved via a separate service rather than
-  directly from measurement objects.
+(see [Diagram](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/DiagramLayout/Diagram) and
+ [DiagramObject](https://zepben.github.io/evolve/docs/cim/ewb/IEC61970/Base/DiagramLayout/DiagramObject)).
+* The measurement service deals with the values reported against measurements - `MeasurementValue`s such as
+  `AnalogValue`, `AccumulatorValue` and `DiscreteValue` - rather than the `Measurement` definitions themselves, which
+  are held by the network service as part of the physical asset model. Keeping the values in their own service keeps
+  frequently changing data out of the asset model.
 
 Ultimately there is a tradeoff between developer usability and model size feasibility. Hopefully you will find this
 is a reasonable trade off when working with large systems.

@@ -7,12 +7,16 @@ __all__ = ["Cut"]
 
 from typing import Optional, TYPE_CHECKING
 
+from typing_extensions import deprecated
+
 from zepben.ewb.model.cim.iec61970.base.wires.switch import Switch
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
+@zb_dataclass
 class Cut(Switch):
     """
     A cut separates a line segment into two parts. The cut appears as a switch inserted between these two parts and connects them together. As the cut is
@@ -28,8 +32,17 @@ class Cut(Switch):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the cut is located starting from side one of the cut line segment, i.e. the line segment Terminal with sequenceNumber equal to 1."""
 
-    ac_line_segment: Optional['AcLineSegment'] = None
-    """The line segment to which the cut is applied."""
+    _ac_line_segment: Optional['AcLineSegment'] = None
+
+    @property
+    def ac_line_segment(self) -> Optional['AcLineSegment']:
+        """The line segment to which the cut is applied."""
+        return self._ac_line_segment
+
+    @ac_line_segment.setter
+    @deprecated("ac_line_segment should never be set directly - it is automatically set when adding it to the `cuts` list")
+    def ac_line_segment(self, value):
+        self._ac_line_segment = value
 
     @property
     def length_from_t1_or_0(self) -> float:

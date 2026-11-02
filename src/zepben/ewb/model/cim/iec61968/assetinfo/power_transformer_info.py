@@ -12,28 +12,24 @@ from typing import List, Optional, Generator, TYPE_CHECKING
 from zepben.ewb.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.ewb.model.resistance_reactance import ResistanceReactance
 from zepben.ewb.util import nlen, ngen, get_by_mrid, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 
 
+@zb_dataclass
 class PowerTransformerInfo(AssetInfo):
     """Set of power transformer data, from an equipment library."""
 
     _transformer_tank_infos: Optional[List[TransformerTankInfo]] = None
     """Data for all the tanks described by this power transformer data."""
 
-    def __init__(self, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
-        super(PowerTransformerInfo, self).__init__(**kwargs)
+    def __init__(self, *args, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
+        super(PowerTransformerInfo, self).__init__(*args, **kwargs)
         if transformer_tank_infos:
             for ti in transformer_tank_infos:
                 self.add_transformer_tank_info(ti)
-
-    def num_transformer_tank_infos(self):
-        """
-        Get the number of `TransformerTankInfo`s associated with this `PowerTransformerInfo`.
-        """
-        return nlen(self._transformer_tank_infos)
 
     @property
     def transformer_tank_infos(self) -> Generator[TransformerTankInfo, None, None]:
@@ -41,6 +37,25 @@ class PowerTransformerInfo(AssetInfo):
         The `TransformerTankInfo`s of this `PowerTransformerInfo`.
         """
         return ngen(self._transformer_tank_infos)
+
+    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
+        """
+        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
+        `end_number` The number of the end to fetch the ResistanceReactance for.
+        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
+        """
+        for tti in self.transformer_tank_infos:
+            rr = tti.resistance_reactance(end_number)
+            if rr is not None:
+                return rr
+        else:
+            return None
+
+    def num_transformer_tank_infos(self):
+        """
+        Get the number of `TransformerTankInfo`s associated with this `PowerTransformerInfo`.
+        """
+        return nlen(self._transformer_tank_infos)
 
     def get_transformer_tank_info(self, mrid: str) -> TransformerTankInfo:
         """
@@ -88,16 +103,3 @@ class PowerTransformerInfo(AssetInfo):
         """
         self._transformer_tank_infos = None
         return self
-
-    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
-        """
-        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
-        `end_number` The number of the end to fetch the ResistanceReactance for.
-        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
-        """
-        for tti in self.transformer_tank_infos:
-            rr = tti.resistance_reactance(end_number)
-            if rr is not None:
-                return rr
-        else:
-            return None

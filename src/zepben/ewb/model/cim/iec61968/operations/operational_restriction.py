@@ -11,11 +11,13 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61968.common.document import Document
 from zepben.ewb.util import get_by_mrid, nlen, ngen, safe_remove
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.core.equipment import Equipment
 
 
+@zb_dataclass
 class OperationalRestriction(Document):
     """
     A document that can be associated with equipment to describe any sort of restrictions compared with the
@@ -29,17 +31,11 @@ class OperationalRestriction(Document):
     """
     _equipment: Optional[List[Equipment]] = None
 
-    def __init__(self, equipment: List[Equipment] = None, **kwargs):
-        super(OperationalRestriction, self).__init__(**kwargs)
+    def __init__(self, *args, equipment: List[Equipment] = None, **kwargs):
+        super(OperationalRestriction, self).__init__(*args, **kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)
-
-    def num_equipment(self):
-        """
-        Returns the number of `Equipment` associated with this `OperationalRestriction`
-        """
-        return nlen(self._equipment)
 
     @property
     def equipment(self) -> Generator[Equipment, None, None]:
@@ -47,6 +43,12 @@ class OperationalRestriction(Document):
         The `Equipment` to which this `OperationalRestriction` applies.
         """
         return ngen(self._equipment)
+
+    def num_equipment(self):
+        """
+        Returns the number of `Equipment` associated with this `OperationalRestriction`
+        """
+        return nlen(self._equipment)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """

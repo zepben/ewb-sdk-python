@@ -11,12 +11,14 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.ewb.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.ewb.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
-from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.ewb.util import nlen, get_by_mrid, ngen, safe_remove, require
+from zepben.ewb.boilerplate.dataclass_base import zb_dataclass
 
 if TYPE_CHECKING:
     from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 
+@zb_dataclass
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 
@@ -47,20 +49,20 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: Optional[float] = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
-        super(EnergyConsumer, self).__init__(**kwargs)
+    def __init__(self, *args, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
+        super(EnergyConsumer, self).__init__(*args, **kwargs)
         if energy_consumer_phases:
             for phase in energy_consumer_phases:
                 self.add_phase(phase)
-
-    def num_phases(self):
-        """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
-        return nlen(self._energy_consumer_phases)
 
     @property
     def phases(self) -> Generator[EnergyConsumerPhase, None, None]:
         """The individual phase models for this energy consumer."""
         return ngen(self._energy_consumer_phases)
+
+    def num_phases(self):
+        """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
+        return nlen(self._energy_consumer_phases)
 
     def get_phase(self, mrid: str) -> EnergyConsumerPhase:
         """
@@ -78,10 +80,17 @@ class EnergyConsumer(EnergyConnection):
 
         `phase` the `EnergyConsumerPhase` to associate with this `EnergyConsumer`.
         Returns A reference to this `EnergyConsumer` to allow fluent use.
-        Raises `ValueError` if another `EnergyConsumerPhase` with the same `mrid` already exists for this `EnergyConsumer`.
+        Raises `ValueError` if another `EnergyConsumerPhase` with the same `mrid` already exists for this `EnergyConsumer`, or if `phase.energy_consumer` is not
+        this `EnergyConsumer`.
         """
         if self._validate_reference(phase, self.get_phase, "An EnergyConsumerPhase"):
             return self
+
+        if phase.energy_consumer is None:
+            phase.energy_consumer = self
+
+        require(phase.energy_consumer is self, lambda: f"{phase} `energy_consumer` property references {phase.energy_consumer}, expected {self}.")
+
         self._energy_consumer_phases = list() if self._energy_consumer_phases is None else self._energy_consumer_phases
         self._energy_consumer_phases.append(phase)
         return self

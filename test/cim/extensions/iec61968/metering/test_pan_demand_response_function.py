@@ -6,13 +6,10 @@ from hypothesis import given
 from pytest import raises
 
 from cim.fill_fields import pan_demand_response_function_kwargs
-from cim.iec61968.metering.test_end_device_function import end_device_function_args, \
-    verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
+from cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_default
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.ewb import PanDemandResponseFunction, ControlledAppliance, Appliance, generate_id
 from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
-
-pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, Appliance.IRRIGATION_PUMP]
 
 
 def test_pan_demand_response_function_constructor_default():
@@ -31,15 +28,6 @@ def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwar
     verify_end_device_function_constructor_kwargs(pdrf, **kwargs)
     assert pdrf.kind == kind
     assert pdrf.appliance.bitmask == appliance
-
-
-def test_pan_demand_response_function_constructor_args():
-    pdrf = PanDemandResponseFunction(*pan_demand_response_function_args)
-
-    verify_end_device_function_constructor_args(pdrf)
-
-    assert pan_demand_response_function_args[-2] == pdrf.kind
-    assert pan_demand_response_function_args[-1].bitmask == pdrf.appliance.bitmask
 
 
 def test_constructor_with_controlled_appliance():
@@ -135,19 +123,21 @@ def test_removing_appliances_initialises_bitmask():
     validate_appliance(pdrf.appliance)
 
 
-def validate_appliance(controlled_appliance: ControlledAppliance,
-                       is_electric_vehicle: bool = False,
-                       is_exterior_lighting: bool = False,
-                       is_generation_system: bool = False,
-                       is_hvac_compressor_or_furnace: bool = False,
-                       is_interior_lighting: bool = False,
-                       is_irrigation_pump: bool = False,
-                       is_managed_commercial_industrial_load: bool = False,
-                       is_pool_pump_spa_jacuzzi: bool = False,
-                       is_simple_misc_load: bool = False,
-                       is_smart_appliance: bool = False,
-                       is_strip_and_baseboard_heater: bool = False,
-                       is_water_heater: bool = False):
+def validate_appliance(
+    controlled_appliance: ControlledAppliance,
+    is_electric_vehicle: bool = False,
+    is_exterior_lighting: bool = False,
+    is_generation_system: bool = False,
+    is_hvac_compressor_or_furnace: bool = False,
+    is_interior_lighting: bool = False,
+    is_irrigation_pump: bool = False,
+    is_managed_commercial_industrial_load: bool = False,
+    is_pool_pump_spa_jacuzzi: bool = False,
+    is_simple_misc_load: bool = False,
+    is_smart_appliance: bool = False,
+    is_strip_and_baseboard_heater: bool = False,
+    is_water_heater: bool = False,
+):
     assert controlled_appliance is not None
     assert controlled_appliance.is_electric_vehicle == is_electric_vehicle
     assert controlled_appliance.is_exterior_lighting == is_exterior_lighting
